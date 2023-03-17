@@ -107,18 +107,49 @@ def end(filename, todos):
 
 
 def wgetnstr(win, n=1024, chars=""):
+    """
+    Reads a string from the given window with max chars n\
+    and initial chars chars. Returns a string from the user\
+    Functions like a JavaScript alert box for user input.
+
+    Args:
+        win (Window object):
+            The window to read from. The entire window\
+            will be used, so a curses.newwin() should be\
+            generated specifically for use with this\
+            function. As a box will be created around the\
+            window's border, the window must have a minimum\
+            height of 3 characters. The width will determine\
+            a maximum value of n.
+        n (int, optional):
+            Max number of characters in the read string.\
+            It might error if this number is greater than\
+            the area of the window. Defaults to 1024.
+        chars (str, optional):
+            Initial string to occupy the window. Defaults to "" (empty string).
+
+    Returns:
+        str: Similar to the built in input() function, returns a string of what the user entered.
+    """
+    assert (
+        win.getmaxyx()[0] >= 3
+    ), "Window is too short, it won't be able to display the minimum 1 line of text."
     original = chars
+    win.box()
     win.nodelay(False)
     win.addstr(1, 1, f"{chars}█")
     while True:
-        ch = win.getch()
-        if ch == 10:  # enter
+        try:
+            ch = win.getch()
+        except KeyboardInterrupt:  # ctrl+c
+            return original
+        if ch in (10, 13):  # enter
             break
         elif ch == 127:  # backspace
             chars = chars[:-1]
             win.addstr(1, len(chars) + 1, "█ ")
         elif ch == 27:  # escape
-            return original 
+            return original
         else:
             if len(chars) < n:
                 ch = chr(ch)
@@ -134,7 +165,6 @@ def wgetnstr(win, n=1024, chars=""):
 def insert_todo(stdscr, todos: list, index, existing_todo=False):
     y, x = stdscr.getmaxyx()
     input_win = curses.newwin(3, 40, y // 2 - 3, x // 2 - 20)
-    input_win.box()
     if existing_todo:
         todos[index] = f"- {wgetnstr(input_win, chars=todos[index].split(' ', 1)[1])}"
     else:
@@ -173,7 +203,9 @@ def main(stdscr, header):
         stdscr.addstr(0, 0, f"{header}:", curses.A_BOLD)
         for i, v in enumerate(todo):
             box, text = format_item(v)
-            stdscr.addstr(i + 1, 0, f"{box}  ", curses.A_REVERSE if i == selected else 0)
+            stdscr.addstr(
+                i + 1, 0, f"{box}  ", curses.A_REVERSE if i == selected else 0
+            )
             stdscr.addstr(
                 i + 1,
                 3,
@@ -241,4 +273,5 @@ def main(stdscr, header):
 
 if __name__ == "__main__":
     from sys import argv
+
     curses.wrapper(main, header=" ".join(argv[1:]) if len(argv) > 1 else None)
