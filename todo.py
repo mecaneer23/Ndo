@@ -164,7 +164,7 @@ def wgetnstr(win, n=1024, chars=""):
 
 def insert_todo(stdscr, todos: list, index, existing_todo=False):
     y, x = stdscr.getmaxyx()
-    input_win = curses.newwin(3, 40, y // 2 - 3, x // 2 - 20)
+    input_win = curses.newwin(3, x // 2, y // 2 - 3, x // 4)
     if existing_todo:
         todos[index] = f"- {wgetnstr(input_win, chars=todos[index].split(' ', 1)[1])}"
     else:
