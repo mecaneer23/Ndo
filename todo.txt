@@ -2,7 +2,6 @@
 - help menu (h)
 - color new todo (c)
 - block selections
-- make multiple columns
 - multiple columns/associated keybinds
 - add line breaks without todo?
 + add cursor to input box
