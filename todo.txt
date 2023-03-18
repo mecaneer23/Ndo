@@ -1,1 +1,6 @@
-+ write readme
+- write readme
+- insert todo
+- delete todo
+- remove todo
+- block selections
+- make multiple columns
