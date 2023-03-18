@@ -16,16 +16,14 @@ def read_file(filename):
 
 def validate_file(data):
     if len(data) == 0:
-        return data
-    for i in data.split("\n"):
+        return
+    lines = data.split("\n")
+    for i in lines.copy():
         if len(i) == 0:
+            lines.remove(i)
             continue
         assert i[0] in "+-", f"not a vaild file: line {i}"
-    return data.split("\n")
-
-
-def parse_todos(data):
-    return data
+    return lines
 
 
 def ensure_within_bounds(counter, minimum, maximum):
@@ -42,10 +40,7 @@ def format_item(item):
         "+": "x",
         "-": " ",
     }
-    try:
-        return f"- [{table[item[0]]}] {item.split(' ', 1)[1]}"
-    except:
-        exit(item)
+    return f"- [{table[item[0]]}] {item.split(' ', 1)[1]}"
 
 
 def toggle_completed(char):
@@ -66,8 +61,8 @@ def main(stdscr):
     curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
     curses.init_pair(2, -1, -1)
 
-    todo = parse_todos(validate_file(read_file(FILENAME)))
-    selected = 1
+    todo = validate_file(read_file(FILENAME))
+    selected = 0
     while True:
         stdscr.addstr(0, 0, "TODO:")
         for i, v in enumerate(todo):
@@ -75,15 +70,11 @@ def main(stdscr):
         try:
             key = stdscr.getch()
         except KeyboardInterrupt:  # exit on ^C
-            return end(stdscr, "Quit", score=score, best_score=best_score)
+            return
         if key in (119, 259, 107):  # w | ^ | k
             selected -= 1
-        # elif key in (97, 260, 104):  # a | < | h
-        #     pass
         elif key in (115, 258, 106):  # s | v | j
             selected += 1
-        # elif key in (100, 261, 108):  # d | > | l
-        #     pass
         elif key in (113, 27):  # q | esc
             return
         elif key == 10:  # enter
