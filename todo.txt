@@ -1,9 +1,10 @@
 - undo last action
-- help menu (h)
 - color new todo (c)
 - block selections
 - multiple columns/associated keybinds
 - add line breaks without todo?
+- make help menu read from md table
++ help menu (h)
 + add cursor to input box
 + insert todo
 + delete todo

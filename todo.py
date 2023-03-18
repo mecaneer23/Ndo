@@ -189,23 +189,47 @@ def swap_todos(todos: list, idx1, idx2):
     return todos
 
 
-def md_table_to_menu(filename, first_line_idx, last_line_idx, columns, parent_win):
+def md_table_to_lines(filename, first_line_idx, last_line_idx):
     with open(filename) as f:
-        lines = f.readlines()[first_line_idx - 1:last_line_idx + 1]
+        lines = f.readlines()[first_line_idx - 1 : last_line_idx + 1]
+    for i, _ in enumerate(lines):
+        lines[i] = lines[i].replace("<kbd>", "").replace("</kbd>", "").replace("  ", "")[:-3].split("| ")[1:]
+    for i, (v1, v2) in enumerate(lines):
+        lines[i] = " ".join([v1.ljust(len(max(lines, key=len))), v2])
+    exit(lines[2])
+    lines = [" ".join(i for i in lines)]
+    lines[1] = ""
+
+
+def help_menu(parent_win):
     parent_win.clear()
-    y, x = parent_win.getmaxyx()
     parent_win.addstr(0, 0, "Help:", curses.A_BOLD)
-    parent_win.refresh()
-    for i, v in enumerate(lines):
-        lines[i] = lines[i].replace("|", "")[:-1]
-    win = curses.newwin(len(lines) + 2, len(lines[0]) + 2, 1, (x - (len(lines[0]) + 1)) // 2)
+    # lines = md_table_to_lines("README.md", 21, 30)
+    lines = [
+        "Keys         Description                ",
+        "",
+        "k/j          Move cursor up and down    ",
+        "K/J          Move todo up and down      ",
+        "o            Add a new todo             ",
+        "d            Remove selected todo       ",
+        "q, Ctrl + c  Quit                       ",
+        "Enter        Toggle a todo as completed ",
+        "i            Edit an existing todo      ",
+        "g/G          Jump to top/bottom of todos",
+    ]
+    win = curses.newwin(
+        len(lines) + 2,
+        len(lines[0]) + 2,
+        1,
+        (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2,
+    )
     win.box()
-    win.refresh()
+    win.hline(2, 1, curses.ACS_HLINE, win.getmaxyx()[1] - 2)
     for i, v in enumerate(lines):
         win.addstr(i + 1, 1, v)
-    while True:
-        parent_win.refresh()
-        return win.getch()
+    parent_win.refresh()
+    win.refresh()
+    return win.getch()
 
 
 def main(stdscr, header):
@@ -277,7 +301,7 @@ def main(stdscr, header):
         elif key == 71:  # G
             selected = len(todo)
         elif key == 104:  # h
-            md_table_to_menu("README.md", 21, 30, 2, stdscr)
+            help_menu(stdscr)
             stdscr.clear()
         elif key in (113, 27):  # q | esc
             return end(FILENAME, todo)
