@@ -2,5 +2,6 @@
 - insert todo
 - delete todo
 - remove todo
+- move todo
 - block selections
 - make multiple columns
