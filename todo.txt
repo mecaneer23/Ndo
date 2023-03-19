@@ -1,6 +1,7 @@
 - write readme
 + insert todo
 + delete todo
+- undo remove todo
 - help menu (h)
 - color new todo (c)
 - edit todo

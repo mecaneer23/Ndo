@@ -40,10 +40,10 @@ def ensure_within_bounds(counter, minimum, maximum):
 
 def format_item(item):
     table = {
-        "+": "x",
-        "-": " ",
+        "+": "☑",
+        "-": "☐",
     }
-    return f"- [{table[item[0]]}] {item.split(' ', 1)[1]}"
+    return f"{table[item[0]]} {item.split(' ', 1)[1]}"
 
 
 def toggle_completed(char):
@@ -58,13 +58,33 @@ def update_file(filename, lst):
         return f.write("\n".join(lst))
 
 
+def wgetnstr(win, n=1024, chars=""):
+    win.nodelay(False)
+    while True:
+        ch = win.getch()
+        # exit(str(ch))
+        if ch == 10:  # enter
+            break
+        elif ch == 127:  # backspace
+            chars = chars[:-1]
+            win.delch(1, len(chars) + 1)
+            win.insch(1, len(chars) + 1, " ")
+        else:
+            if (len(chars) < n):
+                ch = chr(ch)
+                chars += ch
+                win.addch(1, len(chars), ch)
+            else:
+                curses.beep()
+        win.refresh()
+
+    return chars
+
 def insert_todo(stdscr, todos: list, index):
     y, x = stdscr.getmaxyx()
-    input_win = curses.newwin(3, 30, y // 2 - 3, x // 2 - x // 10)
+    input_win = curses.newwin(3, 40, y // 2 - 3, x // 2 - 20)
     input_win.box()
-    curses.echo()
-    todo = input_win.getstr(1, 1).decode()
-    curses.noecho()
+    todo = wgetnstr(input_win)
     todos.insert(index, f"- {todo}")
     return todos
 
