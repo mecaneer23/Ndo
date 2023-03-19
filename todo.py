@@ -7,22 +7,22 @@ STRIKETHROUGH = False
 FILENAME = "todo.txt"
 ACTIONS = {
     "MOVEUP": [
-        ["w", "up arrow", "k"],
+        ["up arrow", "k"],
         "move up to select a todo",
     ],
     "MOVEDOWN": [
-        ["s", "down arrow", "j"],
+        ["down arrow", "j"],
         "move down to select a todo",
     ],
     "INSERT": [
         [
-            "i",
+            "o",
         ],
         "Add a new todo",
     ],
     "REMOVE": [
         [
-            "r",
+            "d",
         ],
         "Remove selected todo",
     ],
@@ -41,7 +41,7 @@ ACTIONS = {
     ],
     "EDIT": [
         [
-            "e",
+            "i",
         ],
         "Edit an existing todo",
     ],
@@ -107,6 +107,7 @@ def end(filename, todos):
 
 
 def wgetnstr(win, n=1024, chars=""):
+    original = chars
     win.nodelay(False)
     win.addstr(1, 1, chars)
     while True:
@@ -116,6 +117,8 @@ def wgetnstr(win, n=1024, chars=""):
         elif ch == 127:  # backspace
             chars = chars[:-1]
             win.addch(1, len(chars) + 1, " ")
+        elif ch == 27:  # escape
+            return original 
         else:
             if len(chars) < n:
                 ch = chr(ch)
@@ -173,19 +176,19 @@ def main(stdscr, header):
             key = stdscr.getch()  # python3 -c "print(ord('x'))"
         except KeyboardInterrupt:  # exit on ^C
             return end(FILENAME, todo)
-        if key in (119, 259, 107):  # w | ^ | k
+        if key in (259, 107):  # up | k
             selected -= 1
             # revert_with = ACTIONS["MOVEDOWN"]
-        elif key in (115, 258, 106):  # s | v | j
+        elif key in (258, 106):  # down | j
             selected += 1
             # revert_with = ACTIONS["MOVEUP"]
-        elif key == 105:  # i
+        elif key == 111:  # o
             todo = insert_todo(stdscr, todo, selected + 1)
             stdscr.clear()
             selected += 1
             update_file(FILENAME, todo)
             # revert_with = ACTIONS["REMOVE"]
-        elif key == 114:  # r
+        elif key == 100:  # d
             todo = remove_todo(todo, selected)
             stdscr.clear()
             selected -= 1
@@ -193,7 +196,7 @@ def main(stdscr, header):
             # revert_with = ACTIONS["INSERT"]
         # elif key == 117:  # u
         #     pass  # undo remove (or last action)
-        elif key == 101:  # e
+        elif key == 105:  # i
             todo = insert_todo(stdscr, todo, selected, True)
             stdscr.clear()
             update_file(FILENAME, todo)
