@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import curses
-from curses.textpad import rectangle as rect
 import os
 
 STRIKETHROUGH = False
