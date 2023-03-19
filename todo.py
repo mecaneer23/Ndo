@@ -134,7 +134,7 @@ def insert_todo(stdscr, todos: list, index, existing_todo=False):
     return todos
 
 
-def remove_todo(stdscr, todos: list, index):
+def remove_todo(todos: list, index):
     todos.pop(index)
     return todos
 
@@ -179,7 +179,7 @@ def main(stdscr):
             update_file(FILENAME, todo)
             # revert_with = ACTIONS["REMOVE"]
         elif key == 114:  # r
-            todo = remove_todo(stdscr, todo, selected)
+            todo = remove_todo(todo, selected)
             stdscr.clear()
             selected -= 1
             update_file(FILENAME, todo)
