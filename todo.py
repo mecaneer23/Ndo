@@ -165,10 +165,10 @@ def main(stdscr, header):
         stdscr.addstr(0, 0, f"{header}:", curses.A_BOLD)
         for i, v in enumerate(todo):
             box, text = format_item(v)
-            stdscr.addstr(i + 1, 0, f"{box} ", curses.A_REVERSE if i == selected else 0)
+            stdscr.addstr(i + 1, 0, f"{box}  ", curses.A_REVERSE if i == selected else 0)
             stdscr.addstr(
                 i + 1,
-                2,
+                3,
                 strikethrough(text) if v.startswith("+") else text,
                 curses.A_REVERSE if i == selected else 0,
             )
