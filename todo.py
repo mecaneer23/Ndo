@@ -201,6 +201,10 @@ def main(stdscr, header):
             stdscr.clear()
             update_file(FILENAME, todo)
             # revert_with = ACTIONS["EDIT"]
+        elif key == 103:  # g
+            selected = 0
+        elif key == 71:  # G
+            selected = len(todo)
         elif key == 104:  # h
             pass  # display help menu
         elif key in (113, 27):  # q | esc
