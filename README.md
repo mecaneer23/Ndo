@@ -1,4 +1,4 @@
-# TODO
+# Ndo - a todo application
 
 A curses implementation of a todo list helper.
 
