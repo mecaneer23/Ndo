@@ -39,6 +39,12 @@ ACTIONS = {
         ],
         "Toggle a todo as completed",
     ],
+    "EDIT": [
+        [
+            "e",
+        ],
+        "Edit an existing todo",
+    ],
 }
 AUTOSAVE = True
 
@@ -189,6 +195,7 @@ def main(stdscr):
             todo = insert_todo(stdscr, todo, selected, True)
             stdscr.clear()
             update_file(FILENAME, todo)
+            # revert_with = ACTIONS["EDIT"]
         elif key == 104:  # h
             pass  # display help menu
         elif key in (113, 27):  # q | esc
