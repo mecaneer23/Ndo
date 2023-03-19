@@ -1,4 +1,4 @@
-# Ndo - a todo application
+# Ndo - an ncurses todo application
 
 A curses implementation of a todo list helper. Most of the keybindings are similar to vim-bindings so vim users should feel relatively comfortable.
 
