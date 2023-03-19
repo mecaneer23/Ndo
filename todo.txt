@@ -1,10 +1,10 @@
 - write readme
 + insert todo
 + delete todo
-- undo remove todo
+- undo last action
 - help menu (h)
 - color new todo (c)
-- edit todo
++ edit todo
 - move todo
 - block selections
 - make multiple columns
