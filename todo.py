@@ -109,8 +109,7 @@ def wgetnstr(win, n=1024, chars=""):
             break
         elif ch == 127:  # backspace
             chars = chars[:-1]
-            win.delch(1, len(chars) + 1)
-            win.insch(1, len(chars) + 1, " ")
+            win.addch(1, len(chars) + 1, " ")
         else:
             if len(chars) < n:
                 ch = chr(ch)
