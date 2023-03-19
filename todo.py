@@ -145,7 +145,7 @@ def remove_todo(todos: list, index):
 
 
 def strikethrough(text):
-    return "\u0336".join(text) + "\u0336" if STRIKETHROUGH else text
+    return "\u0336".join(text) if STRIKETHROUGH else text
 
 
 def main(stdscr, header):
