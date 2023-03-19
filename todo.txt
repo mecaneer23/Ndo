@@ -1,6 +1,7 @@
-- write readme
++ write readme
 + insert todo
 + delete todo
++ add command line input (header)
 - undo last action
 - help menu (h)
 - color new todo (c)

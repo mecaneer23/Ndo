@@ -148,16 +148,18 @@ def strikethrough(text):
     return "\u0336".join(text) + "\u0336" if STRIKETHROUGH else text
 
 
-def main(stdscr):
+def main(stdscr, header):
     curses.use_default_colors()
     curses.curs_set(0)
 
     todo = validate_file(read_file(FILENAME))
     selected = 0
     # revert_with = None
+    if not header:
+        header = "TODO"
 
     while True:
-        stdscr.addstr(0, 0, "TODO:", curses.A_BOLD)
+        stdscr.addstr(0, 0, f"{header}:", curses.A_BOLD)
         for i, v in enumerate(todo):
             box, text = format_item(v)
             stdscr.addstr(i + 1, 0, f"{box} ", curses.A_REVERSE if i == selected else 0)
@@ -211,4 +213,5 @@ def main(stdscr):
 
 
 if __name__ == "__main__":
-    curses.wrapper(main)
+    from sys import argv
+    curses.wrapper(main, header=" ".join(argv[1:]) if len(argv) > 1 else None)
