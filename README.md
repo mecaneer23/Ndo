@@ -23,6 +23,6 @@ $ python3 todo.py This is a very cool header
 | <kbd>w</kbd>/<kbd>s</kbd>, <kbd>k</kbd>/<kbd>j</kbd> | Move cursor up and down    |
 | <kbd>i</kbd>                                         | Add a new todo             |
 | <kbd>r</kbd>                                         | Remove selected todo       |
-| <kbd>q</kbd>, <kbd>ctrl + c</kbd>                    | Quit                       |
-| <kbd>enter</kbd>                                     | Toggle a todo as completed |
+| <kbd>q</kbd>, <kbd>Ctrl + c</kbd>                    | Quit                       |
+| <kbd>Enter</kbd>                                     | Toggle a todo as completed |
 | <kbd>e</kbd>                                         | Edit an existing todo      |
