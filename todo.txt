@@ -1,7 +1,9 @@
 - write readme
-- insert todo
-- delete todo
-- remove todo
++ insert todo
++ delete todo
+- help menu (h)
+- color new todo (c)
+- edit todo
 - move todo
 - block selections
 - make multiple columns
