@@ -1,9 +1,3 @@
-+ write readme
-+ insert todo
-+ delete todo
-+ add command line input (header)
-+ edit todo
-+ move todo
 - undo last action
 - help menu (h)
 - color new todo (c)
@@ -11,3 +5,10 @@
 - make multiple columns
 - add cursor to input box
 - multiple columns/associated keybinds
+- add line breaks without todo?
++ insert todo
++ delete todo
++ add command line input (header)
++ edit todo
++ move todo
++ write readme
