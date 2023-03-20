@@ -151,6 +151,12 @@ def strikethrough(text):
     return "\u0336".join(text) if STRIKETHROUGH else text
 
 
+def swap_todos(todos: list, idx1, idx2):
+    if min(idx1, idx2) >= 0 and max(idx1, idx2) < len(todos):
+        todos[idx1], todos[idx2] = todos[idx2], todos[idx1]
+    return todos
+
+
 def main(stdscr, header):
     curses.use_default_colors()
     curses.curs_set(0)
@@ -179,6 +185,16 @@ def main(stdscr, header):
         if key in (259, 107):  # up | k
             selected -= 1
             # revert_with = ACTIONS["MOVEDOWN"]
+        elif key == 75:  # K
+            todo = swap_todos(todo, selected, selected - 1)
+            stdscr.clear()
+            selected -= 1
+            update_file(FILENAME, todo)
+        elif key == 74:  # J
+            todo = swap_todos(todo, selected, selected + 1)
+            stdscr.clear()
+            selected += 1
+            update_file(FILENAME, todo)
         elif key in (258, 106):  # down | j
             selected += 1
             # revert_with = ACTIONS["MOVEUP"]

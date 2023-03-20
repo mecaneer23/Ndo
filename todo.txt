@@ -2,10 +2,10 @@
 + insert todo
 + delete todo
 + add command line input (header)
++ edit todo
++ move todo
 - undo last action
 - help menu (h)
 - color new todo (c)
-+ edit todo
-- move todo
 - block selections
 - make multiple columns
