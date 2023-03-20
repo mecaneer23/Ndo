@@ -189,6 +189,25 @@ def swap_todos(todos: list, idx1, idx2):
     return todos
 
 
+def md_table_to_menu(filename, first_line_idx, last_line_idx, columns, parent_win):
+    with open(filename) as f:
+        lines = f.readlines()[first_line_idx - 1:last_line_idx + 1]
+    parent_win.clear()
+    y, x = parent_win.getmaxyx()
+    parent_win.addstr(0, 0, "Help:", curses.A_BOLD)
+    parent_win.refresh()
+    for i, v in enumerate(lines):
+        lines[i] = lines[i].replace("|", "")[:-1]
+    win = curses.newwin(len(lines) + 2, len(lines[0]) + 2, 1, (x - (len(lines[0]) + 1)) // 2)
+    win.box()
+    win.refresh()
+    for i, v in enumerate(lines):
+        win.addstr(i + 1, 1, v)
+    while True:
+        parent_win.refresh()
+        return win.getch()
+
+
 def main(stdscr, header):
     curses.use_default_colors()
     curses.curs_set(0)
@@ -258,7 +277,8 @@ def main(stdscr, header):
         elif key == 71:  # G
             selected = len(todo)
         elif key == 104:  # h
-            pass  # display help menu
+            md_table_to_menu("README.md", 21, 30, 2, stdscr)
+            stdscr.clear()
         elif key in (113, 27):  # q | esc
             return end(FILENAME, todo)
         elif key == 10:  # enter
