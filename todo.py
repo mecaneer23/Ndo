@@ -138,7 +138,9 @@ def insert_todo(stdscr, todos: list, index, existing_todo=False):
     if existing_todo:
         todos[index] = f"- {wgetnstr(input_win, chars=todos[index].split(' ', 1)[1])}"
     else:
-        todos.insert(index, f"- {wgetnstr(input_win)}")
+        if (todo := wgetnstr(input_win)) == "":
+            return todos
+        todos.insert(index, f"- {todo}")
     return todos
 
 
@@ -199,9 +201,11 @@ def main(stdscr, header):
             selected += 1
             # revert_with = ACTIONS["MOVEUP"]
         elif key == 111:  # o
+            temp = todo.copy()
             todo = insert_todo(stdscr, todo, selected + 1)
             stdscr.clear()
-            selected += 1
+            if temp != todo:
+                selected += 1
             update_file(FILENAME, todo)
             # revert_with = ACTIONS["REMOVE"]
         elif key == 100:  # d
