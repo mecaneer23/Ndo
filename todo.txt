@@ -9,3 +9,5 @@
 - color new todo (c)
 - block selections
 - make multiple columns
+- add cursor to input box
+- multiple columns/associated keybinds
