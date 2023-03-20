@@ -109,21 +109,21 @@ def end(filename, todos):
 def wgetnstr(win, n=1024, chars=""):
     original = chars
     win.nodelay(False)
-    win.addstr(1, 1, chars)
+    win.addstr(1, 1, f"{chars}█")
     while True:
         ch = win.getch()
         if ch == 10:  # enter
             break
         elif ch == 127:  # backspace
             chars = chars[:-1]
-            win.addch(1, len(chars) + 1, " ")
+            win.addstr(1, len(chars) + 1, "█ ")
         elif ch == 27:  # escape
             return original 
         else:
             if len(chars) < n:
                 ch = chr(ch)
                 chars += ch
-                win.addch(1, len(chars), ch)
+                win.addstr(1, len(chars), f"{ch}█")
             else:
                 curses.beep()
         win.refresh()
