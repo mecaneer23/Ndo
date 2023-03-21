@@ -193,7 +193,13 @@ def md_table_to_lines(filename, first_line_idx, last_line_idx):
     with open(filename) as f:
         lines = f.readlines()[first_line_idx - 1 : last_line_idx + 1]
     for i, _ in enumerate(lines):
-        lines[i] = lines[i].replace("<kbd>", "").replace("</kbd>", "").replace("  ", "")[:-3].split("| ")[1:]
+        lines[i] = (
+            lines[i]
+            .replace("<kbd>", "")
+            .replace("</kbd>", "")
+            .replace("  ", "")[:-3]
+            .split("| ")[1:]
+        )
     for i, (v1, v2) in enumerate(lines):
         lines[i] = " ".join([v1.ljust(len(max(lines, key=len))), v2])
     exit(lines[2])
@@ -207,7 +213,7 @@ def help_menu(parent_win):
     # lines = md_table_to_lines("README.md", 21, 30)
     lines = [
         "Keys         Description                ",
-        "",
+        "                                        ",
         "k/j          Move cursor up and down    ",
         "K/J          Move todo up and down      ",
         "o            Add a new todo             ",
