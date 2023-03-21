@@ -231,9 +231,9 @@ def help_menu(parent_win):
         (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2,
     )
     win.box()
-    win.hline(2, 1, curses.ACS_HLINE, win.getmaxyx()[1] - 2)
     for i, v in enumerate(lines):
         win.addstr(i + 1, 1, v)
+    win.hline(2, 1, curses.ACS_HLINE, win.getmaxyx()[1] - 2)
     parent_win.refresh()
     win.refresh()
     return win.getch()
