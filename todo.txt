@@ -4,6 +4,8 @@
 - multiple columns/associated keybinds
 - add line breaks without todo?
 - make help menu read from md table
+- add argparse and put flags on command line
+- add --help flag
 + help menu (h)
 + add cursor to input box
 + insert todo

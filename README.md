@@ -20,6 +20,7 @@ $ python3 todo.py This is a very cool header
 
 | Keys                              | Description                 |
 | --------------------------------- | --------------------------- |
+| <kbd>h</kbd>                      | Show a list of controls     |
 | <kbd>k</kbd>/<kbd>j</kbd>         | Move cursor up and down     |
 | <kbd>K</kbd>/<kbd>J</kbd>         | Move todo up and down       |
 | <kbd>o</kbd>                      | Add a new todo              |

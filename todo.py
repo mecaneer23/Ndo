@@ -214,6 +214,7 @@ def help_menu(parent_win):
     lines = [
         "Keys         Description                ",
         "                                        ",
+        "h            Display this help menu     ",
         "k/j          Move cursor up and down    ",
         "K/J          Move todo up and down      ",
         "o            Add a new todo             ",
