@@ -21,10 +21,19 @@ CONTROLS = [
 ]
 
 
-class Todo(str):
+class Todo:
     def __init__(self, text, color="White"):
         self.text = str(text)
-        self.color = get_color(color)
+        self.color = get_color(color) if str(color).isalpha() else color
+
+    def __getitem__(self, key):
+        return self.text[key]
+
+    def split(self, *a):
+        return self.text.split(*a)
+
+    def startswith(self, *a):
+        return self.text.startswith(*a)
 
 
 def read_file(filename):
@@ -134,7 +143,7 @@ def update_file(filename, lst, save=AUTOSAVE):
     if not save:
         return 0
     with open(filename, "w") as f:
-        return f.write("\n".join(lst))
+        return f.write("\n".join([i.text for i in lst]))
 
 
 def end(filename, todos):
@@ -201,15 +210,17 @@ def insert_todo(stdscr, todos: list, index, existing_todo=False):
     y, x = stdscr.getmaxyx()
     input_win = curses.newwin(3, x // 2, y // 2 - 3, x // 4)
     if existing_todo:
-        todos[index] = f"- {wgetnstr(input_win, chars=todos[index].split(' ', 1)[1])}"
+        todos[index] = Todo(f"- {wgetnstr(input_win, chars=todos[index].split(' ', 1)[1])}")
     else:
         if (todo := wgetnstr(input_win)) == "":
             return todos
-        todos.insert(index, f"- {todo}")
+        todos.insert(index, Todo(f"- {todo}"))
     return todos
 
 
 def remove_todo(todos: list, index):
+    if len(todos) < 1:
+        return todos
     todos.pop(index)
     return todos
 
@@ -304,7 +315,10 @@ def color_menu(parent_win):
                 curses.color_pair(get_color(v.strip()))
                 | (curses.A_REVERSE if i == selected else 0),
             )
-        key = win.getch()
+        try:
+            key = win.getch()
+        except KeyboardInterrupt:
+            return get_color(lines[selected].strip())
         if key == 107:  # k
             selected -= 1
         elif key == 106:  # j
@@ -353,13 +367,13 @@ def main(stdscr, header):
                 i + 1,
                 0,
                 f"{box}  ",
-                curses.color_pair(v.color) | (curses.A_REVERSE if i == selected else 0),
+                curses.color_pair(v.color or get_color("White")) | (curses.A_REVERSE if i == selected else 0),
             )
             stdscr.addstr(
                 i + 1,
                 3,
                 strikethrough(text) if v.startswith("+") else text,
-                curses.color_pair(v.color) | (curses.A_REVERSE if i == selected else 0),
+                curses.color_pair(v.color or get_color("White")) | (curses.A_REVERSE if i == selected else 0),
             )
         try:
             key = stdscr.getch()  # python3 -c "print(ord('x'))"
@@ -415,7 +429,7 @@ def main(stdscr, header):
         elif key in (113, 27):  # q | esc
             return end(FILENAME, todo)
         elif key == 10:  # enter
-            todo[selected] = toggle_completed(todo[selected][0]) + todo[selected][1:]
+            todo[selected] = Todo(toggle_completed(todo[selected][0]) + todo[selected][1:], color=todo[selected].color)
             update_file(FILENAME, todo)
             # revert_with = ACTIONS["TOGGLE"]
         else:
