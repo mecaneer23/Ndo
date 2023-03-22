@@ -21,6 +21,12 @@ CONTROLS = [
 ]
 
 
+class Todo(str):
+    def __init__(self, text, color="White"):
+        self.text = str(text)
+        self.color = get_color(color)
+
+
 def read_file(filename):
     if not os.path.exists(filename):
         with open(filename, "w") as f:
@@ -256,26 +262,104 @@ def help_menu(parent_win):
     return win.getch()
 
 
+def get_color(color):
+    return {
+        "Red": 1,
+        "Green": 2,
+        "Yellow": 3,
+        "Blue": 4,
+        "Magenta": 5,
+        "Cyan": 6,
+        "White": 7,
+    }[color]
+
+
+def color_menu(parent_win):
+    parent_win.clear()
+    parent_win.addstr(0, 0, "Colors:", curses.A_BOLD)
+    lines = [
+        "Red    ",
+        "Green  ",
+        "Yellow ",
+        "Blue   ",
+        "Magenta",
+        "Cyan   ",
+        "White  ",
+    ]
+    win = curses.newwin(
+        len(lines) + 2,
+        len(lines[0]) + 2,
+        1,
+        (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2,
+    )
+    win.box()
+    selected = 0
+    while True:
+        parent_win.refresh()
+        for i, v in enumerate(lines):
+            win.addstr(
+                i + 1,
+                1,
+                v,
+                curses.color_pair(get_color(v.strip()))
+                | (curses.A_REVERSE if i == selected else 0),
+            )
+        key = win.getch()
+        if key == 107:  # k
+            selected -= 1
+        elif key == 106:  # j
+            selected += 1
+        elif key == 103:  # g
+            selected = 0
+        elif key == 71:  # G
+            selected = len(lines)
+        elif key in (113, 27):  # q | esc
+            return
+        elif key == 10:  # enter
+            return get_color(lines[selected].strip())
+        else:
+            continue
+        selected = ensure_within_bounds(selected, 0, len(lines))
+        parent_win.refresh()
+        win.refresh()
+
+
 def main(stdscr, header):
     curses.use_default_colors()
     curses.curs_set(0)
+    for i, v in enumerate(
+        [
+            curses.COLOR_RED,
+            curses.COLOR_GREEN,
+            curses.COLOR_YELLOW,
+            curses.COLOR_BLUE,
+            curses.COLOR_MAGENTA,
+            curses.COLOR_CYAN,
+            curses.COLOR_WHITE,
+        ],
+        start=1,
+    ):
+        curses.init_pair(i, v, -1)
 
-    todo = validate_file(read_file(FILENAME))
+        todo = [Todo(i) for i in validate_file(read_file(FILENAME))]
     selected = 0
     # revert_with = None
 
     while True:
-        stdscr.addstr(0, 0, f"{header}:", curses.A_BOLD)
+        stdscr.addstr(0, 0, f"{header}:")
         for i, v in enumerate(todo):
             box, text = format_item(v)
             stdscr.addstr(
-                i + 1, 0, f"{box}  ", curses.A_REVERSE if i == selected else 0
+                i + 1,
+                0,
+                f"{box}  ",
+                curses.color_pair(v.color) | (curses.A_REVERSE if i == selected else 0),
             )
             stdscr.addstr(
                 i + 1,
                 3,
                 strikethrough(text) if v.startswith("+") else text,
-                curses.A_REVERSE if i == selected else 0,
+                curses.color_pair(v.color) | (curses.A_REVERSE if i == selected else 0),
             )
         try:
             key = stdscr.getch()  # python3 -c "print(ord('x'))"
@@ -313,6 +397,9 @@ def main(stdscr, header):
             # revert_with = ACTIONS["INSERT"]
         # elif key == 117:  # u
         #     pass  # undo remove (or last action)
+        elif key == 99:  # c
+            todo[selected].color = color_menu(stdscr)
+            stdscr.clear()
         elif key == 105:  # i
             todo = insert_todo(stdscr, todo, selected, True)
             stdscr.clear()
