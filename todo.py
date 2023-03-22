@@ -5,48 +5,20 @@ import os
 
 STRIKETHROUGH = False
 FILENAME = "todo.txt"
-ACTIONS = {
-    "MOVEUP": [
-        ["up arrow", "k"],
-        "move up to select a todo",
-    ],
-    "MOVEDOWN": [
-        ["down arrow", "j"],
-        "move down to select a todo",
-    ],
-    "INSERT": [
-        [
-            "o",
-        ],
-        "Add a new todo",
-    ],
-    "REMOVE": [
-        [
-            "d",
-        ],
-        "Remove selected todo",
-    ],
-    "QUIT": [
-        [
-            "q",
-            "ctrl+c",
-        ],
-        "Quit",
-    ],
-    "TOGGLE": [
-        [
-            "enter",
-        ],
-        "Toggle a todo as completed",
-    ],
-    "EDIT": [
-        [
-            "i",
-        ],
-        "Edit an existing todo",
-    ],
-}
 AUTOSAVE = True
+CONTROLS = [
+    "Keys         Description                ",
+    "----------------------------------------",
+    "h            Display this help menu     ",
+    "k/j          Move cursor up and down    ",
+    "K/J          Move todo up and down      ",
+    "o            Add a new todo             ",
+    "d            Remove selected todo       ",
+    "q, Ctrl + c  Quit                       ",
+    "Enter        Toggle a todo as completed ",
+    "i            Edit an existing todo      ",
+    "g/G          Jump to top/bottom of todos",
+]
 
 
 def read_file(filename):
@@ -59,7 +31,7 @@ def read_file(filename):
 
 def validate_file(data):
     if len(data) == 0:
-        return
+        return []
     lines = data.split("\n")
     for i in lines.copy():
         if len(i) == 0:
@@ -69,6 +41,63 @@ def validate_file(data):
             data.split("\n").index(i)
         )
     return lines
+
+
+def get_args():
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Todo list",
+        add_help=False,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="Controls:\n  " + "\n  ".join(CONTROLS),
+    )
+    parser.add_argument(
+        "--help",
+        action="help",
+        help="Show this help message and exit.",
+    )
+    parser.add_argument(
+        "--autosave",
+        "-s",
+        action="store_true",
+        default=True,
+        help="Boolean: determines if file is saved on every\
+            action or only once at the program termination.",
+    )
+    parser.add_argument(
+        "filename",
+        type=str,
+        nargs="?",
+        default="todo.txt",
+        help="Provide a filename to store the todo list in.\
+            Default is `todo.txt`.",
+    )
+    parser.add_argument(
+        "--strikethrough",
+        "-t",
+        action="store_true",
+        default=False,
+        help="Boolean: strikethrough completed todos\
+            - option to disable because some terminals\
+            don't support strikethroughs.",
+    )
+    parser.add_argument(
+        "--header",
+        "-h",
+        type=str,
+        default="TODO",
+        help="Allows passing alternate header. Default is `TODO`",
+    )
+    return parser.parse_args()
+
+
+def handle_args(args):
+    global AUTOSAVE, FILENAME, STRIKETHROUGH
+    AUTOSAVE = args.autosave
+    FILENAME = args.filename
+    STRIKETHROUGH = args.strikethrough
+    return args.header
 
 
 def ensure_within_bounds(counter, minimum, maximum):
@@ -211,19 +240,7 @@ def help_menu(parent_win):
     parent_win.clear()
     parent_win.addstr(0, 0, "Help:", curses.A_BOLD)
     # lines = md_table_to_lines("README.md", 21, 30)
-    lines = [
-        "Keys         Description                ",
-        "                                        ",
-        "h            Display this help menu     ",
-        "k/j          Move cursor up and down    ",
-        "K/J          Move todo up and down      ",
-        "o            Add a new todo             ",
-        "d            Remove selected todo       ",
-        "q, Ctrl + c  Quit                       ",
-        "Enter        Toggle a todo as completed ",
-        "i            Edit an existing todo      ",
-        "g/G          Jump to top/bottom of todos",
-    ]
+    lines = CONTROLS
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
@@ -246,8 +263,6 @@ def main(stdscr, header):
     todo = validate_file(read_file(FILENAME))
     selected = 0
     # revert_with = None
-    if not header:
-        header = "TODO"
 
     while True:
         stdscr.addstr(0, 0, f"{header}:", curses.A_BOLD)
@@ -323,6 +338,4 @@ def main(stdscr, header):
 
 
 if __name__ == "__main__":
-    from sys import argv
-
-    curses.wrapper(main, header=" ".join(argv[1:]) if len(argv) > 1 else None)
+    curses.wrapper(main, header=handle_args(get_args()))
