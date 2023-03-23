@@ -1,17 +1,17 @@
-- undo last action
-- block selections
-- multiple columns/associated keybinds
-- add line breaks without todo?
-- make help menu read from md table
 - read/write color to/from file
+- block selections
+- make help menu read from md table
+- multiple columns/associated keybinds
+- undo last action
+- add line breaks without todo?
 + color new todo (c)
 + add argparse and put flags on command line
 + add --help flag
 + help menu (h)
 + add cursor to input box
++ add command line input (header)
 + insert todo
 + delete todo
-+ add command line input (header)
 + edit todo
 + move todo
 + write readme
