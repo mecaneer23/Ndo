@@ -253,6 +253,8 @@ def swap_todos(todos: list, idx1, idx2):
 
 
 def md_table_to_lines(filename, first_line_idx, last_line_idx):
+    return CONTROLS
+    # TODO: make the function actually do stuff
     with open(filename) as f:
         lines = f.readlines()[first_line_idx - 1 : last_line_idx + 1]
     for i, _ in enumerate(lines):
@@ -273,8 +275,7 @@ def md_table_to_lines(filename, first_line_idx, last_line_idx):
 def help_menu(parent_win):
     parent_win.clear()
     parent_win.addstr(0, 0, "Help:", curses.A_BOLD)
-    # lines = md_table_to_lines("README.md", 21, 30)
-    lines = CONTROLS
+    lines = md_table_to_lines("README.md", 21, 30)
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
@@ -421,8 +422,8 @@ def main(stdscr, header):
             selected -= 1
             update_file(FILENAME, todo)
             # revert_with = ACTIONS["INSERT"]
-        # elif key == 117:  # u
-        #     pass  # undo remove (or last action)
+        elif key == 117:  # u
+            pass  # undo remove (or last action)
         elif key == 99:  # c
             todo[selected].color = color_menu(stdscr)
             stdscr.clear()
