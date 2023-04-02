@@ -5,6 +5,7 @@
 - undo last action
 - add line breaks without todo?
 - fix strikethrough so newlines work
+- make help menu use fork shapes to avoid extra whitespace
 + color new todo (c)
 + add argparse and put flags on command line
 + add --help flag
