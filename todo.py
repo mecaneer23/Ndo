@@ -163,7 +163,7 @@ def end(filename, todos):
     return update_file(filename, todos, True)
 
 
-def wgetnstr(win, n=1024, chars=""):
+def wgetnstr(win, n=1024, chars="", cursor="█"):
     """
     Reads a string from the given window with max chars n\
     and initial chars chars. Returns a string from the user\
@@ -184,6 +184,8 @@ def wgetnstr(win, n=1024, chars=""):
             the area of the window. Defaults to 1024.
         chars (str, optional):
             Initial string to occupy the window. Defaults to "" (empty string).
+        cursor (str, optional):
+            Cursor character to display while typing. Defaults to "█".
 
     Returns:
         str: Similar to the built in input() function, returns a string of what the user entered.
@@ -194,7 +196,7 @@ def wgetnstr(win, n=1024, chars=""):
     original = chars
     win.box()
     win.nodelay(False)
-    win.addstr(1, 1, f"{chars}█")
+    win.addstr(1, 1, f"{chars}{cursor}")
     while True:
         try:
             ch = win.getch()
@@ -204,14 +206,14 @@ def wgetnstr(win, n=1024, chars=""):
             break
         elif ch == 127:  # backspace
             chars = chars[:-1]
-            win.addstr(1, len(chars) + 1, "█ ")
+            win.addstr(1, len(chars) + 1, f"{cursor} ")
         elif ch == 27:  # escape
             return original
         else:
             if len(chars) < n:
                 ch = chr(ch)
                 chars += ch
-                win.addstr(1, len(chars), f"{ch}█")
+                win.addstr(1, len(chars), f"{ch}{cursor}")
             else:
                 curses.beep()
         win.refresh()
