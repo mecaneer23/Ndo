@@ -19,12 +19,30 @@ CONTROLS = [
     "i            Edit an existing todo      ",
     "g/G          Jump to top/bottom of todos",
 ]
+COLORS = {
+    "Red": 1,
+    "Green": 2,
+    "Yellow": 3,
+    "Blue": 4,
+    "Magenta": 5,
+    "Cyan": 6,
+    "White": 7,
+}
 
 
 class Todo:
+    def _set_color(self, color):
+        if str(color).isalpha():
+            if len(self.text) - len(self.display_text) == 1:
+                return list([k for k, _ in COLORS.items()])[self.text[1]]
+            return get_color(color)
+        return color
+
     def __init__(self, text, color="White"):
         self.text = str(text)
-        self.color = get_color(color) if str(color).isalpha() else color
+        self.box_char = self.text[0]
+        self.display_text = text.split(" ", 1)[1]
+        self.color = self._set_color(color)
 
     def __getitem__(self, key):
         return self.text[key]
@@ -34,6 +52,12 @@ class Todo:
 
     def startswith(self, *a):
         return self.text.startswith(*a)
+
+    def get_box(self):
+        return {
+            "+": "☑",
+            "-": "☐",
+        }[self.box_char]
 
 
 def read_file(filename):
@@ -52,9 +76,6 @@ def validate_file(data):
         if len(i) == 0:
             lines.remove(i)
             continue
-        assert i[0] in "+-", "not a vaild file: line {}".format(
-            data.split("\n").index(i)
-        )
     return lines
 
 
@@ -122,14 +143,6 @@ def ensure_within_bounds(counter, minimum, maximum):
         return maximum - 1
     else:
         return counter
-
-
-def format_item(item):
-    table = {
-        "+": "☑",
-        "-": "☐",
-    }
-    return table[item[0]], item.split(" ", 1)[1]
 
 
 def toggle_completed(char):
@@ -210,7 +223,9 @@ def insert_todo(stdscr, todos: list, index, existing_todo=False):
     y, x = stdscr.getmaxyx()
     input_win = curses.newwin(3, x // 2, y // 2 - 3, x // 4)
     if existing_todo:
-        todos[index] = Todo(f"- {wgetnstr(input_win, chars=todos[index].split(' ', 1)[1])}")
+        todos[index] = Todo(
+            f"- {wgetnstr(input_win, chars=todos[index].split(' ', 1)[1])}"
+        )
     else:
         if (todo := wgetnstr(input_win)) == "":
             return todos
@@ -274,15 +289,7 @@ def help_menu(parent_win):
 
 
 def get_color(color):
-    return {
-        "Red": 1,
-        "Green": 2,
-        "Yellow": 3,
-        "Blue": 4,
-        "Magenta": 5,
-        "Cyan": 6,
-        "White": 7,
-    }[color]
+    return COLORS[color]
 
 
 def color_menu(parent_win):
@@ -362,18 +369,21 @@ def main(stdscr, header):
     while True:
         stdscr.addstr(0, 0, f"{header}:")
         for i, v in enumerate(todo):
-            box, text = format_item(v)
+            box = v.get_box()
+            text = v.display_text
             stdscr.addstr(
                 i + 1,
                 0,
                 f"{box}  ",
-                curses.color_pair(v.color or get_color("White")) | (curses.A_REVERSE if i == selected else 0),
+                curses.color_pair(v.color or get_color("White"))
+                | (curses.A_REVERSE if i == selected else 0),
             )
             stdscr.addstr(
                 i + 1,
                 3,
                 strikethrough(text) if v.startswith("+") else text,
-                curses.color_pair(v.color or get_color("White")) | (curses.A_REVERSE if i == selected else 0),
+                curses.color_pair(v.color or get_color("White"))
+                | (curses.A_REVERSE if i == selected else 0),
             )
         try:
             key = stdscr.getch()  # python3 -c "print(ord('x'))"
@@ -429,7 +439,10 @@ def main(stdscr, header):
         elif key in (113, 27):  # q | esc
             return end(FILENAME, todo)
         elif key == 10:  # enter
-            todo[selected] = Todo(toggle_completed(todo[selected][0]) + todo[selected][1:], color=todo[selected].color)
+            todo[selected] = Todo(
+                toggle_completed(todo[selected][0]) + todo[selected][1:],
+                color=todo[selected].color,
+            )
             update_file(FILENAME, todo)
             # revert_with = ACTIONS["TOGGLE"]
         else:
