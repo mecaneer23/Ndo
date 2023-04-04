@@ -7,20 +7,6 @@ STRIKETHROUGH = False
 FILENAME = "todo.txt"
 AUTOSAVE = True
 HEADER = "TODO"
-CONTROLS = [
-    "Keys         Description                ",
-    "----------------------------------------",
-    "h            Display this help menu     ",
-    "k/j          Move cursor up and down    ",
-    "K/J          Move todo up and down      ",
-    "o            Add a new todo             ",
-    "d            Remove selected todo       ",
-    "q, Ctrl + c  Quit                       ",
-    "Enter        Toggle a todo as completed ",
-    "i            Edit an existing todo      ",
-    "g/G          Jump to top/bottom of todos",
-    "c            Change selected todo color ",
-]
 COLORS = {
     "Red": 1,
     "Green": 2,
@@ -94,7 +80,7 @@ def get_args():
         description="Todo list",
         add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="Controls:\n  " + "\n  ".join(CONTROLS),
+        epilog="Controls:\n  " + "\n  ".join(md_table_to_lines("README.md", 21, 31)),
     )
     parser.add_argument(
         "--help",
@@ -256,30 +242,30 @@ def swap_todos(todos: list, idx1, idx2):
     return todos
 
 
+def maxlen(iterable):
+    return len(max(iterable, key=len))
+
+
 def md_table_to_lines(filename, first_line_idx, last_line_idx):
-    return CONTROLS
-    # TODO: make the function actually do stuff
     with open(filename) as f:
         lines = f.readlines()[first_line_idx - 1 : last_line_idx + 1]
     for i, _ in enumerate(lines):
-        lines[i] = (
-            lines[i]
-            .replace("<kbd>", "")
-            .replace("</kbd>", "")
-            .replace("  ", "")[:-3]
-            .split("| ")[1:]
+        lines[i] = lines[i].replace("<kbd>", "").replace("</kbd>", "").split("|")[1:-1]
+    lines[1] = ("-", "-")
+    key_max = maxlen([k.strip() for k, _ in lines])
+    value_max = maxlen(v.strip() for _, v in lines)
+    lines[1] = ("-" * (key_max + 2), "-" * value_max)
+    for i, (k, v) in enumerate(lines):
+        lines[i] = (k.strip() + " " * (key_max - len(k.strip()) + 2) + v.strip()).ljust(
+            key_max + value_max + 2
         )
-    for i, (v1, v2) in enumerate(lines):
-        lines[i] = " ".join([v1.ljust(len(max(lines, key=len))), v2])
-    exit(lines[2])
-    lines = [" ".join(i for i in lines)]
-    lines[1] = ""
+    return lines
 
 
 def help_menu(parent_win):
     parent_win.clear()
     parent_win.addstr(0, 0, "Help:", curses.A_BOLD)
-    lines = md_table_to_lines("README.md", 21, 30)
+    lines = md_table_to_lines("README.md", 21, 31)
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
