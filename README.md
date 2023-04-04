@@ -5,16 +5,24 @@ A curses implementation of a todo list helper. Most of the keybindings are simil
 ## Running
 
 ```bash
-python3 todo.py
+python3 todo.py [options] [filename]
 ```
 
 ## Flags
 
-If you want to use the tool for something other than todos, you can rename the header simply by passing an alternative header. For example:
+Positional arguments:
+| Argument | Description                                                          |
+| -------- | -------------------------------------------------------------------- |
+| filename | Provide a filename to store the todo list in. Default is `todo.txt`. |
 
-```bash
-python3 todo.py This is a very cool header
-```
+Options:
+| Option                     | Description                                                                                                     |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| --help                     | Show this help message and exit.                                                                                |
+| --autosave, -s             | Boolean: determines if file is saved on every action or only once at the program termination.                   |
+| --strikethrough, -t        | Boolean: strikethrough completed todos - option to disable because some terminals don't support strikethroughs. |
+| --header HEADER, -h HEADER | Allows passing alternate header. Default is `TODO`.                                                             |
+| --help-file HELP_FILE      | Allows passing alternate file to specify help menu. Default is `README.md`.                                     |
 
 ## Controls
 

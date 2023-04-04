@@ -5,6 +5,7 @@ import os
 
 STRIKETHROUGH = False
 FILENAME = "todo.txt"
+HELP_FILE = "README.md"
 AUTOSAVE = True
 HEADER = "TODO"
 COLORS = {
@@ -80,7 +81,7 @@ def get_args():
         description="Todo list",
         add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="Controls:\n  " + "\n  ".join(md_table_to_lines("README.md", 21, 31)),
+        epilog="Controls:\n  " + "\n  ".join(md_table_to_lines(HELP_FILE, 29, 41)),
     )
     parser.add_argument(
         "--help",
@@ -119,13 +120,20 @@ def get_args():
         default=HEADER,
         help=f"Allows passing alternate header. Default is `{HEADER}`.",
     )
+    parser.add_argument(
+        "--help-file",
+        type=str,
+        default=HELP_FILE,
+        help=f"Allows passing alternate file to specify help menu. Default is `{HELP_FILE}`.",
+    )
     return parser.parse_args()
 
 
 def handle_args(args):
-    global AUTOSAVE, FILENAME, STRIKETHROUGH, HEADER
+    global AUTOSAVE, FILENAME, HELP_FILE, STRIKETHROUGH, HEADER
     AUTOSAVE = args.autosave
     FILENAME = args.filename
+    HELP_FILE = args.help_file
     STRIKETHROUGH = args.strikethrough
     HEADER = args.header
 
@@ -248,7 +256,7 @@ def maxlen(iterable):
 
 def md_table_to_lines(filename, first_line_idx, last_line_idx):
     with open(filename) as f:
-        lines = f.readlines()[first_line_idx - 1 : last_line_idx + 1]
+        lines = f.readlines()[first_line_idx - 1 : last_line_idx - 1]
     for i, _ in enumerate(lines):
         lines[i] = lines[i].replace("<kbd>", "").replace("</kbd>", "").split("|")[1:-1]
     lines[1] = ("-", "-")
@@ -265,7 +273,7 @@ def md_table_to_lines(filename, first_line_idx, last_line_idx):
 def help_menu(parent_win):
     parent_win.clear()
     parent_win.addstr(0, 0, "Help:", curses.A_BOLD)
-    lines = md_table_to_lines("README.md", 21, 31)
+    lines = md_table_to_lines(HELP_FILE, 29, 41)
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
