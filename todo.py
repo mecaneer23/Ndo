@@ -18,6 +18,7 @@ CONTROLS = [
     "Enter        Toggle a todo as completed ",
     "i            Edit an existing todo      ",
     "g/G          Jump to top/bottom of todos",
+    "c            Change selected todo color ",
 ]
 COLORS = {
     "Red": 1,
