@@ -4,8 +4,8 @@ import curses
 import os
 
 STRIKETHROUGH = False
-FILENAME = "todo.txt"
-HELP_FILE = "README.md"
+FILENAME = f"{os.path.dirname(__file__)}/todo.txt"
+HELP_FILE = f"{os.path.dirname(__file__)}/README.md"
 AUTOSAVE = True
 HEADER = "TODO"
 COLORS = {
@@ -46,10 +46,14 @@ class Todo:
         self.color = color if color not in (None, 0) else 7
 
     def get_box(self):
-        return {
+        table = {
             "+": "☑",
             "-": "☐",
-        }[self.box_char]
+        }
+
+        if self.box_char in table:
+            return table[self.box_char]
+        raise KeyError(f"The first character of `{self.text}` is not one of (+, -)")
 
     def __repr__(self):
         return f"{self.box_char}{self.color} {self.display_text}"
