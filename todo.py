@@ -33,15 +33,15 @@ COLORS = {
 class Todo:
     def _set_color(self, color):
         if str(color).isalpha():
-            if len(self.text) - len(self.display_text) == 1:
-                return list([k for k, _ in COLORS.items()])[self.text[1]]
+            if len(self.text) - len(self.display_text) == 3:
+                return int(self.text[1])
             return get_color(color)
         return color
 
     def __init__(self, text, color="White"):
         self.text = str(text)
         self.box_char = self.text[0]
-        self.display_text = text.split(" ", 1)[1]
+        self.display_text = self.text.split(" ", 1)[1]
         self.color = self._set_color(color)
 
     def __getitem__(self, key):
@@ -53,11 +53,17 @@ class Todo:
     def startswith(self, *a):
         return self.text.startswith(*a)
 
+    def set_color(self, color):
+        self.color = color if color not in (None, 0) else 7
+
     def get_box(self):
         return {
             "+": "☑",
             "-": "☐",
         }[self.box_char]
+
+    def __repr__(self):
+        return f"{self.box_char}{self.color} {self.display_text}"
 
 
 def read_file(filename):
@@ -156,11 +162,7 @@ def update_file(filename, lst, save=AUTOSAVE):
     if not save:
         return 0
     with open(filename, "w") as f:
-        return f.write("\n".join([i.text for i in lst]))
-
-
-def end(filename, todos):
-    return update_file(filename, todos, True)
+        return f.write("\n".join([repr(i) for i in lst]))
 
 
 def wgetnstr(win, n=1024, chars="", cursor="█"):
@@ -365,7 +367,7 @@ def main(stdscr, header):
     ):
         curses.init_pair(i, v, -1)
 
-        todo = [Todo(i) for i in validate_file(read_file(FILENAME))]
+    todo = [Todo(i) for i in validate_file(read_file(FILENAME))]
     selected = 0
     # revert_with = None
 
@@ -391,7 +393,7 @@ def main(stdscr, header):
         try:
             key = stdscr.getch()  # python3 -c "print(ord('x'))"
         except KeyboardInterrupt:  # exit on ^C
-            return end(FILENAME, todo)
+            return update_file(FILENAME, todo, True)
         if key in (259, 107):  # up | k
             selected -= 1
             # revert_with = ACTIONS["MOVEDOWN"]
@@ -425,8 +427,9 @@ def main(stdscr, header):
         elif key == 117:  # u
             pass  # undo remove (or last action)
         elif key == 99:  # c
-            todo[selected].color = color_menu(stdscr)
+            todo[selected].set_color(color_menu(stdscr))
             stdscr.clear()
+            update_file(FILENAME, todo)
         elif key == 105:  # i
             todo = insert_todo(stdscr, todo, selected, True)
             stdscr.clear()
@@ -440,7 +443,7 @@ def main(stdscr, header):
             help_menu(stdscr)
             stdscr.clear()
         elif key in (113, 27):  # q | esc
-            return end(FILENAME, todo)
+            return update_file(FILENAME, todo, True)
         elif key == 10:  # enter
             todo[selected] = Todo(
                 toggle_completed(todo[selected][0]) + todo[selected][1:],

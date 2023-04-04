@@ -1,19 +1,19 @@
-- read/write color to/from file
-- block selections
-- make help menu read from md table
-- multiple columns/associated keybinds
-- undo last action
-- add line breaks without todo?
-- fix strikethrough so newlines work
-- make help menu use fork shapes to avoid extra whitespace
-+ color new todo (c)
-+ add argparse and put flags on command line
-+ add --help flag
-+ help menu (h)
-+ add cursor to input box
-+ add command line input (header)
-+ insert todo
-+ delete todo
-+ edit todo
-+ move todo
-+ write readme
+-7 block selections
+-7 make help menu read from md table
+-7 multiple columns/associated keybinds
+-7 undo last action
+-7 add line breaks without todo?
+-7 fix strikethrough so newlines work
+-7 make help menu use fork shapes to avoid extra whitespace
++7 read/write color to/from file
++7 color new todo (c)
++7 add argparse and put flags on command line
++7 add --help flag
++7 help menu (h)
++7 add cursor to input box
++7 add command line input (header)
++7 insert todo
++7 delete todo
++7 edit todo
++7 move todo
++7 write readme
