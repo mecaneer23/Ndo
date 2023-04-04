@@ -354,6 +354,24 @@ def color_menu(parent_win):
         win.refresh()
 
 
+def print_todos(win, todos, selected):
+    for i, v in enumerate(todos):
+        win.addstr(
+            i + 1,
+            0,
+            f"{v.get_box()}  ",
+            curses.color_pair(v.color or get_color("White"))
+            | (curses.A_REVERSE if i == selected else 0),
+        )
+        win.addstr(
+            i + 1,
+            3,
+            strikethrough(v.display_text) if v.startswith("+") else v.display_text,
+            curses.color_pair(v.color or get_color("White"))
+            | (curses.A_REVERSE if i == selected else 0),
+        )
+
+
 def main(stdscr, header):
     curses.use_default_colors()
     curses.curs_set(0)
@@ -377,23 +395,7 @@ def main(stdscr, header):
 
     while True:
         stdscr.addstr(0, 0, f"{header}:")
-        for i, v in enumerate(todo):
-            box = v.get_box()
-            text = v.display_text
-            stdscr.addstr(
-                i + 1,
-                0,
-                f"{box}  ",
-                curses.color_pair(v.color or get_color("White"))
-                | (curses.A_REVERSE if i == selected else 0),
-            )
-            stdscr.addstr(
-                i + 1,
-                3,
-                strikethrough(text) if v.startswith("+") else text,
-                curses.color_pair(v.color or get_color("White"))
-                | (curses.A_REVERSE if i == selected else 0),
-            )
+        print_todos(stdscr, todo, selected)
         try:
             key = stdscr.getch()  # python3 -c "print(ord('x'))"
         except KeyboardInterrupt:  # exit on ^C
