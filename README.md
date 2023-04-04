@@ -29,7 +29,7 @@ python3 todo.py This is a very cool header
 | <kbd>Enter</kbd>                  | Toggle a todo as completed  |
 | <kbd>i</kbd>                      | Edit an existing todo       |
 | <kbd>g</kbd>/<kbd>G</kbd>         | Jump to top/bottom of todos |
-| <kbd>c</kbd>                       | Change selected todo color  |
+| <kbd>c</kbd>                      | Change selected todo color  |
 
 ## Bugs
 
