@@ -6,6 +6,7 @@ import os
 STRIKETHROUGH = False
 FILENAME = "todo.txt"
 AUTOSAVE = True
+HEADER = "TODO"
 CONTROLS = [
     "Keys         Description                ",
     "----------------------------------------",
@@ -104,7 +105,7 @@ def get_args():
         "--autosave",
         "-s",
         action="store_true",
-        default=True,
+        default=AUTOSAVE,
         help="Boolean: determines if file is saved on every\
             action or only once at the program termination.",
     )
@@ -112,15 +113,15 @@ def get_args():
         "filename",
         type=str,
         nargs="?",
-        default="todo.txt",
-        help="Provide a filename to store the todo list in.\
-            Default is `todo.txt`.",
+        default=FILENAME,
+        help=f"Provide a filename to store the todo list in.\
+            Default is `{FILENAME}`.",
     )
     parser.add_argument(
         "--strikethrough",
         "-t",
         action="store_true",
-        default=False,
+        default=STRIKETHROUGH,
         help="Boolean: strikethrough completed todos\
             - option to disable because some terminals\
             don't support strikethroughs.",
@@ -129,18 +130,18 @@ def get_args():
         "--header",
         "-h",
         type=str,
-        default="TODO",
-        help="Allows passing alternate header. Default is `TODO`",
+        default=HEADER,
+        help=f"Allows passing alternate header. Default is `{HEADER}`.",
     )
     return parser.parse_args()
 
 
 def handle_args(args):
-    global AUTOSAVE, FILENAME, STRIKETHROUGH
+    global AUTOSAVE, FILENAME, STRIKETHROUGH, HEADER
     AUTOSAVE = args.autosave
     FILENAME = args.filename
     STRIKETHROUGH = args.strikethrough
-    return args.header
+    HEADER = args.header
 
 
 def ensure_within_bounds(counter, minimum, maximum):
@@ -461,4 +462,5 @@ def main(stdscr, header):
 
 
 if __name__ == "__main__":
-    curses.wrapper(main, header=handle_args(get_args()))
+    handle_args(get_args())
+    curses.wrapper(main, header=HEADER)
