@@ -343,6 +343,8 @@ def color_menu(parent_win):
             return
         elif key == 10:  # enter
             return get_color(lines[selected].strip())
+        elif key in range(49, 56):
+            selected = key - 49
         else:
             continue
         selected = ensure_within_bounds(selected, 0, len(lines))

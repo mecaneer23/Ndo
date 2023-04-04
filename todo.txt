@@ -1,10 +1,12 @@
 -7 block selections
+-7 copy to clipboard (y)
 -7 make help menu read from md table
 -7 multiple columns/associated keybinds
 -7 undo last action
 -7 add line breaks without todo?
 -7 fix strikethrough so newlines work
 -7 make help menu use fork shapes to avoid extra whitespace
++7 allow number input for color menu
 +7 read/write color to/from file
 +7 color new todo (c)
 +7 add argparse and put flags on command line
