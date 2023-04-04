@@ -219,6 +219,12 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
     return chars
 
 
+def hline(win, y, x, ch, n):
+    win.addch(y, x, curses.ACS_LTEE)
+    win.hline(y, x + 1, ch, n - 2)
+    win.addch(y, x + n - 1, curses.ACS_RTEE)
+
+
 def insert_todo(stdscr, todos: list, index, existing_todo=False):
     y, x = stdscr.getmaxyx()
     input_win = curses.newwin(3, x // 2, y // 2 - 3, x // 4)
@@ -283,7 +289,7 @@ def help_menu(parent_win):
     win.box()
     for i, v in enumerate(lines):
         win.addstr(i + 1, 1, v)
-    win.hline(2, 1, curses.ACS_HLINE, win.getmaxyx()[1] - 2)
+    hline(win, 2, 0, curses.ACS_HLINE, win.getmaxyx()[1])
     parent_win.refresh()
     win.refresh()
     return win.getch()
