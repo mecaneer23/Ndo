@@ -2,8 +2,9 @@
 -7 copy to clipboard (y)
 -7 multiple columns/associated keybinds
 -7 undo last action
+-7 add support for arrow keys in wgetnstr()
 -3 add line breaks without todo?
--7 fix strikethrough so newlines work
+-4 fix strikethrough so newlines work
 +7 make help menu use fork shapes to avoid extra whitespace
 +7 update readme flags
 +7 make help menu read from md table

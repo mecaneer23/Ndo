@@ -211,6 +211,10 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
             win.addstr(1, len(chars) + 1, f"{cursor} ")
         elif ch == 27:  # escape
             return original
+        elif ch == 260:  # left arrow
+            pass
+        elif ch == 261:  # right arrow
+            pass
         else:
             if len(chars) < n:
                 ch = chr(ch)
@@ -407,6 +411,9 @@ def main(stdscr, header):
         if key in (259, 107):  # up | k
             selected -= 1
             # revert_with = ACTIONS["MOVEDOWN"]
+        elif key in (258, 106):  # down | j
+            selected += 1
+            # revert_with = ACTIONS["MOVEUP"]
         elif key == 75:  # K
             todo = swap_todos(todo, selected, selected - 1)
             stdscr.clear()
@@ -417,9 +424,6 @@ def main(stdscr, header):
             stdscr.clear()
             selected += 1
             update_file(FILENAME, todo)
-        elif key in (258, 106):  # down | j
-            selected += 1
-            # revert_with = ACTIONS["MOVEUP"]
         elif key == 111:  # o
             temp = todo.copy()
             todo = insert_todo(stdscr, todo, selected + 1)
