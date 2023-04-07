@@ -32,6 +32,7 @@ Options:
 | <kbd>k</kbd>/<kbd>j</kbd>         | Move cursor up and down     |
 | <kbd>K</kbd>/<kbd>J</kbd>         | Move todo up and down       |
 | <kbd>o</kbd>                      | Add a new todo              |
+| <kbd>O</kbd>                      | Add a todo on current line  |
 | <kbd>d</kbd>                      | Remove selected todo        |
 | <kbd>q</kbd>, <kbd>Ctrl + c</kbd> | Quit                        |
 | <kbd>Enter</kbd>                  | Toggle a todo as completed  |
