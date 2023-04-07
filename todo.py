@@ -432,6 +432,12 @@ def main(stdscr, header):
                 selected += 1
             update_file(FILENAME, todo)
             # revert_with = ACTIONS["REMOVE"]
+        elif key == 79:  # O
+            temp = todo.copy()
+            todo = insert_todo(stdscr, todo, selected)
+            stdscr.clear()
+            update_file(FILENAME, todo)
+            # revert_with = ACTIONS["REMOVE"]
         elif key == 100:  # d
             todo = remove_todo(todo, selected)
             stdscr.clear()
