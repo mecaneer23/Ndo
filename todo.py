@@ -237,13 +237,11 @@ def insert_todo(stdscr, todos: list, index, existing_todo=False):
     y, x = stdscr.getmaxyx()
     input_win = curses.newwin(3, x // 2, y // 2 - 3, x // 4)
     if existing_todo:
-        todos[index] = Todo(
-            f"- {wgetnstr(input_win, chars=todos[index].split(' ', 1)[1])}"
-        )
-    else:
-        if (todo := wgetnstr(input_win)) == "":
-            return todos
-        todos.insert(index, Todo(f"- {todo}"))
+        todos[index].display_text = wgetnstr(input_win, chars=todos[index].display_text)
+        return todos
+    if (todo := wgetnstr(input_win)) == "":
+        return todos
+    todos.insert(index, Todo(f"- {todo}"))
     return todos
 
 
