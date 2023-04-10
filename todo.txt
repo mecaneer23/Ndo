@@ -1,26 +1,9 @@
+-7 make insert box bigger if it needs to
+-7 add support for arrow keys in wgetnstr()
 -7 block selections (change how selections are handled)
 -7 allow scrolling if overflow (in print_todos())
 -7 copy to clipboard (y) (import clipboard somehow)
 -7 multiple columns/associated keybinds
 -7 undo last action
--7 add support for arrow keys in wgetnstr()
 -3 add line breaks without todo?
 -4 fix strikethrough so newlines work
-+7 make sure wgetnstr backspace works properly
-+7 insert on current line (O)
-+7 make help menu use fork shapes to avoid extra whitespace
-+7 update readme flags
-+7 make help menu read from md table
-+7 allow number input for color menu
-+7 read/write color to/from file
-+7 color new todo (c)
-+7 add argparse and put flags on command line
-+7 add --help flag
-+7 help menu (h)
-+7 add cursor to input box
-+7 add command line input (header)
-+7 insert todo
-+7 delete todo
-+7 edit todo
-+7 move todo
-+7 write readme
