@@ -206,7 +206,7 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
             return original
         if ch in (10, 13):  # enter
             break
-        elif ch == 127:  # backspace
+        elif ch in (8, 127, 263):  # backspace
             chars = chars[:-1]
             win.addstr(1, len(chars) + 1, f"{cursor} ")
         elif ch == 27:  # escape
