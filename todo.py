@@ -375,7 +375,7 @@ def print_todos(win, todos, selected):
         win.addstr(
             i + 1,
             0,
-            f"{v.get_box()}  {strikethrough(v.display_text) if v.startswith('+') else v.display_text}"
+            f"{v.get_box()}  {strikethrough(v.display_text) if v.startswith('+') else v.display_text}",
             curses.color_pair(v.color or get_color("White"))
             | (curses.A_REVERSE if i == selected else 0),
         )
