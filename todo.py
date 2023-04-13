@@ -235,11 +235,15 @@ def hline(win, y, x, ch, n):
 
 def insert_todo(stdscr, todos: list, index, existing_todo=False):
     y, x = stdscr.getmaxyx()
-    input_win = curses.newwin(3, x // 2, y // 2 - 3, x // 4)
     if existing_todo:
-        todos[index].display_text = wgetnstr(input_win, chars=todos[index].display_text)
+        todo = todos[index].display_text
+        ncols = max(x // 2, len(todo) + 3) if len(todo) < x - 1 else x // 2
+        begin_x = x // 4 if len(todo) < x - 1 - ncols else (x - ncols) // 2
+        todos[index].display_text = wgetnstr(
+            curses.newwin(3, ncols, y // 2 - 3, begin_x), chars=todo
+        )
         return todos
-    if (todo := wgetnstr(input_win)) == "":
+    if (todo := wgetnstr(curses.newwin(3, x // 2, y // 2 - 3, x // 4))) == "":
         return todos
     todos.insert(index, Todo(f"- {todo}"))
     return todos
