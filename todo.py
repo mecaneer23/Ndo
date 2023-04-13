@@ -85,7 +85,7 @@ def get_args():
         description="Todo list",
         add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="Controls:\n  " + "\n  ".join(md_table_to_lines(HELP_FILE, 29, 41)),
+        epilog="Controls:\n  " + "\n  ".join(md_table_to_lines(HELP_FILE, 29, 44, ["<kbd>", "</kbd>"])),
     )
     parser.add_argument(
         "--help",
@@ -270,11 +270,13 @@ def maxlen(iterable):
     return len(max(iterable, key=len))
 
 
-def md_table_to_lines(filename, first_line_idx, last_line_idx):
+def md_table_to_lines(filename, first_line_idx, last_line_idx, remove = []):
     with open(filename) as f:
         lines = f.readlines()[first_line_idx - 1 : last_line_idx - 1]
     for i, _ in enumerate(lines):
-        lines[i] = lines[i].replace("<kbd>", "").replace("</kbd>", "").split("|")[1:-1]
+        for item in remove:
+            lines[i] = lines[i].replace(item, "")
+        lines[i].split("|")[1:-1]
     lines[1] = ("-", "-")
     key_max = maxlen([k.strip() for k, _ in lines])
     value_max = maxlen(v.strip() for _, v in lines)
@@ -289,7 +291,7 @@ def md_table_to_lines(filename, first_line_idx, last_line_idx):
 def help_menu(parent_win):
     parent_win.clear()
     parent_win.addstr(0, 0, "Help:", curses.A_BOLD)
-    lines = md_table_to_lines(HELP_FILE, 29, 44)
+    lines = md_table_to_lines(HELP_FILE, 29, 44, ["<kbd>", "</kbd>"])
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
