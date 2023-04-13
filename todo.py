@@ -216,12 +216,12 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
         elif ch == 261:  # right arrow
             pass
         else:
-            if len(chars) < n:
-                ch = chr(ch)
-                chars += ch
-                win.addstr(1, len(chars), f"{ch}{cursor}")
-            else:
+            if len(chars) >= n:
                 curses.beep()
+                continue
+            ch = chr(ch)
+            chars += ch
+            win.addstr(1, len(chars), f"{ch}{cursor}")
         win.refresh()
 
     return chars
@@ -382,6 +382,20 @@ def print_todos(win, todos, selected):
         )
 
 
+def todo_from_clipboard(todos, selected):
+    try:
+        from pyperclip import paste
+    except ModuleNotFoundError:
+        exit(
+            "`pyperclip` module required for paste operation. Try `pip install pyperclip`"
+        )
+    todo = paste()
+    if "\n" in todo:
+        return
+    todos.insert(selected + 1, Todo(f"- {todo}"))
+    return todos
+
+
 def main(stdscr, header):
     curses.use_default_colors()
     curses.curs_set(0)
@@ -461,6 +475,21 @@ def main(stdscr, header):
             selected = 0
         elif key == 71:  # G
             selected = len(todo)
+        elif key == 121:  # y
+            try:
+                from pyperclip import copy
+            except ModuleNotFoundError:
+                exit(
+                    "`pyperclip` module required for copy operation. Try `pip install pyperclip`"
+                )
+            copy(todo[selected].display_text)
+        elif key == 112:  # p
+            temp = todo.copy()
+            todo = todo_from_clipboard(todo, selected)
+            stdscr.clear()
+            if temp != todo:
+                selected += 1
+            update_file(FILENAME, todo)
         elif key == 104:  # h
             help_menu(stdscr)
             stdscr.clear()
