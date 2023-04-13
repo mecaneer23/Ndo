@@ -289,7 +289,7 @@ def md_table_to_lines(filename, first_line_idx, last_line_idx):
 def help_menu(parent_win):
     parent_win.clear()
     parent_win.addstr(0, 0, "Help:", curses.A_BOLD)
-    lines = md_table_to_lines(HELP_FILE, 29, 41)
+    lines = md_table_to_lines(HELP_FILE, 29, 44)
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
