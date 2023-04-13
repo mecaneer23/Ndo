@@ -1,3 +1,4 @@
+-1 !! add - to readme, fix empty line on reload
 -7 allow scrolling if overflow (in print_todos())
 -7 add support for arrow keys in wgetnstr()
 -7 block selections (change how selections are handled)
