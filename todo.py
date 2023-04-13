@@ -215,7 +215,7 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
             pass
         elif ch == 261:  # right arrow
             pass
-        else:
+        else:  # typable characters (basically alphanum)
             if len(chars) >= n:
                 curses.beep()
                 continue
@@ -420,7 +420,7 @@ def main(stdscr, header):
         stdscr.addstr(0, 0, f"{header}:")
         print_todos(stdscr, todo, selected)
         try:
-            key = stdscr.getch()  # python3 -c "print(ord('x'))"
+            key = stdscr.getch()
         except KeyboardInterrupt:  # exit on ^C
             return update_file(FILENAME, todo, True)
         if key in (259, 107):  # up | k
