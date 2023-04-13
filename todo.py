@@ -367,18 +367,15 @@ def color_menu(parent_win):
 
 
 def print_todos(win, todos, selected):
+    y = win.getmaxyx()[0] - 1
+    row_buffer_size = 8
     for i, v in enumerate(todos):
+        # if i + row_buffer_size > y or i + row_buffer_size < 0:
+        # if outside 0 + row_buffer_size --> y - row_buffer_size
         win.addstr(
             i + 1,
             0,
-            f"{v.get_box()}  ",
-            curses.color_pair(v.color or get_color("White"))
-            | (curses.A_REVERSE if i == selected else 0),
-        )
-        win.addstr(
-            i + 1,
-            3,
-            strikethrough(v.display_text) if v.startswith("+") else v.display_text,
+            f"{v.get_box()}  {strikethrough(v.display_text) if v.startswith('+') else v.display_text}"
             curses.color_pair(v.color or get_color("White"))
             | (curses.A_REVERSE if i == selected else 0),
         )
