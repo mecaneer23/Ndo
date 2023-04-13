@@ -276,7 +276,7 @@ def md_table_to_lines(filename, first_line_idx, last_line_idx, remove = []):
     for i, _ in enumerate(lines):
         for item in remove:
             lines[i] = lines[i].replace(item, "")
-        lines[i].split("|")[1:-1]
+        lines[i] = lines[i].split("|")[1:-1]
     lines[1] = ("-", "-")
     key_max = maxlen([k.strip() for k, _ in lines])
     value_max = maxlen(v.strip() for _, v in lines)
