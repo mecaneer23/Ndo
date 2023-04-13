@@ -59,6 +59,17 @@ class Todo:
         return f"{self.box_char}{self.color} {self.display_text}"
 
 
+class EmptyTodo(Todo):
+    def __init__(self):
+        self.display_text = " "
+        self.text = " "
+        self.color = 7
+        self.box_char = "-"
+
+    def get_box(self):
+        return " "
+
+
 def read_file(filename):
     if not os.path.exists(filename):
         with open(filename, "w") as f:
@@ -249,6 +260,10 @@ def insert_todo(stdscr, todos: list, index, existing_todo=False):
     return todos
 
 
+def insert_empty_todo(todos, index):
+    todos.insert(index, EmptyTodo())
+    return todos
+
 def remove_todo(todos: list, index):
     if len(todos) < 1:
         return todos
@@ -412,7 +427,7 @@ def main(stdscr, header):
     ):
         curses.init_pair(i, v, -1)
 
-    todo = [Todo(i) for i in validate_file(read_file(FILENAME))]
+    todo = [Todo(i) if i != "-7" else EmptyTodo() for i in validate_file(read_file(FILENAME))]
     selected = 0
     # revert_with = None
 
@@ -489,6 +504,10 @@ def main(stdscr, header):
             if temp != todo:
                 selected += 1
             update_file(FILENAME, todo)
+        elif key == 45:  # -
+            insert_empty_todo(todo, selected + 1)
+            selected += 1
+            stdscr.clear()
         elif key == 104:  # h
             help_menu(stdscr)
             stdscr.clear()
