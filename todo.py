@@ -96,7 +96,8 @@ def get_args():
         description="Todo list",
         add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="Controls:\n  " + "\n  ".join(md_table_to_lines(HELP_FILE, 29, 44, ["<kbd>", "</kbd>"])),
+        epilog="Controls:\n  "
+        + "\n  ".join(md_table_to_lines(HELP_FILE, 29, 44, ["<kbd>", "</kbd>"])),
     )
     parser.add_argument(
         "--help",
@@ -264,6 +265,7 @@ def insert_empty_todo(todos, index):
     todos.insert(index, EmptyTodo())
     return todos
 
+
 def remove_todo(todos: list, index):
     if len(todos) < 1:
         return todos
@@ -285,7 +287,7 @@ def maxlen(iterable):
     return len(max(iterable, key=len))
 
 
-def md_table_to_lines(filename, first_line_idx, last_line_idx, remove = []):
+def md_table_to_lines(filename, first_line_idx, last_line_idx, remove=[]):
     with open(filename) as f:
         lines = f.readlines()[first_line_idx - 1 : last_line_idx - 1]
     for i, _ in enumerate(lines):
@@ -427,7 +429,10 @@ def main(stdscr, header):
     ):
         curses.init_pair(i, v, -1)
 
-    todo = [Todo(i) if i != "-7" else EmptyTodo() for i in validate_file(read_file(FILENAME))]
+    todo = [
+        Todo(i) if i != "-7" else EmptyTodo()
+        for i in validate_file(read_file(FILENAME))
+    ]
     selected = 0
     # revert_with = None
 
