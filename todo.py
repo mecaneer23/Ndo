@@ -505,9 +505,11 @@ def main(stdscr, header):
                 selected += 1
             update_file(FILENAME, todo)
         elif key == 45:  # -
+            continue  # doesn't work properly
             insert_empty_todo(todo, selected + 1)
             selected += 1
             stdscr.clear()
+            update_file(FILENAME, todo)
         elif key == 104:  # h
             help_menu(stdscr)
             stdscr.clear()
