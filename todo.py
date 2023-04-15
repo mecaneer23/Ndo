@@ -61,10 +61,7 @@ class Todo:
 
 class EmptyTodo(Todo):
     def __init__(self):
-        self.display_text = " "
-        self.text = " "
-        self.color = 7
-        self.box_char = "-"
+        super().__init__("-7 \t")
 
     def get_box(self):
         return " "
@@ -430,7 +427,7 @@ def main(stdscr, header):
         curses.init_pair(i, v, -1)
 
     todo = [
-        Todo(i) if i != "-7" else EmptyTodo()
+        Todo(i) if i != "-7 \t" else EmptyTodo()
         for i in validate_file(read_file(FILENAME))
     ]
     selected = 0
@@ -510,7 +507,7 @@ def main(stdscr, header):
                 selected += 1
             update_file(FILENAME, todo)
         elif key == 45:  # -
-            continue  # doesn't work properly
+            # continue  # doesn't work properly
             insert_empty_todo(todo, selected + 1)
             selected += 1
             stdscr.clear()
@@ -521,6 +518,8 @@ def main(stdscr, header):
         elif key in (113, 27):  # q | esc
             return update_file(FILENAME, todo, True)
         elif key == 10:  # enter
+            if type(todo[selected]) == EmptyTodo:
+                continue
             todo[selected] = Todo(
                 toggle_completed(todo[selected][0]) + todo[selected][1:],
                 color=todo[selected].color,
