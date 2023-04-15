@@ -46,4 +46,3 @@ Options:
 ## Bugs
 
 - For some reason long todos don't render properly in strikethrough mode (in certain terminals)
-
