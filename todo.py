@@ -8,6 +8,7 @@ FILENAME = f"{os.path.dirname(__file__)}/todo.txt"
 HELP_FILE = f"{os.path.dirname(__file__)}/README.md"
 AUTOSAVE = True
 HEADER = "TODO"
+
 COLORS = {
     "Red": 1,
     "Green": 2,
@@ -90,7 +91,7 @@ def get_args():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Todo list",
+        description="Ndo is a todo list program to help you manage your todo lists",
         add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Controls:\n  "
@@ -131,7 +132,9 @@ def get_args():
         "-h",
         type=str,
         default=HEADER,
-        help=f"Allows passing alternate header. Default is `{HEADER}`.",
+        help=f"Allows passing alternate header.\
+            Make sure to quote multi-word headers.\
+            Default is `{HEADER}`.",
     )
     parser.add_argument(
         "--help-file",
