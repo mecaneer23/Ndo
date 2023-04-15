@@ -39,6 +39,7 @@ Options:
 | <kbd>y</kbd>                      | Copy todo to clipboard      |
 | <kbd>p</kbd>                      | New todo from clipboard     |
 | <kbd>g</kbd>/<kbd>G</kbd>         | Jump to top/bottom of todos |
+| <kbd>-</kbd>                      | Insert blank line           |
 | <kbd>q</kbd>, <kbd>Ctrl + c</kbd> | Quit                        |
 | <kbd>Enter</kbd>                  | Toggle a todo as completed  |
 
