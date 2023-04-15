@@ -384,8 +384,8 @@ def color_menu(parent_win):
 
 
 def print_todos(win, todos, selected):
-    y = win.getmaxyx()[0] - 1
-    row_buffer_size = 8
+    # y = win.getmaxyx()[0] - 1
+    # row_buffer_size = 8
     for i, v in enumerate(todos):
         # if i + row_buffer_size > y or i + row_buffer_size < 0:
         # if outside 0 + row_buffer_size --> y - row_buffer_size
