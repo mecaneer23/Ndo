@@ -197,12 +197,15 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
             It might error if this number is greater than\
             the area of the window. Defaults to 1024.
         chars (str, optional):
-            Initial string to occupy the window. Defaults to "" (empty string).
+            Initial string to occupy the window.\
+            Defaults to "" (empty string).
         cursor (str, optional):
-            Cursor character to display while typing. Defaults to "█".
+            Cursor character to display while typing.\
+            Defaults to "█".
 
     Returns:
-        str: Similar to the built in input() function, returns a string of what the user entered.
+        str: Similar to the built in input() function,\
+        returns a string of what the user entered.
     """
     assert (
         win.getmaxyx()[0] >= 3
