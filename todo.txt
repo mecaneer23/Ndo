@@ -1,6 +1,6 @@
--7 allow scrolling if overflow (in print_todos())
--7 add support for arrow keys in wgetnstr()
--7 block selections (change how selections are handled)
--7 multiple columns/associated keybinds
--7 undo last action
--7 fix strikethrough so newlines work
+-2 undo last action
+-2 allow scrolling if overflow (in print_todos())
+-3 add support for arrow keys in wgetnstr() (change how cursor is handled)
+-3 block selections (change how selections are handled)
+-1 multiple columns/associated keybinds
+-1 fix strikethrough so newlines work
