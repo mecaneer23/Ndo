@@ -326,7 +326,8 @@ def help_menu(parent_win):
     hline(win, 2, 0, curses.ACS_HLINE, win.getmaxyx()[1])
     parent_win.refresh()
     win.refresh()
-    return win.getch()
+    win.getch()
+    parent_win.clear()
 
 
 def get_color(color):
@@ -506,7 +507,7 @@ def cursor_bottom(len_todos):
 
 def blank_todo(stdscr, todos, selected):
     insert_empty_todo(todos, selected + 1)
-    selected = cursor_up(selected, len(todos))
+    selected = cursor_down(selected, len(todos))
     stdscr.clear()
     update_file(FILENAME, todos)
     return todos, selected
@@ -519,11 +520,6 @@ def toggle(todos, selected):
     )
     update_file(FILENAME, todos)
     return todos
-
-
-def display_help(stdscr):
-    help_menu(stdscr)
-    stdscr.clear()
 
 
 def quit_program(todos):
@@ -594,7 +590,7 @@ def main(stdscr, header):
         elif key == 45:  # -
             todos, selected = blank_todo(stdscr, todos, selected)
         elif key == 104:  # h
-            display_help(stdscr)
+            help_menu(stdscr)
         elif key in (113, 27):  # q | esc
             return quit_program(todos)
         elif key == 10:  # enter
