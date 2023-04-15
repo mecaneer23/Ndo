@@ -2,6 +2,7 @@
 # pyright: reportMissingImports=false
 
 import curses
+from enum import Enum
 import os
 
 STRIKETHROUGH = False
@@ -416,6 +417,119 @@ def todo_from_clipboard(todos, selected):
     return todos
 
 
+def cursor_up(selected, len_todos):
+    return ensure_within_bounds(selected - 1, 0, len_todos)
+
+
+def cursor_down(selected, len_todos):
+    return ensure_within_bounds(selected + 1, 0, len_todos)
+
+
+def todo_up(stdscr, todos, selected):
+    todos = swap_todos(todos, selected, selected - 1)
+    stdscr.clear()
+    update_file(FILENAME, todos)
+    return todos, cursor_up(selected, len(todos))
+
+
+def todo_down(stdscr, todos, selected):
+    todos = swap_todos(todos, selected, selected + 1)
+    stdscr.clear()
+    update_file(FILENAME, todos)
+    return todos, cursor_down(selected, len(todos))
+
+
+def new_todo_next(stdscr, todos, selected, paste=False):
+    temp = todos.copy()
+    todos = (
+        insert_todo(stdscr, todos, selected + 1)
+        if not paste
+        else todo_from_clipboard(todos, selected)
+    )
+    stdscr.clear()
+    if temp != todos:
+        selected = cursor_down(selected, len(todos))
+    update_file(FILENAME, todos)
+    return todos, selected
+
+
+def new_todo_current(stdscr, todos, selected):
+    todos = insert_todo(stdscr, todos, selected)
+    stdscr.clear()
+    update_file(FILENAME, todos)
+    return todos
+
+
+def delete_todo(stdscr, todos, selected):
+    todos = remove_todo(todos, selected)
+    stdscr.clear()
+    selected = cursor_up(selected, len(todos))
+    update_file(FILENAME, todos)
+    return todos, selected
+
+
+def color_todo(stdscr, todos, selected):
+    todos[selected].set_color(color_menu(stdscr))
+    stdscr.clear()
+    update_file(FILENAME, todos)
+    return todos
+
+
+def edit_todo(stdscr, todos, selected):
+    todos = insert_todo(stdscr, todos, selected, True)
+    stdscr.clear()
+    update_file(FILENAME, todos)
+    return todos
+
+
+def copy_todo(todos, selected):
+    try:
+        from pyperclip import copy
+    except ModuleNotFoundError:
+        exit(
+            "`pyperclip` module required for copy operation. Try `pip install pyperclip`"
+        )
+    copy(todos[selected].display_text)
+
+
+def paste_todo(stdscr, todos, selected):
+    return new_todo_next(stdscr, todos, selected, paste=True)
+
+
+def cursor_top(len_todos):
+    return ensure_within_bounds(0, 0, len_todos)
+
+
+def cursor_bottom(len_todos):
+    return ensure_within_bounds(len_todos, 0, len_todos)
+
+
+def blank_todo(stdscr, todos, selected):
+    insert_empty_todo(todos, selected + 1)
+    selected = cursor_up(selected, len(todos))
+    stdscr.clear()
+    update_file(FILENAME, todos)
+    return todos, selected
+
+
+def toggle(todos, selected):
+    todos[selected] = Todo(
+        toggle_completed(todos[selected].box_char) + todos[selected][1:],
+        color=todos[selected].color,
+    )
+    update_file(FILENAME, todos)
+    return todos
+
+
+def display_help(stdscr):
+    help_menu(stdscr)
+    stdscr.clear()
+
+
+def quit_program(todos):
+    return update_file(FILENAME, todos, True)
+
+
 def main(stdscr, header):
     curses.use_default_colors()
     curses.curs_set(0)
@@ -433,109 +547,62 @@ def main(stdscr, header):
     ):
         curses.init_pair(i, v, -1)
 
-    todo = [
+    todos = [
         Todo(i) if i != "-7 \t" else EmptyTodo()
         for i in validate_file(read_file(FILENAME))
     ]
     selected = 0
-    # revert_with = None
+    # revert_with = lambda: None
 
     while True:
         stdscr.addstr(0, 0, f"{header}:")
-        print_todos(stdscr, todo, selected)
+        print_todos(stdscr, todos, selected)
         try:
             key = stdscr.getch()
         except KeyboardInterrupt:  # exit on ^C
-            return update_file(FILENAME, todo, True)
+            return update_file(FILENAME, todos, True)
         if key in (259, 107):  # up | k
-            selected -= 1
-            # revert_with = ACTIONS["MOVEDOWN"]
+            selected = cursor_up(selected, len(todos))
         elif key in (258, 106):  # down | j
-            selected += 1
-            # revert_with = ACTIONS["MOVEUP"]
+            selected = cursor_down(selected, len(todos))
         elif key == 75:  # K
-            todo = swap_todos(todo, selected, selected - 1)
-            stdscr.clear()
-            selected -= 1
-            update_file(FILENAME, todo)
+            todos, selected = todo_up(stdscr, todos, selected)
         elif key == 74:  # J
-            todo = swap_todos(todo, selected, selected + 1)
-            stdscr.clear()
-            selected += 1
-            update_file(FILENAME, todo)
+            todos, selected = todo_down(stdscr, todos, selected)
         elif key == 111:  # o
-            temp = todo.copy()
-            todo = insert_todo(stdscr, todo, selected + 1)
-            stdscr.clear()
-            if temp != todo:
-                selected += 1
-            update_file(FILENAME, todo)
-            # revert_with = ACTIONS["REMOVE"]
+            todos, selected = new_todo_next(stdscr, todos, selected)
         elif key == 79:  # O
-            temp = todo.copy()
-            todo = insert_todo(stdscr, todo, selected)
-            stdscr.clear()
-            update_file(FILENAME, todo)
-            # revert_with = ACTIONS["REMOVE"]
+            todos = new_todo_current(stdscr, todos, selected)
         elif key == 100:  # d
-            todo = remove_todo(todo, selected)
-            stdscr.clear()
-            selected -= 1
-            update_file(FILENAME, todo)
-            # revert_with = ACTIONS["INSERT"]
+            todos, selected = delete_todo(stdscr, todos, selected)
         elif key == 117:  # u
-            pass  # undo remove (or last action)
+            pass  # undo last action
+        elif key == 18:  # ^R
+            pass  # redo last action
         elif key == 99:  # c
-            todo[selected].set_color(color_menu(stdscr))
-            stdscr.clear()
-            update_file(FILENAME, todo)
+            todos = color_todo(stdscr, todos, selected)
         elif key == 105:  # i
-            todo = insert_todo(stdscr, todo, selected, True)
-            stdscr.clear()
-            update_file(FILENAME, todo)
-            # revert_with = ACTIONS["EDIT"]
+            todos = edit_todo(stdscr, todos, selected)
         elif key == 103:  # g
-            selected = 0
+            selected = cursor_top(len(todos))
         elif key == 71:  # G
-            selected = len(todo)
+            selected = cursor_bottom(len(todos))
         elif key == 121:  # y
-            try:
-                from pyperclip import copy
-            except ModuleNotFoundError:
-                exit(
-                    "`pyperclip` module required for copy operation. Try `pip install pyperclip`"
-                )
-            copy(todo[selected].display_text)
+            copy_todo(todos, selected)
         elif key == 112:  # p
-            temp = todo.copy()
-            todo = todo_from_clipboard(todo, selected)
-            stdscr.clear()
-            if temp != todo:
-                selected += 1
-            update_file(FILENAME, todo)
+            todos, selected = paste_todo(stdscr, todos, selected)
         elif key == 45:  # -
-            # continue  # doesn't work properly
-            insert_empty_todo(todo, selected + 1)
-            selected += 1
-            stdscr.clear()
-            update_file(FILENAME, todo)
+            todos, selected = blank_todo(stdscr, todos, selected)
         elif key == 104:  # h
-            help_menu(stdscr)
-            stdscr.clear()
+            display_help(stdscr)
         elif key in (113, 27):  # q | esc
-            return update_file(FILENAME, todo, True)
+            return quit_program(todos)
         elif key == 10:  # enter
-            if type(todo[selected]) == EmptyTodo:
+            if type(todos[selected]) == EmptyTodo:
                 continue
-            todo[selected] = Todo(
-                toggle_completed(todo[selected][0]) + todo[selected][1:],
-                color=todo[selected].color,
-            )
-            update_file(FILENAME, todo)
-            # revert_with = ACTIONS["TOGGLE"]
+            todos = toggle(todos, selected)
         else:
             continue
-        selected = ensure_within_bounds(selected, 0, len(todo))
         stdscr.refresh()
 
 
