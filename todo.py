@@ -594,7 +594,7 @@ def main(stdscr, header):
         elif key in (113, 27):  # q | esc
             return quit_program(todos)
         elif key == 10:  # enter
-            if type(todos[selected]) == EmptyTodo:
+            if isinstance(todos[selected], EmptyTodo):
                 continue
             todos = toggle(todos, selected)
         else:
