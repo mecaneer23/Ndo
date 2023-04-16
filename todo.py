@@ -2,7 +2,6 @@
 # pyright: reportMissingImports=false
 
 import curses
-from enum import Enum
 import os
 
 STRIKETHROUGH = False
@@ -68,6 +67,57 @@ class EmptyTodo(Todo):
 
     def get_box(self):
         return " "
+
+
+class UndoRedo:
+    def __init__(self):
+        self.history = []
+        self.index = -1
+
+    def handle_return(self, current, *returns):
+        """
+        this is the only non-reusable function from this class
+        This function takes in a list of returns and a list of
+        current values and returns a list with a set amount of values.
+        """
+        assert len(returns) <= len(current), "too many returned values"
+        assert (
+            len(current) == 2
+        ), "make sure you include all of (todos, selected) and nothing more"
+        assert isinstance(
+            current[0], list
+        ), "make sure todos is the first element of current"
+        assert isinstance(
+            current[1], int
+        ), "make sure selected is the second element of current"
+        if len(returns) == 2:
+            return returns
+        assert len(returns) == 1
+        if isinstance(returns[0], list):  # `todos`
+            return returns[0], current[1]
+        elif isinstance(returns[0], int):  # `selected`
+            return current[0], returns[0]
+        else:
+            return current
+
+    def undo(self, *current):
+        if self.index <= 0:
+            return current
+        func, args = self.history[self.index]
+        self.index -= 1
+        return func(*args)
+
+    def redo(self, *current):
+        if self.index + 1 >= len(self.history):
+            return current
+        self.index += 1
+        func, args = self.history[self.index]
+        return func(*args)
+
+    def add(self, revert_with, *args):
+        self.history.append((revert_with, args))
+        self.index += 1
+        assert self.index == len(self.history) - 1, "UndoRedo is broken right now"
 
 
 def read_file(filename):
@@ -426,6 +476,18 @@ def cursor_down(selected, len_todos):
     return ensure_within_bounds(selected + 1, 0, len_todos)
 
 
+def cursor_top(len_todos):
+    return ensure_within_bounds(0, 0, len_todos)
+
+
+def cursor_bottom(len_todos):
+    return ensure_within_bounds(len_todos, 0, len_todos)
+
+
+def cursor_to(position, len_todos):
+    return ensure_within_bounds(position, 0, len_todos)
+
+
 def todo_up(stdscr, todos, selected):
     todos = swap_todos(todos, selected, selected - 1)
     stdscr.clear()
@@ -497,14 +559,6 @@ def paste_todo(stdscr, todos, selected):
     return new_todo_next(stdscr, todos, selected, paste=True)
 
 
-def cursor_top(len_todos):
-    return ensure_within_bounds(0, 0, len_todos)
-
-
-def cursor_bottom(len_todos):
-    return ensure_within_bounds(len_todos, 0, len_todos)
-
-
 def blank_todo(stdscr, todos, selected):
     insert_empty_todo(todos, selected + 1)
     selected = cursor_down(selected, len(todos))
@@ -548,7 +602,7 @@ def main(stdscr, header):
         for i in validate_file(read_file(FILENAME))
     ]
     selected = 0
-    # revert_with = lambda: None
+    history = UndoRedo()
 
     while True:
         stdscr.addstr(0, 0, f"{header}:")
@@ -556,38 +610,54 @@ def main(stdscr, header):
         try:
             key = stdscr.getch()
         except KeyboardInterrupt:  # exit on ^C
-            return update_file(FILENAME, todos, True)
+            return quit_program(todos)
         if key in (259, 107):  # up | k
+            history.add(cursor_down, selected, len(todos))
             selected = cursor_up(selected, len(todos))
         elif key in (258, 106):  # down | j
+            history.add(cursor_up, selected, len(todos))
             selected = cursor_down(selected, len(todos))
         elif key == 75:  # K
+            history.add(todo_down, stdscr, todos, selected)
             todos, selected = todo_up(stdscr, todos, selected)
         elif key == 74:  # J
+            history.add(todo_up, stdscr, todos, selected)
             todos, selected = todo_down(stdscr, todos, selected)
         elif key == 111:  # o
+            history.add(delete_todo, stdscr, todos, selected)
             todos, selected = new_todo_next(stdscr, todos, selected)
         elif key == 79:  # O
+            history.add(delete_todo, stdscr, todos, selected)
             todos = new_todo_current(stdscr, todos, selected)
         elif key == 100:  # d
+            history.add(new_todo_next, stdscr, todos, selected)
             todos, selected = delete_todo(stdscr, todos, selected)
         elif key == 117:  # u
-            pass  # undo last action
+            continue # undo broken right now
+            todos, selected = history.handle_return([todos, selected], history.undo(todos, selected))
         elif key == 18:  # ^R
-            pass  # redo last action
+            continue # redo broken right now
+            todos, selected = history.handle_return([todos, selected], history.redo(todos, selected))
         elif key == 99:  # c
+            # not currently undoable (color to previous state)
             todos = color_todo(stdscr, todos, selected)
         elif key == 105:  # i
+            # not currently undoable (edit to previous state)
             todos = edit_todo(stdscr, todos, selected)
         elif key == 103:  # g
+            # not currently undoable (cursor_to)
             selected = cursor_top(len(todos))
         elif key == 71:  # G
+            # not currently undoable (cursor_to)
             selected = cursor_bottom(len(todos))
         elif key == 121:  # y
+            # not currently undoable (copy previous item in clipboard)
             copy_todo(todos, selected)
         elif key == 112:  # p
+            history.add(delete_todo, stdscr, todos, selected)
             todos, selected = paste_todo(stdscr, todos, selected)
         elif key == 45:  # -
+            history.add(delete_todo, stdscr, todos, selected)
             todos, selected = blank_todo(stdscr, todos, selected)
         elif key == 104:  # h
             help_menu(stdscr)
@@ -596,6 +666,7 @@ def main(stdscr, header):
         elif key == 10:  # enter
             if isinstance(todos[selected], EmptyTodo):
                 continue
+            history.add(toggle, todos, selected)
             todos = toggle(todos, selected)
         else:
             continue

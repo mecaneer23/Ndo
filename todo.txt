@@ -1,4 +1,4 @@
--2 undo last action
+-2 make undo/redo actually work
 -2 allow scrolling if overflow (in print_todos())
 -3 add support for arrow keys in wgetnstr() (change how cursor is handled)
 -3 block selections (change how selections are handled)
