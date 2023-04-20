@@ -115,9 +115,8 @@ class UndoRedo:
         return func(*args)
 
     def add(self, revert_with, *args):
-        self.history.append((revert_with, args))
-        self.index += 1
-        assert self.index == len(self.history) - 1, "UndoRedo is broken right now"
+        self.history.append((revert_with, list(args).copy()))
+        self.index = len(self.history) - 1
 
 
 def read_file(filename):
@@ -192,7 +191,8 @@ def get_args():
         "--help-file",
         type=str,
         default=HELP_FILE,
-        help=f"Allows passing alternate file to specify help menu. Default is `{HELP_FILE}`.",
+        help=f"Allows passing alternate file to\
+        specify help menu. Default is `{HELP_FILE}`.",
     )
     return parser.parse_args()
 
@@ -462,7 +462,8 @@ def todo_from_clipboard(todos, selected):
         from pyperclip import paste
     except ModuleNotFoundError:
         exit(
-            "`pyperclip` module required for paste operation. Try `pip install pyperclip`"
+            "`pyperclip` module required for paste operation.\
+            Try `pip install pyperclip`"
         )
     todo = paste()
     if "\n" in todo:
@@ -553,7 +554,8 @@ def copy_todo(todos, selected):
         from pyperclip import copy
     except ModuleNotFoundError:
         exit(
-            "`pyperclip` module required for copy operation. Try `pip install pyperclip`"
+            "`pyperclip` module required for copy operation.\
+            Try `pip install pyperclip`"
         )
     copy(todos[selected].display_text)
 
@@ -636,11 +638,15 @@ def main(stdscr, header):
             history.add(new_todo_next, stdscr, todos, selected)
             todos, selected = delete_todo(stdscr, todos, selected)
         elif key == 117:  # u
-            continue # undo broken right now
-            todos, selected = history.handle_return([todos, selected], history.undo(todos, selected))
+            # continue # undo broken right now
+            todos, selected = history.handle_return(
+                [todos, selected], history.undo(todos, selected)
+            )
         elif key == 18:  # ^R
-            continue # redo broken right now
-            todos, selected = history.handle_return([todos, selected], history.redo(todos, selected))
+            # continue # redo broken right now
+            todos, selected = history.handle_return(
+                [todos, selected], history.redo(todos, selected)
+            )
         elif key == 99:  # c
             # not currently undoable (color to previous state)
             todos = color_todo(stdscr, todos, selected)
