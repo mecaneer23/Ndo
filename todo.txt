@@ -1,6 +1,6 @@
 -2 make undo/redo actually work
--2 allow scrolling if overflow (in print_todos())
 -3 add support for arrow keys in wgetnstr() (change how cursor is handled)
 -3 block selections (change how selections are handled)
 -1 multiple columns/associated keybinds
 -1 fix strikethrough so newlines work
++7 allow scrolling if overflow (in print_todos())
