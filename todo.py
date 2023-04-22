@@ -9,6 +9,7 @@ FILENAME = f"{os.path.dirname(__file__)}/todo.txt"
 HELP_FILE = f"{os.path.dirname(__file__)}/README.md"
 AUTOSAVE = True
 HEADER = "TODO"
+DEBUG_FLAG = False
 
 COLORS = {
     "Red": 1,
@@ -583,6 +584,14 @@ def toggle(todos, selected):
 
 def quit_program(todos):
     return update_file(FILENAME, todos, True)
+
+
+def toggle_debug_flag(setting=None):
+    global DEBUG_FLAG
+    if setting is not None:
+        DEBUG_FLAG = setting
+        return
+    DEBUG_FLAG = not DEBUG_FLAG
 
 
 def main(stdscr, header):
