@@ -61,6 +61,14 @@ class Todo:
     def __repr__(self):
         return f"{self.box_char}{self.color} {self.display_text}"
 
+    @staticmethod
+    def join(items, separator: str = ""):
+        return separator.join([item.display_text for item in items])
+
+    @staticmethod
+    def join_repr(items, separator: str = ""):
+        return separator.join([repr(item) for item in items])
+
 
 class EmptyTodo(Todo):
     def __init__(self):
@@ -227,7 +235,7 @@ def update_file(filename, lst, save=AUTOSAVE):
     if not save:
         return 0
     with open(filename, "w") as f:
-        return f.write("\n".join([repr(i) for i in lst]))
+        return f.write(Todo.join_repr(lst, "\n"))
 
 
 def wgetnstr(win, n=1024, chars="", cursor="█"):
