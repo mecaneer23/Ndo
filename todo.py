@@ -448,7 +448,7 @@ def color_menu(parent_win):
         win.refresh()
 
 
-def print_todos(win, todos, selected):
+def make_printable_sublist(win, todos, selected):
     y = win.getmaxyx()[0] - 1
     row_buffer_size = 8
     selected_buffer = (y - row_buffer_size) // 2
@@ -457,12 +457,17 @@ def print_todos(win, todos, selected):
         start = max(0, selected - selected_buffer)
         end = min(len(todos), selected + selected_buffer + 1)
         if end - start < y:
-            start = max(0, end - y)
-            end = min(len(todos), start + y)
+            if start == 0:
+                end = min(len(todos), y)
+            else:
+                start = max(0, end - y)
         new_todos = todos[start:end]
         selected = new_todos.index(todos[selected])
-    if DEBUG_FLAG == True:
-        exit(Todo.join(new_todos, "\n"))
+    return new_todos, selected
+
+
+def print_todos(win, todos, selected):
+    new_todos, selected = make_printable_sublist(win, todos, selected)
     for i, v in enumerate(new_todos):
         display_text = (
             strikethrough(v.display_text) if v.startswith("+") else v.display_text
