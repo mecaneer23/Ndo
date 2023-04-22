@@ -687,6 +687,8 @@ def main(stdscr, header):
             todos, selected = blank_todo(stdscr, todos, selected)
         elif key == 104:  # h
             help_menu(stdscr)
+        elif key == 98:  # b
+            toggle_debug_flag()
         elif key in (113, 27):  # q | esc
             return quit_program(todos)
         elif key == 10:  # enter
