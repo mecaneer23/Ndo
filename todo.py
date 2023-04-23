@@ -113,8 +113,9 @@ class UndoRedo:
         if self.index <= 0:
             return current
         func, args = self.history[self.index]
+        call = func(*args)
         self.index -= 1
-        return func(*args)
+        return call
 
     def redo(self, *current):
         if self.index + 1 >= len(self.history):
@@ -126,6 +127,8 @@ class UndoRedo:
     def add(self, revert_with, *args):
         self.history.append((revert_with, list(args).copy()))
         self.index = len(self.history) - 1
+        with open("ODASIJ.txt", "w") as f:
+            f.write("\n".join(f"{i[0]} {i[1]}" for i in self.history))
 
 
 def read_file(filename):
@@ -670,12 +673,12 @@ def main(stdscr, header):
             history.add(new_todo_next, stdscr, todos, selected)
             todos, selected = delete_todo(stdscr, todos, selected)
         elif key == 117:  # u
-            # continue # undo broken right now
+            continue # undo broken right now
             todos, selected = history.handle_return(
                 [todos, selected], history.undo(todos, selected)
             )
         elif key == 18:  # ^R
-            # continue # redo broken right now
+            continue # redo broken right now
             todos, selected = history.handle_return(
                 [todos, selected], history.redo(todos, selected)
             )
