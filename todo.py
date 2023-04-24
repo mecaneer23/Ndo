@@ -218,7 +218,7 @@ def handle_args(args):
     HEADER = args.header
 
 
-def ensure_within_bounds(counter, minimum, maximum):
+def ensure_within_bounds(counter: list, minimum: list, maximum: list):
     if counter < minimum:
         return minimum
     elif counter > maximum - 1:
@@ -484,7 +484,7 @@ def print_todos(win, todos, selected):
         )
 
 
-def todo_from_clipboard(todos, selected):
+def todo_from_clipboard(todos: list, selected: int):
     try:
         from pyperclip import paste
     except ModuleNotFoundError:
@@ -494,7 +494,7 @@ def todo_from_clipboard(todos, selected):
         )
     todo = paste()
     if "\n" in todo:
-        return
+        return todos
     todos.insert(selected + 1, Todo(f"- {todo}"))
     return todos
 
