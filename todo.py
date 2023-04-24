@@ -312,7 +312,7 @@ def hline(win, y, x, ch, n):
     win.addch(y, x + n - 1, curses.ACS_RTEE)
 
 
-def insert_todo(stdscr, todos: list, index, existing_todo=False):
+def insert_todo(stdscr, todos: list, index: int, existing_todo=False):
     y, x = stdscr.getmaxyx()
     if existing_todo:
         todo = todos[index].display_text
