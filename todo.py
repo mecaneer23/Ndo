@@ -92,9 +92,9 @@ class UndoRedo:
         returns = undo_or_redo([todos, selected])
         if isinstance(returns, tuple):
             return returns
-        elif isinstance(returns, list):  # `todos`
+        elif isinstance(returns, list):
             return returns, selected
-        elif isinstance(returns, int):  # `selected`
+        elif isinstance(returns, int):
             return todos, returns
         else:
             return todos, selected
