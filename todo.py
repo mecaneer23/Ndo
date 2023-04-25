@@ -83,31 +83,22 @@ class UndoRedo:
         self.history = []
         self.index = -1
 
-    def handle_return(self, current, *returns):
+    def handle_return(self, todos, selected, returns):
         """
         this is the only non-reusable function from this class
         This function takes in a list of returns and a list of
         current values and returns a list with a set amount of values.
         """
-        assert len(returns) <= len(current), "too many returned values"
-        assert (
-            len(current) == 2
-        ), "make sure you include all of (todos, selected) and nothing more"
-        assert isinstance(
-            current[0], list
-        ), "make sure todos is the first element of current"
-        assert isinstance(
-            current[1], int
-        ), "make sure selected is the second element of current"
-        if len(returns) == 2:
+        assert isinstance(todos, list), "make sure todos is a list"
+        assert isinstance(selected, int), "make sure selected is an integer"
+        if isinstance(returns, tuple):
             return returns
-        assert len(returns) == 1
-        if isinstance(returns[0], list):  # `todos`
-            return returns[0], current[1]
-        elif isinstance(returns[0], int):  # `selected`
-            return current[0], returns[0]
+        if isinstance(returns, list):  # `todos`
+            return returns, selected
+        elif isinstance(returns, int):  # `selected`
+            return todos, returns
         else:
-            return current
+            return todos, selected
 
     def undo(self, *current):
         if self.index <= 0:
@@ -127,8 +118,9 @@ class UndoRedo:
     def add(self, revert_with, *args):
         self.history.append((revert_with, list(args).copy()))
         self.index = len(self.history) - 1
-        with open("ODASIJ.txt", "w") as f:
-            f.write("\n".join(f"{i[0]} {i[1]}" for i in self.history))
+        if DEBUG_FLAG:
+            with open("debugging/history.txt", "w") as f:
+                f.write("\n".join(f"{i[0]} {i[1]}" for i in self.history))
 
 
 def read_file(filename):
@@ -532,16 +524,21 @@ def todo_down(stdscr, todos, selected):
     return todos, cursor_down(selected, len(todos))
 
 
-def new_todo_next(stdscr, todos, selected, paste=False):
+def new_todo_next(
+    stdscr, todos: list, selected: int, todo: Todo = None, paste: bool = False
+):
     temp = todos.copy()
-    todos = (
-        insert_todo(stdscr, todos, selected + 1)
-        if not paste
-        else todo_from_clipboard(todos, selected)
-    )
-    stdscr.clear()
-    if temp != todos:
-        selected = cursor_down(selected, len(todos))
+    if todo is None:
+        todos = (
+            insert_todo(stdscr, todos, selected + 1)
+            if not paste
+            else todo_from_clipboard(todos, selected)
+        )
+        stdscr.clear()
+        if temp != todos:
+            selected = cursor_down(selected, len(todos))
+    else:
+        todos.insert(selected, Todo(f"- {todo.display_text}"))
     update_file(FILENAME, todos)
     return todos, selected
 
@@ -619,6 +616,10 @@ def toggle_debug_flag(setting=None):
     DEBUG_FLAG = not DEBUG_FLAG
 
 
+def set_todo_to(todos: list, selected: int, todo: Todo):
+    todos[selected] = Todo(f"- {todo.display_text}")
+
+
 def main(stdscr, header):
     curses.use_default_colors()
     curses.curs_set(0)
@@ -651,10 +652,10 @@ def main(stdscr, header):
         except KeyboardInterrupt:  # exit on ^C
             return quit_program(todos)
         if key in (259, 107):  # up | k
-            history.add(cursor_down, selected, len(todos))
+            history.add(cursor_to, selected, len(todos))
             selected = cursor_up(selected, len(todos))
         elif key in (258, 106):  # down | j
-            history.add(cursor_up, selected, len(todos))
+            history.add(cursor_to, selected, len(todos))
             selected = cursor_down(selected, len(todos))
         elif key == 75:  # K
             history.add(todo_down, stdscr, todos, selected)
@@ -669,29 +670,27 @@ def main(stdscr, header):
             history.add(delete_todo, stdscr, todos, selected)
             todos = new_todo_current(stdscr, todos, selected)
         elif key == 100:  # d
-            history.add(new_todo_next, stdscr, todos, selected)
+            history.add(new_todo_next, stdscr, todos, selected, todos[selected])
             todos, selected = delete_todo(stdscr, todos, selected)
         elif key == 117:  # u
-            continue # undo broken right now
             todos, selected = history.handle_return(
-                [todos, selected], history.undo(todos, selected)
+                todos, selected, history.undo(todos, selected)
             )
         elif key == 18:  # ^R
-            continue # redo broken right now
             todos, selected = history.handle_return(
-                [todos, selected], history.redo(todos, selected)
+                todos, selected, history.redo(todos, selected)
             )
         elif key == 99:  # c
             # not currently undoable (color to previous state)
             todos = color_todo(stdscr, todos, selected)
         elif key == 105:  # i
-            # not currently undoable (edit to previous state)
+            history.add(set_todo_to, todos, selected, todos[selected])
             todos = edit_todo(stdscr, todos, selected)
         elif key == 103:  # g
-            # not currently undoable (cursor_to)
+            history.add(cursor_to, selected, len(todos))
             selected = cursor_top(len(todos))
         elif key == 71:  # G
-            # not currently undoable (cursor_to)
+            history.add(cursor_to, selected, len(todos))
             selected = cursor_bottom(len(todos))
         elif key == 121:  # y
             # not currently undoable (copy previous item in clipboard)
