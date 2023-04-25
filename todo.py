@@ -617,6 +617,7 @@ def toggle_debug_flag(setting=None):
 
 def set_todo_to(todos: list, selected: int, todo: Todo):
     todos[selected] = Todo(f"- {todo.display_text}")
+    return todos
 
 
 def main(stdscr, header):
@@ -657,13 +658,13 @@ def main(stdscr, header):
             history.add(cursor_to, selected, len(todos))
             selected = cursor_down(selected, len(todos))
         elif key == 75:  # K
-            history.add(todo_down, stdscr, todos, selected)
+            history.add(todo_down, stdscr, todos, selected - 1)
             todos, selected = todo_up(stdscr, todos, selected)
         elif key == 74:  # J
-            history.add(todo_up, stdscr, todos, selected)
+            history.add(todo_up, stdscr, todos, selected + 1)
             todos, selected = todo_down(stdscr, todos, selected)
         elif key == 111:  # o
-            history.add(delete_todo, stdscr, todos, selected)
+            history.add(delete_todo, stdscr, todos, selected + 1)
             todos, selected = new_todo_next(stdscr, todos, selected)
         elif key == 79:  # O
             history.add(delete_todo, stdscr, todos, selected)
@@ -691,10 +692,10 @@ def main(stdscr, header):
             # not currently undoable (copy previous item in clipboard)
             copy_todo(todos, selected)
         elif key == 112:  # p
-            history.add(delete_todo, stdscr, todos, selected)
+            history.add(delete_todo, stdscr, todos, selected + 1)
             todos, selected = paste_todo(stdscr, todos, selected)
         elif key == 45:  # -
-            history.add(delete_todo, stdscr, todos, selected)
+            history.add(delete_todo, stdscr, todos, selected + 1)
             todos, selected = blank_todo(stdscr, todos, selected)
         elif key == 104:  # h
             help_menu(stdscr)
