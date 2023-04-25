@@ -453,8 +453,7 @@ def color_menu(parent_win):
 
 def make_printable_sublist(win, todos, selected):
     y = win.getmaxyx()[0] - 1
-    row_buffer_size = min(8, y)
-    selected_buffer = (y - row_buffer_size) // 2
+    selected_buffer = min(y, 12) // 2
     new_todos = todos.copy()
     if len(todos) - 1 > y:
         start = max(0, selected - selected_buffer)
