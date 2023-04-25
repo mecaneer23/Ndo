@@ -83,17 +83,16 @@ class UndoRedo:
         self.history = []
         self.index = -1
 
-    def handle_return(self, todos, selected, returns):
+    def handle_return(self, undo_or_redo, todos, selected):
         """
         this is the only non-reusable function from this class
         This function takes in a list of returns and a list of
         current values and returns a list with a set amount of values.
         """
-        assert isinstance(todos, list), "make sure todos is a list"
-        assert isinstance(selected, int), "make sure selected is an integer"
+        returns = undo_or_redo([todos, selected])
         if isinstance(returns, tuple):
             return returns
-        if isinstance(returns, list):  # `todos`
+        elif isinstance(returns, list):  # `todos`
             return returns, selected
         elif isinstance(returns, int):  # `selected`
             return todos, returns
@@ -673,13 +672,9 @@ def main(stdscr, header):
             history.add(new_todo_next, stdscr, todos, selected, todos[selected])
             todos, selected = delete_todo(stdscr, todos, selected)
         elif key == 117:  # u
-            todos, selected = history.handle_return(
-                todos, selected, history.undo(todos, selected)
-            )
+            todos, selected = history.handle_return(history.undo, todos, selected)
         elif key == 18:  # ^R
-            todos, selected = history.handle_return(
-                todos, selected, history.redo(todos, selected)
-            )
+            todos, selected = history.handle_return(history.redo, todos, selected)
         elif key == 99:  # c
             # not currently undoable (color to previous state)
             todos = color_todo(stdscr, todos, selected)
