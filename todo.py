@@ -119,9 +119,13 @@ class UndoRedo:
     def add(self, revert_with, *args):
         self.history.append((revert_with, deepcopy_ignore(args)))
         self.index = len(self.history) - 1
+        to_debug_file(Path("debugging/history.txt"), repr(self))
+
+    def __repr__(self):
+        return "\n".join(f"{i[0].__name__}: {i[1]}" for i in self.history)
 
 
-def to_debug_file(filename: Path, message, mode="w"):
+def to_debug_file(filename: Path, message: str, mode="w"):
     if DEBUG_FLAG:
         with filename.open(mode) as f:
             f.write(message)
