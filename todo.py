@@ -682,19 +682,16 @@ def main(stdscr, header):
             history.add(todo_up, stdscr, todos, selected + 1)
             todos, selected = todo_down(stdscr, todos, selected)
         elif key == 111:  # o
-            history.add(delete_todo, stdscr, todos, selected + 1)
             todos, selected = new_todo_next(stdscr, todos, selected)
-        elif key == 79:  # O
             history.add(delete_todo, stdscr, todos, selected)
+        elif key == 79:  # O
             todos = new_todo_current(stdscr, todos, selected)
+            history.add(delete_todo, stdscr, todos, selected)
         elif key == 100:  # d
             history.add(new_todo_next, stdscr, todos, selected, todos[selected])
             todos, selected = delete_todo(stdscr, todos, selected)
         elif key == 117:  # u
-            try:
-                todos, selected = history.handle_return(history.undo, todos, selected)
-            except ValueError:
-                exit(f"{todos} {selected}")
+            todos, selected = history.handle_return(history.undo, todos, selected)
         elif key == 18:  # ^R
             todos, selected = history.handle_return(history.redo, todos, selected)
         elif key == 99:  # c
@@ -713,11 +710,11 @@ def main(stdscr, header):
             # not currently undoable (copy previous item in clipboard)
             copy_todo(todos, selected)
         elif key == 112:  # p
-            history.add(delete_todo, stdscr, todos, selected + 1)
             todos, selected = paste_todo(stdscr, todos, selected)
+            history.add(delete_todo, stdscr, todos, selected)
         elif key == 45:  # -
-            history.add(delete_todo, stdscr, todos, selected + 1)
             todos, selected = blank_todo(stdscr, todos, selected)
+            history.add(delete_todo, stdscr, todos, selected)
         elif key == 104:  # h
             help_menu(stdscr)
         elif key == 98:  # b
@@ -727,8 +724,8 @@ def main(stdscr, header):
         elif key == 10:  # enter
             if isinstance(todos[selected], EmptyTodo):
                 continue
-            history.add(toggle, todos, selected)
             todos = toggle(todos, selected)
+            history.add(toggle, todos, selected)
         else:
             continue
         stdscr.refresh()
