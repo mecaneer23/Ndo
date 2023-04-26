@@ -2,11 +2,11 @@
 # pyright: reportMissingImports=false
 
 import curses
-import os
+from pathlib import Path
 
 STRIKETHROUGH = False
-FILENAME = f"{os.path.dirname(__file__)}/todo.txt"
-HELP_FILE = f"{os.path.dirname(__file__)}/README.md"
+FILENAME = Path("todo.txt").absolute()
+HELP_FILE = Path("README.md").absolute()
 AUTOSAVE = True
 HEADER = "TODO"
 DEBUG_FLAG = False
@@ -83,7 +83,7 @@ class UndoRedo:
         self.history = []
         self.index = -1
 
-    def handle_return(self, undo_or_redo, todos, selected):
+    def handle_return(self, undo_or_redo, todos: list, selected: int):
         """
         this is the only non-reusable function from this class
         This function takes in a list of current values and
@@ -100,11 +100,14 @@ class UndoRedo:
             return todos, selected
 
     def undo(self, *current):
-        if self.index <= 0:
+        if self.index < 0:
             return current
         func, args = self.history[self.index]
         call = func(*args)
-        to_debug_file("debugging/current.txt", f"Most recently called function: {self.history[self.index]}\nReturned {call}")
+        to_debug_file(
+            Path("debugging/current.txt"),
+            f"Most recently called function: {self.history[self.index]}\nReturned {call}",
+        )
         self.index -= 1
         return call
 
@@ -113,26 +116,32 @@ class UndoRedo:
             return current
         self.index += 1
         func, args = self.history[self.index]
-        to_debug_file("debugging/current.txt", f"Most recently called function: {self.history[self.index]}")
+        to_debug_file(
+            Path("debugging/current.txt"),
+            f"Most recently called function: {self.history[self.index]}",
+        )
         return func(*args)
 
     def add(self, revert_with, *args):
         self.history.append((revert_with, list(args).copy()))
         self.index = len(self.history) - 1
-        to_debug_file("debugging/history.txt", "\n".join(f"{i[0]} {i[1]}" for i in self.history))
+        to_debug_file(
+            Path("debugging/history.txt"),
+            "\n".join(f"{i[0]} {i[1]}" for i in self.history),
+        )
 
 
-def to_debug_file(filename, message):
+def to_debug_file(filename: Path, message, mode="w"):
     if DEBUG_FLAG:
-        with open(filename, "w") as f:
+        with filename.open(mode) as f:
             f.write(message)
 
 
-def read_file(filename):
-    if not os.path.exists(filename):
-        with open(filename, "w") as f:
+def read_file(filename: Path):
+    if not filename.exists():
+        with filename.open("w") as f:
             return ""
-    with open(filename) as f:
+    with filename.open() as f:
         return f.read()
 
 
@@ -209,8 +218,8 @@ def get_args():
 def handle_args(args):
     global AUTOSAVE, FILENAME, HELP_FILE, STRIKETHROUGH, HEADER
     AUTOSAVE = args.autosave
-    FILENAME = args.filename
-    HELP_FILE = args.help_file
+    FILENAME = Path(args.filename)
+    HELP_FILE = Path(args.help_file)
     STRIKETHROUGH = args.strikethrough
     HEADER = args.header
 
@@ -234,7 +243,7 @@ def toggle_completed(char):
 def update_file(filename, lst, save=AUTOSAVE):
     if not save:
         return 0
-    with open(filename, "w") as f:
+    with filename.open("w") as f:
         return f.write(Todo.join_repr(lst, "\n"))
 
 
@@ -352,7 +361,7 @@ def maxlen(iterable):
 
 
 def md_table_to_lines(filename, first_line_idx, last_line_idx, remove=[]):
-    with open(filename) as f:
+    with filename.open() as f:
         lines = f.readlines()[first_line_idx - 1 : last_line_idx - 1]
     for i, _ in enumerate(lines):
         for item in remove:
