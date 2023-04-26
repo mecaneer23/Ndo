@@ -7,8 +7,8 @@ from copy import deepcopy
 from _curses import window as curses_window
 
 STRIKETHROUGH = False
-FILENAME = Path("todo.txt").absolute()
-HELP_FILE = Path("README.md").absolute()
+FILENAME = Path(__file__).parent.joinpath("todo.txt").absolute()
+HELP_FILE = Path(__file__).parent.joinpath("README.md").absolute()
 AUTOSAVE = True
 HEADER = "TODO"
 DEBUG_FLAG = False
