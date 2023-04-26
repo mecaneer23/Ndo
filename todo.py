@@ -86,8 +86,8 @@ class UndoRedo:
     def handle_return(self, undo_or_redo, todos, selected):
         """
         this is the only non-reusable function from this class
-        This function takes in a list of returns and a list of
-        current values and returns a list with a set amount of values.
+        This function takes in a list of current values and
+        returns a list with the values after being undone
         """
         returns = undo_or_redo([todos, selected])
         if isinstance(returns, tuple):
