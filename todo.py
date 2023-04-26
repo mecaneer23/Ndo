@@ -3,6 +3,8 @@
 
 import curses
 from pathlib import Path
+from copy import deepcopy
+from _curses import window as curses_window
 
 STRIKETHROUGH = False
 FILENAME = Path("todo.txt").absolute()
@@ -104,10 +106,6 @@ class UndoRedo:
             return current
         func, args = self.history[self.index]
         call = func(*args)
-        to_debug_file(
-            Path("debugging/current.txt"),
-            f"Most recently called function: {self.history[self.index]}\nReturned {call}",
-        )
         self.index -= 1
         return call
 
@@ -116,19 +114,11 @@ class UndoRedo:
             return current
         self.index += 1
         func, args = self.history[self.index]
-        to_debug_file(
-            Path("debugging/current.txt"),
-            f"Most recently called function: {self.history[self.index]}",
-        )
         return func(*args)
 
     def add(self, revert_with, *args):
-        self.history.append((revert_with, list(args).copy()))
+        self.history.append((revert_with, deepcopy_ignore(args)))
         self.index = len(self.history) - 1
-        to_debug_file(
-            Path("debugging/history.txt"),
-            "\n".join(f"{i[0]} {i[1]}" for i in self.history),
-        )
 
 
 def to_debug_file(filename: Path, message, mode="w"):
@@ -222,6 +212,16 @@ def handle_args(args):
     HELP_FILE = Path(args.help_file)
     STRIKETHROUGH = args.strikethrough
     HEADER = args.header
+
+
+def deepcopy_ignore(lst):
+    output = []
+    for i in lst:
+        if isinstance(i, curses_window):
+            output.append(i)
+        else:
+            output.append(deepcopy(i))
+    return output
 
 
 def ensure_within_bounds(counter: list, minimum: list, maximum: list):
@@ -630,9 +630,8 @@ def toggle_debug_flag(setting=None):
     DEBUG_FLAG = not DEBUG_FLAG
 
 
-def set_todo_to(todos: list, selected: int, todo: Todo):
-    todos[selected] = Todo(f"- {todo.display_text}")
-    return todos
+def reset_todos(todos: list):
+    return todos.copy()
 
 
 def main(stdscr, header):
@@ -688,14 +687,17 @@ def main(stdscr, header):
             history.add(new_todo_next, stdscr, todos, selected, todos[selected])
             todos, selected = delete_todo(stdscr, todos, selected)
         elif key == 117:  # u
-            todos, selected = history.handle_return(history.undo, todos, selected)
+            try:
+                todos, selected = history.handle_return(history.undo, todos, selected)
+            except ValueError:
+                exit(f"{todos} {selected}")
         elif key == 18:  # ^R
             todos, selected = history.handle_return(history.redo, todos, selected)
         elif key == 99:  # c
             # not currently undoable (color to previous state)
             todos = color_todo(stdscr, todos, selected)
         elif key == 105:  # i
-            history.add(set_todo_to, todos, selected, todos[selected])
+            history.add(reset_todos, todos)
             todos = edit_todo(stdscr, todos, selected)
         elif key == 103:  # g
             history.add(cursor_to, selected, len(todos))
