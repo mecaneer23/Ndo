@@ -104,6 +104,7 @@ class UndoRedo:
             return current
         func, args = self.history[self.index]
         call = func(*args)
+        to_debug_file("debugging/current.txt", f"Most recently called function: {self.history[self.index]}\nReturned {call}")
         self.index -= 1
         return call
 
@@ -112,14 +113,19 @@ class UndoRedo:
             return current
         self.index += 1
         func, args = self.history[self.index]
+        to_debug_file("debugging/current.txt", f"Most recently called function: {self.history[self.index]}")
         return func(*args)
 
     def add(self, revert_with, *args):
         self.history.append((revert_with, list(args).copy()))
         self.index = len(self.history) - 1
-        if DEBUG_FLAG:
-            with open("debugging/history.txt", "w") as f:
-                f.write("\n".join(f"{i[0]} {i[1]}" for i in self.history))
+        to_debug_file("debugging/history.txt", "\n".join(f"{i[0]} {i[1]}" for i in self.history))
+
+
+def to_debug_file(filename, message):
+    if DEBUG_FLAG:
+        with open(filename, "w") as f:
+            f.write(message)
 
 
 def read_file(filename):
