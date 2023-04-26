@@ -1,7 +1,4 @@
--3 current bug: 'o' and then 'u' deletes two lines instead of one (issue with UndoRedo class)
-+7 make undo/redo actually work
--3 basically just fix undo/redo
 -2 add support for arrow keys in wgetnstr() (change how cursor is handled)
+-1 add relative cursor_to (10j)
 -1 block selections (change how selections are handled)
 -1 multiple columns/associated keybinds
-+7 allow scrolling if overflow (in print_todos())

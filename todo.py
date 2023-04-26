@@ -91,7 +91,7 @@ class UndoRedo:
         This function takes in a list of current values and
         returns a list with the values after being undone
         """
-        returns = undo_or_redo([todos, selected])
+        returns = undo_or_redo(todos, selected)
         if isinstance(returns, tuple):
             return returns
         elif isinstance(returns, list):
@@ -101,17 +101,17 @@ class UndoRedo:
         else:
             return todos, selected
 
-    def undo(self, *current):
+    def undo(self, todos, selected):
         if self.index < 0:
-            return current
+            return todos, selected
         func, args = self.history[self.index]
         call = func(*args)
         self.index -= 1
         return call
 
-    def redo(self, *current):
+    def redo(self, todos, selected):
         if self.index + 1 >= len(self.history):
-            return current
+            return todos, selected
         self.index += 1
         func, args = self.history[self.index]
         return func(*args)
