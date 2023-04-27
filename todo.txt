@@ -1,4 +1,4 @@
-+3 make input box easily escapable
 -3 block selections (change how selections are handled)
 -6 fix redo (needs to do opposite function of whatever undo function just did)
 -1 multiple columns/associated keybinds
++2 make input box easily escapable

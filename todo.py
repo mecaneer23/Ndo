@@ -426,7 +426,7 @@ def get_color(color):
     return COLORS[color]
 
 
-def color_menu(parent_win):
+def color_menu(parent_win, original: int):
     parent_win.clear()
     parent_win.addstr(0, 0, "Colors:", curses.A_BOLD)
     lines = [
@@ -445,7 +445,7 @@ def color_menu(parent_win):
         (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2,
     )
     win.box()
-    selected = 0
+    selected = original - 1
     while True:
         parent_win.refresh()
         for i, v in enumerate(lines):
@@ -459,7 +459,7 @@ def color_menu(parent_win):
         try:
             key = win.getch()
         except KeyboardInterrupt:
-            return get_color(lines[selected].strip())
+            return original
         if key == 107:  # k
             selected -= 1
         elif key == 106:  # j
@@ -469,7 +469,7 @@ def color_menu(parent_win):
         elif key == 71:  # G
             selected = len(lines)
         elif key in (113, 27):  # q | esc
-            return
+            return original
         elif key == 10:  # enter
             return get_color(lines[selected].strip())
         elif key in range(49, 56):  # numbers
@@ -597,7 +597,7 @@ def delete_todo(stdscr, todos, selected):
 
 
 def color_todo(stdscr, todos, selected):
-    todos[selected].set_color(color_menu(stdscr))
+    todos[selected].set_color(color_menu(stdscr, todos[selected].color))
     stdscr.clear()
     update_file(FILENAME, todos)
     return todos
