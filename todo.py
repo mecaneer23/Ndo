@@ -105,10 +105,9 @@ class UndoRedo:
         if self.index < 0:
             return todos, selected
         func, args = self.history[self.index]
-        call = func(*args)
         self.index -= 1
         to_debug_file(Path("debugging/pointer.txt"), self.index)
-        return call
+        return func(*args)
 
     def redo(self, todos, selected):
         if self.index + 1 >= len(self.history):
