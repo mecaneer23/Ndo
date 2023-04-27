@@ -121,6 +121,7 @@ class UndoRedo:
         self.history.append((revert_with, deepcopy_ignore(args)))
         self.index = len(self.history) - 1
         to_debug_file(Path("debugging/history.txt"), repr(self))
+        to_debug_file(Path("debugging/pointer.txt"), self.index)
 
     def __repr__(self):
         return "\n".join(f"{i[0].__name__}: {i[1]}" for i in self.history)
