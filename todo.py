@@ -124,7 +124,7 @@ class UndoRedo:
         to_debug_file(Path("debugging/pointer.txt"), self.index)
 
     def do(self, func, *args):
-        # now I have the redo function and the
+        # TODO: now I have the redo function and the
         # args it needs... how should I store it?
         return func(*args)
 
@@ -704,7 +704,7 @@ def main(stdscr, header):
             todos, selected = history.handle_return(history.redo, todos, selected)
             update_file(FILENAME, todos)
         elif key == 99:  # c
-            # not currently undoable (color to previous state)
+            # TODO: not currently undoable (color to previous state)
             todos = color_todo(stdscr, todos, selected)
         elif key == 105:  # i
             history.add(reset_todos, todos)
@@ -716,7 +716,7 @@ def main(stdscr, header):
             history.add(cursor_to, selected, len(todos))
             selected = history.do(cursor_bottom, len(todos))
         elif key == 121:  # y
-            # not currently undoable (copy previous item in clipboard)
+            # TODO: not currently undoable (copy previous item in clipboard)
             copy_todo(todos, selected)
         elif key == 112:  # p
             todos, selected = history.do(paste_todo, stdscr, todos, selected)
