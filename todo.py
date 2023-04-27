@@ -694,8 +694,10 @@ def main(stdscr, header):
             todos, selected = delete_todo(stdscr, todos, selected)
         elif key == 117:  # u
             todos, selected = history.handle_return(history.undo, todos, selected)
+            update_file(FILENAME, todos)
         elif key == 18:  # ^R
             todos, selected = history.handle_return(history.redo, todos, selected)
+            update_file(FILENAME, todos)
         elif key == 99:  # c
             # not currently undoable (color to previous state)
             todos = color_todo(stdscr, todos, selected)
