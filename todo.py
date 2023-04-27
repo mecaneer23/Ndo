@@ -429,15 +429,7 @@ def get_color(color):
 def color_menu(parent_win, original: int):
     parent_win.clear()
     parent_win.addstr(0, 0, "Colors:", curses.A_BOLD)
-    lines = [
-        "Red    ",
-        "Green  ",
-        "Yellow ",
-        "Blue   ",
-        "Magenta",
-        "Cyan   ",
-        "White  ",
-    ]
+    lines = [i.ljust(len(max(COLORS.keys(), key=len))) for i in COLORS.keys()]
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
