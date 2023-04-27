@@ -8,9 +8,9 @@ def main(stdscr):
     stdscr.addstr("Ctrl+C to exit\n")
     while True:
         try:
+            ch = stdscr.getch()
             # ch = stdscr.getkey()
-            # ch = stdscr.getch()
-            ch = stdscr.get_wch()
+            # ch = stdscr.get_wch()
         except KeyboardInterrupt:
             return
         stdscr.addstr(*[i // 2 for i in stdscr.getmaxyx()], repr(ch) + "      ")

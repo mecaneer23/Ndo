@@ -310,9 +310,12 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
             if position > 0:
                 position -= 1
                 chars.pop(position)
-        elif ch == 27:  # escape
+        elif ch == 27:  # any escape sequence
+            win.nodelay(True)
+            if win.getch() == -1:  # escape, otherwise skip `[`
+                return original
+            win.nodelay(False)
             try:
-                win.getch()  # skip the `[`
                 arrow = win.getch()
             except KeyboardInterrupt:
                 return original
@@ -326,8 +329,6 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
                 win.getch()  # skip the `~`
                 if position < len(chars):
                     chars.pop(position)
-            else:  # escape
-                return original
         else:  # typable characters (basically alphanum)
             if len(chars) >= n:
                 curses.beep()
