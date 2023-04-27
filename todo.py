@@ -123,6 +123,11 @@ class UndoRedo:
         to_debug_file(Path("debugging/history.txt"), repr(self))
         to_debug_file(Path("debugging/pointer.txt"), self.index)
 
+    def do(self, func, *args):
+        # now I have the redo function and the
+        # args it needs... how should I store it?
+        return func(*args)
+
     def __repr__(self):
         return "\n".join(f"{i[0].__name__}: {i[1]}" for i in self.history)
 
@@ -673,25 +678,25 @@ def main(stdscr, header):
             return quit_program(todos)
         if key in (259, 107):  # up | k
             history.add(cursor_to, selected, len(todos))
-            selected = cursor_up(selected, len(todos))
+            selected = history.do(cursor_up, selected, len(todos))
         elif key in (258, 106):  # down | j
             history.add(cursor_to, selected, len(todos))
-            selected = cursor_down(selected, len(todos))
+            selected = history.do(cursor_down, selected, len(todos))
         elif key == 75:  # K
             history.add(todo_down, stdscr, todos, selected - 1)
-            todos, selected = todo_up(stdscr, todos, selected)
+            todos, selected = history.do(todo_up, stdscr, todos, selected)
         elif key == 74:  # J
             history.add(todo_up, stdscr, todos, selected + 1)
-            todos, selected = todo_down(stdscr, todos, selected)
+            todos, selected = history.do(todo_down, stdscr, todos, selected)
         elif key == 111:  # o
-            todos, selected = new_todo_next(stdscr, todos, selected)
+            todos, selected = history.do(new_todo_next, stdscr, todos, selected)
             history.add(delete_todo, stdscr, todos, selected)
         elif key == 79:  # O
-            todos = new_todo_current(stdscr, todos, selected)
+            todos = history.do(new_todo_current, stdscr, todos, selected)
             history.add(delete_todo, stdscr, todos, selected)
         elif key == 100:  # d
             history.add(new_todo_next, stdscr, todos, selected, todos[selected])
-            todos, selected = delete_todo(stdscr, todos, selected)
+            todos, selected = history.do(delete_todo, stdscr, todos, selected)
         elif key == 117:  # u
             todos, selected = history.handle_return(history.undo, todos, selected)
             update_file(FILENAME, todos)
@@ -703,21 +708,21 @@ def main(stdscr, header):
             todos = color_todo(stdscr, todos, selected)
         elif key == 105:  # i
             history.add(reset_todos, todos)
-            todos = edit_todo(stdscr, todos, selected)
+            todos = history.do(edit_todo, stdscr, todos, selected)
         elif key == 103:  # g
             history.add(cursor_to, selected, len(todos))
-            selected = cursor_top(len(todos))
+            selected = history.do(cursor_top, len(todos))
         elif key == 71:  # G
             history.add(cursor_to, selected, len(todos))
-            selected = cursor_bottom(len(todos))
+            selected = history.do(cursor_bottom, len(todos))
         elif key == 121:  # y
             # not currently undoable (copy previous item in clipboard)
             copy_todo(todos, selected)
         elif key == 112:  # p
-            todos, selected = paste_todo(stdscr, todos, selected)
+            todos, selected = history.do(paste_todo, stdscr, todos, selected)
             history.add(delete_todo, stdscr, todos, selected)
         elif key == 45:  # -
-            todos, selected = blank_todo(stdscr, todos, selected)
+            todos, selected = history.do(blank_todo, stdscr, todos, selected)
             history.add(delete_todo, stdscr, todos, selected)
         elif key == 104:  # h
             help_menu(stdscr)
@@ -728,7 +733,7 @@ def main(stdscr, header):
         elif key == 10:  # enter
             if isinstance(todos[selected], EmptyTodo):
                 continue
-            todos = toggle(todos, selected)
+            todos = history.do(toggle, todos, selected)
             history.add(toggle, todos, selected)
         else:
             continue
