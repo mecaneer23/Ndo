@@ -164,7 +164,7 @@ def get_args():
         add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Controls:\n  "
-        + "\n  ".join(md_table_to_lines(HELP_FILE, 29, 44, ["<kbd>", "</kbd>"])),
+        + "\n  ".join(md_table_to_lines(HELP_FILE, 29, 47, ["<kbd>", "</kbd>"])),
     )
     parser.add_argument(
         "--help",
@@ -283,9 +283,8 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
         str: Similar to the built in input() function,\
         returns a string of what the user entered.
     """
-    assert (
-        win.getmaxyx()[0] >= 3
-    ), "Window is too short, it won't be able to display the minimum 1 line of text."
+    if win.getmaxyx()[0] < 3:
+        raise ValueError("Window is too short, it won't be able to display the minimum 1 line of text.")
     original = chars
     win.box()
     win.nodelay(False)
@@ -383,7 +382,7 @@ def md_table_to_lines(filename, first_line_idx, last_line_idx, remove=[]):
 def help_menu(parent_win):
     parent_win.clear()
     parent_win.addstr(0, 0, "Help:", curses.A_BOLD)
-    lines = md_table_to_lines(HELP_FILE, 29, 44, ["<kbd>", "</kbd>"])
+    lines = md_table_to_lines(HELP_FILE, 29, 47, ["<kbd>", "</kbd>"])
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
