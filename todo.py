@@ -110,7 +110,7 @@ class UndoRedo:
         return func(*args)
 
     def redo(self, todos, selected):
-        if self.index + 1 >= len(self.history):
+        if self.index >= len(self.history) - 1:
             return todos, selected
         self.index += 1
         func, args = self.history[self.index]
