@@ -107,6 +107,7 @@ class UndoRedo:
         func, args = self.history[self.index]
         call = func(*args)
         self.index -= 1
+        to_debug_file(Path("debugging/pointer.txt"), self.index)
         return call
 
     def redo(self, todos, selected):
@@ -114,6 +115,7 @@ class UndoRedo:
             return todos, selected
         self.index += 1
         func, args = self.history[self.index]
+        to_debug_file(Path("debugging/pointer.txt"), self.index)
         return func(*args)
 
     def add(self, revert_with, *args):
@@ -128,7 +130,7 @@ class UndoRedo:
 def to_debug_file(filename: Path, message: str, mode="w"):
     if DEBUG_FLAG:
         with filename.open(mode) as f:
-            f.write(message)
+            f.write(str(message))
 
 
 def read_file(filename: Path):
