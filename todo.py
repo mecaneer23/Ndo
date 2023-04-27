@@ -4,7 +4,6 @@
 import curses
 from pathlib import Path
 from copy import deepcopy
-from _curses import window as curses_window
 
 STRIKETHROUGH = False
 FILENAME = Path(__file__).parent.joinpath("todo.txt").absolute()
@@ -226,13 +225,9 @@ def handle_args(args):
 
 
 def deepcopy_ignore(lst):
-    output = []
-    for i in lst:
-        if isinstance(i, curses_window):
-            output.append(i)
-        else:
-            output.append(deepcopy(i))
-    return output
+    from _curses import window as curses_window
+
+    return [i if isinstance(i, curses_window) else deepcopy(i) for i in lst]
 
 
 def ensure_within_bounds(counter: list, minimum: list, maximum: list):
