@@ -362,10 +362,6 @@ def swap_todos(todos: list, idx1, idx2):
     return todos
 
 
-def maxlen(iterable):
-    return len(max(iterable, key=len))
-
-
 def md_table_to_lines(filename, first_line_idx, last_line_idx, remove=[]):
     with filename.open() as f:
         lines = f.readlines()[first_line_idx - 1 : last_line_idx - 1]
@@ -374,8 +370,8 @@ def md_table_to_lines(filename, first_line_idx, last_line_idx, remove=[]):
             lines[i] = lines[i].replace(item, "")
         lines[i] = lines[i].split("|")[1:-1]
     lines[1] = ("-", "-")
-    key_max = maxlen([k.strip() for k, _ in lines])
-    value_max = maxlen(v.strip() for _, v in lines)
+    key_max = len(max([k.strip() for k, _ in lines], key=len))
+    value_max = len(max([v.strip() for _, v in lines], key=len))
     lines[1] = ("-" * (key_max + 2), "-" * value_max)
     for i, (k, v) in enumerate(lines):
         lines[i] = (k.strip() + " " * (key_max - len(k.strip()) + 2) + v.strip()).ljust(
