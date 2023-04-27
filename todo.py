@@ -645,7 +645,7 @@ def reset_todos(todos: list):
     return todos.copy()
 
 
-def main(stdscr, header):
+def init():
     curses.use_default_colors()
     curses.curs_set(0)
     for i, v in enumerate(
@@ -662,6 +662,9 @@ def main(stdscr, header):
     ):
         curses.init_pair(i, v, -1)
 
+
+def main(stdscr, header):
+    init()
     todos = [
         Todo(i) if i != "-7 \t" else EmptyTodo()
         for i in validate_file(read_file(FILENAME))
