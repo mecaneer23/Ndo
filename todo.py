@@ -3,7 +3,6 @@
 
 import curses
 from pathlib import Path
-from copy import deepcopy
 
 STRIKETHROUGH = False
 FILENAME = Path(__file__).parent.joinpath("todo.txt").absolute()
@@ -226,6 +225,7 @@ def handle_args(args):
 
 def deepcopy_ignore(lst):
     from _curses import window as curses_window
+    from copy import deepcopy
 
     return [i if isinstance(i, curses_window) else deepcopy(i) for i in lst]
 
