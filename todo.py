@@ -240,10 +240,10 @@ def ensure_within_bounds(counter: list, minimum: list, maximum: list):
 
 
 def toggle_completed(char):
-    if char == "+":
-        return "-"
-    elif char == "-":
-        return "+"
+    return {
+        "+": "-",
+        "-": "+",
+    }[char]
 
 
 def update_file(filename, lst, save=AUTOSAVE):
