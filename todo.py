@@ -286,12 +286,20 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
         returns a string of what the user entered.
     """
     if win.getmaxyx()[0] < 3:
-        raise ValueError("Window is too short, it won't be able to display the minimum 1 line of text.")
+        raise ValueError(
+            "Window is too short, it won't be able to display the minimum 1 line of text."
+        )
     original = chars
+    chars = list(chars)
+    position = len(chars)
     win.box()
     win.nodelay(False)
-    win.addstr(1, 1, f"{chars}{cursor}")
     while True:
+        for i, v in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 3)):
+            win.addstr(1, i + 1, v, curses.A_REVERSE if i == position else 0)
+        if position == len(chars):
+            win.addstr(1, len(chars) + 1, cursor)
+        win.refresh()
         try:
             ch = win.getch()
         except KeyboardInterrupt:  # ctrl+c
@@ -299,24 +307,36 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
         if ch in (10, 13):  # enter
             break
         elif ch in (8, 127, 263):  # backspace
-            chars = chars[:-1]
-            win.addstr(1, len(chars) + 1, f"{cursor} ")
+            if position > 0:
+                position -= 1
+                chars.pop(position)
         elif ch == 27:  # escape
-            return original
-        elif ch == 260:  # left arrow
-            pass
-        elif ch == 261:  # right arrow
-            pass
+            try:
+                win.getch()  # skip the `[`
+                arrow = win.getch()
+            except KeyboardInterrupt:
+                return original
+            if arrow == 68:  # left arrow
+                if position > 0:
+                    position -= 1
+            elif arrow == 67:  # right arrow
+                if position < len(chars):
+                    position += 1
+            elif arrow == 51:  # delete
+                win.getch()  # skip the `~`
+                if position < len(chars):
+                    chars.pop(position)
+            else:  # escape
+                return original
         else:  # typable characters (basically alphanum)
             if len(chars) >= n:
                 curses.beep()
                 continue
-            ch = chr(ch)
-            chars += ch
-            win.addstr(1, len(chars), f"{ch}{cursor}")
-        win.refresh()
+            chars.insert(position, chr(ch))
+            if position < len(chars):
+                position += 1
 
-    return chars
+    return "".join(chars)
 
 
 def hline(win, y, x, ch, n):
@@ -696,7 +716,7 @@ def main(stdscr, header):
             todos, selected = history.handle_return(history.undo, todos, selected)
             update_file(FILENAME, todos)
         elif key == 18:  # ^R
-            continue # redo doesn't work right now
+            continue  # redo doesn't work right now
             todos, selected = history.handle_return(history.redo, todos, selected)
             update_file(FILENAME, todos)
         elif key == 99:  # c

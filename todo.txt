@@ -1,5 +1,4 @@
 -7 fix redo (needs to do opposite function of whatever undo function just did)
--2 add support for arrow keys in wgetnstr() (change how cursor is handled)
 -1 add relative cursor_to (10j)
 -1 block selections (change how selections are handled)
 -1 multiple columns/associated keybinds
