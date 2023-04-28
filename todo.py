@@ -657,6 +657,25 @@ def reset_todos(todos: list):
     return todos.copy()
 
 
+def relative_cursor_to(win, history: UndoRedo, todos: list, selected: int, first_digit: int):
+    total = str(first_digit)
+    while True:
+        try:
+            key = win.getch()
+        except KeyboardInterrupt:  # exit on ^C
+            return selected
+        if key in (259, 107):  # up | k
+            history.add_undo(cursor_to, selected, len(todos))
+            return history.do(cursor_to, selected - int(total), len(todos))
+        elif key in (258, 106):  # down | j
+            history.add_undo(cursor_to, selected, len(todos))
+            return history.do(cursor_to, selected + int(total), len(todos))
+        elif key in range(48, 58):  # digits
+            total += str(key - 48)
+            continue
+        return selected
+
+
 def init():
     curses.use_default_colors()
     curses.curs_set(0)
@@ -751,6 +770,8 @@ def main(stdscr, header):
                 continue
             todos = history.do(toggle, todos, selected)
             history.add_undo(toggle, todos, selected)
+        elif key in range(48, 58):  # digits
+            selected = relative_cursor_to(stdscr, history, todos, selected, key - 48)
         else:
             continue
         stdscr.refresh()
