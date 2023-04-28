@@ -657,7 +657,9 @@ def reset_todos(todos: list):
     return todos.copy()
 
 
-def relative_cursor_to(win, history: UndoRedo, todos: list, selected: int, first_digit: int):
+def relative_cursor_to(
+    win, history: UndoRedo, todos: list, selected: int, first_digit: int
+):
     total = str(first_digit)
     while True:
         try:
