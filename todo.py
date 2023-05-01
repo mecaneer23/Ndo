@@ -477,7 +477,7 @@ def make_printable_sublist(win, todos, selected):
     y = win.getmaxyx()[0] - 1
     selected_buffer = min(y, 12) // 2
     new_todos = todos.copy()
-    if len(todos) - 1 > y:
+    if len(todos) > y:
         start = max(0, selected - selected_buffer)
         end = min(len(todos), selected + selected_buffer + 1)
         if end - start < y:
