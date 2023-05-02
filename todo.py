@@ -5,7 +5,7 @@ import curses
 from pathlib import Path
 
 STRIKETHROUGH = False
-FILENAME = Path(__file__).parent.joinpath("todo.txt").absolute()
+FILENAME = Path(__file__).parent.joinpath("todo.txt").absolute() if not Path("todo.txt").is_file() else Path("todo.txt")
 HELP_FILE = Path(__file__).parent.joinpath("README.md").absolute()
 AUTOSAVE = True
 HEADER = "TODO"
