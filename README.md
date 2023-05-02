@@ -18,10 +18,10 @@ Positional arguments:
 Options:
 | Option                     | Description                                                                                                     |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| --help                     | Show this help message and exit.                                                                                |
-| --autosave, -s             | Boolean: determines if file is saved on every action or only once at the program termination.                   |
-| --strikethrough, -t        | Boolean: strikethrough completed todos - option to disable because some terminals don't support strikethroughs. |
-| --header HEADER, -h HEADER | Allows passing alternate header. Default is `TODO`.                                                             |
+| --help, -h                 | Show this help message and exit.                                                                                |
+| --autosave, -a             | Boolean: determines if file is saved on every action or only once at the program termination.                   |
+| --strikethrough, -s        | Boolean: strikethrough completed todos - option to disable because some terminals don't support strikethroughs. |
+| --title TITLE, -t TITLE    | Allows passing alternate header. Default is `TODO`.                                                             |
 | --help-file HELP_FILE      | Allows passing alternate file to specify help menu. Default is `README.md`.                                     |
 
 ## Controls
