@@ -170,12 +170,13 @@ def get_args():
     )
     parser.add_argument(
         "--help",
+        "-h",
         action="help",
         help="Show this help message and exit.",
     )
     parser.add_argument(
         "--autosave",
-        "-s",
+        "-a",
         action="store_true",
         default=AUTOSAVE,
         help="Boolean: determines if file is saved on every\
@@ -191,7 +192,7 @@ def get_args():
     )
     parser.add_argument(
         "--strikethrough",
-        "-t",
+        "-s",
         action="store_true",
         default=STRIKETHROUGH,
         help="Boolean: strikethrough completed todos\
@@ -199,8 +200,8 @@ def get_args():
             don't support strikethroughs.",
     )
     parser.add_argument(
-        "--header",
-        "-h",
+        "--title",
+        "-t",
         type=str,
         default=HEADER,
         help=f"Allows passing alternate header.\
@@ -223,7 +224,7 @@ def handle_args(args):
     FILENAME = Path(args.filename)
     HELP_FILE = Path(args.help_file)
     STRIKETHROUGH = args.strikethrough
-    HEADER = args.header
+    HEADER = args.title
 
 
 def deepcopy_ignore(lst):
