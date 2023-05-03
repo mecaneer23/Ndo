@@ -473,7 +473,7 @@ def color_menu(parent_win, original: int):
         win.refresh()
 
 
-def make_printable_sublist(height, lst, cursor):
+def make_printable_sublist(height: int, lst: list, cursor: int):
     selected_buffer = min(height, 12) // 2
     sublist = lst.copy()
     if len(lst) <= height:
