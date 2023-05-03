@@ -474,19 +474,17 @@ def color_menu(parent_win, original: int):
 
 
 def make_printable_sublist(height: int, lst: list, cursor: int):
-    selected_buffer = min(height, 12) // 2
-    sublist = lst.copy()
-    if len(lst) <= height or cursor >= len(lst):
-        return sublist, cursor
-    start = max(0, cursor - selected_buffer)
-    end = min(len(lst), cursor + selected_buffer + 1)
+    if len(lst) < height:
+        return lst, cursor
+    start = max(0, cursor - height // 2)
+    end = min(len(lst), start + height)
     if end - start < height:
         if start == 0:
             end = min(len(lst), height)
         else:
             start = max(0, end - height)
     sublist = lst[start:end]
-    cursor = sublist.index(lst[cursor])
+    cursor -= start
     return sublist, cursor
 
 
