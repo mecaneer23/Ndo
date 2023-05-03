@@ -473,20 +473,21 @@ def color_menu(parent_win, original: int):
         win.refresh()
 
 
-def make_printable_sublist(height, todos, selected):
+def make_printable_sublist(height, lst, cursor):
     selected_buffer = min(height, 12) // 2
-    new_todos = todos.copy()
-    if len(todos) > height:
-        start = max(0, selected - selected_buffer)
-        end = min(len(todos), selected + selected_buffer + 1)
-        if end - start < height:
-            if start == 0:
-                end = min(len(todos), height)
-            else:
-                start = max(0, end - height)
-        new_todos = todos[start:end]
-        selected = new_todos.index(todos[selected])
-    return new_todos, selected
+    sublist = lst.copy()
+    if len(lst) <= height:
+        return sublist, cursor
+    start = max(0, cursor - selected_buffer)
+    end = min(len(lst), cursor + selected_buffer + 1)
+    if end - start < height:
+        if start == 0:
+            end = min(len(lst), height)
+        else:
+            start = max(0, end - height)
+    sublist = lst[start:end]
+    cursor = sublist.index(lst[cursor])
+    return sublist, cursor
 
 
 def print_todos(win, todos, selected):
