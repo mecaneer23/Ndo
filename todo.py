@@ -473,26 +473,25 @@ def color_menu(parent_win, original: int):
         win.refresh()
 
 
-def make_printable_sublist(win, todos, selected):
-    y = win.getmaxyx()[0] - 1
-    selected_buffer = min(y, 12) // 2
+def make_printable_sublist(height, todos, selected):
+    selected_buffer = min(height, 12) // 2
     new_todos = todos.copy()
-    if len(todos) > y:
+    if len(todos) > height:
         start = max(0, selected - selected_buffer)
         end = min(len(todos), selected + selected_buffer + 1)
-        if end - start < y:
+        if end - start < height:
             if start == 0:
-                end = min(len(todos), y)
+                end = min(len(todos), height)
             else:
-                start = max(0, end - y)
+                start = max(0, end - height)
         new_todos = todos[start:end]
         selected = new_todos.index(todos[selected])
     return new_todos, selected
 
 
 def print_todos(win, todos, selected):
-    new_todos, selected = make_printable_sublist(win, todos, selected)
     height, width = win.getmaxyx()
+    new_todos, selected = make_printable_sublist(height - 1, todos, selected)
     for i, v in enumerate(new_todos):
         display_text = (
             strikethrough(v.display_text) if v.startswith("+") else v.display_text
