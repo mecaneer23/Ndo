@@ -492,6 +492,7 @@ def make_printable_sublist(win, todos, selected):
 
 def print_todos(win, todos, selected):
     new_todos, selected = make_printable_sublist(win, todos, selected)
+    height, width = win.getmaxyx()
     for i, v in enumerate(new_todos):
         display_text = (
             strikethrough(v.display_text) if v.startswith("+") else v.display_text
@@ -499,7 +500,7 @@ def print_todos(win, todos, selected):
         win.addstr(
             i + 1,
             0,
-            f"{v.get_box()}  {display_text.ljust(win.getmaxyx()[1] - 4, ' ')}",
+            f"{v.get_box()}  {display_text[:width - 4].ljust(width - 4, ' ')}",
             curses.color_pair(v.color or get_color("White"))
             | (curses.A_REVERSE if i == selected else 0),
         )
