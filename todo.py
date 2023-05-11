@@ -124,7 +124,8 @@ class UndoRedo:
         to_debug_file(Path("debugging/pointer.txt"), self.index)
 
     def do(self, func, *args):
-        # TODO: now I have the redo function and the
+        # TODO: implement redo
+        # I have the redo function and the
         # args it needs... how should I store it?
         # self.redos.append((func, deepcopy_ignore(args).append(args[1][args[2]]) if func.__name__ == "new_todo_next" else deepcopy_ignore(args)))
         return func(*args)
