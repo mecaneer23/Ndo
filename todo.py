@@ -300,6 +300,8 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
         for i, v in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 3)):
             win.addstr(1, i + 1, v, curses.A_REVERSE if i == position else 0)
         if position == len(chars):
+            if len(chars) + 1 >= win.getmaxyx()[1] - 1:
+                return "".join(chars)
             win.addstr(1, len(chars) + 1, cursor)
         win.refresh()
         try:
