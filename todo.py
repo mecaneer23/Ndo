@@ -695,7 +695,7 @@ def init():
 def main(stdscr, header):
     init()
     todos = [
-        Todo(i) if i != "-7 \t" else EmptyTodo()
+        EmptyTodo() if len(i) <= 3 or i == "-7 \t" else Todo(i)
         for i in validate_file(read_file(FILENAME))
     ]
     selected = 0
