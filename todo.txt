@@ -1,4 +1,3 @@
--7 disable 'i' if no todo
 -7 add sidebar with additional todo info if screen is wide enough
 -7 add search
 -3 block selections (change how selections are handled)

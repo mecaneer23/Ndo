@@ -740,6 +740,8 @@ def main(stdscr, header):
             # TODO: not currently undoable (color to previous state)
             todos = color_todo(stdscr, todos, selected)
         elif key == 105:  # i
+            if len(todos) <= 0:
+                continue
             history.add_undo(reset_todos, todos)
             todos = history.do(edit_todo, stdscr, todos, selected)
         elif key == 103:  # g
