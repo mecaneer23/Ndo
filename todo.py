@@ -390,7 +390,7 @@ def swap_todos(todos: list, idx1, idx2):
 
 
 def md_table_to_lines(filename, first_line_idx, last_line_idx, remove=[]):
-    with filename.open() as f:
+    with open(str(filename)) as f:
         lines = f.readlines()[first_line_idx - 1 : last_line_idx - 1]
     for i, _ in enumerate(lines):
         for item in remove:
