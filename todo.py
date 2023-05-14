@@ -7,7 +7,11 @@ from typing import List
 
 STRIKETHROUGH = False
 FILESTRING = "todo.txt"
-FILENAME = Path(__file__).parent.joinpath(FILESTRING).absolute() if not Path(FILESTRING).is_file() else Path(FILESTRING)
+FILENAME = (
+    Path(__file__).parent.joinpath(FILESTRING).absolute()
+    if not Path(FILESTRING).is_file()
+    else Path(FILESTRING)
+)
 HELP_FILE = Path(__file__).parent.joinpath("README.md").absolute()
 AUTOSAVE = True
 HEADER = "TODO"
@@ -775,7 +779,14 @@ def main(stdscr, header):
             todos = history.do(new_todo_current, stdscr, todos, selected)
             history.add_undo(delete_todo, stdscr, todos, selected)
         elif key == 100:  # d
-            history.add_undo(new_todo_next, stdscr, todos, selected, todos[selected])
+            # history.add_undo(new_todo_next, stdscr, todos, selected, todos[selected])
+            history.add_undo(
+                lambda _, todos, selected, __ = None, ___ = None: (todos, selected),
+                stdscr,
+                todos,
+                selected,
+                todos[selected],
+            )
             todos, selected = history.do(delete_todo, stdscr, todos, selected)
         elif key == 117:  # u
             todos, selected = history.handle_return(history.undo, todos, selected)
