@@ -3,6 +3,7 @@
 
 import curses
 from pathlib import Path
+from typing import List
 
 STRIKETHROUGH = False
 FILESTRING = "todo.txt"
@@ -393,8 +394,8 @@ def md_table_to_lines(
     first_line_idx: int,
     last_line_idx: int,
     filename: str = "README.md",
-    remove: list[str] = [],
-) -> list[str]:
+    remove: List[str] = [],
+) -> List[str]:
     """
     Converts a markdown table to a list of formatted strings.
 
