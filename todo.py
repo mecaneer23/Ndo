@@ -781,7 +781,7 @@ def main(stdscr, header):
         elif key == 100:  # d
             # history.add_undo(new_todo_next, stdscr, todos, selected, todos[selected])
             history.add_undo(
-                lambda _, todos, selected, __ = None, ___ = None: (todos, selected),
+                lambda _, todos, selected, __ = None: (todos, selected),
                 stdscr,
                 todos,
                 selected,
