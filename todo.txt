@@ -1,4 +1,4 @@
--7 fix toggle todo after edit
++7 fix toggle todo after edit
 -7 add sidebar with additional todo info if screen is wide enough
 -7 add search
 -6 fix redo (needs to do opposite function of whatever undo function just did)

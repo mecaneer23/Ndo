@@ -45,6 +45,10 @@ class Todo:
     def __getitem__(self, key):
         return self.text[key]
 
+    def set_display_text(self, text):
+        self.display_text = text
+        self.text = self.text.split()[0] + " " + text
+
     def split(self, *a):
         return self.text.split(*a)
 
@@ -362,8 +366,8 @@ def insert_todo(stdscr, todos: list, index: int, existing_todo=False):
         todo = todos[index].display_text
         ncols = max(x // 2, len(todo) + 3) if len(todo) < x - 1 else x // 2
         begin_x = x // 4 if len(todo) < x - 1 - ncols else (x - ncols) // 2
-        todos[index].display_text = wgetnstr(
-            curses.newwin(3, ncols, y // 2 - 3, begin_x), chars=todo
+        todos[index].set_display_text(
+            wgetnstr(curses.newwin(3, ncols, y // 2 - 3, begin_x), chars=todo)
         )
         return todos
     if (todo := wgetnstr(curses.newwin(3, x // 2, y // 2 - 3, x // 4))) == "":
@@ -781,7 +785,7 @@ def main(stdscr, header):
         elif key == 100:  # d
             # history.add_undo(new_todo_next, stdscr, todos, selected, todos[selected])
             history.add_undo(
-                lambda _, todos, selected, __ = None: (todos, selected),
+                lambda _, todos, selected, __=None: (todos, selected),
                 stdscr,
                 todos,
                 selected,
