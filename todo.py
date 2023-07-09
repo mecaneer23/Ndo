@@ -244,7 +244,7 @@ def deepcopy_ignore(lst):
     return [i if isinstance(i, curses_window) else deepcopy(i) for i in lst]
 
 
-def ensure_within_bounds(counter: list, minimum: list, maximum: list):
+def ensure_within_bounds(counter: int, minimum: int, maximum: int):
     if counter < minimum:
         return minimum
     elif counter > maximum - 1:
