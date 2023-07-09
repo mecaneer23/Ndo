@@ -326,6 +326,14 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
             if position > 0:
                 position -= 1
                 chars.pop(position)
+        elif ch == 98:  # alt + left arrow
+            raise NotImplementedError
+        elif ch == 102:  # alt + right arrow
+            raise NotImplementedError
+        # elif ch == __:  # home
+        #    raise NotImplementedError
+        # elif ch == __:  # end
+        #    raise NotImplementedError
         elif ch == 27:  # any escape sequence
             win.nodelay(True)
             if win.getch() == -1:  # escape, otherwise skip `[`
