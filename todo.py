@@ -82,10 +82,17 @@ class Todo:
 
 class EmptyTodo(Todo):
     def __init__(self):
-        super().__init__("-7 \t")
+        self.display_text = ""
+        self.color = 7
+
+    def startswith(self, *_):
+        return False
 
     def get_box(self):
         return " "
+
+    def __repr__(self):
+        return self.display_text
 
 
 class UndoRedo:
@@ -160,12 +167,7 @@ def read_file(filename: Path):
 def validate_file(data):
     if len(data) == 0:
         return []
-    lines = data.split("\n")
-    for i in lines.copy():
-        if len(i) == 0:
-            lines.remove(i)
-            continue
-    return lines
+    return data.split("\n")
 
 
 def get_args():
@@ -568,10 +570,7 @@ def todo_from_clipboard(todos: list, selected: int):
     try:
         from pyperclip import paste
     except ModuleNotFoundError:
-        exit(
-            "`pyperclip` module required for paste operation.\
-            Try `pip install pyperclip`"
-        )
+        pyperclip_error(todos, "paste")
     todo = paste()
     if "\n" in todo:
         return todos
@@ -661,14 +660,17 @@ def edit_todo(stdscr, todos, selected):
     return todos
 
 
+def pyperclip_error(todos, operation):
+    update_file(FILENAME, todos, True)
+    exit(f"`pyperclip` module required for {operation} operation.\
+        Try `pip install pyperclip`")
+
+
 def copy_todo(todos, selected):
     try:
         from pyperclip import copy
     except ModuleNotFoundError:
-        exit(
-            "`pyperclip` module required for copy operation.\
-            Try `pip install pyperclip`"
-        )
+        pyperclip_error(todos, "copy")
     copy(todos[selected].display_text)
 
 
@@ -751,7 +753,7 @@ def init():
 def main(stdscr, header):
     init()
     todos = [
-        EmptyTodo() if len(i) <= 3 or i == "-7 \t" else Todo(i)
+        EmptyTodo() if len(i) <= 3 else Todo(i)
         for i in validate_file(read_file(FILENAME))
     ]
     selected = 0

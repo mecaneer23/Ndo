@@ -1,4 +1,4 @@
--7 fix validate_file so it's less strict (doesn't fail silently)
++7 make empty todos more robust
 -7 add search
 -7 add home/end keys to wgetnstr
 -7 add ctrl + arrow key word jumping to wgetnstr
