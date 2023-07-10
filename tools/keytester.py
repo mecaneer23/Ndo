@@ -13,6 +13,8 @@ def main(stdscr):
             # ch = stdscr.get_wch()
         except KeyboardInterrupt:
             return
+        if ch == 3:  # ^C
+            return
         stdscr.addstr(*[i // 2 for i in stdscr.getmaxyx()], repr(ch) + "      ")
 
 
