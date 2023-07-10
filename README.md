@@ -4,7 +4,9 @@ A curses implementation of a todo list helper. Most of the keybindings are simil
 
 ## OS Support
 
-Ndo is optimized for Linux, as most Vim users use Linux. However, general editing is available for Windows using the following external package.
+- Ndo is optimized for Linux, as most Vim users use Linux.
+- MacOS is also supported however some keyboard shortcuts use different modifier keys.
+- In Windows, general editing is available using the following external package, although some keyboard shortcuts might not work.
 
 ```bash
 pip install windows-curses
