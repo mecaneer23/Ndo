@@ -326,33 +326,49 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
             if position > 0:
                 position -= 1
                 chars.pop(position)
-        elif ch == 98:  # alt + left arrow
-            raise NotImplementedError
-        elif ch == 102:  # alt + right arrow
-            raise NotImplementedError
-        # elif ch == __:  # home
-        #    raise NotImplementedError
-        # elif ch == __:  # end
-        #    raise NotImplementedError
         elif ch == 27:  # any escape sequence
             win.nodelay(True)
             if win.getch() == -1:  # escape, otherwise skip `[`
                 return original
             win.nodelay(False)
             try:
-                arrow = win.getch()
+                subch = win.getch()
             except KeyboardInterrupt:
                 return original
-            if arrow == 68:  # left arrow
+            if subch == 68:  # left arrow
                 if position > 0:
                     position -= 1
-            elif arrow == 67:  # right arrow
+            elif subch == 67:  # right arrow
                 if position < len(chars):
                     position += 1
-            elif arrow == 51:  # delete
+            elif subch == 51:  # delete
                 win.getch()  # skip the `~`
                 if position < len(chars):
                     chars.pop(position)
+            elif subch == 49:  # ctrl + left
+                for _ in range(2):  # skip the `;5`
+                    win.getch()
+                direction = win.getch()
+                if direction == 67:  # right arrow
+                    while True:
+                        if position >= len(chars) - 1:
+                            break
+                        position += 1
+                        if chars[position] == " ":
+                            break
+                elif direction == 68:  # left arrow
+                    while True:
+                        if position <= 0:
+                            break
+                        position -= 1
+                        if chars[position] == " ":
+                            break
+            elif subch == 72:  # home
+                position = 0
+            elif subch == 70:  # end
+                position = len(chars)
+            else:
+                raise ValueError(repr(subch))
         else:  # typable characters (basically alphanum)
             if len(chars) >= n:
                 curses.beep()
