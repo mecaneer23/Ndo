@@ -1,6 +1,3 @@
-+7 make empty todos more robust
-+7 add home/end keys to wgetnstr
-+7 add ctrl + arrow key word jumping to wgetnstr
 -7 add search
 -3 add sidebar with additional todo info if screen is wide enough
 -6 fix redo (needs to do opposite function of whatever undo function just did)
