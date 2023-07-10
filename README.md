@@ -1,6 +1,14 @@
 # Ndo - an ncurses todo application
 
-A curses implementation of a todo list helper. Most of the keybindings are similar to vim-bindings so vim users should feel relatively comfortable.
+A curses implementation of a todo list helper. Most of the keybindings are similar to Vim-bindings so Vim users should feel relatively comfortable.
+
+## OS Support
+
+Ndo is optimized for Linux, as most Vim users use Linux. However, general editing is available for Windows using the following external package.
+
+```bash
+pip install windows-curses
+```
 
 ## Running
 
