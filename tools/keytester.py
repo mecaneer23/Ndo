@@ -15,7 +15,7 @@ def main(stdscr):
             return
         if ch == 3:  # ^C
             return
-        stdscr.addstr(*[i // 2 for i in stdscr.getmaxyx()], repr(ch) + "      ")
+        stdscr.addstr(*[i // 2 for i in stdscr.getmaxyx()], str(ch) + "      ")
 
 
 if __name__ == "__main__":
