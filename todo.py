@@ -303,6 +303,8 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
         raise ValueError(
             "Window is too short, it won't be able to display the minimum 1 line of text."
         )
+    elif win.getmaxyx()[0] > 3:
+        raise NotImplementedError("Multiline text editing is not supported")
     original = chars
     chars = list(chars)
     position = len(chars)
