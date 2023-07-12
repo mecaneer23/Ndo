@@ -2,7 +2,7 @@
 +4 enable block selections for delete
 +4 enable block selections for toggle
 -4 enable block selections for color selection
--4 multiselect up or down, not just down
++4 multiselect up or down, not just down
 -7 add ctrl + backspace to delete word in wgetnstr
 
 -2 add search

@@ -197,8 +197,30 @@ class Cursor:
         if len(self.positions) > 1:
             self.positions.remove(max(self.positions))
 
+    def deselect_prev(self):
+        if len(self.positions) > 1:
+            self.positions.remove(min(self.positions))
+
+    def select_prev(self):
+        self.positions.append(min(self.positions) - 1)
+        self.positions.sort()
+
     def get_deletable(self):
         return [min(self.positions) for _ in self.positions]
+
+    def multiselect_down(self):
+        if len(self.positions) == 1 or self.direction == "down":
+            self.select_next()
+            self.direction = "down"
+            return
+        self.deselect_prev()
+
+    def multiselect_up(self):
+        if len(self.positions) == 1 or self.direction == "up":
+            self.select_prev()
+            self.direction = "up"
+            return
+        self.deselect_next()
 
 
 def to_debug_file(filename: Path, message: str, mode="w"):
@@ -921,9 +943,9 @@ def main(stdscr, header):
             if subch == -1:  # escape, otherwise skip `[`
                 return quit_program(todos)
             elif subch == 106:  # alt + j
-                selected.select_next()
+                selected.multiselect_down()
             elif subch == 107:  # alt + k
-                selected.deselect_next()
+                selected.multiselect_up()
             stdscr.nodelay(False)
         elif key == 113:  # q
             return quit_program(todos)
