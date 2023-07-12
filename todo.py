@@ -171,12 +171,26 @@ class Cursor:
     def __int__(self):
         return self.positions[0]
 
+    def __contains__(self, child):
+        return child in self.positions
+
     def set_to(self, position):
         self.positions[0] = position
 
     def todo_set_to(self, todo_position):
         self.positions[0] = todo_position[1]
         return todo_position[0]
+
+    def set_multiple(self, positions):
+        self.positions = positions
+
+    def select_next(self):
+        self.positions.append(max(self.positions) + 1)
+        self.positions.sort()
+
+    def deselect_next(self):
+        if len(self.positions) > 1:
+            self.positions.remove(max(self.positions))
 
 
 def to_debug_file(filename: Path, message: str, mode="w"):
@@ -602,7 +616,7 @@ def make_printable_sublist(height: int, lst: list, cursor: int):
 
 def print_todos(win, todos, selected):
     height, width = win.getmaxyx()
-    new_todos, selected = make_printable_sublist(height - 1, todos, selected)
+    new_todos = selected.todo_set_to(make_printable_sublist(height - 1, todos, int(selected)))
     for i, v in enumerate(new_todos):
         display_text = (
             strikethrough(v.display_text) if v.startswith("+") else v.display_text
@@ -612,7 +626,7 @@ def print_todos(win, todos, selected):
             0,
             f"{v.get_box()}  {display_text[:width - 4].ljust(width - 4, ' ')}",
             curses.color_pair(v.color or get_color("White"))
-            | (curses.A_REVERSE if i == selected else 0),
+            | (curses.A_REVERSE if i in selected else 0),
         )
 
 
@@ -813,7 +827,7 @@ def main(stdscr, header):
 
     while True:
         stdscr.addstr(0, 0, f"{header}:")
-        print_todos(stdscr, todos, int(selected))
+        print_todos(stdscr, todos, selected)
         try:
             key = stdscr.getch()
         except KeyboardInterrupt:  # exit on ^C
@@ -880,7 +894,19 @@ def main(stdscr, header):
             help_menu(stdscr)
         elif key == 98:  # b
             toggle_debug_flag()
-        elif key in (113, 27):  # q | esc
+        elif key == 27:  # any escape sequence
+            stdscr.nodelay(True)
+            subch = stdscr.getch()
+            if subch == -1:  # escape, otherwise skip `[`
+                return quit_program(todos)
+            elif subch == 106:  # alt + j
+                raise NotImplementedError("this works but every other command related to it doesn't yet (and I didn't add these keys to the readme)")
+                selected.select_next()
+            elif subch == 107:  # alt + k
+                raise NotImplementedError("this works but every other command related to it doesn't yet")
+                selected.deselect_next()
+            stdscr.nodelay(False)
+        elif key == 113:  # q | esc
             return quit_program(todos)
         elif key == 10:  # enter
             if isinstance(todos[int(selected)], EmptyTodo):
