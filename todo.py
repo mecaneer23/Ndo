@@ -254,13 +254,8 @@ def deepcopy_ignore(lst):
     return [i if isinstance(i, curses_window) else deepcopy(i) for i in lst]
 
 
-def ensure_within_bounds(counter: int, minimum: int, maximum: int):
-    if counter < minimum:
-        return minimum
-    elif counter > maximum - 1:
-        return maximum - 1
-    else:
-        return counter
+def clamp(counter: int, minimum: int, maximum: int):
+    return min(max(counter, minimum), maximum - 1)
 
 
 def toggle_completed(char):
@@ -564,7 +559,7 @@ def color_menu(parent_win, original: int):
             selected = key - 49
         else:
             continue
-        selected = ensure_within_bounds(selected, 0, len(lines))
+        selected = clamp(selected, 0, len(lines))
         parent_win.refresh()
         win.refresh()
 
@@ -613,23 +608,23 @@ def todo_from_clipboard(todos: list, selected: int):
 
 
 def cursor_up(selected, len_todos):
-    return ensure_within_bounds(selected - 1, 0, len_todos)
+    return clamp(selected - 1, 0, len_todos)
 
 
 def cursor_down(selected, len_todos):
-    return ensure_within_bounds(selected + 1, 0, len_todos)
+    return clamp(selected + 1, 0, len_todos)
 
 
 def cursor_top(len_todos):
-    return ensure_within_bounds(0, 0, len_todos)
+    return clamp(0, 0, len_todos)
 
 
 def cursor_bottom(len_todos):
-    return ensure_within_bounds(len_todos, 0, len_todos)
+    return clamp(len_todos, 0, len_todos)
 
 
 def cursor_to(position, len_todos):
-    return ensure_within_bounds(position, 0, len_todos)
+    return clamp(position, 0, len_todos)
 
 
 def todo_up(stdscr, todos, selected):
