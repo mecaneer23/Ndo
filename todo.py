@@ -921,12 +921,11 @@ def main(stdscr, header):
             if subch == -1:  # escape, otherwise skip `[`
                 return quit_program(todos)
             elif subch == 106:  # alt + j
-                # raise NotImplementedError("this works but every other command related to it doesn't yet (and I didn't add these keys to the readme)")
                 selected.select_next()
             elif subch == 107:  # alt + k
                 selected.deselect_next()
             stdscr.nodelay(False)
-        elif key == 113:  # q | esc
+        elif key == 113:  # q
             return quit_program(todos)
         elif key == 10:  # enter
             if isinstance(todos[int(selected)], EmptyTodo):
