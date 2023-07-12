@@ -92,8 +92,8 @@ class EmptyTodo(Todo):
 
     def set_display_text(self, text):
         self.box_char = "-"
-        self.text = f"{self.box_char}{self.color} {text}"
         self.display_text = text
+        self.text = f"{self.box_char}{self.color} {text}"
         self.__class__ = Todo(self.text).__class__
 
     def get_box(self):
