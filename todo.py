@@ -330,6 +330,11 @@ def update_file(filename, lst, save=AUTOSAVE):
         return f.write(Todo.join_repr(lst, "\n"))
 
 
+def print(message):
+    with open("debugging/log.txt", "w") as f:
+        f.write(message)
+
+
 def wgetnstr(win, n=1024, chars="", cursor="█"):
     """
     Reads a string from the given window with max chars n\
