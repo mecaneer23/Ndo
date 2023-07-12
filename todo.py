@@ -66,7 +66,9 @@ class Todo:
 
         if self.box_char in table:
             return table[self.box_char]
-        raise KeyError(f"The first character of `{self.text}` is not one of (+, -)")
+        raise KeyError(
+            f"The completion indicator of `{self.text}` is not one of (+, -)"
+        )
 
     def __repr__(self):
         return f"{self.box_char}{self.color} {self.display_text}"
@@ -87,6 +89,12 @@ class EmptyTodo(Todo):
 
     def startswith(self, *_):
         return False
+
+    def set_display_text(self, text):
+        self.box_char = "-"
+        self.text = f"{self.box_char}{self.color} {text}"
+        self.display_text = text
+        self.__class__ = Todo(self.text).__class__
 
     def get_box(self):
         return " "
@@ -688,8 +696,10 @@ def edit_todo(stdscr, todos, selected):
 
 def pyperclip_error(todos, operation):
     update_file(FILENAME, todos, True)
-    exit(f"`pyperclip` module required for {operation} operation.\
-        Try `pip install pyperclip`")
+    exit(
+        f"`pyperclip` module required for {operation} operation.\
+        Try `pip install pyperclip`"
+    )
 
 
 def copy_todo(todos, selected):
