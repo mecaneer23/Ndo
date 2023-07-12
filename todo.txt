@@ -1,12 +1,12 @@
--4 block selections (change how selections are handled)
++4 block selections (change how selections are handled)
 +4 enable block selections for delete
 +4 enable block selections for toggle
--4 enable block selections for color selection
++4 enable block selections for color selection
 +4 multiselect up or down, not just down
 -7 add ctrl + backspace to delete word in wgetnstr
 
 -2 add search
--3 add sidebar with additional todo info if screen is wide enough
--3 multiline todos?
--6 fix redo (needs to do opposite function of whatever undo function just did)
+-6 add sidebar with additional todo info if screen is wide enough
+-6 multiline todos?
+-3 fix redo (needs to do opposite function of whatever undo function just did)
 -1 multiple columns/associated keybinds

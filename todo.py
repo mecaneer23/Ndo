@@ -741,7 +741,9 @@ def delete_todo(stdscr, todos, selected):
 
 
 def color_todo(stdscr, todos, selected):
-    todos[selected].set_color(color_menu(stdscr, todos[selected].color))
+    new_color = color_menu(stdscr, todos[int(selected)].color)
+    for pos in selected.positions:
+        todos[pos].set_color(new_color)
     stdscr.clear()
     update_file(FILENAME, todos)
     return todos
@@ -908,7 +910,7 @@ def main(stdscr, header):
             update_file(FILENAME, todos)
         elif key == 99:  # c
             # TODO: not currently undoable (color to previous state)
-            todos = color_todo(stdscr, todos, int(selected))
+            todos = color_todo(stdscr, todos, selected)
         elif key == 105:  # i
             if len(todos) <= 0:
                 continue
