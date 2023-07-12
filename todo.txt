@@ -1,5 +1,6 @@
--7 add search
+-4 block selections (change how selections are handled)
+-2 add search
 -3 add sidebar with additional todo info if screen is wide enough
+-3 multiline todos?
 -6 fix redo (needs to do opposite function of whatever undo function just did)
--3 block selections (change how selections are handled)
 -1 multiple columns/associated keybinds
