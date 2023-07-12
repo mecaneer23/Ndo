@@ -70,6 +70,11 @@ class Todo:
             f"The completion indicator of `{self.text}` is not one of (+, -)"
         )
 
+    def toggle(self):
+        new_box = {"+": "-", "-": "+"}[self.box_char]
+        self.box_char = new_box
+        self.text = repr(self)
+
     def __repr__(self):
         return f"{self.box_char}{self.color} {self.display_text}"
 
@@ -294,13 +299,6 @@ def deepcopy_ignore(lst):
 
 def clamp(counter: int, minimum: int, maximum: int):
     return min(max(counter, minimum), maximum - 1)
-
-
-def toggle_completed(char):
-    return {
-        "+": "-",
-        "-": "+",
-    }[char]
 
 
 def update_file(filename, lst, save=AUTOSAVE):
@@ -763,10 +761,7 @@ def blank_todo(stdscr, todos, selected):
 
 
 def toggle(todos, selected):
-    todos[selected] = Todo(
-        toggle_completed(todos[selected].box_char) + todos[selected][1:],
-        color=todos[selected].color,
-    )
+    todos[int(selected)].toggle()
     update_file(FILENAME, todos)
     return todos
 
@@ -935,8 +930,8 @@ def main(stdscr, header):
         elif key == 10:  # enter
             if isinstance(todos[int(selected)], EmptyTodo):
                 continue
-            todos = history.do(toggle, todos, int(selected))
-            history.add_undo(toggle, todos, int(selected))
+            todos = history.do(toggle, todos, selected)
+            history.add_undo(toggle, todos, selected)
         elif key in range(48, 58):  # digits
             selected.set_to(
                 relative_cursor_to(stdscr, history, todos, int(selected), key - 48)
