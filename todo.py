@@ -175,7 +175,7 @@ class Cursor:
         return child in self.positions
 
     def set_to(self, position):
-        self.positions[0] = position
+        self.positions = [position]
 
     def todo_set_to(self, todo_position):
         self.positions[0] = todo_position[1]
@@ -191,6 +191,9 @@ class Cursor:
     def deselect_next(self):
         if len(self.positions) > 1:
             self.positions.remove(max(self.positions))
+
+    def get_deletable(self):
+        return [min(self.positions) for i in self.positions]
 
 
 def to_debug_file(filename: Path, message: str, mode="w"):
@@ -616,7 +619,9 @@ def make_printable_sublist(height: int, lst: list, cursor: int):
 
 def print_todos(win, todos, selected):
     height, width = win.getmaxyx()
-    new_todos = selected.todo_set_to(make_printable_sublist(height - 1, todos, int(selected)))
+    new_todos = selected.todo_set_to(
+        make_printable_sublist(height - 1, todos, int(selected))
+    )
     for i, v in enumerate(new_todos):
         display_text = (
             strikethrough(v.display_text) if v.startswith("+") else v.display_text
@@ -703,11 +708,16 @@ def new_todo_current(stdscr, todos, selected):
 
 
 def delete_todo(stdscr, todos, selected):
-    todos = remove_todo(todos, selected)
+    if isinstance(selected, Cursor):
+        positions = selected.get_deletable()
+    elif isinstance(selected, int):
+        positions = [selected]
+    for pos in positions:
+        todos = remove_todo(todos, pos)
     stdscr.clear()
-    selected = cursor_up(selected, len(todos))
     update_file(FILENAME, todos)
-    return todos, selected
+    selected.set_to(cursor_up(int(selected), len(todos)))
+    return todos, int(selected)
 
 
 def color_todo(stdscr, todos, selected):
@@ -840,32 +850,43 @@ def main(stdscr, header):
             selected.set_to(history.do(cursor_down, int(selected), len(todos)))
         elif key == 75:  # K
             history.add_undo(todo_down, stdscr, todos, int(selected) - 1)
-            todos = selected.todo_set_to(history.do(todo_up, stdscr, todos, int(selected)))
+            todos = selected.todo_set_to(
+                history.do(todo_up, stdscr, todos, int(selected))
+            )
         elif key == 74:  # J
             history.add_undo(todo_up, stdscr, todos, int(selected) + 1)
-            todos = selected.todo_set_to(history.do(todo_down, stdscr, todos, int(selected)))
+            todos = selected.todo_set_to(
+                history.do(todo_down, stdscr, todos, int(selected))
+            )
         elif key == 111:  # o
-            todos = selected.todo_set_to(history.do(new_todo_next, stdscr, todos, int(selected)))
+            todos = selected.todo_set_to(
+                history.do(new_todo_next, stdscr, todos, int(selected))
+            )
             history.add_undo(delete_todo, stdscr, todos, int(selected))
         elif key == 79:  # O
             todos = history.do(new_todo_current, stdscr, todos, int(selected))
             history.add_undo(delete_todo, stdscr, todos, int(selected))
         elif key == 100:  # d
-            # history.add_undo(new_todo_next, stdscr, todos, int(selected), todos[int(selected)])
             history.add_undo(
-                lambda _, todos, selected, __=None: (todos, int(selected)),
+                lambda _, todos, selected, __=None: (todos, selected),
                 stdscr,
                 todos,
                 int(selected),
                 todos[int(selected)],
             )
-            todos = selected.todo_set_to(history.do(delete_todo, stdscr, todos, int(selected)))
+            todos = selected.todo_set_to(
+                history.do(delete_todo, stdscr, todos, selected)
+            )
         elif key == 117:  # u
-            todos = selected.todo_set_to(history.handle_return(history.undo, todos, int(selected)))
+            todos = selected.todo_set_to(
+                history.handle_return(history.undo, todos, int(selected))
+            )
             update_file(FILENAME, todos)
         elif key == 18:  # ^R
             continue  # redo doesn't work right now
-            todos = selected.todo_set_to(history.handle_return(history.redo, todos, int(selected)))
+            todos = selected.todo_set_to(
+                history.handle_return(history.redo, todos, int(selected))
+            )
             update_file(FILENAME, todos)
         elif key == 99:  # c
             # TODO: not currently undoable (color to previous state)
@@ -885,10 +906,14 @@ def main(stdscr, header):
             # TODO: not currently undoable (copy previous item in clipboard)
             copy_todo(todos, int(selected))
         elif key == 112:  # p
-            todos = selected.todo_set_to(history.do(paste_todo, stdscr, todos, int(selected)))
+            todos = selected.todo_set_to(
+                history.do(paste_todo, stdscr, todos, int(selected))
+            )
             history.add_undo(delete_todo, stdscr, todos, int(selected))
         elif key == 45:  # -
-            todos = selected.todo_set_to(history.do(blank_todo, stdscr, todos, int(selected)))
+            todos = selected.todo_set_to(
+                history.do(blank_todo, stdscr, todos, int(selected))
+            )
             history.add_undo(delete_todo, stdscr, todos, int(selected))
         elif key == 104:  # h
             help_menu(stdscr)
@@ -900,10 +925,9 @@ def main(stdscr, header):
             if subch == -1:  # escape, otherwise skip `[`
                 return quit_program(todos)
             elif subch == 106:  # alt + j
-                raise NotImplementedError("this works but every other command related to it doesn't yet (and I didn't add these keys to the readme)")
+                # raise NotImplementedError("this works but every other command related to it doesn't yet (and I didn't add these keys to the readme)")
                 selected.select_next()
             elif subch == 107:  # alt + k
-                raise NotImplementedError("this works but every other command related to it doesn't yet")
                 selected.deselect_next()
             stdscr.nodelay(False)
         elif key == 113:  # q | esc
@@ -914,7 +938,9 @@ def main(stdscr, header):
             todos = history.do(toggle, todos, int(selected))
             history.add_undo(toggle, todos, int(selected))
         elif key in range(48, 58):  # digits
-            selected.set_to(relative_cursor_to(stdscr, history, todos, int(selected), key - 48))
+            selected.set_to(
+                relative_cursor_to(stdscr, history, todos, int(selected), key - 48)
+            )
         else:
             continue
         stdscr.refresh()
