@@ -761,7 +761,8 @@ def blank_todo(stdscr, todos, selected):
 
 
 def toggle(todos, selected):
-    todos[int(selected)].toggle()
+    for pos in selected.positions:
+        todos[pos].toggle()
     update_file(FILENAME, todos)
     return todos
 
