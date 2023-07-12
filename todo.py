@@ -198,7 +198,7 @@ class Cursor:
             self.positions.remove(max(self.positions))
 
     def get_deletable(self):
-        return [min(self.positions) for i in self.positions]
+        return [min(self.positions) for _ in self.positions]
 
 
 def to_debug_file(filename: Path, message: str, mode="w"):
