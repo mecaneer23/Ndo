@@ -1,5 +1,4 @@
-+7 add ctrl + backspace to delete word in wgetnstr
--7 add ctrl + delete to delete word in wgetnstr
++7 add ctrl + delete to delete word in wgetnstr
 
 -2 add search
 -6 add sidebar with additional todo info if screen is wide enough

@@ -403,12 +403,24 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
                     chars.pop(position)
                     break
                 chars.pop(position)
-        # elif ch == __:  # ctrl + delete
-        #    raise NotImplementedError("delete word")
         elif ch == 27:  # any escape sequence `^[`
             win.nodelay(True)
-            if win.getch() == -1:  # escape, otherwise skip `[`
+            escape = win.getch()  # skip `[`
+            if escape == -1:  # escape
                 return original
+            elif escape == 100:  # ctrl + delete
+                if position < len(chars) - 1:
+                    chars.pop(position)
+                    position -= 1
+                while True:
+                    if position >= len(chars) - 1:
+                        break
+                    position += 1
+                    if chars[position] == " ":
+                        break
+                    chars.pop(position)
+                    position -= 1
+                continue
             win.nodelay(False)
             try:
                 subch = win.getch()
@@ -449,9 +461,10 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
             else:
                 raise ValueError(repr(subch))
         else:  # typable characters (basically alphanum)
-            # raise ValueError(repr(ch))
             if len(chars) >= n:
                 curses.beep()
+                continue
+            if ch == -1:
                 continue
             chars.insert(position, chr(ch))
             if position < len(chars):
