@@ -389,7 +389,18 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
             if position > 0:
                 position -= 1
                 chars.pop(position)
-        elif ch == 27:  # any escape sequence
+        elif ch == 23:  # ctrl + backspace
+            while True:
+                if position <= 0:
+                    break
+                position -= 1
+                if chars[position] == " ":
+                    chars.pop(position)
+                    break
+                chars.pop(position)
+        # elif ch == __:  # ctrl + delete
+        #    raise NotImplementedError("delete word")
+        elif ch == 27:  # any escape sequence `^[`
             win.nodelay(True)
             if win.getch() == -1:  # escape, otherwise skip `[`
                 return original
@@ -408,7 +419,7 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
                 win.getch()  # skip the `~`
                 if position < len(chars):
                     chars.pop(position)
-            elif subch == 49:  # ctrl + left
+            elif subch == 49:  # ctrl + arrow
                 for _ in range(2):  # skip the `;5`
                     win.getch()
                 direction = win.getch()
@@ -433,6 +444,7 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
             else:
                 raise ValueError(repr(subch))
         else:  # typable characters (basically alphanum)
+            # raise ValueError(repr(ch))
             if len(chars) >= n:
                 curses.beep()
                 continue
