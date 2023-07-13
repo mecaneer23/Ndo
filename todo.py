@@ -16,6 +16,7 @@ HELP_FILE = Path(__file__).parent.joinpath("README.md").absolute()
 AUTOSAVE = True
 HEADER = "TODO"
 DEBUG_FLAG = False
+INDENT = 2
 
 COLORS = {
     "Red": 1,
@@ -36,7 +37,7 @@ class Todo:
             return get_color(color)
         return color
 
-    def __init__(self, text, color="White"):
+    def __init__(self, text, indent=0, color="White"):
         self.text = str(text)
         self.box_char = self.text[0]
         self.display_text = self.text.split(" ", 1)[1]
@@ -300,12 +301,21 @@ def get_args():
         help=f"Allows passing alternate file to\
         specify help menu. Default is `{HELP_FILE}`.",
     )
+    parser.add_argument(
+        "--indentation-level",
+        "-i",
+        type=int,
+        default=INDENT,
+        help=f"Allows specification of indentation level\
+            default is `{INDENT}`.",
+    )
     return parser.parse_args()
 
 
 def handle_args(args):
-    global AUTOSAVE, FILENAME, HELP_FILE, STRIKETHROUGH, HEADER
+    global AUTOSAVE, FILENAME, HELP_FILE, STRIKETHROUGH, HEADER, INDENT
     AUTOSAVE = args.autosave
+    INDENT = args.indentation_level
     FILENAME = Path(args.filename)
     HELP_FILE = Path(args.help_file)
     STRIKETHROUGH = args.strikethrough
@@ -738,17 +748,18 @@ def new_todo_next(
     stdscr, todos: list, selected: int, todo: Todo = None, paste: bool = False
 ):
     temp = todos.copy()
-    if todo is None:
-        todos = (
-            insert_todo(stdscr, todos, selected + 1)
-            if not paste
-            else todo_from_clipboard(todos, selected)
-        )
-        stdscr.clear()
-        if temp != todos:
-            selected = cursor_down(selected, len(todos))
-    else:
+    if todo is not None:
         todos.insert(selected, Todo(f"- {todo.display_text}"))
+        update_file(FILENAME, todos)
+        return todos, selected
+    todos = (
+        insert_todo(stdscr, todos, selected + 1)
+        if not paste
+        else todo_from_clipboard(todos, selected)
+    )
+    stdscr.clear()
+    if temp != todos:
+        selected = cursor_down(selected, len(todos))
     update_file(FILENAME, todos)
     return todos, selected
 
