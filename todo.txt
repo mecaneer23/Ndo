@@ -1,6 +1,7 @@
 -7 make editing work on VT100 terminals (alacritty/xterm)
 +7 make selected empty todos look better
 -7 add bullet points
++7 fix bug where edited empty todo becomes todo with nothing in it
 
 -2 add search
 -6 add sidebar with additional todo info if screen is wide enough

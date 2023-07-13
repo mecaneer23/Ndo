@@ -479,16 +479,8 @@ def hline(win, y, x, ch, n):
     win.addch(y, x + n - 1, curses.ACS_RTEE)
 
 
-def insert_todo(stdscr, todos: list, index: int, existing_todo=False):
+def insert_todo(stdscr, todos: list, index: int):
     y, x = stdscr.getmaxyx()
-    if existing_todo:
-        todo = todos[index].display_text
-        ncols = max(x // 2, len(todo) + 3) if len(todo) < x - 1 else x // 2
-        begin_x = x // 4 if len(todo) < x - 1 - ncols else (x - ncols) // 2
-        todos[index].set_display_text(
-            wgetnstr(curses.newwin(3, ncols, y // 2 - 3, begin_x), chars=todo)
-        )
-        return todos
     if (todo := wgetnstr(curses.newwin(3, x // 2, y // 2 - 3, x // 4))) == "":
         return todos
     todos.insert(index, Todo(f"- {todo}"))
@@ -791,7 +783,17 @@ def color_todo(stdscr, todos, selected):
 
 
 def edit_todo(stdscr, todos, selected):
-    todos = insert_todo(stdscr, todos, selected, True)
+    y, x = stdscr.getmaxyx()
+    todo = todos[selected].display_text
+    ncols = max(x // 2, len(todo) + 3) if len(todo) < x - 1 else x // 2
+    begin_x = x // 4 if len(todo) < x - 1 - ncols else (x - ncols) // 2
+    if (
+        edited_todo := wgetnstr(
+            curses.newwin(3, ncols, y // 2 - 3, begin_x), chars=todo
+        )
+    ) == "":
+        return todos
+    todos[selected].set_display_text(edited_todo)
     stdscr.clear()
     update_file(FILENAME, todos)
     return todos
