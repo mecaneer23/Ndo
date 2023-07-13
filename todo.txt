@@ -1,5 +1,5 @@
 -7 make editing work on VT100 terminals (alacritty/xterm)
--7 make selected empty todos look better
++7 make selected empty todos look better
 -7 add bullet points
 
 -2 add search

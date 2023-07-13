@@ -673,13 +673,24 @@ def print_todos(win, todos, selected):
         make_printable_sublist(height - 1, todos, int(selected))
     )
     for i, v in enumerate(new_todos):
-        display_text = (
-            strikethrough(v.display_text) if v.startswith("+") else v.display_text
+        display_string = (
+            "⎯" * 8
+            if i in selected and isinstance(v, EmptyTodo)
+            else "  ".join(
+                [
+                    v.get_box(),
+                    (
+                        strikethrough(v.display_text)
+                        if v.startswith("+")
+                        else v.display_text
+                    )[: width - 4].ljust(width - 4, " "),
+                ]
+            )
         )
         win.addstr(
             i + 1,
             0,
-            f"{v.get_box()}  {display_text[:width - 4].ljust(width - 4, ' ')}",
+            display_string,
             curses.color_pair(v.color or get_color("White"))
             | (curses.A_REVERSE if i in selected else 0),
         )
