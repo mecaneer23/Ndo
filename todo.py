@@ -37,8 +37,9 @@ class Todo:
             return get_color(color)
         return color
 
-    def __init__(self, text, indent=0, color="White"):
+    def __init__(self, text, color="White"):
         self.text = str(text)
+        self.indent = len(text) - len(text.lstrip())
         self.box_char = self.text[0]
         self.display_text = self.text.split(" ", 1)[1]
         self.color = self._set_color(color)
@@ -333,8 +334,8 @@ def update_file(filename, lst, save=AUTOSAVE):
 
 
 def print(message):
-    with open("debugging/log.txt", "w") as f:
-        f.write(message)
+    with open("debugging/log.txt", "a") as f:
+        f.write(str(message))
 
 
 def wgetnstr(win, n=1024, chars="", cursor="█"):
