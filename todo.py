@@ -244,7 +244,7 @@ def get_args():
         add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Controls:\n  "
-        + "\n  ".join(md_table_to_lines(39, 57, str(HELP_FILE), ["<kbd>", "</kbd>"])),
+        + "\n  ".join(md_table_to_lines(40, 58, str(HELP_FILE), ["<kbd>", "</kbd>"])),
     )
     parser.add_argument(
         "--help",
@@ -298,8 +298,8 @@ def get_args():
         "-i",
         type=int,
         default=INDENT,
-        help=f"Allows specification of indentation level\
-            default is `{INDENT}`.",
+        help=f"Allows specification of indentation level. \
+            Default is `{INDENT}`.",
     )
     return parser.parse_args()
 
@@ -578,7 +578,7 @@ def md_table_to_lines(
 def help_menu(parent_win):
     parent_win.clear()
     parent_win.addstr(0, 0, "Help:", curses.A_BOLD)
-    lines = md_table_to_lines(39, 57, str(HELP_FILE), ["<kbd>", "</kbd>"])
+    lines = md_table_to_lines(40, 58, str(HELP_FILE), ["<kbd>", "</kbd>"])
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
