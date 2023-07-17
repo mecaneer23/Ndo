@@ -333,9 +333,9 @@ def update_file(filename, lst, save=AUTOSAVE):
         return f.write("\n".join(map(repr, lst)))
 
 
-def print(message):
+def print(message, end="\n"):
     with open("debugging/log.txt", "a") as f:
-        f.write(str(message))
+        f.write(f"{message}{end}")
 
 
 def wgetnstr(win, n=1024, chars="", cursor="█"):
