@@ -31,7 +31,7 @@ COLORS = {
 
 class Todo:
     def _init_color_dtext(self):
-        counter = self.indent
+        counter = self.indent_level
         while True:
             if self._text[counter] == " ":
                 if (color := self._text[counter - 1]) == "-":
@@ -41,8 +41,8 @@ class Todo:
 
     def __init__(self, text):
         self._text = str(text)
-        self.indent = len(text) - len(text.lstrip())
-        self.box_char = self._text[self.indent]
+        self.indent_level = len(text) - len(text.lstrip())
+        self.box_char = self._text[self.indent_level]
         self.color, self.display_text = self._init_color_dtext()
 
     def __getitem__(self, key):
@@ -78,18 +78,27 @@ class Todo:
         self.box_char = new_box
         self._text = repr(self)
 
+    def indent(self):
+        self.indent_level += INDENT
+        self._text = repr(self)
+
+    def dedent(self):
+        if self.indent_level >= INDENT:
+            self.indent_level -= INDENT
+            self._text = repr(self)
+
     def __str__(self):
         return repr(self)
 
     def __repr__(self):
-        return f"{self.indent * ' '}{self.box_char}{self.color} {self.display_text}"
+        return f"{self.indent_level * ' '}{self.box_char}{self.color} {self.display_text}"
 
 
 class EmptyTodo(Todo):
     def __init__(self):
         self.display_text = ""
         self.color = 7
-        self.indent = 0
+        self.indent_level = 0
 
     def startswith(self, *_):
         return False
@@ -678,7 +687,7 @@ def print_todos(win, todos, selected):
         display_string = (
             "".join(
                 [
-                    v.indent * " ",
+                    v.indent_level * " ",
                     f"{v.get_box()}  ",
                     (
                         strikethrough(v.display_text)
@@ -883,6 +892,22 @@ def relative_cursor_to(
         return selected
 
 
+def indent(stdscr, todos, selected):
+    for pos in selected.positions:
+        todos[pos].indent()
+    stdscr.clear()
+    update_file(FILENAME, todos)
+    return todos, selected.positions[0]
+
+
+def dedent(stdscr, todos, selected):
+    for pos in selected.positions:
+        todos[pos].dedent()
+    stdscr.clear()
+    update_file(FILENAME, todos)
+    return todos, selected.positions[0]
+
+
 def init():
     curses.use_default_colors()
     curses.curs_set(0)
@@ -1006,6 +1031,12 @@ def main(stdscr, header):
             stdscr.nodelay(False)
         elif key == 113:  # q
             return quit_program(todos)
+        elif key == 9:  # tab
+            history.add_undo(reset_todos, todos)
+            todos = selected.todo_set_to(history.do(indent, stdscr, todos, selected))
+        elif key == 353:  # shift + tab
+            history.add_undo(reset_todos, todos)
+            todos = selected.todo_set_to(history.do(dedent, stdscr, todos, selected))
         elif key == 10:  # enter
             if isinstance(todos[int(selected)], EmptyTodo):
                 continue
