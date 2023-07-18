@@ -1,6 +1,9 @@
 -7 make editing work on VT100 terminals (alacritty/xterm)
 +7 make selected empty todos look better
 -7 add bullet points
+  -7 like this
+  -4 or this
+    -3 or even something like this
 +7 fix bug where edited empty todo becomes todo with nothing in it
 
 -2 add search

@@ -32,30 +32,30 @@ COLORS = {
 class Todo:
     def _set_color(self, color):
         if str(color).isalpha():
-            if len(self.text) - len(self.display_text) == 3:
-                return int(self.text[1])
+            if len(self._text) - len(self.display_text) == 3:
+                return int(self._text[self.indent + 1])
             return get_color(color)
         return color
 
     def __init__(self, text, color="White"):
-        self.text = str(text)
+        self._text = str(text)
         self.indent = len(text) - len(text.lstrip())
-        self.box_char = self.text[0]
-        self.display_text = self.text.split(" ", 1)[1]
+        self.box_char = self._text[self.indent]
+        self.display_text = self._text[self.indent + 1:].lstrip()
         self.color = self._set_color(color)
 
     def __getitem__(self, key):
-        return self.text[key]
+        return self._text[key]
 
-    def set_display_text(self, text):
-        self.display_text = text
-        self.text = self.text.split()[0] + " " + text
+    def set_display_text(self, display_text):
+        self.display_text = display_text
+        self._text = repr(self)
 
     def split(self, *a):
-        return self.text.split(*a)
+        return self._text.split(*a)
 
     def startswith(self, *a):
-        return self.text.startswith(*a)
+        return self._text.startswith(*a)
 
     def set_color(self, color):
         self.color = color if color not in (None, 0) else 7
@@ -69,16 +69,19 @@ class Todo:
         if self.box_char in table:
             return table[self.box_char]
         raise KeyError(
-            f"The completion indicator of `{self.text}` is not one of (+, -)"
+            f"The completion indicator of `{self._text}` is not one of (+, -)"
         )
 
     def toggle(self):
         new_box = {"+": "-", "-": "+"}[self.box_char]
         self.box_char = new_box
-        self.text = repr(self)
+        self._text = repr(self)
+
+    def __str__(self):
+        return repr(self)
 
     def __repr__(self):
-        return f"{self.box_char}{self.color} {self.display_text}"
+        return f"{self.indent * ' '}{self.box_char}{self.color} {self.display_text}"
 
 
 class EmptyTodo(Todo):
