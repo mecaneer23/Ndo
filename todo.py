@@ -30,19 +30,26 @@ COLORS = {
 
 
 class Todo:
-    def _set_color(self, color):
+    def _init_color(self, color):
         if str(color).isalpha():
             if len(self._text) - len(self.display_text) == 3:
                 return int(self._text[self.indent + 1])
             return get_color(color)
         return color
 
+    def _init_display_text(self):
+        counter = self.indent
+        while True:
+            if self._text[counter] == " ":
+                return self._text[counter:].lstrip()
+            counter += 1
+
     def __init__(self, text, color="White"):
         self._text = str(text)
         self.indent = len(text) - len(text.lstrip())
         self.box_char = self._text[self.indent]
-        self.display_text = self._text[self.indent + 1:].lstrip()
-        self.color = self._set_color(color)
+        self.display_text = self._init_display_text()
+        self.color = self._init_color(color)
 
     def __getitem__(self, key):
         return self._text[key]
@@ -58,7 +65,7 @@ class Todo:
         return self._text.startswith(*a)
 
     def set_color(self, color):
-        self.color = color if color not in (None, 0) else 7
+        self.color = 7 if color in (None, 0, 7) else color
 
     def get_box(self):
         table = {
@@ -88,6 +95,7 @@ class EmptyTodo(Todo):
     def __init__(self):
         self.display_text = ""
         self.color = 7
+        self.indent = 0
 
     def startswith(self, *_):
         return False
@@ -671,12 +679,13 @@ def print_todos(win, todos, selected):
         make_printable_sublist(height - 1, todos, int(selected))
     )
     for i, v in enumerate(new_todos):
+        if v.color is None:
+            raise ValueError(f"Invalid color for `{v}`")
         display_string = (
-            "⎯" * 8
-            if i in selected and isinstance(v, EmptyTodo)
-            else "  ".join(
+            "".join(
                 [
-                    v.get_box(),
+                    v.indent * " ",
+                    f"{v.get_box()}  ",
                     (
                         strikethrough(v.display_text)
                         if v.startswith("+")
@@ -684,6 +693,8 @@ def print_todos(win, todos, selected):
                     )[: width - 4].ljust(width - 4, " "),
                 ]
             )
+            if i not in selected or not isinstance(v, EmptyTodo)
+            else "⎯" * 8
         )
         win.addstr(
             i + 1,

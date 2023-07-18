@@ -4,6 +4,9 @@
   -7 like this
   -4 or this
     -3 or even something like this
+-7 make new_todo_next() use current indentation level
+-7 add <tab> for indent
+-7 add <shift+tab> for dedent
 +7 fix bug where edited empty todo becomes todo with nothing in it
 
 -2 add search
