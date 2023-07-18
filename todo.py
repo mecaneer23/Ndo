@@ -30,19 +30,20 @@ COLORS = {
 
 
 class Todo:
-    def _init_display_text(self):
+    def _init_color_dtext(self):
         counter = self.indent
         while True:
             if self._text[counter] == " ":
-                return self._text[counter:].lstrip()
+                if (color := self._text[counter - 1]) == "-":
+                    color = 7
+                return int(color), self._text[counter:].lstrip()
             counter += 1
 
     def __init__(self, text):
         self._text = str(text)
         self.indent = len(text) - len(text.lstrip())
         self.box_char = self._text[self.indent]
-        self.display_text = self._init_display_text()
-        self.color = int(self._text[self.indent + 1])
+        self.color, self.display_text = self._init_color_dtext()
 
     def __getitem__(self, key):
         return self._text[key]
