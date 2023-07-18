@@ -7,11 +7,7 @@ from typing import List
 
 STRIKETHROUGH = False
 FILESTRING = "todo.txt"
-FILENAME = (
-    Path(__file__).parent.joinpath(FILESTRING).absolute()
-    if not Path(FILESTRING).is_file()
-    else Path(FILESTRING)
-)
+FILENAME = Path(FILESTRING)
 HELP_FILE = Path(__file__).parent.joinpath("README.md").absolute()
 AUTOSAVE = True
 HEADER = "TODO"
