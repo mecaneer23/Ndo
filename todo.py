@@ -30,13 +30,6 @@ COLORS = {
 
 
 class Todo:
-    def _init_color(self, color):
-        if str(color).isalpha():
-            if len(self._text) - len(self.display_text) == 3:
-                return int(self._text[self.indent + 1])
-            return get_color(color)
-        return color
-
     def _init_display_text(self):
         counter = self.indent
         while True:
@@ -44,12 +37,12 @@ class Todo:
                 return self._text[counter:].lstrip()
             counter += 1
 
-    def __init__(self, text, color="White"):
+    def __init__(self, text):
         self._text = str(text)
         self.indent = len(text) - len(text.lstrip())
         self.box_char = self._text[self.indent]
         self.display_text = self._init_display_text()
-        self.color = self._init_color(color)
+        self.color = int(self._text[self.indent + 1])
 
     def __getitem__(self, key):
         return self._text[key]
@@ -65,7 +58,7 @@ class Todo:
         return self._text.startswith(*a)
 
     def set_color(self, color):
-        self.color = 7 if color in (None, 0, 7) else color
+        self.color = color
 
     def get_box(self):
         table = {
