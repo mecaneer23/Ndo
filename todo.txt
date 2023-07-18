@@ -1,9 +1,8 @@
 -7 make editing work on VT100 terminals (alacritty/xterm)
 -7 fix scrolling on long todo lists in make_printable_sublist()
-+7 update new keybinds in readme and ensure table sizes are still correct
 
 -2 add search
 -6 add sidebar with additional todo info if screen is wide enough
 -6 multiline todos?
--3 fix redo (needs to do opposite function of whatever undo function just did)
--1 multiple columns/associated keybinds
+-3 fix redo
+-1 add multiple column support
