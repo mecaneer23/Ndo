@@ -87,7 +87,9 @@ class Todo:
         return repr(self)
 
     def __repr__(self):
-        return f"{self.indent_level * ' '}{self.box_char}{self.color} {self.display_text}"
+        return (
+            f"{self.indent_level * ' '}{self.box_char}{self.color} {self.display_text}"
+        )
 
 
 class EmptyTodo(Todo):
@@ -750,10 +752,7 @@ def todo_down(stdscr, todos, selected):
     return todos, cursor_down(selected, len(todos))
 
 
-def new_todo_next(
-    stdscr, todos: list, selected: int, paste: bool = False
-):
-    indent_level = todos[selected].indent_level
+def new_todo_next(stdscr, todos: list, selected: int, paste: bool = False):
     temp = todos.copy()
     todos = (
         insert_todo(stdscr, todos, selected + 1, todos[selected].indent_level)
