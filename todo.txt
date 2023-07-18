@@ -1,7 +1,7 @@
 -7 make editing work on VT100 terminals (alacritty/xterm)
 +7 fix add todo
 -7 fix scrolling on long todo lists in make_printable_sublist()
--7 make new_todo_next() use current indentation level
++7 make new_todo_next() use current indentation level
 +7 add <tab> for indent
 +7 add <shift+tab> for dedent
 

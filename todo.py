@@ -496,11 +496,11 @@ def hline(win, y, x, ch, n):
     win.addch(y, x + n - 1, curses.ACS_RTEE)
 
 
-def insert_todo(stdscr, todos: list, index: int):
+def insert_todo(stdscr, todos: list, index: int, indent_level=0):
     y, x = stdscr.getmaxyx()
     if (todo := wgetnstr(curses.newwin(3, x // 2, y // 2 - 3, x // 4))) == "":
         return todos
-    todos.insert(index, Todo(f"- {todo}"))
+    todos.insert(index, Todo(f"{' ' * indent_level}- {todo}"))
     return todos
 
 
@@ -755,15 +755,12 @@ def todo_down(stdscr, todos, selected):
 
 
 def new_todo_next(
-    stdscr, todos: list, selected: int, todo: Todo = None, paste: bool = False
+    stdscr, todos: list, selected: int, paste: bool = False
 ):
+    indent_level = todos[selected].indent_level
     temp = todos.copy()
-    if todo is not None:
-        todos.insert(selected, Todo(f"- {todo.display_text}"))
-        update_file(FILENAME, todos)
-        return todos, selected
     todos = (
-        insert_todo(stdscr, todos, selected + 1)
+        insert_todo(stdscr, todos, selected + 1, todos[selected].indent_level)
         if not paste
         else todo_from_clipboard(todos, selected)
     )
