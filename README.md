@@ -21,11 +21,13 @@ python3 todo.py [options] [filename]
 ## Flags
 
 Positional arguments:
+
 | Argument | Description                                                          |
 | -------- | -------------------------------------------------------------------- |
 | filename | Provide a filename to store the todo list in. Default is `todo.txt`. |
 
 Options:
+
 | Option                                                      | Description                                                                                                     |
 | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | --help, -h                                                  | Show this help message and exit.                                                                                |
