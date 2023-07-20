@@ -676,9 +676,8 @@ def make_printable_sublist(height: int, lst: list, cursor: int):
 
 def print_todos(win, todos, selected):
     height, width = win.getmaxyx()
-    new_todos = selected.todo_set_to(
-        make_printable_sublist(height - 1, todos, int(selected))
-    )
+    new_todos, temp_selected = make_printable_sublist(height - 1, todos, int(selected))
+    highlight = [temp_selected, *selected.positions[1:]]
     for i, v in enumerate(new_todos):
         if v.color is None:
             raise ValueError(f"Invalid color for `{v}`")
@@ -694,7 +693,7 @@ def print_todos(win, todos, selected):
                     )[: width - 4].ljust(width - 4, " "),
                 ]
             )
-            if i not in selected or not isinstance(v, EmptyTodo)
+            if i not in highlight or not isinstance(v, EmptyTodo)
             else "⎯" * 8
         )
         win.addstr(
@@ -702,7 +701,7 @@ def print_todos(win, todos, selected):
             0,
             display_string,
             curses.color_pair(v.color or get_color("White"))
-            | (curses.A_REVERSE if i in selected else 0),
+            | (curses.A_REVERSE if i in highlight else 0),
         )
 
 

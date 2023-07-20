@@ -1,5 +1,5 @@
 -7 make editing work on VT100 terminals (alacritty/xterm)
--7 fix scrolling on long todo lists in make_printable_sublist()
++7 fix scrolling on long todo lists in print_todos()
 
 -2 add search
 -6 add sidebar with additional todo info if screen is wide enough
