@@ -754,7 +754,12 @@ def todo_down(stdscr, todos, selected):
 def new_todo_next(stdscr, todos: list, selected: int, paste: bool = False):
     temp = todos.copy()
     todos = (
-        insert_todo(stdscr, todos, selected + 1, todos[selected].indent_level)
+        insert_todo(
+            stdscr,
+            todos,
+            selected + 1,
+            todos[selected].indent_level if len(todos) > 1 else 0,
+        )
         if not paste
         else todo_from_clipboard(todos, selected)
     )
@@ -775,13 +780,13 @@ def new_todo_current(stdscr, todos, selected):
 def delete_todo(stdscr, todos, selected):
     if isinstance(selected, Cursor):
         positions = selected.get_deletable()
+        selected.set_to(cursor_up(int(selected), len(todos)))
     elif isinstance(selected, int):
         positions = [selected]
     for pos in positions:
         todos = remove_todo(todos, pos)
     stdscr.clear()
     update_file(FILENAME, todos)
-    selected.set_to(cursor_up(int(selected), len(todos)))
     return todos, int(selected)
 
 
@@ -958,13 +963,7 @@ def main(stdscr, header):
             todos = history.do(new_todo_current, stdscr, todos, int(selected))
             history.add_undo(delete_todo, stdscr, todos, int(selected))
         elif key == 100:  # d
-            history.add_undo(
-                lambda _, todos, selected, __=None: (todos, selected),
-                stdscr,
-                todos,
-                int(selected),
-                todos[int(selected)],
-            )
+            history.add_undo(lambda a, b: (a, b), todos, int(selected))
             todos = selected.todo_set_to(
                 history.do(delete_todo, stdscr, todos, selected)
             )
