@@ -1,5 +1,5 @@
 -7 make editing work on VT100 terminals (alacritty/xterm)
-+7 fix scrolling on long todo lists in print_todos()
+-7 fix extra line selected on indented selected last todo
 
 -2 add search
 -6 add sidebar with additional todo info if screen is wide enough
