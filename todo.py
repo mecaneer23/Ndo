@@ -692,10 +692,10 @@ def print_todos(win, todos, selected):
                         else v.display_text
                     ),
                 ]
-            )[: width - 1].ljust(width - 1, " ")
+            )
             if i not in highlight or not isinstance(v, EmptyTodo)
             else "⎯" * 8
-        )
+        )[: width - 1].ljust(width - 1, " ")
         win.addstr(
             i + 1,
             0,
@@ -739,14 +739,12 @@ def cursor_to(position, len_todos):
 
 def todo_up(stdscr, todos, selected):
     todos = swap_todos(todos, selected, selected - 1)
-    stdscr.clear()
     update_file(FILENAME, todos)
     return todos, cursor_up(selected, len(todos))
 
 
 def todo_down(stdscr, todos, selected):
     todos = swap_todos(todos, selected, selected + 1)
-    stdscr.clear()
     update_file(FILENAME, todos)
     return todos, cursor_down(selected, len(todos))
 
@@ -839,7 +837,6 @@ def paste_todo(stdscr, todos, selected):
 def blank_todo(stdscr, todos, selected):
     insert_empty_todo(todos, selected + 1)
     selected = cursor_down(selected, len(todos))
-    stdscr.clear()
     update_file(FILENAME, todos)
     return todos, selected
 
@@ -891,7 +888,6 @@ def relative_cursor_to(
 def indent(stdscr, todos, selected):
     for pos in selected.positions:
         todos[pos].indent()
-    stdscr.clear()
     update_file(FILENAME, todos)
     return todos, selected.positions[0]
 
@@ -899,7 +895,6 @@ def indent(stdscr, todos, selected):
 def dedent(stdscr, todos, selected):
     for pos in selected.positions:
         todos[pos].dedent()
-    stdscr.clear()
     update_file(FILENAME, todos)
     return todos, selected.positions[0]
 
