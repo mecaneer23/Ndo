@@ -690,9 +690,9 @@ def print_todos(win, todos, selected):
                         strikethrough(v.display_text)
                         if v.startswith("+")
                         else v.display_text
-                    )[: width - 4].ljust(width - 4, " "),
+                    ),
                 ]
-            )
+            )[: width - 4].ljust(width - 4, " ")
             if i not in highlight or not isinstance(v, EmptyTodo)
             else "⎯" * 8
         )
