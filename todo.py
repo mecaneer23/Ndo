@@ -297,7 +297,7 @@ def get_args():
         default=HEADER,
         help=f"Allows passing alternate header.\
             Make sure to quote multi-word headers.\
-            Default is `{HEADER}`.",
+            Default is filename.",
     )
     parser.add_argument(
         "--help-file",
@@ -324,7 +324,7 @@ def handle_args(args):
     FILENAME = Path(args.filename)
     HELP_FILE = Path(args.help_file)
     STRIKETHROUGH = args.strikethrough
-    HEADER = args.title
+    HEADER = FILENAME.name if args.title == HEADER else args.title
 
 
 def deepcopy_ignore(lst):
