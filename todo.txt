@@ -1,6 +1,6 @@
 -7 make editing work on VT100 terminals (alacritty/xterm)
 +7 make wgetnstr call in insert_todo width 3/4 of screen instead of 1/2
--7 make wgetnstr call in edit_todo default width 3/4 of screen instead of 1/2
++7 make wgetnstr call in edit_todo default width 3/4 of screen instead of 1/2
 
 -2 add search
 -6 add sidebar with additional todo info if screen is wide enough

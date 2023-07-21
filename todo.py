@@ -800,8 +800,8 @@ def color_todo(stdscr, todos, selected):
 def edit_todo(stdscr, todos, selected):
     y, x = stdscr.getmaxyx()
     todo = todos[selected].display_text
-    ncols = max(x // 2, len(todo) + 3) if len(todo) < x - 1 else x // 2
-    begin_x = x // 4 if len(todo) < x - 1 - ncols else (x - ncols) // 2
+    ncols = max(x * 3 // 4, len(todo) + 3) if len(todo) < x - 1 else x * 3 // 4
+    begin_x = x // 8 if len(todo) < x - 1 - ncols else (x - ncols) // 2
     if (
         edited_todo := wgetnstr(
             curses.newwin(3, ncols, y // 2 - 3, begin_x), chars=todo
