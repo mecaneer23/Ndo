@@ -496,7 +496,7 @@ def hline(win, y, x, ch, n):
 
 def insert_todo(stdscr, todos: list, index: int, indent_level=0):
     y, x = stdscr.getmaxyx()
-    if (todo := wgetnstr(curses.newwin(3, x // 2, y // 2 - 3, x // 4))) == "":
+    if (todo := wgetnstr(curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8))) == "":
         return todos
     todos.insert(index, Todo(f"{' ' * indent_level}- {todo}"))
     return todos
