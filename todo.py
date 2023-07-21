@@ -10,7 +10,7 @@ FILESTRING = "todo.txt"
 FILENAME = Path(FILESTRING)
 HELP_FILE = Path(__file__).parent.joinpath("README.md").absolute()
 AUTOSAVE = True
-HEADER = "TODO"
+HEADER = ""
 DEBUG_FLAG = False
 INDENT = 2
 
