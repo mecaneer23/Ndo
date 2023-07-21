@@ -1,5 +1,5 @@
 -7 make editing work on VT100 terminals (alacritty/xterm)
-+7 fix extra line selected on indented selected last todo
+-7 make wgetnstr width 3/4 of screen instead of 1/2
 
 -2 add search
 -6 add sidebar with additional todo info if screen is wide enough
