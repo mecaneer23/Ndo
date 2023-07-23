@@ -422,6 +422,7 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█"):
         elif ch == 24:  # ctrl + x
             if mode is not None:
                 mode.toggle()
+                return "".join(chars)
         elif ch == 23:  # ctrl + backspace
             while True:
                 if position <= 0:
@@ -944,12 +945,12 @@ def main(stdscr, header):
     while True:
         stdscr.addstr(0, 0, f"{header}:")
         print_todos(stdscr, todos, selected)
+        stdscr.refresh()
         if not mode.toggle_mode:
             todos = selected.todo_set_to(
                 history.do(new_todo_next, stdscr, todos, int(selected), mode)
             )
             history.add_undo(delete_todo, stdscr, todos, int(selected))
-            stdscr.refresh()
             continue
         try:
             key = stdscr.getch()

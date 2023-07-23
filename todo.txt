@@ -1,5 +1,5 @@
 -7 make editing work on VT100 terminals (alacritty/xterm)
--7 add toggle mode/normal mode to enter key (allows rapid text entry)
++7 add toggle mode/normal mode to enter key (allows rapid text entry)
 
 -2 add search
 -6 add sidebar with additional todo info if screen is wide enough
