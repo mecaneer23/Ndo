@@ -39,25 +39,26 @@ Options:
 
 ## Controls
 
-| Keys                                           | Description                    |
-| ---------------------------------------------- | ------------------------------ |
-| <kbd>h</kbd>                                   | Show a list of controls        |
-| <kbd>k</kbd>/<kbd>j</kbd>                      | Move cursor up and down        |
-| <kbd>Shift</kbd>+<kbd>k</kbd>/<kbd>j</kbd>     | Move todo up and down          |
-| <kbd>Alt</kbd>+<kbd>k</kbd>/<kbd>j</kbd>       | Select/deselect multiple todos |
-| <kbd>o</kbd>                                   | Add a new todo                 |
-| <kbd>Shift</kbd>+<kbd>o</kbd>                  | Add a todo on current line     |
-| <kbd>d</kbd>                                   | Remove selected todo           |
-| <kbd>c</kbd>                                   | Change selected todo color     |
-| <kbd>i</kbd>                                   | Edit an existing todo          |
-| <kbd>y</kbd>                                   | Copy todo to clipboard         |
-| <kbd>p</kbd>                                   | New todo from clipboard        |
-| <kbd>g</kbd>/<kbd>Shift</kbd>+<kbd>g</kbd>     | Jump to top/bottom of todos    |
-| <kbd>u</kbd>                                   | Undo change                    |
-| <kbd>-</kbd>                                   | Insert blank line              |
-| <kbd>Tab</kbd>/<kbd>Shift</kbd>+<kbd>Tab</kbd> | Indent/unindent selected todo  |
-| <kbd>q</kbd>, <kbd>Ctrl</kbd>+<kbd>c</kbd>     | Quit                           |
-| <kbd>Enter</kbd>                               | Toggle a todo as completed     |
+| Keys                                           | Description                       |
+| ---------------------------------------------- | --------------------------------- |
+| <kbd>h</kbd>                                   | Show a list of controls           |
+| <kbd>k</kbd>/<kbd>j</kbd>                      | Move cursor up and down           |
+| <kbd>Shift</kbd>+<kbd>k</kbd>/<kbd>j</kbd>     | Move todo up and down             |
+| <kbd>Alt</kbd>+<kbd>k</kbd>/<kbd>j</kbd>       | Select/deselect multiple todos    |
+| <kbd>o</kbd>                                   | Add a new todo                    |
+| <kbd>Shift</kbd>+<kbd>o</kbd>                  | Add a todo on current line        |
+| <kbd>d</kbd>                                   | Remove selected todo              |
+| <kbd>c</kbd>                                   | Change selected todo color        |
+| <kbd>i</kbd>                                   | Edit an existing todo             |
+| <kbd>y</kbd>                                   | Copy todo to clipboard            |
+| <kbd>p</kbd>                                   | New todo from clipboard           |
+| <kbd>g</kbd>/<kbd>Shift</kbd>+<kbd>g</kbd>     | Jump to top/bottom of todos       |
+| <kbd>u</kbd>                                   | Undo change                       |
+| <kbd>-</kbd>                                   | Insert blank line                 |
+| <kbd>Ctrl</kbd>+<kbd>x</kbd>                   | Toggle `toggle` and `entry` modes |
+| <kbd>Tab</kbd>/<kbd>Shift</kbd>+<kbd>Tab</kbd> | Indent/unindent selected todo     |
+| <kbd>q</kbd>, <kbd>Ctrl</kbd>+<kbd>c</kbd>     | Quit                              |
+| <kbd>Enter</kbd>                               | Toggle a todo as completed        |
 
 ## Bugs
 
