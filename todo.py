@@ -30,9 +30,11 @@ class Todo:
         counter = self.indent_level
         while True:
             if self._text[counter] == " ":
-                if (color := self._text[counter - 1]) == "-":
-                    color = 7
-                return int(color), self._text[counter:].lstrip()
+                return (
+                    7
+                    if self._text[counter - 1] == "-"
+                    else int(self._text[counter - 1])
+                ), self._text[counter:].lstrip()
             counter += 1
 
     def __init__(self, text):
