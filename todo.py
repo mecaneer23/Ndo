@@ -1046,7 +1046,7 @@ def main(stdscr, header):
         elif key == 9:  # tab
             history.add_undo(reset_todos, todos)
             todos = selected.todo_set_to(history.do(indent, stdscr, todos, selected))
-        elif key == 353:  # shift + tab
+        elif key in (351, 353):  # shift + tab
             history.add_undo(reset_todos, todos)
             todos = selected.todo_set_to(history.do(dedent, stdscr, todos, selected))
         elif key == 24:  # ctrl + x
