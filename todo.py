@@ -425,6 +425,8 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█"):
         try:
             ch = win.getch()
         except KeyboardInterrupt:  # ctrl+c
+            if mode is not None:
+                mode.toggle()
             return original
         if ch in (10, 13):  # enter
             break
@@ -449,6 +451,8 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█"):
             win.nodelay(True)
             escape = win.getch()  # skip `[`
             if escape == -1:  # escape
+                if mode is not None:
+                    mode.toggle()
                 return original
             elif escape == 100:  # ctrl + delete
                 if position < len(chars) - 1:
