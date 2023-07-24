@@ -231,6 +231,14 @@ class Cursor:
         self.deselect_next()
 
 
+class Mode:
+    def __init__(self, toggle_mode):
+        self.toggle_mode = toggle_mode
+
+    def toggle(self):
+        self.toggle_mode = not self.toggle_mode
+
+
 def to_debug_file(filename: Path, message: str, mode="w"):
     if DEBUG_FLAG:
         with filename.open(mode) as f:
@@ -352,7 +360,7 @@ def print(message, end="\n"):
         f.write(f"{message}{end}")
 
 
-def wgetnstr(win, n=1024, chars="", cursor="█"):
+def wgetnstr(win, mode=None, n=1024, chars="", cursor="█"):
     """
     Reads a string from the given window with max chars n\
     and initial chars chars. Returns a string from the user\
@@ -411,6 +419,9 @@ def wgetnstr(win, n=1024, chars="", cursor="█"):
             if position > 0:
                 position -= 1
                 chars.pop(position)
+        elif ch == 24:  # ctrl + x
+            if mode is not None:
+                mode.toggle()
         elif ch == 23:  # ctrl + backspace
             while True:
                 if position <= 0:
@@ -496,9 +507,9 @@ def hline(win, y, x, ch, n):
     win.addch(y, x + n - 1, curses.ACS_RTEE)
 
 
-def insert_todo(stdscr, todos: list, index: int, indent_level=0):
+def insert_todo(stdscr, todos: list, index: int, mode=None, indent_level=0):
     y, x = stdscr.getmaxyx()
-    if (todo := wgetnstr(curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8))) == "":
+    if (todo := wgetnstr(curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8), mode=mode)) == "":
         return todos
     todos.insert(index, Todo(f"{' ' * indent_level}- {todo}"))
     return todos
@@ -751,13 +762,14 @@ def todo_down(stdscr, todos, selected):
     return todos, cursor_down(selected, len(todos))
 
 
-def new_todo_next(stdscr, todos: list, selected: int, paste: bool = False):
+def new_todo_next(stdscr, todos: list, selected: int, mode=None, paste: bool = False):
     temp = todos.copy()
     todos = (
         insert_todo(
             stdscr,
             todos,
             selected + 1,
+            mode,
             todos[selected].indent_level if len(todos) > 1 else 0,
         )
         if not paste
@@ -927,15 +939,25 @@ def main(stdscr, header):
     ]
     selected = Cursor(0)
     history = UndoRedo()
+    mode = Mode(True)
 
     while True:
         stdscr.addstr(0, 0, f"{header}:")
         print_todos(stdscr, todos, selected)
+        if not mode.toggle_mode:
+            todos = selected.todo_set_to(
+                history.do(new_todo_next, stdscr, todos, int(selected), mode)
+            )
+            history.add_undo(delete_todo, stdscr, todos, int(selected))
+            stdscr.refresh()
+            continue
         try:
             key = stdscr.getch()
         except KeyboardInterrupt:  # exit on ^C
             return quit_program(todos)
-        if key in (259, 107):  # up | k
+        if key == 113:  # q
+            return quit_program(todos)
+        elif key in (259, 107):  # up | k
             history.add_undo(cursor_to, int(selected), len(todos))
             selected.set_to(history.do(cursor_up, int(selected), len(todos)))
         elif key in (258, 106):  # down | j
@@ -1016,14 +1038,14 @@ def main(stdscr, header):
             elif subch == 107:  # alt + k
                 selected.multiselect_up()
             stdscr.nodelay(False)
-        elif key == 113:  # q
-            return quit_program(todos)
         elif key == 9:  # tab
             history.add_undo(reset_todos, todos)
             todos = selected.todo_set_to(history.do(indent, stdscr, todos, selected))
         elif key == 353:  # shift + tab
             history.add_undo(reset_todos, todos)
             todos = selected.todo_set_to(history.do(dedent, stdscr, todos, selected))
+        elif key == 24:  # ctrl + x
+            mode.toggle()
         elif key == 10:  # enter
             if isinstance(todos[int(selected)], EmptyTodo):
                 continue
