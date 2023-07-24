@@ -56,6 +56,7 @@ Options:
 | <kbd>g</kbd>/<kbd>Shift</kbd>+<kbd>g</kbd>     | Jump to top/bottom of todos       |
 | <kbd>u</kbd>                                   | Undo change                       |
 | <kbd>-</kbd>                                   | Insert blank line                 |
+| <kbd>/</kbd>                                   | Search for a sequence             |
 | <kbd>Ctrl</kbd>+<kbd>x</kbd>                   | Toggle `toggle` and `entry` modes |
 | <kbd>Tab</kbd>/<kbd>Shift</kbd>+<kbd>Tab</kbd> | Indent/unindent selected todo     |
 | <kbd>q</kbd>, <kbd>Ctrl</kbd>+<kbd>c</kbd>     | Quit                              |

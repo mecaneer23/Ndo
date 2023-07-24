@@ -269,7 +269,7 @@ def get_args():
         add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Controls:\n  "
-        + "\n  ".join(md_table_to_lines(43, 63, str(HELP_FILE), ["<kbd>", "</kbd>"])),
+        + "\n  ".join(md_table_to_lines(43, 64, str(HELP_FILE), ["<kbd>", "</kbd>"])),
     )
     parser.add_argument(
         "--help",
@@ -632,7 +632,7 @@ def md_table_to_lines(
 def help_menu(parent_win):
     parent_win.clear()
     parent_win.addstr(0, 0, "Help:", curses.A_BOLD)
-    lines = md_table_to_lines(43, 63, str(HELP_FILE), ["<kbd>", "</kbd>"])
+    lines = md_table_to_lines(43, 64, str(HELP_FILE), ["<kbd>", "</kbd>"])
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
