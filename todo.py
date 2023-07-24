@@ -1039,6 +1039,10 @@ def main(stdscr, header):
             elif subch == 107:  # alt + k
                 selected.multiselect_up()
             stdscr.nodelay(False)
+        elif key == 426:  # alt + j (on windows)
+            selected.multiselect_down()
+        elif key == 427:  # alt + k (on windows)
+            selected.multiselect_up()
         elif key == 9:  # tab
             history.add_undo(reset_todos, todos)
             todos = selected.todo_set_to(history.do(indent, stdscr, todos, selected))
