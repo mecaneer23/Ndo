@@ -139,9 +139,7 @@ class Note(Todo):
         return
 
     def __repr__(self):
-        return (
-            f"{self.indent_level * ' '}{self.color} {self.display_text}"
-        )
+        return f"{self.indent_level * ' '}{self.color} {self.display_text}"
 
 
 class UndoRedo:

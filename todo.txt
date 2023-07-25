@@ -5,5 +5,4 @@
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
 -7 fix indentation at end of long todo lists
-+7 allow todo without box -- "notes"
 -7 add keybindings for working with Notes
