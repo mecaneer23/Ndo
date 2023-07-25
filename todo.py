@@ -4,6 +4,7 @@
 import curses
 from pathlib import Path
 from typing import List
+import re
 
 STRIKETHROUGH = False
 FILESTRING = "todo.txt"
@@ -51,11 +52,8 @@ class Todo:
         self.display_text = display_text
         self._text = repr(self)
 
-    def split(self, *a):
-        return self._text.split(*a)
-
-    def startswith(self, *a):
-        return self._text.startswith(*a)
+    def is_toggled(self):
+        return self.box_char == "+"
 
     def set_color(self, color):
         self.color = color
@@ -101,8 +99,11 @@ class EmptyTodo(Todo):
         self.color = 7
         self.indent_level = 0
 
-    def startswith(self, *_):
+    def is_toggled(self):
         return False
+
+    def toggle(self):
+        return
 
     def set_display_text(self, text):
         self.box_char = "-"
@@ -115,6 +116,32 @@ class EmptyTodo(Todo):
 
     def __repr__(self):
         return self.display_text
+
+
+class Note(Todo):
+    def _init_color_dtext(self):
+        if not self._text[self.indent_level].isdigit():
+            return 7, self._text
+        return (
+            int(self._text[self.indent_level]),
+            self._text[self.indent_level + 2 :],
+        )
+
+    def __init__(self, text):
+        self._text = text
+        self.indent_level = len(text) - len(text.lstrip())
+        self.color, self.display_text = self._init_color_dtext()
+
+    def is_toggled(self):
+        return False
+
+    def toggle(self):
+        return
+
+    def __repr__(self):
+        return (
+            f"{self.indent_level * ' '}{self.color} {self.display_text}"
+        )
 
 
 class UndoRedo:
@@ -255,10 +282,20 @@ def read_file(filename: Path):
         return f.read()
 
 
-def validate_file(data):
-    if len(data) == 0:
+def validate_file(raw_data):
+    if len(raw_data) == 0:
         return []
-    return data.split("\n")
+    usable_data = []
+    for line in raw_data.split("\n"):
+        if len(line) == 0:
+            usable_data.append(EmptyTodo())
+        elif line.lstrip().startswith("-"):
+            usable_data.append(Todo(line))
+        elif re.match(r"^( *\d )?.*$", line):
+            usable_data.append(Note(line))
+        else:
+            raise ValueError(f"Invalid todo: {line}")
+    return usable_data
 
 
 def get_args():
@@ -527,7 +564,9 @@ def hline(win, y, x, ch, n):
 
 def insert_todo(stdscr, todos: list, index: int, mode=None, indent_level=0):
     y, x = stdscr.getmaxyx()
-    if (todo := wgetnstr(curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8), mode=mode)) == "":
+    if (
+        todo := wgetnstr(curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8), mode=mode)
+    ) == "":
         return todos
     todos.insert(index, Todo(f"{' ' * indent_level}- {todo}"))
     return todos
@@ -542,7 +581,7 @@ def search(stdscr, todos, selected):
     y, x = stdscr.getmaxyx()
     sequence = wgetnstr(curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8))
     stdscr.clear()
-    for i, todo in enumerate(todos[int(selected):], start=int(selected)):
+    for i, todo in enumerate(todos[int(selected) :], start=int(selected)):
         if sequence in todo.display_text:
             break
     else:
@@ -730,11 +769,11 @@ def print_todos(win, todos, selected):
             "".join(
                 [
                     v.indent_level * " ",
-                    f"{v.get_box()}  ",
+                    "" if isinstance(v, Note) else f"{v.get_box()}  ",
                     f"{i + 1}. " if ENUMERATE else "",
                     (
                         strikethrough(v.display_text)
-                        if v.startswith("+")
+                        if v.is_toggled()
                         else v.display_text
                     ),
                 ]
@@ -966,10 +1005,7 @@ def init():
 
 def main(stdscr, header):
     init()
-    todos = [
-        EmptyTodo() if len(i) <= 3 else Todo(i)
-        for i in validate_file(read_file(FILENAME))
-    ]
+    todos = validate_file(read_file(FILENAME))
     selected = Cursor(0)
     history = UndoRedo()
     mode = Mode(True)
@@ -1088,8 +1124,6 @@ def main(stdscr, header):
         elif key == 24:  # ctrl + x
             mode.toggle()
         elif key == 10:  # enter
-            if isinstance(todos[int(selected)], EmptyTodo):
-                continue
             todos = history.do(toggle, todos, selected)
             history.add_undo(toggle, todos, selected)
         elif key in range(48, 58):  # digits
