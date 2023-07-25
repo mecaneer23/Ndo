@@ -1,6 +1,6 @@
 -7 make editing work on VT100 terminals (alacritty/xterm)
 
--2 add search
++2 add search
 -6 add sidebar with additional todo info if screen is wide enough
 -6 multiline todos?
 -3 fix redo

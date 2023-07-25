@@ -534,6 +534,19 @@ def insert_empty_todo(todos, index):
     return todos
 
 
+def search(stdscr, todos, selected):
+    y, x = stdscr.getmaxyx()
+    sequence = wgetnstr(curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8))
+    stdscr.clear()
+    for i, todo in enumerate(todos[int(selected):], start=int(selected)):
+        if sequence in todo.display_text:
+            break
+    else:
+        selected.set_to(0)
+        return
+    selected.set_to(i)
+
+
 def remove_todo(todos: list, index):
     if len(todos) < 1:
         return todos
@@ -956,10 +969,9 @@ def main(stdscr, header):
     selected = Cursor(0)
     history = UndoRedo()
     mode = Mode(True)
-    note = ""
 
     while True:
-        stdscr.addstr(0, 0, f"{header}: {note}")
+        stdscr.addstr(0, 0, f"{header}:")
         print_todos(stdscr, todos, selected)
         stdscr.refresh()
         if not mode.toggle_mode:
@@ -1065,6 +1077,10 @@ def main(stdscr, header):
         elif key in (351, 353):  # shift + tab
             history.add_undo(reset_todos, todos)
             todos = selected.todo_set_to(history.do(dedent, stdscr, todos, selected))
+        elif key == 47:  # /
+            stdscr.addstr(0, 0, "Searching...")
+            stdscr.refresh()
+            search(stdscr, todos, selected)
         elif key == 24:  # ctrl + x
             mode.toggle()
         elif key == 10:  # enter
