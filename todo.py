@@ -13,6 +13,7 @@ AUTOSAVE = True
 HEADER = ""
 DEBUG_FLAG = False
 INDENT = 2
+ENUMERATE = False
 
 COLORS = {
     "Red": 1,
@@ -267,7 +268,7 @@ def get_args():
         add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Controls:\n  "
-        + "\n  ".join(md_table_to_lines(42, 62, str(HELP_FILE), ["<kbd>", "</kbd>"])),
+        + "\n  ".join(md_table_to_lines(43, 63, str(HELP_FILE), ["<kbd>", "</kbd>"])),
     )
     parser.add_argument(
         "--help",
@@ -280,8 +281,17 @@ def get_args():
         "-a",
         action="store_true",
         default=AUTOSAVE,
-        help="Boolean: determines if file is saved on every\
-            action or only once at the program termination.",
+        help=f"Boolean: determines if file is saved on every\
+            action or only once at the program termination.\
+            Default is `{AUTOSAVE}`.",
+    )
+    parser.add_argument(
+        "--enumerate",
+        "-e",
+        action="store_true",
+        default=ENUMERATE,
+        help=f"Boolean: determines if todos are numbered when\
+            printed or not. Default is `{ENUMERATE}`.",
     )
     parser.add_argument(
         "filename",
@@ -296,9 +306,10 @@ def get_args():
         "-s",
         action="store_true",
         default=STRIKETHROUGH,
-        help="Boolean: strikethrough completed todos\
+        help=f"Boolean: strikethrough completed todos\
             - option to disable because some terminals\
-            don't support strikethroughs.",
+            don't support strikethroughs. Default is\
+            `{STRIKETHROUGH}`.",
     )
     parser.add_argument(
         "--title",
@@ -328,13 +339,14 @@ def get_args():
 
 
 def handle_args(args):
-    global AUTOSAVE, FILENAME, HELP_FILE, STRIKETHROUGH, HEADER, INDENT
+    global AUTOSAVE, FILENAME, HELP_FILE, STRIKETHROUGH, HEADER, INDENT, ENUMERATE
     AUTOSAVE = args.autosave
     INDENT = args.indentation_level
     FILENAME = Path(args.filename)
     HELP_FILE = Path(args.help_file)
     STRIKETHROUGH = args.strikethrough
     HEADER = FILENAME.name if args.title == HEADER else args.title
+    ENUMERATE = args.enumerate
 
 
 def deepcopy_ignore(lst):
@@ -605,7 +617,7 @@ def md_table_to_lines(
 def help_menu(parent_win):
     parent_win.clear()
     parent_win.addstr(0, 0, "Help:", curses.A_BOLD)
-    lines = md_table_to_lines(42, 62, str(HELP_FILE), ["<kbd>", "</kbd>"])
+    lines = md_table_to_lines(43, 63, str(HELP_FILE), ["<kbd>", "</kbd>"])
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
@@ -700,6 +712,7 @@ def print_todos(win, todos, selected):
                 [
                     v.indent_level * " ",
                     f"{v.get_box()}  ",
+                    f"{i + 1}. " if ENUMERATE else "",
                     (
                         strikethrough(v.display_text)
                         if v.startswith("+")
