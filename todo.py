@@ -676,23 +676,32 @@ def md_table_to_lines(
 
 def help_menu(parent_win):
     parent_win.clear()
-    set_header(parent_win, "Help:")
     lines = md_table_to_lines(
         43, 65, str(HELP_FILE), ["<kbd>", "</kbd>", "(arranged alphabetically)"]
     )
-    win = curses.newwin(
-        len(lines) + 2,
-        len(lines[0]) + 2,
-        1,
-        (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2,
+    win = curses.newpad(
+        len(lines) + 1,
+        len(lines[0]),
     )
-    win.box()
-    for i, v in enumerate(lines):
-        win.addstr(i + 1, 1, v)
-    hline(win, 2, 0, curses.ACS_HLINE, win.getmaxyx()[1])
+    first_column = (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2
+    set_header(parent_win, "Help (k/j to scroll):")
     parent_win.refresh()
-    win.refresh()
-    win.getch()
+    for i, v in enumerate(lines):
+        win.addstr(i, 1, v)
+    win.hline(1, 1, curses.ACS_HLINE, win.getmaxyx()[1] - 2)
+    cursor = 0
+    while True:
+        win.refresh(cursor, 0, 1, first_column, parent_win.getmaxyx()[0] - 1, parent_win.getmaxyx()[1] - 1)
+        try:
+            key = win.getch()
+        except KeyboardInterrupt:  # exit on ^C
+            break
+        if key in (259, 107):  # up | k
+            cursor = clamp(cursor - 1, 0, len(lines))
+        elif key in (258, 106):  # down | j
+            cursor = clamp(cursor + 1, 0, len(lines))
+        else:
+            break
     parent_win.clear()
 
 
