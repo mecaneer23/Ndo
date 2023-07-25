@@ -956,9 +956,10 @@ def main(stdscr, header):
     selected = Cursor(0)
     history = UndoRedo()
     mode = Mode(True)
+    note = ""
 
     while True:
-        stdscr.addstr(0, 0, f"{header}:")
+        stdscr.addstr(0, 0, f"{header}: {note}")
         print_todos(stdscr, todos, selected)
         stdscr.refresh()
         if not mode.toggle_mode:
