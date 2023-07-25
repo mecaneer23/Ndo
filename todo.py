@@ -759,7 +759,7 @@ def make_printable_sublist(height: int, lst: list, cursor: int):
 def print_todos(win, todos, selected):
     height, width = win.getmaxyx()
     new_todos, temp_selected = make_printable_sublist(height - 1, todos, int(selected))
-    highlight = [temp_selected, *selected.positions[1:]]
+    highlight = range(temp_selected, len(selected) + temp_selected)
     for i, v in enumerate(new_todos):
         if v.color is None:
             raise ValueError(f"Invalid color for `{v}`")

@@ -4,7 +4,7 @@
   -4 allow multiline paste
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
--7 fix multiselect operations at end of long todo lists
++7 fix multiselect operations at end of long todo lists
 -1 add keybindings for working with Notes
   -1 add new Note
   -1 convert Note to Todo
