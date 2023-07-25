@@ -165,7 +165,8 @@ class UndoRedo:
         # TODO: implement redo
         # I have the redo function and the
         # args it needs... how should I store it?
-        # self.redos.append((func, deepcopy_ignore(args).append(args[1][args[2]]) if func.__name__ == "new_todo_next" else deepcopy_ignore(args)))
+        # self.redos.append((func, deepcopy_ignore(args).append(args[1][args[2]])
+        # if func.__name__ == "new_todo_next" else deepcopy_ignore(args)))
         return func(*args)
 
     def __repr__(self):
@@ -563,7 +564,8 @@ def md_table_to_lines(
         first_line_idx (int): The index of the first line of the markdown table to be converted.
         last_line_idx (int): The index of the last line of the markdown table to be converted.
         filename (str, optional): The name of the markdown file containing the table. Default is "README.md".
-        remove (list[str], optional): The list of strings to be removed from each line. This is in the case of formatting that should exist in markdown but not python. Default is an empty list.
+        remove (list[str], optional): The list of strings to be removed from each line.
+        This is in the case of formatting that should exist in markdown but not python. Default is an empty list.
 
     Returns:
         list[str]: A list of formatted strings representing the converted markdown table.
