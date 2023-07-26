@@ -12,7 +12,6 @@ FILENAME = Path(FILESTRING)
 HELP_FILE = Path(__file__).parent.joinpath("README.md").absolute()
 AUTOSAVE = True
 HEADER = ""
-DEBUG_FLAG = False
 INDENT = 2
 ENUMERATE = False
 
@@ -169,7 +168,6 @@ class UndoRedo:
             return todos, selected
         func, args = self.history[self.index]
         self.index -= 1
-        to_debug_file(Path("debugging/pointer.txt"), self.index)
         return func(*args)
 
     def redo(self, todos, selected):
@@ -177,14 +175,11 @@ class UndoRedo:
             return todos, selected
         self.index += 1
         func, args = self.redos[self.index]
-        to_debug_file(Path("debugging/pointer.txt"), self.index)
         return func(*args)
 
     def add_undo(self, revert_with, *args):
         self.history.append((revert_with, deepcopy_ignore(args)))
         self.index = len(self.history) - 1
-        to_debug_file(Path("debugging/history.txt"), repr(self))
-        to_debug_file(Path("debugging/pointer.txt"), self.index)
 
     def do(self, func, *args):
         # TODO: implement redo
@@ -264,12 +259,6 @@ class Mode:
 
     def toggle(self):
         self.toggle_mode = not self.toggle_mode
-
-
-def to_debug_file(filename: Path, message: str, mode="w"):
-    if DEBUG_FLAG:
-        with filename.open(mode) as f:
-            f.write(str(message))
 
 
 def read_file(filename: Path):
@@ -673,7 +662,7 @@ def md_table_to_lines(
 def help_menu(parent_win):
     parent_win.clear()
     parent_win.addstr(0, 0, "Help:", curses.A_BOLD)
-    lines = md_table_to_lines(43, 64, str(HELP_FILE), ["<kbd>", "</kbd>"])
+    lines = md_table_to_lines(43, 64, str(HELP_FILE), ["<kbd>", "</kbd>", "(arranged alphabetically)"])
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
@@ -936,14 +925,6 @@ def quit_program(todos):
     return update_file(FILENAME, todos, True)
 
 
-def toggle_debug_flag(setting=None):
-    global DEBUG_FLAG
-    if setting is not None:
-        DEBUG_FLAG = setting
-        return
-    DEBUG_FLAG = not DEBUG_FLAG
-
-
 def reset_todos(todos: list):
     return todos.copy()
 
@@ -1094,7 +1075,7 @@ def main(stdscr, header):
         elif key == 104:  # h
             help_menu(stdscr)
         elif key == 98:  # b
-            toggle_debug_flag()
+            raise NotImplementedError("b")
         elif key == 27:  # any escape sequence
             stdscr.nodelay(True)
             subch = stdscr.getch()
