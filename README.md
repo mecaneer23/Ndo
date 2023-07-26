@@ -45,7 +45,7 @@ Options:
 | <kbd>-</kbd>                                   | Insert blank line                   |
 | <kbd>/</kbd>                                   | Search for a sequence               |
 | <kbd>Alt</kbd>+<kbd>k</kbd>/<kbd>j</kbd>       | Select/deselect multiple todos      |
-| <kbd>Ctrl</kbd>+<kbd>x</kbd>/<kbd>k</kbd>      | Toggle `toggle` and `entry` modes   |
+| <kbd>Ctrl</kbd>+<kbd>x</kbd>, <kbd>k</kbd>     | Toggle `toggle` and `entry` modes   |
 | <kbd>Enter</kbd>                               | Toggle a todo as completed          |
 | <kbd>Shift</kbd>+<kbd>k</kbd>/<kbd>j</kbd>     | Move todo up and down               |
 | <kbd>Shift</kbd>+<kbd>o</kbd>                  | Add a todo on current line          |
