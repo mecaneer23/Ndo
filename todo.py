@@ -565,6 +565,8 @@ def insert_empty_todo(todos, index):
 
 
 def search(stdscr, todos, selected):
+    set_header(stdscr, "Searching...")
+    stdscr.refresh()
     y, x = stdscr.getmaxyx()
     sequence = wgetnstr(curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8))
     stdscr.clear()
@@ -575,6 +577,10 @@ def search(stdscr, todos, selected):
         selected.set_to(0)
         return
     selected.set_to(i)
+
+
+def set_header(stdscr, message):
+    stdscr.addstr(0, 0, message, curses.A_BOLD)
 
 
 def remove_todo(todos: list, index):
@@ -661,8 +667,10 @@ def md_table_to_lines(
 
 def help_menu(parent_win):
     parent_win.clear()
-    parent_win.addstr(0, 0, "Help:", curses.A_BOLD)
-    lines = md_table_to_lines(43, 64, str(HELP_FILE), ["<kbd>", "</kbd>", "(arranged alphabetically)"])
+    set_header(parent_win, "Help:")
+    lines = md_table_to_lines(
+        43, 64, str(HELP_FILE), ["<kbd>", "</kbd>", "(arranged alphabetically)"]
+    )
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
@@ -685,7 +693,7 @@ def get_color(color):
 
 def color_menu(parent_win, original: int):
     parent_win.clear()
-    parent_win.addstr(0, 0, "Colors:", curses.A_BOLD)
+    set_header(parent_win, "Colors:")
     lines = [i.ljust(len(max(COLORS.keys(), key=len))) for i in COLORS.keys()]
     win = curses.newwin(
         len(lines) + 2,
@@ -990,7 +998,7 @@ def main(stdscr, header):
     mode = Mode(True)
 
     while True:
-        stdscr.addstr(0, 0, f"{header}:")
+        set_header(stdscr, f"{header}:")
         print_todos(stdscr, todos, selected)
         stdscr.refresh()
         if not mode.toggle_mode:
@@ -1075,7 +1083,7 @@ def main(stdscr, header):
         elif key == 104:  # h
             help_menu(stdscr)
         elif key == 98:  # b
-            raise NotImplementedError("b")
+            magnify(stdscr, todos[int(selected)])
         elif key == 27:  # any escape sequence
             stdscr.nodelay(True)
             subch = stdscr.getch()
@@ -1097,8 +1105,6 @@ def main(stdscr, header):
             history.add_undo(reset_todos, todos)
             todos = selected.todo_set_to(history.do(dedent, stdscr, todos, selected))
         elif key == 47:  # /
-            stdscr.addstr(0, 0, "Searching...")
-            stdscr.refresh()
             search(stdscr, todos, selected)
         elif key in (24, 11):  # ctrl + x/k
             mode.toggle()
