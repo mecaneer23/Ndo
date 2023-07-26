@@ -261,6 +261,15 @@ class Mode:
         self.toggle_mode = not self.toggle_mode
 
 
+class ExternalModuleNotFoundError(Exception):
+    def __init__(self, module, todos, operation):
+        update_file(FILENAME, todos, True)
+        exit(
+            f"`{module}` module required for {operation} operation. "
+            f"Try `pip install {module}`"
+        )
+
+
 def read_file(filename: Path):
     if not filename.exists():
         with filename.open("w") as f:
@@ -293,7 +302,7 @@ def get_args():
         add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Controls:\n  "
-        + "\n  ".join(md_table_to_lines(43, 64, str(HELP_FILE), ["<kbd>", "</kbd>"])),
+        + "\n  ".join(md_table_to_lines(43, 65, str(HELP_FILE), ["<kbd>", "</kbd>"])),
     )
     parser.add_argument(
         "--help",
@@ -669,7 +678,7 @@ def help_menu(parent_win):
     parent_win.clear()
     set_header(parent_win, "Help:")
     lines = md_table_to_lines(
-        43, 64, str(HELP_FILE), ["<kbd>", "</kbd>", "(arranged alphabetically)"]
+        43, 65, str(HELP_FILE), ["<kbd>", "</kbd>", "(arranged alphabetically)"]
     )
     win = curses.newwin(
         len(lines) + 2,
@@ -685,6 +694,32 @@ def help_menu(parent_win):
     win.refresh()
     win.getch()
     parent_win.clear()
+
+
+def magnify(stdscr, todos, selected):
+    try:
+        from pyfiglet import figlet_format as big
+    except ModuleNotFoundError:
+        raise ExternalModuleNotFoundError("pyfiglet", todos, "magnify")
+
+    stdscr.clear()
+    set_header(stdscr, "Magnifying...")
+    big_text = big(todos[int(selected)].display_text, width=stdscr.getmaxyx()[1]).split(
+        "\n"
+    )
+    first_column = max((stdscr.getmaxyx()[1] - len(max(big_text, key=len))) // 2, 0)
+    first_row = max((stdscr.getmaxyx()[0] - len(big_text)) // 2 + 1, 1)
+    for i, line in enumerate(big_text):
+        for count, char in enumerate(line):
+            if (
+                first_row + i >= stdscr.getmaxyx()[0] - 1
+                or first_column + count >= stdscr.getmaxyx()[1] - 1
+            ):
+                continue
+            stdscr.addch(first_row + i, first_column + count, char)
+    stdscr.refresh()
+    stdscr.getch()
+    stdscr.clear()
 
 
 def get_color(color):
@@ -789,7 +824,7 @@ def todo_from_clipboard(todos: list, selected: int):
     try:
         from pyperclip import paste
     except ModuleNotFoundError:
-        pyperclip_error(todos, "paste")
+        raise ExternalModuleNotFoundError("pyperclip", todos, "paste")
     todo = paste()
     if "\n" in todo:
         return todos
@@ -895,19 +930,11 @@ def edit_todo(stdscr, todos, selected):
     return todos
 
 
-def pyperclip_error(todos, operation):
-    update_file(FILENAME, todos, True)
-    exit(
-        f"`pyperclip` module required for {operation} operation.\
-        Try `pip install pyperclip`"
-    )
-
-
 def copy_todo(todos, selected):
     try:
         from pyperclip import copy
     except ModuleNotFoundError:
-        pyperclip_error(todos, "copy")
+        raise ExternalModuleNotFoundError("pyperclip", todos, "copy")
     copy(todos[selected].display_text)
 
 
@@ -1083,7 +1110,7 @@ def main(stdscr, header):
         elif key == 104:  # h
             help_menu(stdscr)
         elif key == 98:  # b
-            magnify(stdscr, todos[int(selected)])
+            magnify(stdscr, todos, selected)
         elif key == 27:  # any escape sequence
             stdscr.nodelay(True)
             subch = stdscr.getch()
