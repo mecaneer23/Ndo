@@ -469,7 +469,7 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█"):
             if position > 0:
                 position -= 1
                 chars.pop(position)
-        elif ch == 24:  # ctrl + x
+        elif ch in (24, 11):  # ctrl + x/k
             if mode is not None:
                 mode.toggle()
                 return "".join(chars)
@@ -1119,7 +1119,7 @@ def main(stdscr, header):
             stdscr.addstr(0, 0, "Searching...")
             stdscr.refresh()
             search(stdscr, todos, selected)
-        elif key == 24:  # ctrl + x
+        elif key in (24, 11):  # ctrl + x/k
             mode.toggle()
         elif key == 10:  # enter
             todos = history.do(toggle, todos, selected)

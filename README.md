@@ -57,7 +57,7 @@ Options:
 | <kbd>u</kbd>                                   | Undo change                       |
 | <kbd>-</kbd>                                   | Insert blank line                 |
 | <kbd>/</kbd>                                   | Search for a sequence             |
-| <kbd>Ctrl</kbd>+<kbd>x</kbd>                   | Toggle `toggle` and `entry` modes |
+| <kbd>Ctrl</kbd>+<kbd>x</kbd>/<kbd>k</kbd>      | Toggle `toggle` and `entry` modes |
 | <kbd>Tab</kbd>/<kbd>Shift</kbd>+<kbd>Tab</kbd> | Indent/unindent selected todo     |
 | <kbd>q</kbd>, <kbd>Ctrl</kbd>+<kbd>c</kbd>     | Quit                              |
 | <kbd>Enter</kbd>                               | Toggle a todo as completed        |
