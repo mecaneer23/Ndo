@@ -287,7 +287,7 @@ def validate_file(raw_data):
     for line in raw_data.split("\n"):
         if len(line) == 0:
             usable_data.append(EmptyTodo())
-        elif line.lstrip().startswith("-"):
+        elif re.match(r"^( *)?(\+|-)\d? .*$", line):
             usable_data.append(Todo(line))
         elif re.match(r"^( *\d )?.*$", line):
             usable_data.append(Note(line))
