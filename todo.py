@@ -795,14 +795,11 @@ def make_printable_sublist(height: int, lst: list, cursor: int):
         return lst, cursor
     start = max(0, cursor - height // 2)
     end = min(len(lst), start + height)
+    # If len(sublist) < height, resume moving list
     if end - start < height:
-        if start == 0:
-            end = min(len(lst), height)
-        else:
-            start = max(0, end - height)
-    sublist = lst[start:end]
-    cursor -= start
-    return sublist, cursor
+        start = max(0, len(lst) - height)
+        end = min(len(lst), start + height)
+    return lst[start:end], cursor - start
 
 
 def print_todos(win, todos, selected):
