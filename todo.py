@@ -691,7 +691,14 @@ def help_menu(parent_win):
     win.hline(1, 1, curses.ACS_HLINE, win.getmaxyx()[1] - 2)
     cursor = 0
     while True:
-        win.refresh(cursor, 0, 1, first_column, parent_win.getmaxyx()[0] - 1, parent_win.getmaxyx()[1] - 1)
+        win.refresh(
+            cursor,
+            0,
+            1,
+            first_column,
+            parent_win.getmaxyx()[0] - 1,
+            parent_win.getmaxyx()[1] - 1,
+        )
         try:
             key = win.getch()
         except KeyboardInterrupt:  # exit on ^C
