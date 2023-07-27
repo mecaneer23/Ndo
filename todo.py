@@ -83,6 +83,9 @@ class Todo:
             self.indent_level -= INDENT
             self._text = repr(self)
 
+    def to_note(self):
+        self.__class__ = Note(self._text).__class__
+
     def __str__(self):
         return repr(self)
 
@@ -136,6 +139,11 @@ class Note(Todo):
 
     def toggle(self):
         return
+
+    def to_todo(self):
+        self.box_char = "-"
+        self._text = f"{self.indent_level * ' '}{self.box_char}{self.color} {self.display_text}"
+        self.__class__ = Todo(self._text).__class__
 
     def __repr__(self):
         return f"{self.indent_level * ' '}{self.color} {self.display_text}"
@@ -302,7 +310,7 @@ def get_args():
         add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Controls:\n  "
-        + "\n  ".join(md_table_to_lines(43, 65, str(HELP_FILE), ["<kbd>", "</kbd>"])),
+        + "\n  ".join(md_table_to_lines(43, 66, str(HELP_FILE), ["<kbd>", "</kbd>"])),
     )
     parser.add_argument(
         "--help",
@@ -679,7 +687,7 @@ def help_menu(parent_win):
     set_header(parent_win, "Help (k/j to scroll):")
     lines = []
     for i in md_table_to_lines(
-        43, 65, str(HELP_FILE), ["<kbd>", "</kbd>", "(arranged alphabetically)"]
+        43, 66, str(HELP_FILE), ["<kbd>", "</kbd>", "(arranged alphabetically)"]
     ):
         lines.append(i[:-2])
     win = curses.newwin(
@@ -1150,6 +1158,12 @@ def main(stdscr, header):
             search(stdscr, todos, selected)
         elif key in (24, 11):  # ctrl + x/k
             mode.toggle()
+        elif key == 330:  # delete
+            if isinstance(todos[int(selected)], Note):
+                todos[int(selected)].to_todo()
+            elif Todo is type(todos[int(selected)]):
+                todos[int(selected)].to_note()
+            update_file(FILENAME, todos)
         elif key == 10:  # enter
             todos = history.do(toggle, todos, selected)
             history.add_undo(toggle, todos, selected)
