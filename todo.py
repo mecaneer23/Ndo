@@ -796,7 +796,7 @@ def make_printable_sublist(height: int, lst: list, cursor: int, distance: int = 
     distance = height * 3 // 7 if distance < 0 else distance
     start = max(0, cursor - distance)
     end = min(len(lst), start + height)
-    # If len(sublist) < height, resume moving list
+    # If len(sublist) < height, stop moving list and resume moving cursor
     if end - start < height:
         start = len(lst) - height
         end = len(lst)
