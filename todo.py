@@ -694,11 +694,11 @@ def help_menu(parent_win):
     win.addstr(1, 1, lines[0])
     hline(win, 2, 0, curses.ACS_HLINE, win.getmaxyx()[1])
     while True:
-        new_lines, temp_cursor = make_printable_sublist(
-            win.getmaxyx()[0] - 4, lines[2:], cursor
+        new_lines, _ = make_printable_sublist(
+            win.getmaxyx()[0] - 4, lines[2:], cursor, 0
         )
         for i, v in enumerate(new_lines):
-            win.addstr(i + 3, 1, v, curses.A_REVERSE if i == temp_cursor else 0)
+            win.addstr(i + 3, 1, v)
         win.refresh()
         try:
             key = win.getch()
@@ -706,8 +706,8 @@ def help_menu(parent_win):
             break
         if key in (259, 107):  # up | k
             cursor = clamp(cursor - 1, 0, len(lines) - 2)
-        elif key in (258, 106):  # down | j
-            cursor = clamp(cursor + 1, 0, len(lines) - 2)
+        elif key in (258, 106, 10):  # down | j | enter
+            cursor = clamp(cursor + 1, 0, len(lines) - len(new_lines) - 1)
         else:
             break
     parent_win.clear()
