@@ -10,4 +10,4 @@
   -1 convert Todo to Note
   -1 fix indentation because it's sorta funky with notes
 -6 add keybinds for indentation while in entry mode
-+7 make help menu use pager
+-7 add bounds to help_menu() and remove cursor

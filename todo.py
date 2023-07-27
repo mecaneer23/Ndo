@@ -676,37 +676,38 @@ def md_table_to_lines(
 
 def help_menu(parent_win):
     parent_win.clear()
-    lines = md_table_to_lines(
-        43, 65, str(HELP_FILE), ["<kbd>", "</kbd>", "(arranged alphabetically)"]
-    )
-    win = curses.newpad(
-        len(lines) + 1,
-        len(lines[0]),
-    )
-    first_column = (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2
     set_header(parent_win, "Help (k/j to scroll):")
+    lines = []
+    for i in md_table_to_lines(
+        43, 65, str(HELP_FILE), ["<kbd>", "</kbd>", "(arranged alphabetically)"]
+    ):
+        lines.append(i[:-2])
+    win = curses.newwin(
+        min(parent_win.getmaxyx()[0] - 1, len(lines) + 2),
+        len(lines[0]) + 2,
+        1,
+        (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2,
+    )
+    win.box()
     parent_win.refresh()
-    for i, v in enumerate(lines):
-        win.addstr(i, 1, v)
-    win.hline(1, 1, curses.ACS_HLINE, win.getmaxyx()[1] - 2)
     cursor = 0
+    win.addstr(1, 1, lines[0])
+    hline(win, 2, 0, curses.ACS_HLINE, win.getmaxyx()[1])
     while True:
-        win.refresh(
-            cursor,
-            0,
-            1,
-            first_column,
-            parent_win.getmaxyx()[0] - 1,
-            parent_win.getmaxyx()[1] - 1,
+        new_lines, temp_cursor = make_printable_sublist(
+            win.getmaxyx()[0] - 4, lines[2:], cursor
         )
+        for i, v in enumerate(new_lines):
+            win.addstr(i + 3, 1, v, curses.A_REVERSE if i == temp_cursor else 0)
+        win.refresh()
         try:
             key = win.getch()
         except KeyboardInterrupt:  # exit on ^C
             break
         if key in (259, 107):  # up | k
-            cursor = clamp(cursor - 1, 0, len(lines))
+            cursor = clamp(cursor - 1, 0, len(lines) - 2)
         elif key in (258, 106):  # down | j
-            cursor = clamp(cursor + 1, 0, len(lines))
+            cursor = clamp(cursor + 1, 0, len(lines) - 2)
         else:
             break
     parent_win.clear()
