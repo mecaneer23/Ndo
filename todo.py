@@ -142,7 +142,9 @@ class Note(Todo):
 
     def to_todo(self):
         self.box_char = "-"
-        self._text = f"{self.indent_level * ' '}{self.box_char}{self.color} {self.display_text}"
+        self._text = (
+            f"{self.indent_level * ' '}{self.box_char}{self.color} {self.display_text}"
+        )
         self.__class__ = Todo(self._text).__class__
 
     def __repr__(self):
@@ -834,13 +836,17 @@ def print_todos(win, todos, selected):
             if i not in highlight or not isinstance(v, EmptyTodo)
             else "⎯" * 8
         )[: width - 1].ljust(width - 1, " ")
-        win.addstr(
-            i + 1,
-            0,
-            display_string,
-            curses.color_pair(v.color or get_color("White"))
-            | (curses.A_REVERSE if i in highlight else 0),
-        )
+        counter = 0
+        while counter < len(display_string):
+            char = display_string[counter]
+            win.addch(
+                i + 1,
+                counter,
+                char,
+                curses.color_pair(v.color or get_color("White"))
+                | (curses.A_REVERSE if i in highlight else 0),
+            )
+            counter += 1
 
 
 def todo_from_clipboard(todos: list, selected: int):
