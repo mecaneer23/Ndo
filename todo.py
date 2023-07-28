@@ -838,11 +838,10 @@ def print_todos(win, todos, selected):
         )[: width - 1].ljust(width - 1, " ")
         counter = 0
         while counter < len(display_string):
-            char = display_string[counter]
             win.addch(
                 i + 1,
                 counter,
-                char,
+                display_string[counter],
                 curses.color_pair(v.color or get_color("White"))
                 | (curses.A_REVERSE if i in highlight else 0),
             )
