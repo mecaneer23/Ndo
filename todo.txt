@@ -8,4 +8,4 @@
 +6 add keybinds for indentation while in entry mode
 -6 make indentation in entry mode more clear
 -7 fix strikethrough
--7 remove the number on white notes
++7 remove the number on white notes
