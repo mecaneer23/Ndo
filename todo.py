@@ -416,7 +416,7 @@ def print(message, end="\n"):
         f.write(f"{message}{end}")
 
 
-def wgetnstr(win, mode=None, n=1024, chars="", cursor="█"):
+def wgetnstr(win, mode=None, n=1024, chars="", cursor="█", current_todo=None):
     """
     Reads a string from the given window with max chars n\
     and initial chars chars. Returns a string from the user\
@@ -490,6 +490,8 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█"):
                     chars.pop(position)
                     break
                 chars.pop(position)
+        elif ch == 9:  # tab
+            current_todo.indent()
         elif ch == 27:  # any escape sequence `^[`
             win.nodelay(True)
             escape = win.getch()  # skip `[`
@@ -547,6 +549,8 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█"):
                 position = 0
             elif subch == 70:  # end
                 position = len(chars)
+            elif subch == 90:  # shift + tab
+                current_todo.dedent()
             else:
                 raise ValueError(repr(subch))
         else:  # typable characters (basically alphanum)
@@ -568,12 +572,20 @@ def hline(win, y, x, ch, n):
     win.addch(y, x + n - 1, curses.ACS_RTEE)
 
 
-def insert_todo(stdscr, todos: list, index: int, mode=None, indent_level=0):
+def insert_todo(stdscr, todos: list, index: int, mode=None):
     y, x = stdscr.getmaxyx()
     if (
-        todo := wgetnstr(curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8), mode=mode)
+        todo := wgetnstr(
+            curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8),
+            mode=mode,
+            current_todo=todos[index],
+        )
     ) == "":
         return todos
+    if todos[index].indent_level != 0:
+        indent_level = todos[index].indent_level
+    else:
+        indent_level = todos[index - 1].indent_level if len(todos) > 0 else 0
     todos.insert(index, Todo(f"{' ' * indent_level}- {todo}"))
     return todos
 
@@ -900,7 +912,6 @@ def new_todo_next(stdscr, todos: list, selected: int, mode=None, paste: bool = F
             todos,
             selected + 1,
             mode,
-            todos[selected].indent_level if len(todos) > 1 else 0,
         )
         if not paste
         else todo_from_clipboard(todos, selected)
@@ -948,7 +959,9 @@ def edit_todo(stdscr, todos, selected):
     begin_x = x // 8 if len(todo) < x - 1 - ncols else (x - ncols) // 2
     if (
         edited_todo := wgetnstr(
-            curses.newwin(3, ncols, y // 2 - 3, begin_x), chars=todo
+            curses.newwin(3, ncols, y // 2 - 3, begin_x),
+            chars=todo,
+            current_todo=todos[selected],
         )
     ) == "":
         return todos
@@ -1013,14 +1026,14 @@ def relative_cursor_to(
         return selected
 
 
-def indent(stdscr, todos, selected):
+def indent(todos, selected):
     for pos in selected.positions:
         todos[pos].indent()
     update_file(FILENAME, todos)
     return todos, selected.positions[0]
 
 
-def dedent(stdscr, todos, selected):
+def dedent(todos, selected):
     for pos in selected.positions:
         todos[pos].dedent()
     update_file(FILENAME, todos)
@@ -1155,10 +1168,10 @@ def main(stdscr, header):
             selected.multiselect_up()
         elif key == 9:  # tab
             history.add_undo(reset_todos, todos)
-            todos = selected.todo_set_to(history.do(indent, stdscr, todos, selected))
+            todos = selected.todo_set_to(history.do(indent, todos, selected))
         elif key in (351, 353):  # shift + tab
             history.add_undo(reset_todos, todos)
-            todos = selected.todo_set_to(history.do(dedent, stdscr, todos, selected))
+            todos = selected.todo_set_to(history.do(dedent, todos, selected))
         elif key == 47:  # /
             search(stdscr, todos, selected)
         elif key in (24, 11):  # ctrl + x/k
