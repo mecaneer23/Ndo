@@ -148,6 +148,8 @@ class Note(Todo):
         self.__class__ = Todo(self._text).__class__
 
     def __repr__(self):
+        if self.color == 7:
+            return f"{self.indent_level * ' '}{self.display_text}"
         return f"{self.indent_level * ' '}{self.color} {self.display_text}"
 
 
@@ -248,7 +250,9 @@ class Cursor:
     def get_deletable(self):
         return [min(self.positions) for _ in self.positions]
 
-    def multiselect_down(self):
+    def multiselect_down(self, max_len):
+        if max(self.positions) >= max_len - 1:
+            return
         if len(self.positions) == 1 or self.direction == "down":
             self.select_next()
             self.direction = "down"
@@ -256,6 +260,8 @@ class Cursor:
         self.deselect_prev()
 
     def multiselect_up(self):
+        if min(self.positions) == 0 and self.direction == "up":
+            return
         if len(self.positions) == 1 or self.direction == "up":
             self.select_prev()
             self.direction = "up"
@@ -1158,12 +1164,12 @@ def main(stdscr, header):
             if subch == -1:  # escape, otherwise skip `[`
                 return quit_program(todos)
             elif subch == 106:  # alt + j
-                selected.multiselect_down()
+                selected.multiselect_down(len(todos))
             elif subch == 107:  # alt + k
                 selected.multiselect_up()
             stdscr.nodelay(False)
         elif key == 426:  # alt + j (on windows)
-            selected.multiselect_down()
+            selected.multiselect_down(len(todos))
         elif key == 427:  # alt + k (on windows)
             selected.multiselect_up()
         elif key == 9:  # tab
@@ -1177,10 +1183,11 @@ def main(stdscr, header):
         elif key in (24, 11):  # ctrl + x/k
             mode.toggle()
         elif key == 330:  # delete
-            if isinstance(todos[int(selected)], Note):
-                todos[int(selected)].to_todo()
-            elif Todo is type(todos[int(selected)]):
-                todos[int(selected)].to_note()
+            for pos in selected.positions:
+                if isinstance(todos[pos], Note):
+                    todos[pos].to_todo()
+                elif Todo is type(todos[pos]):
+                    todos[pos].to_note()
             update_file(FILENAME, todos)
         elif key == 10:  # enter
             todos = history.do(toggle, todos, selected)
