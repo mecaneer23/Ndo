@@ -2,9 +2,9 @@
 # pyright: reportMissingImports=false
 
 import curses
+import re
 from pathlib import Path
 from typing import List
-import re
 
 STRIKETHROUGH = False
 FILESTRING = "todo.txt"
@@ -400,8 +400,9 @@ def handle_args(args):
 
 
 def deepcopy_ignore(lst):
-    from _curses import window as curses_window
     from copy import deepcopy
+
+    from _curses import window as curses_window
 
     return [i if isinstance(i, curses_window) else deepcopy(i) for i in lst]
 
