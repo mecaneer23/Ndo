@@ -3,7 +3,7 @@
 -4 implement multiline todos
   -4 allow multiline paste
   -4 allow multiline print
--4 allow wgetnstr to use multiline editing
+  -4 allow wgetnstr to use multiline editing
 -1 fix notes indentation
 +6 add keybinds for indentation while in entry mode
 -6 make indentation in entry mode more clear
