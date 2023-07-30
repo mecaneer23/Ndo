@@ -366,7 +366,7 @@ def get_args():
         "-t",
         type=str,
         default=HEADER,
-        help=f"Allows passing alternate header.\
+        help="Allows passing alternate header.\
             Make sure to quote multi-word headers.\
             Default is filename.",
     )
@@ -454,7 +454,8 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█", current_todo=None):
     """
     if win.getmaxyx()[0] < 3:
         raise ValueError(
-            "Window is too short, it won't be able to display the minimum 1 line of text."
+            "Window is too short, it won't be able to\
+            display the minimum 1 line of text."
         )
     elif win.getmaxyx()[0] > 3:
         raise NotImplementedError("Multiline text editing is not supported")
@@ -647,17 +648,23 @@ def md_table_to_lines(
     Converts a markdown table to a list of formatted strings.
 
     Args:
-        first_line_idx (int): The index of the first line of the markdown table to be converted.
-        last_line_idx (int): The index of the last line of the markdown table to be converted.
-        filename (str, optional): The name of the markdown file containing the table. Default is "README.md".
+        first_line_idx (int): The index of the first line of the markdown
+        table to be converted.
+        last_line_idx (int): The index of the last line of the markdown
+        table to be converted.
+        filename (str, optional): The name of the markdown file containing the
+        table. Default is "README.md".
         remove (list[str], optional): The list of strings to be removed from each line.
-        This is in the case of formatting that should exist in markdown but not python. Default is an empty list.
+        This is in the case of formatting that should exist in markdown but not
+        python. Default is an empty list.
 
     Returns:
-        list[str]: A list of formatted strings representing the converted markdown table.
+        list[str]: A list of formatted strings representing the converted
+        markdown table.
 
     Raises:
-        ValueError: If the last line index is less than or equal to the first line index.
+        ValueError: If the last line index is less than or equal to the
+        first line index.
         FileNotFoundError: If the specified markdown file cannot be found.
     """
 
@@ -689,7 +696,7 @@ def md_table_to_lines(
     # Find the maximum length of each column
     for i, (_, v) in enumerate(columns):
         columns[i][0] = len(max([w.strip() for w in v], key=len))
-    lines[1] = ["-" * (l + 1) for l, _ in columns]
+    lines[1] = ["-" * (length + 1) for length, _ in columns]
 
     # Join the lines together into a list of formatted strings
     for i, line in enumerate(lines):
@@ -1186,7 +1193,7 @@ def main(stdscr, header):
             for pos in selected.positions:
                 if isinstance(todos[pos], Note):
                     todos[pos].to_todo()
-                elif Todo is type(todos[pos]):
+                elif isinstance(todos[pos], Todo):
                     todos[pos].to_note()
             update_file(FILENAME, todos)
         elif key == 10:  # enter
