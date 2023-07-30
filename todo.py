@@ -675,38 +675,42 @@ def md_table_to_lines(
     # Get raw lines from the markdown file
     try:
         with open(filename) as f:
-            lines = f.readlines()[first_line_idx - 1 : last_line_idx - 1]
+            lines = f.readlines()[
+                first_line_idx - 1 : last_line_idx - 1
+            ]
     except FileNotFoundError:
         raise FileNotFoundError("Markdown file not found.")
 
     # Remove unwanted characters and split each line into a list of values
+    split_lines: List[List[str]] = [[]] * len(lines)
     for i, _ in enumerate(lines):
         for item in remove:
             lines[i] = lines[i].replace(item, "")
-        lines[i] = lines[i].split("|")[1:-1]
-    column_count = len(lines[0])
-    lines[1] = ["-" for _ in range(column_count)]
+        split_lines[i] = lines[i].split("|")[1:-1]
+    column_count = len(split_lines[0])
+    split_lines[1] = ["-" for _ in range(column_count)]
 
     # Create lists of columns
-    columns = [[0, []] for _ in range(column_count)]
+    columns: List = [[0, []] for _ in range(column_count)]
     for i in range(column_count):
-        for line in lines:
+        for line in split_lines:
             columns[i][1].append(line[i])
 
     # Find the maximum length of each column
     for i, (_, v) in enumerate(columns):
         columns[i][0] = len(max([w.strip() for w in v], key=len))
-    lines[1] = ["-" * (length + 1) for length, _ in columns]
+    split_lines[1] = ["-" * (length + 1) for length, _ in columns]
 
     # Join the lines together into a list of formatted strings
-    for i, line in enumerate(lines):
+    joined_lines: List[str] = [""] * len(split_lines)
+    for i, line in enumerate(split_lines):
         for j, v in enumerate(line):
             line[j] = v.strip().ljust(columns[j][0] + 2)
-        lines[i] = "".join(lines[i])
-    lines[1] = "-" * (
+        joined_lines[i] = "".join(split_lines[i])
+    joined_lines[1] = "-" * (
         sum(columns[i][0] for i, _ in enumerate(columns)) + 2 * (len(columns) - 1)
     )
-    return lines
+    return joined_lines
 
 
 def help_menu(parent_win):
