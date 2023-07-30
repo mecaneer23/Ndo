@@ -210,6 +210,7 @@ class UndoRedo:
 class Cursor:
     def __init__(self, position, *positions):
         self.positions = [position, *positions]
+        self.direction = None
 
     def __len__(self):
         return len(self.positions)
@@ -290,7 +291,7 @@ class ExternalModuleNotFoundError(Exception):
 
 def read_file(filename: Path):
     if not filename.exists():
-        with filename.open("w") as f:
+        with filename.open("w"):
             return ""
     with filename.open() as f:
         return f.read()
@@ -442,6 +443,10 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█", current_todo=None):
             window's border, the window must have a minimum\
             height of 3 characters. The width will determine\
             a maximum value of n.
+        mode (Mode, optional):
+            If adding todos in entry mode (used for rapid\
+            repetition), allow toggling of that mode by\
+            passing a Mode object.
         n (int, optional):
             Max number of characters in the read string.\
             It might error if this number is greater than\
@@ -452,6 +457,9 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█", current_todo=None):
         cursor (str, optional):
             Cursor character to display while typing.\
             Defaults to "█".
+        current_todo (Todo, optional):
+            When wgetnstr is used with todos, pass a\
+            Todo object to allow ease of updating indentation.
 
     Returns:
         str: Similar to the built in input() function,\
@@ -650,12 +658,12 @@ def md_table_to_lines(
     remove: List[str] = [],
 ) -> List[str]:
     """
-    Converts a markdown table to a list of formatted strings.
+    Converts a Markdown table to a list of formatted strings.
 
     Args:
-        first_line_idx (int): The index of the first line of the markdown
+        first_line_idx (int): The index of the first line of the Markdown
         table to be converted.
-        last_line_idx (int): The index of the last line of the markdown
+        last_line_idx (int): The index of the last line of the Markdown
         table to be converted.
         filename (str, optional): The name of the markdown file containing the
         table. Default is "README.md".
@@ -665,7 +673,7 @@ def md_table_to_lines(
 
     Returns:
         list[str]: A list of formatted strings representing the converted
-        markdown table.
+        Markdown table.
 
     Raises:
         ValueError: If the last line index is less than or equal to the
@@ -959,6 +967,8 @@ def delete_todo(stdscr, todos, selected):
         selected.set_to(cursor_up(int(selected), len(todos)))
     elif isinstance(selected, int):
         positions = [selected]
+    else:
+        raise TypeError(f"{selected} must be one of `Cursor` or `int`")
     for pos in positions:
         todos = remove_todo(todos, pos)
     stdscr.clear()
