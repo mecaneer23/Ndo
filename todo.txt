@@ -7,8 +7,6 @@
 -1 fix notes indentation
 -6 make indentation in entry mode more clear
 -7 fix strikethrough
-+7 add `simple` box char set ([x], [ ]) and command line option
--7 make get_args read from help file
 -7 add alphabetical sort (undoable)
   -7 treat indented todos as part of the same sublist
     -7 only sort indent level 0 todos

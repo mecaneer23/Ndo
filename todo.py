@@ -10,8 +10,8 @@ STRIKETHROUGH = False
 FILESTRING = "todo.txt"
 FILENAME = Path(FILESTRING)
 HELP_FILE = Path(__file__).parent.joinpath("README.md").absolute()
-HELP_START = 43
-HELP_END = 66
+CONTROLS_START_INDEX = 44
+CONTROLS_END_INDEX = 67
 AUTOSAVE = True
 HEADER = ""
 INDENT = 2
@@ -368,7 +368,12 @@ def get_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Controls:\n  "
         + "\n  ".join(
-            md_table_to_lines(HELP_START, HELP_END, str(HELP_FILE), ["<kbd>", "</kbd>"])
+            md_table_to_lines(
+                CONTROLS_START_INDEX,
+                CONTROLS_END_INDEX,
+                str(HELP_FILE),
+                ["<kbd>", "</kbd>"],
+            )
         ),
     )
     parser.add_argument(
@@ -800,8 +805,8 @@ def help_menu(parent_win):
     set_header(parent_win, "Help (k/j to scroll):")
     lines = []
     for i in md_table_to_lines(
-        HELP_START,
-        HELP_END,
+        CONTROLS_START_INDEX,
+        CONTROLS_END_INDEX,
         str(HELP_FILE),
         ["<kbd>", "</kbd>", "(arranged alphabetically)"],
     ):
