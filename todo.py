@@ -16,6 +16,7 @@ AUTOSAVE = True
 HEADER = ""
 INDENT = 2
 ENUMERATE = False
+SIMPLE_BOXES = False
 
 COLORS = {
     "Red": 1,
@@ -64,10 +65,17 @@ class Todo:
         self.color = color
 
     def get_box(self):
-        table = {
-            "+": "☑",
-            "-": "☐",
-        }
+        table = (
+            {
+                "+": "☑",
+                "-": "☐",
+            }
+            if not SIMPLE_BOXES
+            else {
+                "+": "[x]",
+                "-": "[ ]",
+            }
+        )
 
         if self.box_char in table:
             return table[self.box_char]
@@ -387,6 +395,15 @@ def get_args():
             printed or not. Default is `{ENUMERATE}`.",
     )
     parser.add_argument(
+        "--simple-boxes",
+        "-b",
+        action="store_true",
+        default=SIMPLE_BOXES,
+        help=f"Boolean: allow rendering simpler checkboxes if\
+            terminal doesn't support default ascii checkboxes.\
+            Default is `{SIMPLE_BOXES}`.",
+    )
+    parser.add_argument(
         "filename",
         type=str,
         nargs="?",
@@ -432,14 +449,22 @@ def get_args():
 
 
 def handle_args(args):
-    global AUTOSAVE, FILENAME, HELP_FILE, STRIKETHROUGH, HEADER, INDENT, ENUMERATE
+    global AUTOSAVE
+    global ENUMERATE
+    global FILENAME
+    global HEADER
+    global HELP_FILE
+    global INDENT
+    global SIMPLE_BOXES
+    global STRIKETHROUGH
     AUTOSAVE = args.autosave
-    INDENT = args.indentation_level
-    FILENAME = Path(args.filename)
-    HELP_FILE = Path(args.help_file)
-    STRIKETHROUGH = args.strikethrough
-    HEADER = FILENAME.name if args.title == HEADER else args.title
     ENUMERATE = args.enumerate
+    FILENAME = Path(args.filename)
+    HEADER = FILENAME.name if args.title == HEADER else args.title
+    HELP_FILE = Path(args.help_file)
+    INDENT = args.indentation_level
+    SIMPLE_BOXES = args.simple_boxes
+    STRIKETHROUGH = args.strikethrough
 
 
 def deepcopy_ignore(lst):
@@ -913,7 +938,8 @@ def print_todos(win, todos, selected):
             "".join(
                 [
                     v.indent_level * " ",
-                    "" if isinstance(v, Note) else f"{v.get_box()}  ",
+                    "" if isinstance(v, Note) else f"{v.get_box()} ",
+                    "" if SIMPLE_BOXES else " ",
                     f"{i + 1}. " if ENUMERATE else "",
                     (
                         strikethrough(v.display_text)
