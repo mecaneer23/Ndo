@@ -944,7 +944,7 @@ def print_todos(win, todos, selected):
                 [
                     v.indent_level * " ",
                     "" if isinstance(v, Note) else f"{v.get_box()} ",
-                    "" if SIMPLE_BOXES else " ",
+                    "" if SIMPLE_BOXES or isinstance(v, Note) else " ",
                     f"{i + 1}. " if ENUMERATE else "",
                     (
                         strikethrough(v.display_text)
