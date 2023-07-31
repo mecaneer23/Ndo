@@ -320,7 +320,9 @@ def get_args():
         add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Controls:\n  "
-        + "\n  ".join(md_table_to_lines(HELP_START, HELP_END, str(HELP_FILE), ["<kbd>", "</kbd>"])),
+        + "\n  ".join(
+            md_table_to_lines(HELP_START, HELP_END, str(HELP_FILE), ["<kbd>", "</kbd>"])
+        ),
     )
     parser.add_argument(
         "--help",
@@ -678,9 +680,7 @@ def md_table_to_lines(
     # Get raw lines from the markdown file
     try:
         with open(filename) as f:
-            lines = f.readlines()[
-                first_line_idx - 1 : last_line_idx - 1
-            ]
+            lines = f.readlines()[first_line_idx - 1 : last_line_idx - 1]
     except FileNotFoundError:
         raise FileNotFoundError("Markdown file not found.")
 
@@ -721,7 +721,10 @@ def help_menu(parent_win):
     set_header(parent_win, "Help (k/j to scroll):")
     lines = []
     for i in md_table_to_lines(
-        HELP_START, HELP_END, str(HELP_FILE), ["<kbd>", "</kbd>", "(arranged alphabetically)"]
+        HELP_START,
+        HELP_END,
+        str(HELP_FILE),
+        ["<kbd>", "</kbd>", "(arranged alphabetically)"],
     ):
         lines.append(i[:-2])
     win = curses.newwin(
@@ -1109,14 +1112,10 @@ def main(stdscr, header):
             selected.set_to(history.do(cursor_down, int(selected), len(todos)))
         elif key == 75:  # K
             history.add_undo(todo_down, todos, int(selected) - 1)
-            todos = selected.todo_set_to(
-                history.do(todo_up, todos, int(selected))
-            )
+            todos = selected.todo_set_to(history.do(todo_up, todos, int(selected)))
         elif key == 74:  # J
             history.add_undo(todo_up, todos, int(selected) + 1)
-            todos = selected.todo_set_to(
-                history.do(todo_down, todos, int(selected))
-            )
+            todos = selected.todo_set_to(history.do(todo_down, todos, int(selected)))
         elif key == 111:  # o
             todos = selected.todo_set_to(
                 history.do(new_todo_next, stdscr, todos, int(selected))
@@ -1164,9 +1163,7 @@ def main(stdscr, header):
             )
             history.add_undo(delete_todo, stdscr, todos, int(selected))
         elif key == 45:  # -
-            todos = selected.todo_set_to(
-                history.do(blank_todo, todos, int(selected))
-            )
+            todos = selected.todo_set_to(history.do(blank_todo, todos, int(selected)))
             history.add_undo(delete_todo, stdscr, todos, int(selected))
         elif key == 104:  # h
             help_menu(stdscr)
