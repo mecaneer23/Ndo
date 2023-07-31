@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# pyright: reportMissingImports=false
+# pyright: reportMissingModuleSource=false
 
 import curses
 import re
