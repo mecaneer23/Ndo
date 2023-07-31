@@ -1163,7 +1163,7 @@ def toggle_todo_note(todos, selected):
     update_file(FILENAME, todos)
 
 
-def sort_todos(todos: list, selected: int) -> tuple:
+def alphabetical_sort(todos: list, selected: int) -> tuple:
     selected_todo = todos[selected]
     indented_sections = []
     section = []
@@ -1322,7 +1322,9 @@ def main(stdscr, header):
             toggle_todo_note(todos, selected)
         elif key == 115:  # s
             history.add_undo(reset_todos, todos)
-            todos = selected.todo_set_to(history.do(sort_todos, todos, int(selected)))
+            todos = selected.todo_set_to(
+                history.do(alphabetical_sort, todos, int(selected))
+            )
         elif key == 10:  # enter
             todos = history.do(toggle, todos, selected)
             history.add_undo(toggle, todos, selected)
