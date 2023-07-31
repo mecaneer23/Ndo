@@ -464,8 +464,12 @@ def handle_args(args):
     global STRIKETHROUGH
     AUTOSAVE = args.autosave
     ENUMERATE = args.enumerate
-    FILENAME = Path(args.filename)
-    HEADER = FILENAME.name if args.title == HEADER else args.title
+    FILENAME = (
+        Path(args.filename, FILESTRING)
+        if Path(args.filename).is_dir()
+        else Path(args.filename)
+    )
+    HEADER = FILENAME.as_posix() if args.title == HEADER else args.title
     HELP_FILE = Path(args.help_file)
     INDENT = args.indentation_level
     SIMPLE_BOXES = args.simple_boxes

@@ -7,6 +7,6 @@
   -4 allow multiline paste
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
--7 make `filename` param accept a directory
++7 make `filename` param accept a directory
 -2 make editing work on VT100 terminals (alacritty/xterm)
 -6 make indentation in entry mode more clear
