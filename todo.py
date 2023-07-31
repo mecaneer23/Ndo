@@ -1190,13 +1190,13 @@ def main(stdscr, header):
         elif key == 27:  # any escape sequence
             stdscr.nodelay(True)
             subch = stdscr.getch()
+            stdscr.nodelay(False)
             if subch == -1:  # escape, otherwise skip `[`
                 return quit_program(todos)
             elif subch == 106:  # alt + j
                 selected.multiselect_down(len(todos))
             elif subch == 107:  # alt + k
                 selected.multiselect_up()
-            stdscr.nodelay(False)
         elif key == 426:  # alt + j (on windows)
             selected.multiselect_down(len(todos))
         elif key == 427:  # alt + k (on windows)

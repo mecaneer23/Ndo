@@ -8,3 +8,7 @@
 -6 make indentation in entry mode more clear
 -7 fix strikethrough
 -7 add numbers and other rapid movement to block selection
+  -7 alt + numbers
+  -7 alt + g
+  -7 alt + shift + g
+-7 add `simple` box char set ([#], [ ]) and command line option
