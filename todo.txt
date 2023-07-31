@@ -1,6 +1,5 @@
-+7 add alphabetical sort (undoable)
-  +7 treat indented todos as part of the same sublist
-    +7 only sort indent level 0 todos
+-7 add color sort
+-7 add sort menu
 -1 fix notes indentation
 -3 fix redo
 -7 fix strikethrough
