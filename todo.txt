@@ -1,13 +1,13 @@
--2 make editing work on VT100 terminals (alacritty/xterm)
++7 add alphabetical sort (undoable)
+  +7 treat indented todos as part of the same sublist
+    +7 only sort indent level 0 todos
+-1 fix notes indentation
 -3 fix redo
+-7 fix strikethrough
 -4 implement multiline todos
   -4 allow multiline paste
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
--1 fix notes indentation
--6 make indentation in entry mode more clear
--7 fix strikethrough
--7 add alphabetical sort (undoable)
-  -7 treat indented todos as part of the same sublist
-    -7 only sort indent level 0 todos
 -7 make `filename` param accept a directory
+-2 make editing work on VT100 terminals (alacritty/xterm)
+-6 make indentation in entry mode more clear

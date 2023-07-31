@@ -1170,11 +1170,12 @@ def sort_todos(todos: list, selected: int) -> tuple:
         if len(section) > 0:
             indented_sections.append(section)
         section = [todo]
+    indented_sections.append(section)
     sorted_todo_list = []
     for section in sorted(indented_sections, key=lambda x: x[0].display_text):
         for todo in section:
             sorted_todo_list.append(todo)
-    return sorted_todo_list, todos.index(selected_todo)
+    return sorted_todo_list, sorted_todo_list.index(selected_todo)
 
 
 def init():
@@ -1316,7 +1317,6 @@ def main(stdscr, header):
         elif key == 330:  # delete
             toggle_todo_note(todos, selected)
         elif key == 115:  # s
-            raise NotImplementedError("Sort... also add to readme")
             history.add_undo(reset_todos, todos)
             todos = selected.todo_set_to(history.do(sort_todos, todos, int(selected)))
         elif key == 10:  # enter
