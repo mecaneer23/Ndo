@@ -435,7 +435,6 @@ def wgetnstr(
     n: int = 1024,
     todo: Todo | None = None,
     indent_level: int = 0,
-    cursor: str = "█",
 ) -> Todo:
     """
     Reads a string from the given window with max chars n
@@ -468,9 +467,6 @@ def wgetnstr(
             Specify a default indent level for the returned
             Todo. If `todo` is also passed, this value will be
             ignored. Default is `0`.
-        cursor (str, optional):
-            Cursor character to display while typing.
-            Defaults to "█".
 
     Returns:
         Todo: Similar to the built in input() function,
@@ -495,7 +491,7 @@ def wgetnstr(
             if len(chars) + 1 >= win.getmaxyx()[1] - 1:
                 todo.set_display_text("".join(chars))
                 return todo
-            win.addstr(1, len(chars) + 1, cursor)
+            win.addstr(1, len(chars) + 1, "█")
         for i, v in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
             win.addstr(1, i + 1, v, curses.A_REVERSE if i == position else 0)
         win.refresh()
