@@ -272,6 +272,14 @@ class Cursor:
             return
         self.deselect_next()
 
+    def multiselect_top(self):
+        for _ in range(self.positions[0], 0, -1):
+            self.multiselect_up()
+
+    def multiselect_bottom(self, max_len):
+        for _ in range(self.positions[-1], max_len):
+            self.multiselect_down(max_len)
+
 
 class Mode:
     def __init__(self, toggle_mode):
@@ -1197,6 +1205,10 @@ def main(stdscr, header):
                 selected.multiselect_down(len(todos))
             elif subch == 107:  # alt + k
                 selected.multiselect_up()
+            elif subch == 103: # alt + g
+                selected.multiselect_top()
+            elif subch == 71: # alt + G
+                selected.multiselect_bottom(len(todos))
         elif key == 426:  # alt + j (on windows)
             selected.multiselect_down(len(todos))
         elif key == 427:  # alt + k (on windows)
