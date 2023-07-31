@@ -10,6 +10,8 @@ STRIKETHROUGH = False
 FILESTRING = "todo.txt"
 FILENAME = Path(FILESTRING)
 HELP_FILE = Path(__file__).parent.joinpath("README.md").absolute()
+HELP_START = 43
+HELP_END = 66
 AUTOSAVE = True
 HEADER = ""
 INDENT = 2
@@ -318,7 +320,7 @@ def get_args():
         add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Controls:\n  "
-        + "\n  ".join(md_table_to_lines(43, 66, str(HELP_FILE), ["<kbd>", "</kbd>"])),
+        + "\n  ".join(md_table_to_lines(HELP_START, HELP_END, str(HELP_FILE), ["<kbd>", "</kbd>"])),
     )
     parser.add_argument(
         "--help",
@@ -719,7 +721,7 @@ def help_menu(parent_win):
     set_header(parent_win, "Help (k/j to scroll):")
     lines = []
     for i in md_table_to_lines(
-        43, 66, str(HELP_FILE), ["<kbd>", "</kbd>", "(arranged alphabetically)"]
+        HELP_START, HELP_END, str(HELP_FILE), ["<kbd>", "</kbd>", "(arranged alphabetically)"]
     ):
         lines.append(i[:-2])
     win = curses.newwin(
