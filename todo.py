@@ -56,6 +56,10 @@ class Todo:
     def is_toggled(self):
         return self.box_char == "+"
 
+    def set_indent_level(self, indent_level):
+        self.indent_level = indent_level
+        return self
+
     def set_color(self, color):
         self.color = color
 
@@ -430,6 +434,7 @@ def wgetnstr(
     mode: Mode | None = None,
     n: int = 1024,
     todo: Todo | None = None,
+    indent_level: int = 0,
     cursor: str = "█",
 ) -> Todo:
     """
@@ -459,6 +464,10 @@ def wgetnstr(
             Todo object to initially occupy the window.
             If `None` is passed, `todo` will default to
             EmptyTodo().
+        indent_level (int, optional):
+            Specify a default indent level for the returned
+            Todo. If `todo` is also passed, this value will be
+            ignored. Default is `0`.
         cursor (str, optional):
             Cursor character to display while typing.
             Defaults to "█".
@@ -475,7 +484,7 @@ def wgetnstr(
     elif win.getmaxyx()[0] > 3:
         raise NotImplementedError("Multiline text editing is not supported")
     if todo is None:
-        todo = EmptyTodo()
+        todo = EmptyTodo().set_indent_level(indent_level)
     original = todo
     chars = list(todo.display_text)
     position = len(chars)
@@ -599,20 +608,13 @@ def hline(win, y, x, ch, n):
     win.addch(y, x + n - 1, curses.ACS_RTEE)
 
 
-def get_indentation_level(todos, index):
-    if len(todos) == 0 or index > len(todos) - 1:
-        return 0
-    if todos[index].indent_level != 0:
-        return todos[index].indent_level
-    return todos[index - 1].indent_level
-
-
 def insert_todo(stdscr, todos: list, index: int, mode=None):
     y, x = stdscr.getmaxyx()
     if isinstance(
         todo := wgetnstr(
             curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8),
             mode=mode,
+            indent_level=todos[index - 1].indent_level,
         ),
         EmptyTodo,
     ):
