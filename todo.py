@@ -88,9 +88,6 @@ class Todo:
     def to_note(self):
         self.__class__ = Note(self._text).__class__
 
-    def __str__(self):
-        return repr(self)
-
     def __repr__(self):
         return (
             f"{self.indent_level * ' '}{self.box_char}{self.color} {self.display_text}"
@@ -428,42 +425,47 @@ def print(message, end="\n"):
         f.write(f"{message}{end}")
 
 
-def wgetnstr(win, mode=None, n=1024, chars="", cursor="█", current_todo=None):
+def wgetnstr(
+    win,
+    mode: Mode | None = None,
+    n: int = 1024,
+    todo: Todo | None = None,
+    cursor: str = "█",
+) -> Todo:
     """
-    Reads a string from the given window with max chars n\
-    and initial chars chars. Returns a string from the user\
+    Reads a string from the given window with max chars n
+    and initial chars chars. Returns a string from the user
     Functions like a JavaScript alert box for user input.
 
     Args:
         win (Window object):
-            The window to read from. The entire window\
-            will be used, so a curses.newwin() should be\
-            generated specifically for use with this\
-            function. As a box will be created around the\
-            window's border, the window must have a minimum\
-            height of 3 characters. The width will determine\
+            The window to read from. The entire window
+            will be used, so a curses.newwin() should be
+            generated specifically for use with this
+            function. As a box will be created around the
+            window's border, the window must have a minimum
+            height of 3 characters. The width will determine
             a maximum value of n.
         mode (Mode, optional):
-            If adding todos in entry mode (used for rapid\
-            repetition), allow toggling of that mode by\
+            If adding todos in entry mode (used for rapid
+            repetition), allow toggling of that mode by
             passing a Mode object.
         n (int, optional):
-            Max number of characters in the read string.\
-            It might error if this number is greater than\
+            Max number of characters in the read string.
+            It might error if this number is greater than
             the area of the window. Defaults to 1024.
-        chars (str, optional):
-            Initial string to occupy the window.\
-            Defaults to "" (empty string).
+        todo (Todo, optional):
+            When wgetnstr is used with Todos, pass a
+            Todo object to initially occupy the window.
+            If `None` is passed, `todo` will default to
+            EmptyTodo().
         cursor (str, optional):
-            Cursor character to display while typing.\
+            Cursor character to display while typing.
             Defaults to "█".
-        current_todo (Todo, optional):
-            When wgetnstr is used with todos, pass a\
-            Todo object to allow ease of updating indentation.
 
     Returns:
-        str: Similar to the built in input() function,\
-        returns a string of what the user entered.
+        Todo: Similar to the built in input() function,
+        returns a Todo object containing the user's entry.
     """
     if win.getmaxyx()[0] < 3:
         raise ValueError(
@@ -472,15 +474,18 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█", current_todo=None):
         )
     elif win.getmaxyx()[0] > 3:
         raise NotImplementedError("Multiline text editing is not supported")
-    original = chars
-    chars = list(chars)
+    if todo is None:
+        todo = EmptyTodo()
+    original = todo
+    chars = list(todo.display_text)
     position = len(chars)
     win.box()
     win.nodelay(False)
     while True:
         if position == len(chars):
             if len(chars) + 1 >= win.getmaxyx()[1] - 1:
-                return "".join(chars)
+                todo.set_display_text("".join(chars))
+                return todo
             win.addstr(1, len(chars) + 1, cursor)
         for i, v in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
             win.addstr(1, i + 1, v, curses.A_REVERSE if i == position else 0)
@@ -500,7 +505,8 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█", current_todo=None):
         elif ch in (24, 11):  # ctrl + x/k
             if mode is not None:
                 mode.toggle()
-                return "".join(chars)
+                todo.set_display_text("".join(chars))
+                return todo
         elif ch == 23:  # ctrl + backspace
             while True:
                 if position <= 0:
@@ -511,8 +517,7 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█", current_todo=None):
                     break
                 chars.pop(position)
         elif ch == 9:  # tab
-            if current_todo is not None:
-                current_todo.indent()
+            todo.indent()
         elif ch == 27:  # any escape sequence `^[`
             win.nodelay(True)
             escape = win.getch()  # skip `[`
@@ -571,8 +576,7 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█", current_todo=None):
             elif subch == 70:  # end
                 position = len(chars)
             elif subch == 90:  # shift + tab
-                if current_todo is not None:
-                    current_todo.dedent()
+                todo.dedent()
             else:
                 raise ValueError(repr(subch))
         else:  # typable characters (basically alphanum)
@@ -585,7 +589,8 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█", current_todo=None):
             if position < len(chars):
                 position += 1
 
-    return "".join(chars)
+    todo.set_display_text("".join(chars))
+    return todo
 
 
 def hline(win, y, x, ch, n):
@@ -604,17 +609,15 @@ def get_indentation_level(todos, index):
 
 def insert_todo(stdscr, todos: list, index: int, mode=None):
     y, x = stdscr.getmaxyx()
-    if (
+    if isinstance(
         todo := wgetnstr(
             curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8),
             mode=mode,
-            current_todo=(
-                todos[index] if len(todos) > 0 and index < len(todos) - 1 else None
-            ),
-        )
-    ) == "":
+        ),
+        EmptyTodo,
+    ):
         return todos
-    todos.insert(index, Todo(f"{' ' * get_indentation_level(todos, index)}- {todo}"))
+    todos.insert(index, todo)
     return todos
 
 
@@ -627,7 +630,7 @@ def search(stdscr, todos, selected):
     set_header(stdscr, "Searching...")
     stdscr.refresh()
     y, x = stdscr.getmaxyx()
-    sequence = wgetnstr(curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8))
+    sequence = wgetnstr(curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8)).display_text
     stdscr.clear()
     for i, todo in enumerate(todos[int(selected) :], start=int(selected)):
         if sequence in todo.display_text:
@@ -998,15 +1001,14 @@ def edit_todo(stdscr, todos, selected):
     todo = todos[selected].display_text
     ncols = max(x * 3 // 4, len(todo) + 3) if len(todo) < x - 1 else x * 3 // 4
     begin_x = x // 8 if len(todo) < x - 1 - ncols else (x - ncols) // 2
-    if (
+    if isinstance(
         edited_todo := wgetnstr(
             curses.newwin(3, ncols, y // 2 - 3, begin_x),
-            chars=todo,
-            current_todo=todos[selected],
-        )
-    ) == "":
+            todo=todos[selected],
+        ), EmptyTodo
+    ):
         return todos
-    todos[selected].set_display_text(edited_todo)
+    todos[selected] = edited_todo
     stdscr.clear()
     update_file(FILENAME, todos)
     return todos
