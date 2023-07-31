@@ -419,7 +419,7 @@ def clamp(counter: int, minimum: int, maximum: int):
 def update_file(filename, lst, save=AUTOSAVE):
     if not save:
         return 0
-    with filename.open("w") as f:
+    with filename.open("w", newline="\n") as f:
         return f.write("\n".join(map(repr, lst)))
 
 
