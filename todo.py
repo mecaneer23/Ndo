@@ -236,7 +236,7 @@ class Cursor:
     def set_to(self, position):
         self.positions = [position]
 
-    def todo_set_to(self, todo_position):
+    def todo_set_to(self, todo_position: tuple):
         self.positions[0] = todo_position[1]
         return todo_position[0]
 
@@ -1150,6 +1150,33 @@ def dedent(todos, selected):
     return todos, selected.positions[0]
 
 
+def toggle_todo_note(todos, selected):
+    for pos in selected.positions:
+        if isinstance(todos[pos], Note):
+            todos[pos].to_todo()
+        elif isinstance(todos[pos], Todo):
+            todos[pos].to_note()
+    update_file(FILENAME, todos)
+
+
+def sort_todos(todos: list, selected: int) -> tuple:
+    selected_todo = todos[selected]
+    indented_sections = []
+    section = []
+    for todo in todos:
+        if todo.indent_level > 0:
+            section.append(todo)
+            continue
+        if len(section) > 0:
+            indented_sections.append(section)
+        section = [todo]
+    sorted_todo_list = []
+    for section in sorted(indented_sections, key=lambda x: x[0].display_text):
+        for todo in section:
+            sorted_todo_list.append(todo)
+    return sorted_todo_list, todos.index(selected_todo)
+
+
 def init():
     curses.use_default_colors()
     curses.curs_set(0)
@@ -1287,12 +1314,11 @@ def main(stdscr, header):
         elif key in (24, 11):  # ctrl + x/k
             mode.toggle()
         elif key == 330:  # delete
-            for pos in selected.positions:
-                if isinstance(todos[pos], Note):
-                    todos[pos].to_todo()
-                elif isinstance(todos[pos], Todo):
-                    todos[pos].to_note()
-            update_file(FILENAME, todos)
+            toggle_todo_note(todos, selected)
+        elif key == 115:  # s
+            raise NotImplementedError("Sort... also add to readme")
+            history.add_undo(reset_todos, todos)
+            todos = selected.todo_set_to(history.do(sort_todos, todos, int(selected)))
         elif key == 10:  # enter
             todos = history.do(toggle, todos, selected)
             history.add_undo(toggle, todos, selected)

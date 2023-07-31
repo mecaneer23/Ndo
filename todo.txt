@@ -10,3 +10,4 @@
 -7 add alphabetical sort (undoable)
   -7 treat indented todos as part of the same sublist
     -7 only sort indent level 0 todos
+-7 make `filename` param accept a directory
