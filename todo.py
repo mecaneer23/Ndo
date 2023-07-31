@@ -910,13 +910,13 @@ def cursor_to(position, len_todos):
     return clamp(position, 0, len_todos)
 
 
-def todo_up(stdscr, todos, selected):
+def todo_up(todos, selected):
     todos = swap_todos(todos, selected, selected - 1)
     update_file(FILENAME, todos)
     return todos, cursor_up(selected, len(todos))
 
 
-def todo_down(stdscr, todos, selected):
+def todo_down(todos, selected):
     todos = swap_todos(todos, selected, selected + 1)
     update_file(FILENAME, todos)
     return todos, cursor_down(selected, len(todos))
@@ -1001,7 +1001,7 @@ def paste_todo(stdscr, todos, selected):
     return new_todo_next(stdscr, todos, selected, paste=True)
 
 
-def blank_todo(stdscr, todos, selected):
+def blank_todo(todos, selected):
     insert_empty_todo(todos, selected + 1)
     selected = cursor_down(selected, len(todos))
     update_file(FILENAME, todos)
@@ -1106,14 +1106,14 @@ def main(stdscr, header):
             history.add_undo(cursor_to, int(selected), len(todos))
             selected.set_to(history.do(cursor_down, int(selected), len(todos)))
         elif key == 75:  # K
-            history.add_undo(todo_down, stdscr, todos, int(selected) - 1)
+            history.add_undo(todo_down, todos, int(selected) - 1)
             todos = selected.todo_set_to(
-                history.do(todo_up, stdscr, todos, int(selected))
+                history.do(todo_up, todos, int(selected))
             )
         elif key == 74:  # J
-            history.add_undo(todo_up, stdscr, todos, int(selected) + 1)
+            history.add_undo(todo_up, todos, int(selected) + 1)
             todos = selected.todo_set_to(
-                history.do(todo_down, stdscr, todos, int(selected))
+                history.do(todo_down, todos, int(selected))
             )
         elif key == 111:  # o
             todos = selected.todo_set_to(
@@ -1163,7 +1163,7 @@ def main(stdscr, header):
             history.add_undo(delete_todo, stdscr, todos, int(selected))
         elif key == 45:  # -
             todos = selected.todo_set_to(
-                history.do(blank_todo, stdscr, todos, int(selected))
+                history.do(blank_todo, todos, int(selected))
             )
             history.add_undo(delete_todo, stdscr, todos, int(selected))
         elif key == 104:  # h
