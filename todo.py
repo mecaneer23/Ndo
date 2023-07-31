@@ -511,7 +511,8 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█", current_todo=None):
                     break
                 chars.pop(position)
         elif ch == 9:  # tab
-            current_todo.indent()
+            if current_todo is not None:
+                current_todo.indent()
         elif ch == 27:  # any escape sequence `^[`
             win.nodelay(True)
             escape = win.getch()  # skip `[`
@@ -570,7 +571,8 @@ def wgetnstr(win, mode=None, n=1024, chars="", cursor="█", current_todo=None):
             elif subch == 70:  # end
                 position = len(chars)
             elif subch == 90:  # shift + tab
-                current_todo.dedent()
+                if current_todo is not None:
+                    current_todo.dedent()
             else:
                 raise ValueError(repr(subch))
         else:  # typable characters (basically alphanum)
@@ -592,21 +594,27 @@ def hline(win, y, x, ch, n):
     win.addch(y, x + n - 1, curses.ACS_RTEE)
 
 
+def get_indentation_level(todos, index):
+    if len(todos) == 0 or index > len(todos) - 1:
+        return 0
+    if todos[index].indent_level != 0:
+        return todos[index].indent_level
+    return todos[index - 1].indent_level
+
+
 def insert_todo(stdscr, todos: list, index: int, mode=None):
     y, x = stdscr.getmaxyx()
     if (
         todo := wgetnstr(
             curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8),
             mode=mode,
-            current_todo=todos[index],
+            current_todo=(
+                todos[index] if len(todos) > 0 and index < len(todos) - 1 else None
+            ),
         )
     ) == "":
         return todos
-    if todos[index].indent_level != 0:
-        indent_level = todos[index].indent_level
-    else:
-        indent_level = todos[index - 1].indent_level if len(todos) > 0 else 0
-    todos.insert(index, Todo(f"{' ' * indent_level}- {todo}"))
+    todos.insert(index, Todo(f"{' ' * get_indentation_level(todos, index)}- {todo}"))
     return todos
 
 
