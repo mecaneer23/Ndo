@@ -277,8 +277,37 @@ class Cursor:
             self.multiselect_up()
 
     def multiselect_bottom(self, max_len):
-        for _ in range(self.positions[-1], max_len):
+        for _ in range(self.positions[0], max_len):
             self.multiselect_down(max_len)
+
+    def multiselect_to(self, position, max_len):
+        direction = -1 if position < self.positions[0] else 1
+        for _ in range(self.positions[0], position, direction):
+            if direction == 1:
+                self.multiselect_down(max_len)
+                continue
+            self.multiselect_up()
+
+    def multiselect_from(self, stdscr, first_digit, max_len):
+        total = str(first_digit)
+        while True:
+            try:
+                key = stdscr.getch()
+            except KeyboardInterrupt:  # exit on ^C
+                return
+            if key != 27:  # not an escape sequence
+                return
+            stdscr.nodelay(True)
+            subch = stdscr.getch()  # alt + ...
+            stdscr.nodelay(False)
+            if subch == 107:  # k
+                self.multiselect_to(self.positions[0] - int(total), max_len)
+            elif subch == 106:  # j
+                self.multiselect_to(self.positions[0] + int(total), max_len)
+            elif subch in range(48, 58):  # digits
+                total += str(subch - 48)
+                continue
+            return
 
 
 class Mode:
@@ -1011,7 +1040,8 @@ def edit_todo(stdscr, todos, selected):
         edited_todo := wgetnstr(
             curses.newwin(3, ncols, y // 2 - 3, begin_x),
             todo=todos[selected],
-        ), EmptyTodo
+        ),
+        EmptyTodo,
     ):
         return todos
     todos[selected] = edited_todo
@@ -1205,10 +1235,12 @@ def main(stdscr, header):
                 selected.multiselect_down(len(todos))
             elif subch == 107:  # alt + k
                 selected.multiselect_up()
-            elif subch == 103: # alt + g
+            elif subch == 103:  # alt + g
                 selected.multiselect_top()
-            elif subch == 71: # alt + G
+            elif subch == 71:  # alt + G
                 selected.multiselect_bottom(len(todos))
+            elif subch in range(48, 58):  # digits:
+                selected.multiselect_from(stdscr, subch - 48, len(todos))
         elif key == 426:  # alt + j (on windows)
             selected.multiselect_down(len(todos))
         elif key == 427:  # alt + k (on windows)
