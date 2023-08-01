@@ -1241,6 +1241,9 @@ def relative_cursor_to(
         elif key in (258, 106):  # down | j
             history.add_undo(cursor_to, selected, len(todos))
             return history.do(cursor_to, selected + int(total), len(todos))
+        elif key in (103, 71):  # g | G
+            history.add_undo(cursor_to, selected, len(todos))
+            return history.do(cursor_to, int(total) - 1, len(todos))
         elif key in range(48, 58):  # digits
             total += str(key - 48)
             continue
