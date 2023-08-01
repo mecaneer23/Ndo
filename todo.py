@@ -530,6 +530,7 @@ def wgetnstr(
     n: int = 1024,
     todo: Todo | None = None,
     indent_level: int = 0,
+    note: bool = False,
 ) -> Todo:
     """
     Reads a string from the given window with max chars n
@@ -565,6 +566,17 @@ def wgetnstr(
             Specify a default indent level for the returned
             Todo. If `todo` is also passed, this value will be
             ignored. Default is `0`.
+        note (bool, optional):
+            If `True`, the returned Todo will be a Note.
+            Default is `False`.
+
+    Raises:
+        ValueError:
+            If the window is too short to display the minimum
+            1 line of text.
+        NotImplementedError:
+            If the window is too long to display the maximum
+            n characters.
 
     Returns:
         Todo: Similar to the built in input() function,
@@ -1360,11 +1372,9 @@ def main(stdscr, header):
             history.add_undo(cursor_to, int(selected), len(todos))
             selected.set_to(history.do(cursor_down, int(selected), len(todos)))
         elif key == 75:  # K
-            history.add_undo(todo_down, todos, int(selected) - 1)
-            todos = selected.todo_set_to(history.do(todo_up, todos, int(selected)))
+            selected.multiselect_up()
         elif key == 74:  # J
-            history.add_undo(todo_up, todos, int(selected) + 1)
-            todos = selected.todo_set_to(history.do(todo_down, todos, int(selected)))
+            selected.multiselect_down(len(todos))
         elif key == 111:  # o
             todos = selected.todo_set_to(
                 history.do(new_todo_next, stdscr, todos, int(selected))
@@ -1425,9 +1435,13 @@ def main(stdscr, header):
             if subch == -1:  # escape, otherwise skip `[`
                 return quit_program(todos)
             elif subch == 106:  # alt + j
-                selected.multiselect_down(len(todos))
+                history.add_undo(todo_up, todos, int(selected) + 1)
+                todos = selected.todo_set_to(
+                    history.do(todo_down, todos, int(selected))
+                )
             elif subch == 107:  # alt + k
-                selected.multiselect_up()
+                history.add_undo(todo_down, todos, int(selected) - 1)
+                todos = selected.todo_set_to(history.do(todo_up, todos, int(selected)))
             elif subch == 103:  # alt + g
                 selected.multiselect_top()
             elif subch == 71:  # alt + G
@@ -1435,9 +1449,11 @@ def main(stdscr, header):
             elif subch in range(48, 58):  # digits:
                 selected.multiselect_from(stdscr, subch - 48, len(todos))
         elif key == 426:  # alt + j (on windows)
-            selected.multiselect_down(len(todos))
+            history.add_undo(todo_up, todos, int(selected) + 1)
+            todos = selected.todo_set_to(history.do(todo_down, todos, int(selected)))
         elif key == 427:  # alt + k (on windows)
-            selected.multiselect_up()
+            history.add_undo(todo_down, todos, int(selected) - 1)
+            todos = selected.todo_set_to(history.do(todo_up, todos, int(selected)))
         elif key == 9:  # tab
             history.add_undo(reset_todos, todos)
             todos = selected.todo_set_to(history.do(indent, todos, selected))

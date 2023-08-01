@@ -47,11 +47,11 @@ Options:
 | ---------------------------------------------- | ----------------------------------- |
 | <kbd>-</kbd>                                   | Insert blank line                   |
 | <kbd>/</kbd>                                   | Search for a sequence               |
-| <kbd>Alt</kbd>+<kbd>k</kbd>/<kbd>j</kbd>       | Select/deselect multiple todos      |
+| <kbd>Alt</kbd>+<kbd>k</kbd>/<kbd>j</kbd>       | Move todo up and down               |
 | <kbd>Ctrl</kbd>+<kbd>x</kbd>, <kbd>k</kbd>     | Toggle `toggle` and `entry` modes   |
 | <kbd>Delete</kbd>                              | Toggle between `Todo` and `Note`    |
 | <kbd>Enter</kbd>                               | Toggle a todo as completed          |
-| <kbd>Shift</kbd>+<kbd>k</kbd>/<kbd>j</kbd>     | Move todo up and down               |
+| <kbd>Shift</kbd>+<kbd>k</kbd>/<kbd>j</kbd>     | Select/deselect multiple todos      |
 | <kbd>Shift</kbd>+<kbd>o</kbd>                  | Add a todo on current line          |
 | <kbd>Tab</kbd>/<kbd>Shift</kbd>+<kbd>Tab</kbd> | Indent/unindent selected todo       |
 | <kbd>b</kbd>                                   | Make selected todo bigger (magnify) |
