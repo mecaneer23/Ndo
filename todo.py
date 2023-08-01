@@ -454,9 +454,9 @@ def get_args():
         "--title",
         "-t",
         type=str,
+        nargs='+',
         default=HEADER,
         help="Allows passing alternate header.\
-            Make sure to quote multi-word headers.\
             Default is filename.",
     )
     return parser.parse_args()
@@ -480,7 +480,7 @@ def handle_args(args):
         if Path(args.filename).is_dir()
         else Path(args.filename)
     )
-    HEADER = FILENAME.as_posix() if args.title == HEADER else args.title
+    HEADER = FILENAME.as_posix() if args.title == HEADER else " ".join(args.title)
     HELP_FILE = Path(args.help_file)
     INDENT = args.indentation_level
     SIMPLE_BOXES = args.simple_boxes

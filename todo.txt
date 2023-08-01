@@ -10,4 +10,4 @@
 -7 make copy/paste todos more robust (add other attributes)
 -7 add relative enumeration
 -7 add num + g/G to go to certain line
--7 fix multiword titles
++7 fix multiword titles
