@@ -524,6 +524,7 @@ def print(message, end="\n"):
 
 
 def wgetnstr(
+    stdscr,
     win,
     mode: Mode | None = None,
     n: int = 1024,
@@ -536,6 +537,9 @@ def wgetnstr(
     Functions like a JavaScript alert box for user input.
 
     Args:
+        stdscr (Window object):
+            Main window of the entire program. Only used in
+            calls to set_header().
         win (Window object):
             The window to read from. The entire window
             will be used, so a curses.newwin() should be
@@ -617,6 +621,8 @@ def wgetnstr(
                 chars.pop(position)
         elif ch == 9:  # tab
             todo.indent()
+            set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
+            stdscr.refresh()
         elif ch == 27:  # any escape sequence `^[`
             win.nodelay(True)
             escape = win.getch()  # skip `[`
@@ -676,6 +682,8 @@ def wgetnstr(
                 position = len(chars)
             elif subch == 90:  # shift + tab
                 todo.dedent()
+                set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
+                stdscr.refresh()
             else:
                 raise ValueError(repr(subch))
         else:  # typable characters (basically alphanum)
@@ -702,6 +710,7 @@ def insert_todo(stdscr, todos: list, index: int, mode=None):
     y, x = stdscr.getmaxyx()
     if isinstance(
         todo := wgetnstr(
+            stdscr,
             curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8),
             mode=mode,
             indent_level=todos[index - 1].indent_level,
@@ -722,7 +731,9 @@ def search(stdscr, todos, selected):
     set_header(stdscr, "Searching...")
     stdscr.refresh()
     y, x = stdscr.getmaxyx()
-    sequence = wgetnstr(curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8)).display_text
+    sequence = wgetnstr(
+        stdscr, curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8)
+    ).display_text
     stdscr.clear()
     for i, todo in enumerate(todos[int(selected) :], start=int(selected)):
         if sequence in todo.display_text:
@@ -1205,6 +1216,7 @@ def edit_todo(stdscr, todos, selected):
     begin_x = x // 8 if len(todo) < x - 1 - ncols else (x - ncols) // 2
     if isinstance(
         edited_todo := wgetnstr(
+            stdscr,
             curses.newwin(3, ncols, y // 2 - 3, begin_x),
             todo=todos[selected],
         ),
