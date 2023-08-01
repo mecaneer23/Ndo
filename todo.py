@@ -1104,12 +1104,15 @@ def get_bullet(indentation_level):
     return symbols[indentation_level // INDENT % len(symbols)]
 
 
-def todo_from_clipboard(todos: list, selected: int):
+def todo_from_clipboard(todos: list, selected: int, copied_todo):
     try:
         from pyperclip import paste
     except ModuleNotFoundError:
         raise ExternalModuleNotFoundError("pyperclip", todos, "paste")
     todo = paste()
+    if copied_todo.display_text == todo:
+        todos.insert(selected + 1, Todo(copied_todo._text))
+        return todos
     if "\n" in todo:
         return todos
     todos.insert(selected + 1, Todo(f"- {todo}"))
@@ -1148,7 +1151,9 @@ def todo_down(todos, selected):
     return todos, cursor_down(selected, len(todos))
 
 
-def new_todo_next(stdscr, todos: list, selected: int, mode=None, paste: bool = False):
+def new_todo_next(
+    stdscr, todos: list, selected: int, mode=None, paste: bool = False, copied_todo=None
+):
     temp = todos.copy()
     todos = (
         insert_todo(
@@ -1158,7 +1163,7 @@ def new_todo_next(stdscr, todos: list, selected: int, mode=None, paste: bool = F
             mode,
         )
         if not paste
-        else todo_from_clipboard(todos, selected)
+        else todo_from_clipboard(todos, selected, copied_todo)
     )
     stdscr.clear()
     if temp != todos:
@@ -1212,16 +1217,17 @@ def edit_todo(stdscr, todos, selected):
     return todos
 
 
-def copy_todo(todos, selected):
+def copy_todo(todos, selected, copied_todo):
     try:
         from pyperclip import copy
     except ModuleNotFoundError:
         raise ExternalModuleNotFoundError("pyperclip", todos, "copy")
     copy(todos[selected].display_text)
+    copied_todo.__init__(todos[selected]._text)
 
 
-def paste_todo(stdscr, todos, selected):
-    return new_todo_next(stdscr, todos, selected, paste=True)
+def paste_todo(stdscr, todos, selected, copied_todo):
+    return new_todo_next(stdscr, todos, selected, paste=True, copied_todo=copied_todo)
 
 
 def blank_todo(todos, selected):
@@ -1317,6 +1323,7 @@ def main(stdscr, header):
     selected = Cursor(0)
     history = UndoRedo()
     mode = Mode(True)
+    copied_todo = Todo("- placeholder")
 
     while True:
         set_header(stdscr, f"{header}:")
@@ -1386,10 +1393,10 @@ def main(stdscr, header):
             selected.set_to(history.do(cursor_bottom, len(todos)))
         elif key == 121:  # y
             # TODO: not currently undoable (copy previous item in clipboard)
-            copy_todo(todos, int(selected))
+            copy_todo(todos, int(selected), copied_todo)
         elif key == 112:  # p
             todos = selected.todo_set_to(
-                history.do(paste_todo, stdscr, todos, int(selected))
+                history.do(paste_todo, stdscr, todos, int(selected), copied_todo)
             )
             history.add_undo(delete_todo, stdscr, todos, selected)
         elif key == 45:  # -
