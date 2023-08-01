@@ -1128,14 +1128,9 @@ def new_todo_current(stdscr, todos, selected):
     return todos
 
 
-def delete_todo(stdscr, todos, selected):
-    if isinstance(selected, Cursor):
-        positions = selected.get_deletable()
-        selected.set_to(cursor_up(int(selected), len(todos)))
-    elif isinstance(selected, int):
-        positions = [selected]
-    else:
-        raise TypeError(f"{selected} must be one of `Cursor` or `int`")
+def delete_todo(stdscr, todos: list, selected: Cursor):
+    positions = selected.get_deletable()
+    selected.set_to(clamp(int(selected), 0, len(todos) - 1))
     for pos in positions:
         todos = remove_todo(todos, pos)
     stdscr.clear()
@@ -1282,7 +1277,7 @@ def main(stdscr, header):
             todos = selected.todo_set_to(
                 history.do(new_todo_next, stdscr, todos, int(selected), mode)
             )
-            history.add_undo(delete_todo, stdscr, todos, int(selected))
+            history.add_undo(delete_todo, stdscr, todos, selected)
             continue
         try:
             key = stdscr.getch()
@@ -1306,10 +1301,10 @@ def main(stdscr, header):
             todos = selected.todo_set_to(
                 history.do(new_todo_next, stdscr, todos, int(selected))
             )
-            history.add_undo(delete_todo, stdscr, todos, int(selected))
+            history.add_undo(delete_todo, stdscr, todos, selected)
         elif key == 79:  # O
             todos = history.do(new_todo_current, stdscr, todos, int(selected))
-            history.add_undo(delete_todo, stdscr, todos, int(selected))
+            history.add_undo(delete_todo, stdscr, todos, selected)
         elif key == 100:  # d
             history.add_undo(lambda a, b: (a, b), todos, int(selected))
             todos = selected.todo_set_to(
@@ -1347,10 +1342,10 @@ def main(stdscr, header):
             todos = selected.todo_set_to(
                 history.do(paste_todo, stdscr, todos, int(selected))
             )
-            history.add_undo(delete_todo, stdscr, todos, int(selected))
+            history.add_undo(delete_todo, stdscr, todos, selected)
         elif key == 45:  # -
             todos = selected.todo_set_to(history.do(blank_todo, todos, int(selected)))
-            history.add_undo(delete_todo, stdscr, todos, int(selected))
+            history.add_undo(delete_todo, stdscr, todos, selected)
         elif key == 104:  # h
             help_menu(stdscr)
         elif key == 98:  # b
