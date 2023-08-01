@@ -1,5 +1,5 @@
 -7 add color sort
--7 add sort menu
++7 add sort menu
 -1 fix notes indentation
 -3 fix redo
 -7 fix strikethrough

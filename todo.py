@@ -923,6 +923,78 @@ def color_menu(parent_win, original: int):
         win.refresh()
 
 
+def alphabetical_sort(todos: list, selected: int) -> tuple:
+    selected_todo = todos[selected]
+    indented_sections = []
+    section = []
+    for todo in todos:
+        if todo.indent_level > 0:
+            section.append(todo)
+            continue
+        if len(section) > 0:
+            indented_sections.append(section)
+        section = [todo]
+    indented_sections.append(section)
+    sorted_todo_list = []
+    for section in sorted(indented_sections, key=lambda x: x[0].display_text):
+        for todo in section:
+            sorted_todo_list.append(todo)
+    return sorted_todo_list, sorted_todo_list.index(selected_todo)
+
+
+def sort_by(method, todos, selected, history) -> tuple:
+    history.add_undo(reset_todos, todos)
+    if method == "Alphabetical":
+        return history.do(alphabetical_sort, todos, int(selected))
+    return todos, selected
+
+
+def sort_menu(parent_win, todos, selected, history) -> tuple:
+    parent_win.clear()
+    set_header(parent_win, "Sort by:")
+    lines = [
+        "Alphabetical"
+    ]
+    win = curses.newwin(
+        len(lines) + 2,
+        len(lines[0]) + 2,
+        1,
+        (parent_win.getmaxyx()[1] - (len(max(lines, key=len)) + 1)) // 2,
+    )
+    win.box()
+    selected = 0
+    while True:
+        parent_win.refresh()
+        for i, v in enumerate(lines):
+            win.addstr(
+                i + 1,
+                1,
+                v,
+                curses.A_REVERSE if i == selected else 0,
+            )
+        try:
+            key = win.getch()
+        except KeyboardInterrupt:
+            return todos, selected
+        if key == 107:  # k
+            selected -= 1
+        elif key == 106:  # j
+            selected += 1
+        elif key == 103:  # g
+            selected = 0
+        elif key == 71:  # G
+            selected = len(lines)
+        elif key in (113, 27):  # q | esc
+            return todos, selected
+        elif key == 10:  # enter
+            return sort_by(lines[selected], todos, selected, history)
+        else:
+            continue
+        selected = clamp(selected, 0, len(lines))
+        parent_win.refresh()
+        win.refresh()
+
+
 def make_printable_sublist(height: int, lst: list, cursor: int, distance: int = -1):
     if len(lst) < height:
         return lst, cursor
@@ -1163,25 +1235,6 @@ def toggle_todo_note(todos, selected):
     update_file(FILENAME, todos)
 
 
-def alphabetical_sort(todos: list, selected: int) -> tuple:
-    selected_todo = todos[selected]
-    indented_sections = []
-    section = []
-    for todo in todos:
-        if todo.indent_level > 0:
-            section.append(todo)
-            continue
-        if len(section) > 0:
-            indented_sections.append(section)
-        section = [todo]
-    indented_sections.append(section)
-    sorted_todo_list = []
-    for section in sorted(indented_sections, key=lambda x: x[0].display_text):
-        for todo in section:
-            sorted_todo_list.append(todo)
-    return sorted_todo_list, sorted_todo_list.index(selected_todo)
-
-
 def init():
     curses.use_default_colors()
     curses.curs_set(0)
@@ -1321,10 +1374,7 @@ def main(stdscr, header):
         elif key == 330:  # delete
             toggle_todo_note(todos, selected)
         elif key == 115:  # s
-            history.add_undo(reset_todos, todos)
-            todos = selected.todo_set_to(
-                history.do(alphabetical_sort, todos, int(selected))
-            )
+            todos = selected.todo_set_to(sort_menu(stdscr, todos, selected, history))
         elif key == 10:  # enter
             todos = history.do(toggle, todos, selected)
             history.add_undo(toggle, todos, selected)
