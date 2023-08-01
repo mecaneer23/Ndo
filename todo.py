@@ -8,14 +8,15 @@ from typing import List
 
 AUTOSAVE = True
 BULLETS = False
-CONTROLS_BEGIN_INDEX = 45
-CONTROLS_END_INDEX = 69
+CONTROLS_BEGIN_INDEX = 46
+CONTROLS_END_INDEX = 70
 DEFAULT_TODO = "todo.txt"
 ENUMERATE = False
 FILENAME = Path(DEFAULT_TODO)
 HEADER = ""
 HELP_FILE = Path(__file__).parent.joinpath("README.md").absolute()
 INDENT = 2
+RELATIVE_ENUMERATE = False
 SIMPLE_BOXES = False
 STRIKETHROUGH = False
 
@@ -432,6 +433,15 @@ def get_args():
             Default is `{INDENT}`.",
     )
     parser.add_argument(
+        "--relative-enumeration",
+        "-r",
+        action="store_true",
+        default=RELATIVE_ENUMERATE,
+        help=f"Boolean: determines if todos are numbered\
+            when printed. Numbers relatively rather than\
+            absolutely. Default is `{RELATIVE_ENUMERATE}`.",
+    )
+    parser.add_argument(
         "--simple-boxes",
         "-x",
         action="store_true",
@@ -454,7 +464,7 @@ def get_args():
         "--title",
         "-t",
         type=str,
-        nargs='+',
+        nargs="+",
         default=HEADER,
         help="Allows passing alternate header.\
             Default is filename.",
@@ -470,6 +480,7 @@ def handle_args(args):
     global HEADER
     global HELP_FILE
     global INDENT
+    global RELATIVE_ENUMERATE
     global SIMPLE_BOXES
     global STRIKETHROUGH
     AUTOSAVE = args.autosave
@@ -483,6 +494,7 @@ def handle_args(args):
     HEADER = FILENAME.as_posix() if args.title == HEADER else " ".join(args.title)
     HELP_FILE = Path(args.help_file)
     INDENT = args.indentation_level
+    RELATIVE_ENUMERATE = args.relative_enumeration
     SIMPLE_BOXES = args.simple_boxes
     STRIKETHROUGH = args.strikethrough
 
@@ -1037,7 +1049,10 @@ def print_todos(win, todos, selected):
     height, width = win.getmaxyx()
     new_todos, temp_selected = make_printable_sublist(height - 1, todos, int(selected))
     highlight = range(temp_selected, len(selected) + temp_selected)
-    for i, v in enumerate(new_todos):
+    for relative, (i, v) in zip(
+        [*range(temp_selected - 1, -1, -1), int(selected), *range(0, len(new_todos))],
+        enumerate(new_todos),
+    ):
         if v.color is None:
             raise ValueError(f"Invalid color for `{v}`")
         display_string = (
@@ -1051,7 +1066,12 @@ def print_todos(win, todos, selected):
                         else ""
                     ),
                     "" if SIMPLE_BOXES or isinstance(v, Note) else " ",
-                    f"{i + 1}. " if ENUMERATE else "",
+                    (
+                        f"{todos.index(v) + 1}. "
+                        if ENUMERATE and not RELATIVE_ENUMERATE
+                        else ""
+                    ),
+                    f"{relative + 1}. " if RELATIVE_ENUMERATE else "",
                     (
                         strikethrough(v.display_text)
                         if v.is_toggled()
