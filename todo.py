@@ -6,17 +6,18 @@ import re
 from pathlib import Path
 from typing import List
 
-STRIKETHROUGH = False
-FILESTRING = "todo.txt"
-FILENAME = Path(FILESTRING)
-HELP_FILE = Path(__file__).parent.joinpath("README.md").absolute()
-CONTROLS_START_INDEX = 44
-CONTROLS_END_INDEX = 68
 AUTOSAVE = True
-HEADER = ""
-INDENT = 2
+BULLETS = False
+CONTROLS_BEGIN_INDEX = 45
+CONTROLS_END_INDEX = 69
+DEFAULT_TODO = "todo.txt"
 ENUMERATE = False
+FILENAME = Path(DEFAULT_TODO)
+HEADER = ""
+HELP_FILE = Path(__file__).parent.joinpath("README.md").absolute()
+INDENT = 2
 SIMPLE_BOXES = False
+STRIKETHROUGH = False
 
 COLORS = {
     "Red": 1,
@@ -369,7 +370,7 @@ def get_args():
         epilog="Controls:\n  "
         + "\n  ".join(
             md_table_to_lines(
-                CONTROLS_START_INDEX,
+                CONTROLS_BEGIN_INDEX,
                 CONTROLS_END_INDEX,
                 str(HELP_FILE),
                 ["<kbd>", "</kbd>"],
@@ -377,10 +378,12 @@ def get_args():
         ),
     )
     parser.add_argument(
-        "--help",
-        "-h",
-        action="help",
-        help="Show this help message and exit.",
+        "filename",
+        type=str,
+        nargs="?",
+        default=FILENAME,
+        help=f"Provide a filename to store the todo list in.\
+            Default is `{FILENAME}`.",
     )
     parser.add_argument(
         "--autosave",
@@ -392,6 +395,14 @@ def get_args():
             Default is `{AUTOSAVE}`.",
     )
     parser.add_argument(
+        "--bullet-display",
+        "-b",
+        action="store_true",
+        default=BULLETS,
+        help=f"Boolean: determine if Notes are displayed with\
+            a bullet point in front or not. Default is `{BULLETS}`.",
+    )
+    parser.add_argument(
         "--enumerate",
         "-e",
         action="store_true",
@@ -400,21 +411,34 @@ def get_args():
             printed or not. Default is `{ENUMERATE}`.",
     )
     parser.add_argument(
+        "--help",
+        "-h",
+        action="help",
+        help="Show this help message and exit.",
+    )
+    parser.add_argument(
+        "--help-file",
+        type=str,
+        default=HELP_FILE,
+        help=f"Allows passing alternate file to\
+        specify help menu. Default is `{HELP_FILE}`.",
+    )
+    parser.add_argument(
+        "--indentation-level",
+        "-i",
+        type=int,
+        default=INDENT,
+        help=f"Allows specification of indentation level. \
+            Default is `{INDENT}`.",
+    )
+    parser.add_argument(
         "--simple-boxes",
-        "-b",
+        "-x",
         action="store_true",
         default=SIMPLE_BOXES,
         help=f"Boolean: allow rendering simpler checkboxes if\
             terminal doesn't support default ascii checkboxes.\
             Default is `{SIMPLE_BOXES}`.",
-    )
-    parser.add_argument(
-        "filename",
-        type=str,
-        nargs="?",
-        default=FILENAME,
-        help=f"Provide a filename to store the todo list in.\
-            Default is `{FILENAME}`.",
     )
     parser.add_argument(
         "--strikethrough",
@@ -435,26 +459,12 @@ def get_args():
             Make sure to quote multi-word headers.\
             Default is filename.",
     )
-    parser.add_argument(
-        "--help-file",
-        type=str,
-        default=HELP_FILE,
-        help=f"Allows passing alternate file to\
-        specify help menu. Default is `{HELP_FILE}`.",
-    )
-    parser.add_argument(
-        "--indentation-level",
-        "-i",
-        type=int,
-        default=INDENT,
-        help=f"Allows specification of indentation level. \
-            Default is `{INDENT}`.",
-    )
     return parser.parse_args()
 
 
 def handle_args(args):
     global AUTOSAVE
+    global BULLETS
     global ENUMERATE
     global FILENAME
     global HEADER
@@ -463,9 +473,10 @@ def handle_args(args):
     global SIMPLE_BOXES
     global STRIKETHROUGH
     AUTOSAVE = args.autosave
+    BULLETS = args.bullet_display
     ENUMERATE = args.enumerate
     FILENAME = (
-        Path(args.filename, FILESTRING)
+        Path(args.filename, DEFAULT_TODO)
         if Path(args.filename).is_dir()
         else Path(args.filename)
     )
@@ -809,7 +820,7 @@ def help_menu(parent_win):
     set_header(parent_win, "Help (k/j to scroll):")
     lines = []
     for i in md_table_to_lines(
-        CONTROLS_START_INDEX,
+        CONTROLS_BEGIN_INDEX,
         CONTROLS_END_INDEX,
         str(HELP_FILE),
         ["<kbd>", "</kbd>", "(arranged alphabetically)"],
@@ -1034,6 +1045,11 @@ def print_todos(win, todos, selected):
                 [
                     v.indent_level * " ",
                     "" if isinstance(v, Note) else f"{v.get_box()} ",
+                    (
+                        f"{get_bullet(v.indent_level)} "
+                        if isinstance(v, Note) and BULLETS
+                        else ""
+                    ),
                     "" if SIMPLE_BOXES or isinstance(v, Note) else " ",
                     f"{i + 1}. " if ENUMERATE else "",
                     (
@@ -1056,6 +1072,16 @@ def print_todos(win, todos, selected):
                 | (curses.A_REVERSE if i in highlight else 0),
             )
             counter += 1
+
+
+def get_bullet(indentation_level):
+    symbols = [
+        "•",
+        "◦",
+        "▪",
+        # "▫",
+    ]
+    return symbols[indentation_level // INDENT % len(symbols)]
 
 
 def todo_from_clipboard(todos: list, selected: int):

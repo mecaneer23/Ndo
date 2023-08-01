@@ -1,4 +1,3 @@
--1 fix notes indentation
 -2 make editing work on VT100 terminals (alacritty/xterm)
 -3 fix redo
 -4 implement multiline todos
@@ -6,5 +5,7 @@
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
 -6 make indentation in entry mode more clear
+-1 fix notes indentation
 -7 fix strikethrough
--7 add bullet display mode for Notes
++7 add bullet display mode for Notes
+-7 make copy/paste todos more robust (add other attributes)
