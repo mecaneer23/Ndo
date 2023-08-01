@@ -62,7 +62,7 @@ Options:
 | <kbd>o</kbd>                                   | Add a new todo                      |
 | <kbd>p</kbd>                                   | New todo from clipboard             |
 | <kbd>q</kbd>, <kbd>Ctrl</kbd>+<kbd>c</kbd>     | Quit                                |
-| <kbd>s</kbd>                                   | Sort top-level todos alphabetically |
+| <kbd>s</kbd>                                   | Sort top-level todos various ways   |
 | <kbd>u</kbd>                                   | Undo change                         |
 | <kbd>y</kbd>                                   | Copy todo to clipboard              |
 
