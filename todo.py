@@ -713,7 +713,7 @@ def insert_todo(stdscr, todos: list, index: int, mode=None):
             stdscr,
             curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8),
             mode=mode,
-            indent_level=todos[index - 1].indent_level,
+            indent_level=todos[index - 1].indent_level if len(todos) > 0 else 0,
         ),
         EmptyTodo,
     ):
