@@ -6,4 +6,4 @@
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
 -7 add `:` prompt to modify constants
--7 add note insertion mode/todo insertion mode
++7 add note insertion mode/todo insertion mode

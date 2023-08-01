@@ -101,6 +101,7 @@ class Todo:
 
     def to_note(self):
         self.__class__ = Note(self._text).__class__
+        return self
 
     def __repr__(self):
         return (
@@ -523,6 +524,11 @@ def print(message, end="\n"):
         f.write(f"{message}{end}")
 
 
+def wgetnstr_success(todo: Todo, chars: list, note: bool) -> Todo:
+    todo.set_display_text("".join(chars))
+    return todo.to_note() if note else todo
+
+
 def wgetnstr(
     stdscr,
     win,
@@ -599,8 +605,7 @@ def wgetnstr(
     while True:
         if position == len(chars):
             if len(chars) + 1 >= win.getmaxyx()[1] - 1:
-                todo.set_display_text("".join(chars))
-                return todo
+                return wgetnstr_success(todo, chars, note)
             win.addstr(1, len(chars) + 1, "█")
         for i, v in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
             win.addstr(1, i + 1, v, curses.A_REVERSE if i == position else 0)
@@ -620,8 +625,7 @@ def wgetnstr(
         elif ch in (24, 11):  # ctrl + x/k
             if mode is not None:
                 mode.toggle()
-                todo.set_display_text("".join(chars))
-                return todo
+                return wgetnstr_success(todo, chars, note)
         elif ch == 23:  # ctrl + backspace
             while True:
                 if position <= 0:
@@ -708,8 +712,7 @@ def wgetnstr(
             if position < len(chars):
                 position += 1
 
-    todo.set_display_text("".join(chars))
-    return todo
+    return wgetnstr_success(todo, chars, note)
 
 
 def hline(win, y, x, ch, n):
@@ -726,6 +729,7 @@ def insert_todo(stdscr, todos: list, index: int, mode=None):
             curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8),
             mode=mode,
             indent_level=todos[index - 1].indent_level if len(todos) > 0 else 0,
+            note=isinstance(todos[index - 1], Note) if len(todos) > 0 else False,
         ),
         EmptyTodo,
     ):
