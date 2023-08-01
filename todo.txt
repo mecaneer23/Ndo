@@ -1,3 +1,5 @@
+-1 fix notes indentation
+-1 fix strikethrough
 -2 make editing work on VT100 terminals (alacritty/xterm)
 -3 fix redo
 -4 implement multiline todos (not with newlines, just really long todos)
@@ -5,9 +7,6 @@
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
 -6 make indentation in entry mode more clear
--1 fix notes indentation
--7 fix strikethrough
--7 make copy/paste todos more robust (add other attributes)
--7 add relative enumeration
 -7 add num + g/G to go to certain line
-+7 fix multiword titles
+-7 add relative enumeration
+-7 make copy/paste todos more robust (add other attributes)
