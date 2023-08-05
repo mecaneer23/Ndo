@@ -346,7 +346,7 @@ def read_file(filename: Path):
         return f.read()
 
 
-def validate_file(raw_data):
+def validate_file(raw_data) -> list[Todo]:
     if len(raw_data) == 0:
         return []
     usable_data = []
@@ -360,6 +360,11 @@ def validate_file(raw_data):
         else:
             raise ValueError(f"Invalid todo: {line}")
     return usable_data
+
+
+def is_file_updated(filename: Path, todos: list):
+    with filename.open() as f:
+        return not validate_file(f.read()) == todos
 
 
 def get_args():
@@ -1354,6 +1359,8 @@ def main(stdscr, header):
     copied_todo = Todo("- placeholder")
 
     while True:
+        if AUTOSAVE and is_file_updated(FILENAME, todos):
+            todos = validate_file(read_file(FILENAME))
         set_header(stdscr, f"{header}:")
         print_todos(stdscr, todos, selected)
         stdscr.refresh()
