@@ -362,7 +362,7 @@ def validate_file(raw_data) -> list[Todo]:
     return usable_data
 
 
-def is_file_updated(filename: Path, todos: list):
+def is_file_externally_updated(filename: Path, todos: list):
     with filename.open() as f:
         return not validate_file(f.read()) == todos
 
@@ -1359,7 +1359,7 @@ def main(stdscr, header):
     copied_todo = Todo("- placeholder")
 
     while True:
-        if AUTOSAVE and is_file_updated(FILENAME, todos):
+        if AUTOSAVE and is_file_externally_updated(FILENAME, todos):
             todos = validate_file(read_file(FILENAME))
         set_header(stdscr, f"{header}:")
         print_todos(stdscr, todos, selected)
@@ -1488,7 +1488,6 @@ def main(stdscr, header):
             )
         else:
             continue
-        stdscr.refresh()
 
 
 if __name__ == "__main__":
