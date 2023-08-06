@@ -349,7 +349,7 @@ def read_file(filename: Path):
 def validate_file(raw_data) -> list[Todo]:
     if len(raw_data) == 0:
         return []
-    usable_data = []
+    usable_data: list[Todo] = []
     for line in raw_data.split("\n"):
         if len(line) == 0:
             usable_data.append(EmptyTodo())
