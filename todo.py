@@ -2,9 +2,12 @@
 # pyright: reportMissingModuleSource=false
 
 import curses
-import re
+from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from pathlib import Path
-from typing import List
+from re import match as re_match
+from typing import Any, Callable, List
+
+from _curses import window as curses_window
 
 AUTOSAVE = True
 BULLETS = False
@@ -43,7 +46,7 @@ class Todo:
                 ), self._text[counter:].lstrip()
             counter += 1
 
-    def __init__(self, text):
+    def __init__(self, text: str):
         self._text = str(text)
         self.indent_level = len(text) - len(text.lstrip())
         self.box_char = self._text[self.indent_level]
@@ -52,7 +55,7 @@ class Todo:
     def __getitem__(self, key):
         return self._text[key]
 
-    def set_display_text(self, display_text):
+    def set_display_text(self, display_text: str):
         self.display_text = display_text
         self._text = repr(self)
 
@@ -203,7 +206,7 @@ class UndoRedo:
         func, args = self.redos[self.index]
         return func(*args)
 
-    def add_undo(self, revert_with, *args):
+    def add_undo(self, revert_with: Callable, *args: Any):
         self.history.append((revert_with, deepcopy_ignore(args)))
         self.index = len(self.history) - 1
 
@@ -220,8 +223,8 @@ class UndoRedo:
 
 
 class Cursor:
-    def __init__(self, position, *positions):
-        self.positions = [position, *positions]
+    def __init__(self, position: int, *positions: int):
+        self.positions: list[int] = [position, *positions]
         self.direction = None
 
     def __len__(self):
@@ -236,7 +239,7 @@ class Cursor:
     def __contains__(self, child):
         return child in self.positions
 
-    def set_to(self, position):
+    def set_to(self, position: int):
         self.positions = [position]
 
     def todo_set_to(self, todo_position: tuple):
@@ -346,16 +349,16 @@ def read_file(filename: Path):
         return f.read()
 
 
-def validate_file(raw_data) -> list[Todo]:
+def validate_file(raw_data: str) -> list[Todo]:
     if len(raw_data) == 0:
         return []
     usable_data: list[Todo] = []
     for line in raw_data.split("\n"):
         if len(line) == 0:
             usable_data.append(EmptyTodo())
-        elif re.match(r"^( *)?(\+|-)\d? .*$", line):
+        elif re_match(r"^( *)?(\+|-)\d? .*$", line):
             usable_data.append(Todo(line))
-        elif re.match(r"^( *\d )?.*$", line):
+        elif re_match(r"^( *\d )?.*$", line):
             usable_data.append(Note(line))
         else:
             raise ValueError(f"Invalid todo: {line}")
@@ -367,13 +370,11 @@ def is_file_externally_updated(filename: Path, todos: list):
         return not validate_file(f.read()) == todos
 
 
-def get_args():
-    import argparse
-
-    parser = argparse.ArgumentParser(
+def get_args() -> Namespace:
+    parser = ArgumentParser(
         description="Ndo is a todo list program to help you manage your todo lists",
         add_help=False,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        formatter_class=RawDescriptionHelpFormatter,
         epilog="Controls:\n  "
         + "\n  ".join(
             md_table_to_lines(
@@ -478,7 +479,7 @@ def get_args():
     return parser.parse_args()
 
 
-def handle_args(args):
+def handle_args(args: Namespace) -> None:
     global AUTOSAVE
     global BULLETS
     global ENUMERATE
@@ -505,10 +506,8 @@ def handle_args(args):
     STRIKETHROUGH = args.strikethrough
 
 
-def deepcopy_ignore(lst):
+def deepcopy_ignore(lst: tuple) -> list:
     from copy import deepcopy
-
-    from _curses import window as curses_window
 
     return [i if isinstance(i, curses_window) else deepcopy(i) for i in lst]
 
@@ -780,7 +779,7 @@ def strikethrough(text):
     return "\u0336".join(text) if STRIKETHROUGH else text
 
 
-def swap_todos(todos: list, idx1, idx2):
+def swap_todos(todos: list, idx1: int, idx2: int):
     if min(idx1, idx2) >= 0 and max(idx1, idx2) < len(todos):
         todos[idx1], todos[idx2] = todos[idx2], todos[idx1]
     return todos
@@ -863,13 +862,13 @@ def help_menu(parent_win):
     parent_win.clear()
     set_header(parent_win, "Help (k/j to scroll):")
     lines = []
-    for i in md_table_to_lines(
+    for line in md_table_to_lines(
         CONTROLS_BEGIN_INDEX,
         CONTROLS_END_INDEX,
         str(HELP_FILE),
         ["<kbd>", "</kbd>", "(arranged alphabetically)"],
     ):
-        lines.append(i[:-2])
+        lines.append(line[:-2])
     win = curses.newwin(
         min(parent_win.getmaxyx()[0] - 1, len(lines) + 2),
         len(lines[0]) + 2,
@@ -992,7 +991,7 @@ def get_indented_sections(todos: list) -> list:
     return indented_sections
 
 
-def flatten_todos(todos: list, selected: int, key) -> tuple:
+def flatten_todos(todos: list, selected: int, key: Callable) -> tuple:
     selected_todo = todos[selected]
     sorted_todos = []
     for section in sorted(get_indented_sections(todos), key=key):
@@ -1136,7 +1135,7 @@ def get_bullet(indentation_level):
     return symbols[indentation_level // INDENT % len(symbols)]
 
 
-def todo_from_clipboard(todos: list, selected: int, copied_todo):
+def todo_from_clipboard(todos: list, selected: int, copied_todo: Todo):
     try:
         from pyperclip import paste
     except ModuleNotFoundError:
@@ -1184,7 +1183,12 @@ def todo_down(todos, selected):
 
 
 def new_todo_next(
-    stdscr, todos: list, selected: int, mode=None, paste: bool = False, copied_todo=None
+    stdscr,
+    todos: list,
+    selected: int,
+    mode: Mode | None = None,
+    paste: bool = False,
+    copied_todo: Todo | None = None,
 ):
     temp = todos.copy()
     todos = (
@@ -1195,7 +1199,9 @@ def new_todo_next(
             mode,
         )
         if not paste
-        else todo_from_clipboard(todos, selected, copied_todo)
+        else todo_from_clipboard(
+            todos, selected, copied_todo if copied_todo is not None else EmptyTodo()
+        )
     )
     stdscr.clear()
     if temp != todos:
@@ -1350,7 +1356,7 @@ def init():
         curses.init_pair(i, v, -1)
 
 
-def main(stdscr, header):
+def main(stdscr: curses_window, header: str):
     init()
     todos = validate_file(read_file(FILENAME))
     selected = Cursor(0)

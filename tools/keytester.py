@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 import curses
+from _curses import window
 
 
-def main(stdscr):
+def main(stdscr: window) -> None:
     curses.curs_set(0)
-    stdscr.addstr("Ctrl+C to exit\n")
+    y, x = (i // 2 for i in stdscr.getmaxyx())
+    stdscr.addstr(0, 0, "Ctrl+C to exit\n")
     while True:
         try:
             ch = stdscr.getch()
@@ -15,7 +17,7 @@ def main(stdscr):
             return
         if ch == 3:  # ^C
             return
-        stdscr.addstr(*[i // 2 for i in stdscr.getmaxyx()], str(ch) + "      ")
+        stdscr.addstr(y, x, str(ch) + "      ")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 import sys
 from _typeshed import ReadOnlyBuffer, SupportsRead
-from typing import IO, Any, NamedTuple, overload
+from typing import IO, Any, NamedTuple, overload, Callable
 from typing_extensions import TypeAlias, final
 
 # Handled by PyCurses_ConvertToChtype in _cursesmodule.c.
@@ -589,7 +589,7 @@ class _CursesWindow:
     def vline(self, ch: _ChType, n: int) -> None: ...
     @overload
     def vline(self, y: int, x: int, ch: _ChType, n: int) -> None: ...
-def wrapper(func, /, *args, **kwds) -> Any: ...
+def wrapper(func: Callable[..., Any], /, *args: Any, **kwds: Any) -> Any: ...
 
 if sys.version_info >= (3, 8):
     class _ncurses_version(NamedTuple):
