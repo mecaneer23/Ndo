@@ -5,10 +5,9 @@ import curses
 from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from pathlib import Path
 from re import match as re_match
-from typing import Any, Callable, List
+from typing import Any, Callable, TypeVar
 
-from _curses import window as curses_window
-
+T = TypeVar("T")
 AUTOSAVE = True
 BULLETS = False
 CONTROLS_BEGIN_INDEX = 46
@@ -35,7 +34,7 @@ COLORS = {
 
 
 class Todo:
-    def _init_color_dtext(self):
+    def _init_color_dtext(self) -> tuple[int, str]:
         counter = self.indent_level
         while True:
             if self._text[counter] == " ":
@@ -46,30 +45,33 @@ class Todo:
                 ), self._text[counter:].lstrip()
             counter += 1
 
-    def __init__(self, text: str):
+    def call_init(self, text: str) -> None:
         self._text = str(text)
         self.indent_level = len(text) - len(text.lstrip())
         self.box_char = self._text[self.indent_level]
         self.color, self.display_text = self._init_color_dtext()
 
-    def __getitem__(self, key):
+    def __init__(self, text: str) -> None:
+        self.call_init(text)
+
+    def __getitem__(self, key: int) -> str:
         return self._text[key]
 
-    def set_display_text(self, display_text: str):
+    def set_display_text(self, display_text: str) -> None:
         self.display_text = display_text
         self._text = repr(self)
 
-    def is_toggled(self):
+    def is_toggled(self) -> bool:
         return self.box_char == "+"
 
-    def set_indent_level(self, indent_level):
+    def set_indent_level(self, indent_level: int) -> Any:
         self.indent_level = indent_level
         return self
 
-    def set_color(self, color):
+    def set_color(self, color: int) -> None:
         self.color = color
 
-    def get_box(self):
+    def get_box(self) -> str:
         table = (
             {
                 "+": "☑",
@@ -88,57 +90,50 @@ class Todo:
             f"The completion indicator of `{self._text}` is not one of (+, -)"
         )
 
-    def toggle(self):
+    def toggle(self) -> None:
         new_box = {"+": "-", "-": "+"}[self.box_char]
         self.box_char = new_box
         self._text = repr(self)
 
-    def indent(self):
+    def indent(self) -> None:
         self.indent_level += INDENT
         self._text = repr(self)
 
-    def dedent(self):
+    def dedent(self) -> None:
         if self.indent_level >= INDENT:
             self.indent_level -= INDENT
             self._text = repr(self)
 
-    def to_note(self):
-        self.__class__ = Note(self._text).__class__
-        return self
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"{self.indent_level * ' '}{self.box_char}{self.color} {self.display_text}"
         )
 
 
 class EmptyTodo(Todo):
-    def __init__(self):
+    def __init__(self) -> None:
         self.display_text = ""
         self.color = 7
         self.indent_level = 0
 
-    def is_toggled(self):
+    def is_toggled(self) -> bool:
         return False
 
-    def toggle(self):
+    def toggle(self) -> None:
         return
 
-    def set_display_text(self, text):
-        self.box_char = "-"
-        self.display_text = text
-        self._text = f"{self.box_char}{self.color} {text}"
-        self.__class__ = Todo(self._text).__class__
+    def set_display_text(self, text: str) -> None:
+        empty_todo_to_todo(self, text)
 
-    def get_box(self):
+    def get_box(self) -> str:
         return " "
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.display_text
 
 
 class Note(Todo):
-    def _init_color_dtext(self):
+    def _init_color_dtext(self) -> tuple[int, str]:
         if not self._text[self.indent_level].isdigit():
             return 7, self._text
         return (
@@ -146,37 +141,42 @@ class Note(Todo):
             self._text[self.indent_level + 2 :],
         )
 
-    def __init__(self, text):
+    def __init__(self, text: str) -> None:
         self._text = text
         self.indent_level = len(text) - len(text.lstrip())
         self.color, self.display_text = self._init_color_dtext()
 
-    def is_toggled(self):
+    def is_toggled(self) -> bool:
         return False
 
-    def toggle(self):
+    def toggle(self) -> None:
         return
 
-    def to_todo(self):
-        self.box_char = "-"
-        self._text = (
-            f"{self.indent_level * ' '}{self.box_char}{self.color} {self.display_text}"
-        )
-        self.__class__ = Todo(self._text).__class__
+    def to_todo(self) -> None:
+        note_todo_switcher(self)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self.color == 7:
             return f"{self.indent_level * ' '}{self.display_text}"
         return f"{self.indent_level * ' '}{self.color} {self.display_text}"
 
 
 class UndoRedo:
-    def __init__(self):
-        self.history = []
-        self.redos = []
+    def __init__(self) -> None:
+        self.history: list[
+            tuple[Callable[..., tuple[list[Todo], int] | list[Todo] | int], Any]
+        ] = []
+        self.redos: list[
+            tuple[Callable[..., tuple[list[Todo], int] | list[Todo] | int], Any]
+        ] = []
         self.index = -1
 
-    def handle_return(self, undo_or_redo, todos: list, selected: int):
+    def handle_return(
+        self,
+        undo_or_redo: Callable[..., tuple[list[Todo], int] | list[Todo] | int],
+        todos: list[Todo],
+        selected: int,
+    ) -> tuple[list[Todo], int]:
         """
         this is the only non-reusable function from this class
         This function takes in a list of current values and
@@ -192,25 +192,29 @@ class UndoRedo:
         else:
             return todos, selected
 
-    def undo(self, todos, selected):
+    def undo(
+        self, todos: list[Todo], selected: int
+    ) -> tuple[list[Todo], int] | list[Todo] | int:
         if self.index < 0:
             return todos, selected
         func, args = self.history[self.index]
         self.index -= 1
         return func(*args)
 
-    def redo(self, todos, selected):
+    def redo(
+        self, todos: list[Todo], selected: int
+    ) -> tuple[list[Todo], int] | list[Todo] | int:
         if self.index >= len(self.history) - 1:
             return todos, selected
         self.index += 1
         func, args = self.redos[self.index]
         return func(*args)
 
-    def add_undo(self, revert_with: Callable, *args: Any):
-        self.history.append((revert_with, deepcopy_ignore(args)))
+    def add_undo(self, revert_with: Callable[..., Any], *args: Any) -> None:
+        self.history.append((revert_with, deepcopy_ignore([*args])))
         self.index = len(self.history) - 1
 
-    def do(self, func, *args):
+    def do(self, func: Callable[..., T], *args: Any) -> T:
         # TODO: implement redo
         # I have the redo function and the
         # args it needs... how should I store it?
@@ -218,57 +222,57 @@ class UndoRedo:
         # if func.__name__ == "new_todo_next" else deepcopy_ignore(args)))
         return func(*args)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "\n".join(f"{i[0].__name__}: {i[1]}" for i in self.history)
 
 
 class Cursor:
-    def __init__(self, position: int, *positions: int):
+    def __init__(self, position: int, *positions: int) -> None:
         self.positions: list[int] = [position, *positions]
-        self.direction = None
+        self.direction: str | None = None
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.positions)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.positions[0])
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.positions[0]
 
-    def __contains__(self, child):
+    def __contains__(self, child: int) -> bool:
         return child in self.positions
 
-    def set_to(self, position: int):
+    def set_to(self, position: int) -> None:
         self.positions = [position]
 
-    def todo_set_to(self, todo_position: tuple):
+    def todo_set_to(self, todo_position: tuple[list[Todo], int]) -> list[Todo]:
         self.positions[0] = todo_position[1]
         return todo_position[0]
 
-    def set_multiple(self, positions):
+    def set_multiple(self, positions: list[int]) -> None:
         self.positions = positions
 
-    def select_next(self):
+    def select_next(self) -> None:
         self.positions.append(max(self.positions) + 1)
         self.positions.sort()
 
-    def deselect_next(self):
+    def deselect_next(self) -> None:
         if len(self.positions) > 1:
             self.positions.remove(max(self.positions))
 
-    def deselect_prev(self):
+    def deselect_prev(self) -> None:
         if len(self.positions) > 1:
             self.positions.remove(min(self.positions))
 
-    def select_prev(self):
+    def select_prev(self) -> None:
         self.positions.append(min(self.positions) - 1)
         self.positions.sort()
 
-    def get_deletable(self):
+    def get_deletable(self) -> list[int]:
         return [min(self.positions) for _ in self.positions]
 
-    def multiselect_down(self, max_len):
+    def multiselect_down(self, max_len: int) -> None:
         if max(self.positions) >= max_len - 1:
             return
         if len(self.positions) == 1 or self.direction == "down":
@@ -277,7 +281,7 @@ class Cursor:
             return
         self.deselect_prev()
 
-    def multiselect_up(self):
+    def multiselect_up(self) -> None:
         if min(self.positions) == 0 and self.direction == "up":
             return
         if len(self.positions) == 1 or self.direction == "up":
@@ -286,15 +290,15 @@ class Cursor:
             return
         self.deselect_next()
 
-    def multiselect_top(self):
+    def multiselect_top(self) -> None:
         for _ in range(self.positions[0], 0, -1):
             self.multiselect_up()
 
-    def multiselect_bottom(self, max_len):
+    def multiselect_bottom(self, max_len: int) -> None:
         for _ in range(self.positions[0], max_len):
             self.multiselect_down(max_len)
 
-    def multiselect_to(self, position, max_len):
+    def multiselect_to(self, position: int, max_len: int) -> None:
         direction = -1 if position < self.positions[0] else 1
         for _ in range(self.positions[0], position, direction):
             if direction == 1:
@@ -302,7 +306,7 @@ class Cursor:
                 continue
             self.multiselect_up()
 
-    def multiselect_from(self, stdscr, first_digit, max_len):
+    def multiselect_from(self, stdscr: Any, first_digit: int, max_len: int) -> None:
         total = str(first_digit)
         while True:
             try:
@@ -325,15 +329,15 @@ class Cursor:
 
 
 class Mode:
-    def __init__(self, toggle_mode):
+    def __init__(self, toggle_mode: bool) -> None:
         self.toggle_mode = toggle_mode
 
-    def toggle(self):
+    def toggle(self) -> None:
         self.toggle_mode = not self.toggle_mode
 
 
 class ExternalModuleNotFoundError(Exception):
-    def __init__(self, module, todos, operation):
+    def __init__(self, module: str, todos: list[Todo], operation: str):
         update_file(FILENAME, todos, True)
         exit(
             f"`{module}` module required for {operation} operation. "
@@ -341,7 +345,30 @@ class ExternalModuleNotFoundError(Exception):
         )
 
 
-def read_file(filename: Path):
+def note_todo_switcher(note_or_todo: Note | Todo) -> Todo:
+    note_or_todo.box_char = "-"
+    note_or_todo._text = "".join(
+        [
+            note_or_todo.indent_level * " ",
+            note_or_todo.box_char,
+            f"{note_or_todo.color} ",
+            note_or_todo.display_text,
+        ]
+    )
+    new_class = Todo if isinstance(note_or_todo, Note) else Note
+    note_or_todo.__class__ = new_class(note_or_todo._text).__class__
+    return note_or_todo
+
+
+def empty_todo_to_todo(todo: Todo, text: str) -> Todo:
+    todo.box_char = "-"
+    todo.display_text = text
+    todo._text = f"{todo.box_char}{todo.color} {text}"
+    todo.__class__ = Todo(todo._text).__class__
+    return todo
+
+
+def read_file(filename: Path) -> str:
     if not filename.exists():
         with filename.open("w"):
             return ""
@@ -365,7 +392,7 @@ def validate_file(raw_data: str) -> list[Todo]:
     return usable_data
 
 
-def is_file_externally_updated(filename: Path, todos: list):
+def is_file_externally_updated(filename: Path, todos: list[Todo]) -> bool:
     with filename.open() as f:
         return not validate_file(f.read()) == todos
 
@@ -506,39 +533,41 @@ def handle_args(args: Namespace) -> None:
     STRIKETHROUGH = args.strikethrough
 
 
-def deepcopy_ignore(lst: tuple) -> list:
+def deepcopy_ignore(lst: list[Any]) -> list[Any]:
     from copy import deepcopy
+
+    from _curses import window as curses_window
 
     return [i if isinstance(i, curses_window) else deepcopy(i) for i in lst]
 
 
-def clamp(counter: int, minimum: int, maximum: int):
+def clamp(counter: int, minimum: int, maximum: int) -> int:
     return min(max(counter, minimum), maximum - 1)
 
 
-def update_file(filename, lst, save=AUTOSAVE):
+def update_file(filename: Path, lst: list[Todo], save: bool = AUTOSAVE) -> int:
     if not save:
         return 0
     with filename.open("w", newline="\n") as f:
         return f.write("\n".join(map(repr, lst)))
 
 
-def print(message, end="\n"):
+def print(message: str, end: str = "\n") -> None:
     with open("debugging/log.txt", "a") as f:
         f.write(f"{message}{end}")
 
 
-def wgetnstr_success(todo: Todo, chars: list, note: bool) -> Todo:
+def wgetnstr_success(todo: Todo, chars: list[str], note: bool) -> Todo:
     todo.set_display_text("".join(chars))
-    return todo.to_note() if note else todo
+    return note_todo_switcher(todo) if note else todo
 
 
 def wgetnstr(
-    stdscr,
-    win,
+    stdscr: Any,
+    win: Any,
     mode: Mode | None = None,
     n: int = 1024,
-    todo: Todo | None = None,
+    todo: Todo = EmptyTodo(),
     indent_level: int = 0,
     note: bool = False,
 ) -> Todo:
@@ -600,7 +629,9 @@ def wgetnstr(
     elif win.getmaxyx()[0] > 3:
         raise NotImplementedError("Multiline text editing is not supported")
     if todo is None:
-        todo = EmptyTodo().set_indent_level(indent_level)
+        todo = EmptyTodo()
+    if isinstance(todo, EmptyTodo):
+        todo.set_indent_level(indent_level)
     original = todo
     chars = list(todo.display_text)
     position = len(chars)
@@ -719,13 +750,15 @@ def wgetnstr(
     return wgetnstr_success(todo, chars, note)
 
 
-def hline(win, y, x, ch, n):
+def hline(win: Any, y: int, x: int, ch: str | int, n: int) -> None:
     win.addch(y, x, curses.ACS_LTEE)
     win.hline(y, x + 1, ch, n - 2)
     win.addch(y, x + n - 1, curses.ACS_RTEE)
 
 
-def insert_todo(stdscr, todos: list, index: int, mode=None):
+def insert_todo(
+    stdscr: Any, todos: list[Todo], index: int, mode: Mode | None = None
+) -> list[Todo]:
     y, x = stdscr.getmaxyx()
     if isinstance(
         todo := wgetnstr(
@@ -742,12 +775,12 @@ def insert_todo(stdscr, todos: list, index: int, mode=None):
     return todos
 
 
-def insert_empty_todo(todos, index):
+def insert_empty_todo(todos: list[Todo], index: int) -> list[Todo]:
     todos.insert(index, EmptyTodo())
     return todos
 
 
-def search(stdscr, todos, selected):
+def search(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
     set_header(stdscr, "Searching...")
     stdscr.refresh()
     y, x = stdscr.getmaxyx()
@@ -764,22 +797,22 @@ def search(stdscr, todos, selected):
     selected.set_to(i)
 
 
-def set_header(stdscr, message):
-    stdscr.addstr(0, 0, message, curses.A_BOLD)
+def set_header(stdscr: Any, message: str) -> None:
+    stdscr.addstr(0, 0, message.ljust(stdscr.getmaxyx()[1]), curses.A_BOLD)
 
 
-def remove_todo(todos: list, index):
+def remove_todo(todos: list[Todo], index: int) -> list[Todo]:
     if len(todos) < 1:
         return todos
     todos.pop(index)
     return todos
 
 
-def strikethrough(text):
+def strikethrough(text: str) -> str:
     return "\u0336".join(text) if STRIKETHROUGH else text
 
 
-def swap_todos(todos: list, idx1: int, idx2: int):
+def swap_todos(todos: list[Todo], idx1: int, idx2: int) -> list[Todo]:
     if min(idx1, idx2) >= 0 and max(idx1, idx2) < len(todos):
         todos[idx1], todos[idx2] = todos[idx2], todos[idx1]
     return todos
@@ -789,8 +822,8 @@ def md_table_to_lines(
     first_line_idx: int,
     last_line_idx: int,
     filename: str = "README.md",
-    remove: List[str] = [],
-) -> List[str]:
+    remove: list[str] = [],
+) -> list[str]:
     """
     Converts a Markdown table to a list of formatted strings.
 
@@ -827,7 +860,7 @@ def md_table_to_lines(
         raise FileNotFoundError("Markdown file not found.")
 
     # Remove unwanted characters and split each line into a list of values
-    split_lines: List[List[str]] = [[]] * len(lines)
+    split_lines: list[list[str]] = [[]] * len(lines)
     for i, _ in enumerate(lines):
         for item in remove:
             lines[i] = lines[i].replace(item, "")
@@ -836,7 +869,7 @@ def md_table_to_lines(
     split_lines[1] = ["-" for _ in range(column_count)]
 
     # Create lists of columns
-    columns: List = [[0, []] for _ in range(column_count)]
+    columns: list[list[Any]] = [[0, []] for _ in range(column_count)]
     for i in range(column_count):
         for line in split_lines:
             columns[i][1].append(line[i])
@@ -847,7 +880,7 @@ def md_table_to_lines(
     split_lines[1] = ["-" * (length + 1) for length, _ in columns]
 
     # Join the lines together into a list of formatted strings
-    joined_lines: List[str] = [""] * len(split_lines)
+    joined_lines: list[str] = [""] * len(split_lines)
     for i, line in enumerate(split_lines):
         for j, v in enumerate(line):
             line[j] = v.strip().ljust(columns[j][0] + 2)
@@ -858,7 +891,7 @@ def md_table_to_lines(
     return joined_lines
 
 
-def help_menu(parent_win):
+def help_menu(parent_win: Any) -> None:
     parent_win.clear()
     set_header(parent_win, "Help (k/j to scroll):")
     lines = []
@@ -900,7 +933,7 @@ def help_menu(parent_win):
     parent_win.clear()
 
 
-def magnify(stdscr, todos, selected):
+def magnify(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
     try:
         from pyfiglet import figlet_format as big
     except ModuleNotFoundError:
@@ -926,11 +959,11 @@ def magnify(stdscr, todos, selected):
     stdscr.clear()
 
 
-def get_color(color):
+def get_color(color: str) -> int:
     return COLORS[color]
 
 
-def color_menu(parent_win, original: int):
+def color_menu(parent_win: Any, original: int) -> int:
     parent_win.clear()
     set_header(parent_win, "Colors:")
     lines = [i.ljust(len(max(COLORS.keys(), key=len))) for i in COLORS.keys()]
@@ -977,7 +1010,7 @@ def color_menu(parent_win, original: int):
         win.refresh()
 
 
-def get_indented_sections(todos: list) -> list:
+def get_indented_sections(todos: list[Todo]) -> list[list[Todo]]:
     indented_sections = []
     section = []
     for todo in todos:
@@ -991,7 +1024,9 @@ def get_indented_sections(todos: list) -> list:
     return indented_sections
 
 
-def flatten_todos(todos: list, selected: int, key: Callable) -> tuple:
+def flatten_todos(
+    todos: list[Todo], selected: int, key: Callable[..., str]
+) -> tuple[list[Todo], int]:
     selected_todo = todos[selected]
     sorted_todos = []
     for section in sorted(get_indented_sections(todos), key=key):
@@ -1000,14 +1035,16 @@ def flatten_todos(todos: list, selected: int, key: Callable) -> tuple:
     return sorted_todos, sorted_todos.index(selected_todo)
 
 
-def sorting_methods():
+def sorting_methods() -> dict[str, Callable[..., int | str]]:
     return {
         "Alphabetical": lambda top_level_todo: top_level_todo[0].display_text,
         "Color": lambda top_level_todo: top_level_todo[0].color,
     }
 
 
-def sort_by(method, todos, selected, history) -> tuple:
+def sort_by(
+    method: str, todos: list[Todo], selected: Cursor, history: UndoRedo
+) -> tuple[list[Todo], int]:
     history.add_undo(reset_todos, todos)
     if method in sorting_methods():
         return history.do(
@@ -1016,10 +1053,12 @@ def sort_by(method, todos, selected, history) -> tuple:
             int(selected),
             sorting_methods()[method],
         )
-    return todos, selected
+    return todos, int(selected)
 
 
-def sort_menu(parent_win, todos, selected, history) -> tuple:
+def sort_menu(
+    parent_win: Any, todos: list[Todo], selected: Cursor, history: UndoRedo
+) -> tuple[list[Todo], int]:
     parent_win.clear()
     set_header(parent_win, "Sort by:")
     lines = list(sorting_methods().keys())
@@ -1063,7 +1102,9 @@ def sort_menu(parent_win, todos, selected, history) -> tuple:
         win.refresh()
 
 
-def make_printable_sublist(height: int, lst: list, cursor: int, distance: int = -1):
+def make_printable_sublist(
+    height: int, lst: list[T], cursor: int, distance: int = -1
+) -> tuple[list[T], int]:
     if len(lst) < height:
         return lst, cursor
     distance = height * 3 // 7 if distance < 0 else distance
@@ -1076,7 +1117,7 @@ def make_printable_sublist(height: int, lst: list, cursor: int, distance: int = 
     return lst[start:end], cursor - start
 
 
-def print_todos(win, todos, selected):
+def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
     height, width = win.getmaxyx()
     new_todos, temp_selected = make_printable_sublist(height - 1, todos, int(selected))
     highlight = range(temp_selected, len(selected) + temp_selected)
@@ -1125,7 +1166,7 @@ def print_todos(win, todos, selected):
             counter += 1
 
 
-def get_bullet(indentation_level):
+def get_bullet(indentation_level: int) -> str:
     symbols = [
         "•",
         "◦",
@@ -1135,7 +1176,9 @@ def get_bullet(indentation_level):
     return symbols[indentation_level // INDENT % len(symbols)]
 
 
-def todo_from_clipboard(todos: list, selected: int, copied_todo: Todo):
+def todo_from_clipboard(
+    todos: list[Todo], selected: int, copied_todo: Todo
+) -> list[Todo]:
     try:
         from pyperclip import paste
     except ModuleNotFoundError:
@@ -1150,46 +1193,46 @@ def todo_from_clipboard(todos: list, selected: int, copied_todo: Todo):
     return todos
 
 
-def cursor_up(selected, len_todos):
+def cursor_up(selected: int, len_todos: int) -> int:
     return clamp(selected - 1, 0, len_todos)
 
 
-def cursor_down(selected, len_todos):
+def cursor_down(selected: int, len_todos: int) -> int:
     return clamp(selected + 1, 0, len_todos)
 
 
-def cursor_top(len_todos):
+def cursor_top(len_todos: int) -> int:
     return clamp(0, 0, len_todos)
 
 
-def cursor_bottom(len_todos):
+def cursor_bottom(len_todos: int) -> int:
     return clamp(len_todos, 0, len_todos)
 
 
-def cursor_to(position, len_todos):
+def cursor_to(position: int, len_todos: int) -> int:
     return clamp(position, 0, len_todos)
 
 
-def todo_up(todos, selected):
+def todo_up(todos: list[Todo], selected: int) -> tuple[list[Todo], int]:
     todos = swap_todos(todos, selected, selected - 1)
     update_file(FILENAME, todos)
     return todos, cursor_up(selected, len(todos))
 
 
-def todo_down(todos, selected):
+def todo_down(todos: list[Todo], selected: int) -> tuple[list[Todo], int]:
     todos = swap_todos(todos, selected, selected + 1)
     update_file(FILENAME, todos)
     return todos, cursor_down(selected, len(todos))
 
 
 def new_todo_next(
-    stdscr,
-    todos: list,
+    stdscr: Any,
+    todos: list[Todo],
     selected: int,
     mode: Mode | None = None,
     paste: bool = False,
     copied_todo: Todo | None = None,
-):
+) -> tuple[list[Todo], int]:
     temp = todos.copy()
     todos = (
         insert_todo(
@@ -1210,14 +1253,16 @@ def new_todo_next(
     return todos, selected
 
 
-def new_todo_current(stdscr, todos, selected):
+def new_todo_current(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo]:
     todos = insert_todo(stdscr, todos, selected)
     stdscr.clear()
     update_file(FILENAME, todos)
     return todos
 
 
-def delete_todo(stdscr, todos: list, selected: Cursor):
+def delete_todo(
+    stdscr: Any, todos: list[Todo], selected: Cursor
+) -> tuple[list[Todo], int]:
     positions = selected.get_deletable()
     selected.set_to(clamp(int(selected), 0, len(todos) - 1))
     for pos in positions:
@@ -1227,7 +1272,7 @@ def delete_todo(stdscr, todos: list, selected: Cursor):
     return todos, int(selected)
 
 
-def color_todo(stdscr, todos, selected):
+def color_todo(stdscr: Any, todos: list[Todo], selected: Cursor) -> list[Todo]:
     new_color = color_menu(stdscr, todos[int(selected)].color)
     for pos in selected.positions:
         todos[pos].set_color(new_color)
@@ -1236,7 +1281,7 @@ def color_todo(stdscr, todos, selected):
     return todos
 
 
-def edit_todo(stdscr, todos, selected):
+def edit_todo(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo]:
     y, x = stdscr.getmaxyx()
     todo = todos[selected].display_text
     ncols = max(x * 3 // 4, len(todo) + 3) if len(todo) < x - 1 else x * 3 // 4
@@ -1256,44 +1301,46 @@ def edit_todo(stdscr, todos, selected):
     return todos
 
 
-def copy_todo(todos, selected, copied_todo):
+def copy_todo(todos: list[Todo], selected: int, copied_todo: Todo) -> None:
     try:
         from pyperclip import copy
     except ModuleNotFoundError:
         raise ExternalModuleNotFoundError("pyperclip", todos, "copy")
     copy(todos[selected].display_text)
-    copied_todo.__init__(todos[selected]._text)
+    copied_todo.call_init(todos[selected]._text)
 
 
-def paste_todo(stdscr, todos, selected, copied_todo):
+def paste_todo(
+    stdscr: Any, todos: list[Todo], selected: int, copied_todo: Todo
+) -> tuple[list[Todo], int]:
     return new_todo_next(stdscr, todos, selected, paste=True, copied_todo=copied_todo)
 
 
-def blank_todo(todos, selected):
+def blank_todo(todos: list[Todo], selected: int) -> tuple[list[Todo], int]:
     insert_empty_todo(todos, selected + 1)
     selected = cursor_down(selected, len(todos))
     update_file(FILENAME, todos)
     return todos, selected
 
 
-def toggle(todos, selected):
+def toggle(todos: list[Todo], selected: Cursor) -> list[Todo]:
     for pos in selected.positions:
         todos[pos].toggle()
     update_file(FILENAME, todos)
     return todos
 
 
-def quit_program(todos):
+def quit_program(todos: list[Todo]) -> int:
     return update_file(FILENAME, todos, True)
 
 
-def reset_todos(todos: list):
+def reset_todos(todos: list[Todo]) -> list[Todo]:
     return todos.copy()
 
 
 def relative_cursor_to(
-    win, history: UndoRedo, todos: list, selected: int, first_digit: int
-):
+    win: Any, history: UndoRedo, todos: list[Todo], selected: int, first_digit: int
+) -> int:
     total = str(first_digit)
     while True:
         try:
@@ -1315,30 +1362,30 @@ def relative_cursor_to(
         return selected
 
 
-def indent(todos, selected):
+def indent(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
     for pos in selected.positions:
         todos[pos].indent()
     update_file(FILENAME, todos)
     return todos, selected.positions[0]
 
 
-def dedent(todos, selected):
+def dedent(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
     for pos in selected.positions:
         todos[pos].dedent()
     update_file(FILENAME, todos)
     return todos, selected.positions[0]
 
 
-def toggle_todo_note(todos, selected):
+def toggle_todo_note(todos: list[Any], selected: Cursor) -> None:
     for pos in selected.positions:
         if isinstance(todos[pos], Note):
             todos[pos].to_todo()
         elif isinstance(todos[pos], Todo):
-            todos[pos].to_note()
+            note_todo_switcher(todos[pos])
     update_file(FILENAME, todos)
 
 
-def init():
+def init() -> None:
     curses.use_default_colors()
     curses.curs_set(0)
     for i, v in enumerate(
@@ -1356,7 +1403,7 @@ def init():
         curses.init_pair(i, v, -1)
 
 
-def main(stdscr: curses_window, header: str):
+def main(stdscr: Any, header: str) -> int:
     init()
     todos = validate_file(read_file(FILENAME))
     selected = Cursor(0)
