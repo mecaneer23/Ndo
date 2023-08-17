@@ -105,6 +105,8 @@ class Todo:
             self._text = repr(self)
 
     def __repr__(self) -> str:
+        if self.color == 7:
+            return f"{self.indent_level * ' '}{self.box_char} {self.display_text}"
         return (
             f"{self.indent_level * ' '}{self.box_char}{self.color} {self.display_text}"
         )
