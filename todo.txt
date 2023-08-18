@@ -5,4 +5,4 @@
   -4 allow multiline paste
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
--7 add `:` prompt to modify constants
+- add `:` prompt to modify constants
