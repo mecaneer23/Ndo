@@ -567,9 +567,9 @@ def wgetnstr_success(todo: Todo, chars: list[str], note: bool) -> Todo:
 def wgetnstr(
     stdscr: Any,
     win: Any,
+    todo: Todo,
     mode: Mode | None = None,
     n: int = 1024,
-    todo: Todo = EmptyTodo(),
     indent_level: int = 0,
     note: bool = False,
 ) -> Todo:
@@ -590,6 +590,9 @@ def wgetnstr(
             window's border, the window must have a minimum
             height of 3 characters. The width will determine
             a maximum value of n.
+        todo (Todo):
+            Pass a Todo object to initially occupy the window.
+            Alternatively pass EmptyTodo.
         mode (Mode, optional):
             If adding todos in entry mode (used for rapid
             repetition), allow toggling of that mode by
@@ -598,11 +601,6 @@ def wgetnstr(
             Max number of characters in the read string.
             It might error if this number is greater than
             the area of the window. Defaults to 1024.
-        todo (Todo, optional):
-            When wgetnstr is used with Todos, pass a
-            Todo object to initially occupy the window.
-            If `None` is passed, `todo` will default to
-            EmptyTodo().
         indent_level (int, optional):
             Specify a default indent level for the returned
             Todo. If `todo` is also passed, this value will be
@@ -630,8 +628,6 @@ def wgetnstr(
         )
     elif win.getmaxyx()[0] > 3:
         raise NotImplementedError("Multiline text editing is not supported")
-    if todo is None:
-        todo = EmptyTodo()
     if isinstance(todo, EmptyTodo):
         todo.set_indent_level(indent_level)
     original = todo
@@ -766,6 +762,7 @@ def insert_todo(
         todo := wgetnstr(
             stdscr,
             curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8),
+            todo=EmptyTodo(),
             mode=mode,
             indent_level=todos[index - 1].indent_level if len(todos) > 0 else 0,
             note=isinstance(todos[index - 1], Note) if len(todos) > 0 else False,
@@ -787,7 +784,7 @@ def search(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
     stdscr.refresh()
     y, x = stdscr.getmaxyx()
     sequence = wgetnstr(
-        stdscr, curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8)
+        stdscr, curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8), EmptyTodo()
     ).display_text
     stdscr.clear()
     for i, todo in enumerate(todos[int(selected) :], start=int(selected)):
