@@ -40,7 +40,7 @@ class Todo:
             if self._text[counter] == " ":
                 return (
                     7
-                    if self._text[counter - 1] == "-"
+                    if self._text[counter - 1] in "-+"
                     else int(self._text[counter - 1])
                 ), self._text[counter:].lstrip()
             counter += 1
