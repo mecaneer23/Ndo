@@ -1330,6 +1330,8 @@ def toggle(todos: list[Todo], selected: Cursor) -> list[Todo]:
 
 
 def quit_program(todos: list[Todo]) -> int:
+    if is_file_externally_updated(FILENAME, todos):
+        todos = validate_file(read_file(FILENAME))
     return update_file(FILENAME, todos, True)
 
 
