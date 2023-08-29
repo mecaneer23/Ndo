@@ -55,11 +55,19 @@ class Todo:
         return box_char, color, display_text
 
     def call_init(self, text: str) -> None:
-        self._text = str(text)
+        self._text: str = text
         self.indent_level: int = len(text) - len(text.lstrip())
+        self.box_char: str | None
+        self.color: int
+        self.display_text: str
+        if self._text == "":
+            self.box_char = "-"
+            self.color = 7
+            self.display_text = ""
+            return
         self.box_char, self.color, self.display_text = self._init_attrs()
 
-    def __init__(self, text: str) -> None:
+    def __init__(self, text: str = "") -> None:
         self.call_init(text)
 
     def __getitem__(self, key: int) -> str:
@@ -74,9 +82,8 @@ class Todo:
             return False
         return self.box_char == "+"
 
-    def set_indent_level(self, indent_level: int) -> Any:
+    def set_indent_level(self, indent_level: int) -> None:
         self.indent_level = indent_level
-        return self
 
     def set_color(self, color: int) -> None:
         self.color = color
@@ -105,6 +112,9 @@ class Todo:
     def has_box(self) -> bool:
         return self.box_char is not None
 
+    def is_empty(self) -> bool:
+        return self.display_text == ""
+
     def toggle(self) -> None:
         self.box_char = {"+": "-", "-": "+", None: ""}[self.box_char]
         self._text = repr(self)
@@ -128,28 +138,6 @@ class Todo:
                 self.display_text,
             ]
         )
-
-
-class EmptyTodo(Todo):
-    def __init__(self) -> None:
-        self.display_text = ""
-        self.color = 7
-        self.indent_level = 0
-
-    def is_toggled(self) -> bool:
-        return False
-
-    def toggle(self) -> None:
-        return
-
-    def set_display_text(self, text: str) -> None:
-        empty_todo_to_todo(self, text)
-
-    def get_box(self) -> str:
-        return " "
-
-    def __repr__(self) -> str:
-        return self.display_text
 
 
 class UndoRedo:
@@ -358,7 +346,7 @@ def validate_file(raw_data: str) -> list[Todo]:
     usable_data: list[Todo] = []
     for line in raw_data.split("\n"):
         if len(line) == 0:
-            usable_data.append(EmptyTodo())
+            usable_data.append(Todo())  # empty todo
         elif re_match(r"^( *)?(\+|-)\d? .*$", line):
             usable_data.append(Todo(line))
         elif re_match(r"^( *\d )?.*$", line):
@@ -533,10 +521,8 @@ def print(message: str, end: str = "\n") -> None:
         f.write(f"{message}{end}")
 
 
-def wgetnstr_success(todo: Todo, chars: list[str], note: bool) -> Todo:
+def wgetnstr_success(todo: Todo, chars: list[str]) -> Todo:
     todo.set_display_text("".join(chars))
-    if note:
-        todo.box_char = None
     return todo
 
 
@@ -544,14 +530,12 @@ def wgetnstr(
     stdscr: Any,
     win: Any,
     todo: Todo,
+    prev_todo: Todo,
     mode: Mode | None = None,
     n: int = 1024,
-    indent_level: int = 0,
-    note: bool = False,
 ) -> Todo:
     """
-    Reads a string from the given window with max chars n
-    and initial chars chars. Returns a string from the user
+    Reads a string from the given window. Returns a todo from the user
     Functions like a JavaScript alert box for user input.
 
     Args:
@@ -568,7 +552,10 @@ def wgetnstr(
             a maximum value of n.
         todo (Todo):
             Pass a Todo object to initially occupy the window.
-            Alternatively pass EmptyTodo.
+        prev_todo (Todo):
+            Pass a Todo object to copy the color, indentation
+            level, box character, etc from. This is only used
+            if `todo` is empty.
         mode (Mode, optional):
             If adding todos in entry mode (used for rapid
             repetition), allow toggling of that mode by
@@ -577,13 +564,6 @@ def wgetnstr(
             Max number of characters in the read string.
             It might error if this number is greater than
             the area of the window. Defaults to 1024.
-        indent_level (int, optional):
-            Specify a default indent level for the returned
-            Todo. If `todo` is also passed, this value will be
-            ignored. Default is `0`.
-        note (bool, optional):
-            If `True`, the returned Todo will be a Note.
-            Default is `False`.
 
     Raises:
         ValueError:
@@ -604,8 +584,11 @@ def wgetnstr(
         )
     elif win.getmaxyx()[0] > 3:
         raise NotImplementedError("Multiline text editing is not supported")
-    if isinstance(todo, EmptyTodo):
-        todo.set_indent_level(indent_level)
+    if todo.is_empty():
+        todo.set_indent_level(prev_todo.indent_level)
+        todo.set_color(prev_todo.color)
+        if not prev_todo.has_box():
+            todo.box_char = None
     original = todo
     chars = list(todo.display_text)
     position = len(chars)
@@ -614,7 +597,7 @@ def wgetnstr(
     while True:
         if position == len(chars):
             if len(chars) + 1 >= win.getmaxyx()[1] - 1:
-                return wgetnstr_success(todo, chars, note)
+                return wgetnstr_success(todo, chars)
             win.addstr(1, len(chars) + 1, "█")
         for i, v in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
             win.addstr(1, i + 1, v, curses.A_REVERSE if i == position else 0)
@@ -634,7 +617,7 @@ def wgetnstr(
         elif ch in (24, 11):  # ctrl + x/k
             if mode is not None:
                 mode.toggle()
-                return wgetnstr_success(todo, chars, note)
+                return wgetnstr_success(todo, chars)
         elif ch == 23:  # ctrl + backspace
             while True:
                 if position <= 0:
@@ -721,7 +704,7 @@ def wgetnstr(
             if position < len(chars):
                 position += 1
 
-    return wgetnstr_success(todo, chars, note)
+    return wgetnstr_success(todo, chars)
 
 
 def hline(win: Any, y: int, x: int, ch: str | int, n: int) -> None:
@@ -734,24 +717,21 @@ def insert_todo(
     stdscr: Any, todos: list[Todo], index: int, mode: Mode | None = None
 ) -> list[Todo]:
     y, x = stdscr.getmaxyx()
-    if isinstance(
-        todo := wgetnstr(
-            stdscr,
-            curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8),
-            todo=EmptyTodo(),
-            mode=mode,
-            indent_level=todos[index - 1].indent_level if len(todos) > 0 else 0,
-            note=(not todos[index - 1].has_box()) if len(todos) > 0 else False,
-        ),
-        EmptyTodo,
-    ):
+    todo = wgetnstr(
+        stdscr,
+        curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8),
+        todo=Todo(),
+        prev_todo=todos[index - 1],
+        mode=mode,
+    )
+    if todo.is_empty():
         return todos
     todos.insert(index, todo)
     return todos
 
 
 def insert_empty_todo(todos: list[Todo], index: int) -> list[Todo]:
-    todos.insert(index, EmptyTodo())
+    todos.insert(index, Todo())
     return todos
 
 
@@ -760,7 +740,7 @@ def search(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
     stdscr.refresh()
     y, x = stdscr.getmaxyx()
     sequence = wgetnstr(
-        stdscr, curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8), EmptyTodo()
+        stdscr, curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8), Todo(), Todo()
     ).display_text
     stdscr.clear()
     for i, todo in enumerate(todos[int(selected) :], start=int(selected)):
@@ -1125,7 +1105,7 @@ def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
                     ),
                 ]
             )
-            if i not in highlight or not isinstance(v, EmptyTodo)
+            if i not in highlight or not v.is_empty()
             else "⎯" * 8
         )[: width - 1].ljust(width - 1, " ")
         counter = 0
@@ -1229,7 +1209,7 @@ def new_todo_next(
         )
         if not paste
         else todo_from_clipboard(
-            todos, selected, copied_todo if copied_todo is not None else EmptyTodo()
+            todos, selected, copied_todo if copied_todo is not None else Todo()
         )
     )
     stdscr.clear()
@@ -1272,14 +1252,13 @@ def edit_todo(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo]:
     todo = todos[selected].display_text
     ncols = max(x * 3 // 4, len(todo) + 3) if len(todo) < x - 1 else x * 3 // 4
     begin_x = x // 8 if len(todo) < x - 1 - ncols else (x - ncols) // 2
-    if isinstance(
-        edited_todo := wgetnstr(
-            stdscr,
-            curses.newwin(3, ncols, y // 2 - 3, begin_x),
-            todo=todos[selected],
-        ),
-        EmptyTodo,
-    ):
+    edited_todo = wgetnstr(
+        stdscr,
+        curses.newwin(3, ncols, y // 2 - 3, begin_x),
+        todo=todos[selected],
+        prev_todo=Todo(),
+    )
+    if edited_todo.is_empty():
         return todos
     todos[selected] = edited_todo
     stdscr.clear()
