@@ -124,7 +124,7 @@ class Todo:
                 self.indent_level * " ",
                 self.box_char if self.box_char is not None else "",
                 str(self.color) if self.color != 7 else "",
-                " " if self.box_char is not None else "",
+                " " if self.box_char is not None or self.color != 7 else "",
                 self.display_text,
             ]
         )
@@ -334,21 +334,6 @@ class ExternalModuleNotFoundError(Exception):
             f"`{module}` module required for {operation} operation. "
             f"Try `pip install {module}`"
         )
-
-
-# def note_todo_switcher(note_or_todo: Note | Todo) -> Todo:
-#     note_or_todo.box_char = "-"
-#     note_or_todo._text = "".join(
-#         [
-#             note_or_todo.indent_level * " ",
-#             note_or_todo.box_char,
-#             f"{note_or_todo.color} ",
-#             note_or_todo.display_text,
-#         ]
-#     )
-#     new_class = Todo if isinstance(note_or_todo, Note) else Note
-#     note_or_todo.__class__ = new_class(note_or_todo._text).__class__
-#     return note_or_todo
 
 
 def empty_todo_to_todo(todo: Todo, text: str) -> Todo:

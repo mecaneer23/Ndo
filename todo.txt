@@ -7,7 +7,6 @@
   -4 allow wgetnstr to use multiline editing
 - add `:` prompt to modify constants
 - make sure if you enter on an empty todo it doesn't add a new EmptyTodo()
-+ fix indentation for notes again lol
 - add config variable defaults in README
   - so the user doesn't need to use flags every time
 - add feature to just print out once and exit - like bat
