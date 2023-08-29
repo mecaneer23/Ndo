@@ -36,6 +36,7 @@ Options:
 | --help, -h                                                  | Show this help message and exit.                                                                                                    |
 | --help-file HELP_FILE                                       | Allows passing alternate file to specify help menu. Default is `README.md`.                                                         |
 | --indentation-level INDENTATION_LEVEL, -i INDENTATION_LEVEL | Allows specification of indentation level. Default is `2`.                                                                          |
+| --no-gui, -n                                                | Boolean: If true, do not start a curses gui, rather, just print out the todo list. Default is `False`.                              |
 | --relative-enumeration, -r                                  | Boolean: determines if todos are numbered when printed. Numbers relatively rather than absolutely. Default is `False`.              |
 | --simple-boxes, -x                                          | Boolean: allow rendering simpler checkboxes if terminal doesn't support default ascii checkboxes. Default is `False`.               |
 | --strikethrough, -s                                         | Boolean: strikethrough completed todos - option to disable because some terminals don't support strikethroughs. Default is `False`. |
