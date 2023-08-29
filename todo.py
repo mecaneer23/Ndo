@@ -35,48 +35,50 @@ COLORS = {
 
 
 class Todo:
+    def __init__(self, text: str = "") -> None:
+        self.box_char: str | None = None
+        self.color: int = 7
+        self.display_text: str = ""
+        self.text: str = ""
+        self.indent_level: int = 0
+        self.call_init(text)
+
     def _init_box_char(self, pointer: int) -> tuple[str | None, int]:
-        if self._text[pointer] in "-+":
-            return self._text[pointer], pointer + 1
+        if self.text[pointer] in "-+":
+            return self.text[pointer], pointer + 1
         return None, pointer
 
     def _init_color(self, pointer: int) -> tuple[int, int]:
-        if self._text[pointer].isdigit():
-            return int(self._text[pointer]), pointer + 2
+        if self.text[pointer].isdigit():
+            return int(self.text[pointer]), pointer + 2
         return 7, pointer
 
     def _init_attrs(self) -> tuple[str | None, int, str]:
         pointer = self.indent_level
         box_char, pointer = self._init_box_char(pointer)
         color, pointer = self._init_color(pointer)
-        if self._text[pointer] == " ":
+        if self.text[pointer] == " ":
             pointer += 1
-        display_text = self._text[pointer:]
+        display_text = self.text[pointer:]
 
         return box_char, color, display_text
 
     def call_init(self, text: str) -> None:
-        self._text: str = text
-        self.indent_level: int = len(text) - len(text.lstrip())
-        self.box_char: str | None
-        self.color: int
-        self.display_text: str
-        if self._text == "":
+        self.text = text
+        self.indent_level = len(text) - len(text.lstrip())
+        if self.text == "":
             self.box_char = "-"
             self.color = 7
             self.display_text = ""
             return
         self.box_char, self.color, self.display_text = self._init_attrs()
 
-    def __init__(self, text: str = "") -> None:
-        self.call_init(text)
-
     def __getitem__(self, key: int) -> str:
-        return self._text[key]
+        return self.text[key]
 
     def set_display_text(self, display_text: str) -> None:
         self.display_text = display_text
-        self._text = repr(self)
+        self.text = repr(self)
 
     def is_toggled(self) -> bool:
         if self.box_char is None:
@@ -107,7 +109,7 @@ class Todo:
         if self.box_char in table:
             return table[self.box_char]
         raise KeyError(
-            f"The completion indicator of `{self._text}` is not one of (+, -)"
+            f"The completion indicator of `{self.text}` is not one of (+, -)"
         )
 
     def has_box(self) -> bool:
@@ -118,16 +120,16 @@ class Todo:
 
     def toggle(self) -> None:
         self.box_char = {"+": "-", "-": "+", None: ""}[self.box_char]
-        self._text = repr(self)
+        self.text = repr(self)
 
     def indent(self) -> None:
         self.indent_level += INDENT
-        self._text = repr(self)
+        self.text = repr(self)
 
     def dedent(self) -> None:
         if self.indent_level >= INDENT:
             self.indent_level -= INDENT
-            self._text = repr(self)
+            self.text = repr(self)
 
     def __repr__(self) -> str:
         return "".join(
@@ -340,7 +342,7 @@ def validate_file(raw_data: str) -> list[Todo]:
     for line in raw_data.split("\n"):
         if len(line) == 0:
             usable_data.append(Todo())  # empty todo
-        elif re_match(r"^( *)?(\+|-)\d? .*$", line):
+        elif re_match(r"^( *)?([+-])\d? .*$", line):
             usable_data.append(Todo(line))
         elif re_match(r"^( *\d )?.*$", line):
             usable_data.append(Todo(line))  # note
@@ -1175,7 +1177,7 @@ def todo_from_clipboard(
         raise ExternalModuleNotFoundError("pyperclip", todos, "paste")
     todo = paste()
     if copied_todo.display_text == todo:
-        todos.insert(selected + 1, Todo(copied_todo._text))
+        todos.insert(selected + 1, Todo(copied_todo.text))
         return todos
     if "\n" in todo:
         return todos
@@ -1296,7 +1298,7 @@ def copy_todo(todos: list[Todo], selected: int, copied_todo: Todo) -> None:
     except ModuleNotFoundError:
         raise ExternalModuleNotFoundError("pyperclip", todos, "copy")
     copy(todos[selected].display_text)
-    copied_todo.call_init(todos[selected]._text)
+    copied_todo.call_init(todos[selected].text)
 
 
 def paste_todo(
