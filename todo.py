@@ -34,22 +34,30 @@ COLORS = {
 
 
 class Todo:
-    def _init_color_dtext(self) -> tuple[int, str]:
-        counter = self.indent_level
-        while True:
-            if self._text[counter] == " ":
-                return (
-                    7
-                    if self._text[counter - 1] in "-+"
-                    else int(self._text[counter - 1])
-                ), self._text[counter:].lstrip()
-            counter += 1
+    def _init_box_char(self, pointer: int) -> tuple[str | None, int]:
+        if self._text[pointer] in "-+":
+            return self._text[pointer], pointer + 1
+        return None, pointer
+
+    def _init_color(self, pointer: int) -> tuple[int, int]:
+        if self._text[pointer].isdigit():
+            return int(self._text[pointer]), pointer + 2
+        return 7, pointer
+
+    def _init_attrs(self) -> tuple[str | None, int, str]:
+        pointer = self.indent_level
+        box_char, pointer = self._init_box_char(pointer)
+        color, pointer = self._init_color(pointer)
+        if self._text[pointer] == " ":
+            pointer += 1
+        display_text = self._text[pointer:]
+
+        return box_char, color, display_text
 
     def call_init(self, text: str) -> None:
         self._text = str(text)
-        self.indent_level = len(text) - len(text.lstrip())
-        self.box_char = self._text[self.indent_level]
-        self.color, self.display_text = self._init_color_dtext()
+        self.indent_level: int = len(text) - len(text.lstrip())
+        self.box_char, self.color, self.display_text = self._init_attrs()
 
     def __init__(self, text: str) -> None:
         self.call_init(text)
@@ -62,6 +70,8 @@ class Todo:
         self._text = repr(self)
 
     def is_toggled(self) -> bool:
+        if self.box_char is None:
+            return False
         return self.box_char == "+"
 
     def set_indent_level(self, indent_level: int) -> Any:
@@ -74,13 +84,15 @@ class Todo:
     def get_box(self) -> str:
         table = (
             {
-                "+": "☑",
-                "-": "☐",
+                "+": "☑  ",
+                "-": "☐  ",
+                None: "",
             }
             if not SIMPLE_BOXES
             else {
-                "+": "[x]",
-                "-": "[ ]",
+                "+": "[x] ",
+                "-": "[ ] ",
+                None: "",
             }
         )
 
@@ -90,9 +102,11 @@ class Todo:
             f"The completion indicator of `{self._text}` is not one of (+, -)"
         )
 
+    def has_box(self) -> bool:
+        return self.box_char is not None
+
     def toggle(self) -> None:
-        new_box = {"+": "-", "-": "+"}[self.box_char]
-        self.box_char = new_box
+        self.box_char = {"+": "-", "-": "+", None: ""}[self.box_char]
         self._text = repr(self)
 
     def indent(self) -> None:
@@ -105,10 +119,14 @@ class Todo:
             self._text = repr(self)
 
     def __repr__(self) -> str:
-        if self.color == 7:
-            return f"{self.indent_level * ' '}{self.box_char} {self.display_text}"
-        return (
-            f"{self.indent_level * ' '}{self.box_char}{self.color} {self.display_text}"
+        return "".join(
+            [
+                self.indent_level * " ",
+                self.box_char if self.box_char is not None else "",
+                str(self.color) if self.color != 7 else "",
+                " " if self.box_char is not None else "",
+                self.display_text,
+            ]
         )
 
 
@@ -132,35 +150,6 @@ class EmptyTodo(Todo):
 
     def __repr__(self) -> str:
         return self.display_text
-
-
-class Note(Todo):
-    def _init_color_dtext(self) -> tuple[int, str]:
-        if not self._text[self.indent_level].isdigit():
-            return 7, self._text
-        return (
-            int(self._text[self.indent_level]),
-            self._text[self.indent_level + 2 :],
-        )
-
-    def __init__(self, text: str) -> None:
-        self._text = text
-        self.indent_level = len(text) - len(text.lstrip())
-        self.color, self.display_text = self._init_color_dtext()
-
-    def is_toggled(self) -> bool:
-        return False
-
-    def toggle(self) -> None:
-        return
-
-    def to_todo(self) -> None:
-        note_todo_switcher(self)
-
-    def __repr__(self) -> str:
-        if self.color == 7:
-            return f"{self.indent_level * ' '}{self.display_text}"
-        return f"{self.indent_level * ' '}{self.color} {self.display_text}"
 
 
 class UndoRedo:
@@ -347,19 +336,19 @@ class ExternalModuleNotFoundError(Exception):
         )
 
 
-def note_todo_switcher(note_or_todo: Note | Todo) -> Todo:
-    note_or_todo.box_char = "-"
-    note_or_todo._text = "".join(
-        [
-            note_or_todo.indent_level * " ",
-            note_or_todo.box_char,
-            f"{note_or_todo.color} ",
-            note_or_todo.display_text,
-        ]
-    )
-    new_class = Todo if isinstance(note_or_todo, Note) else Note
-    note_or_todo.__class__ = new_class(note_or_todo._text).__class__
-    return note_or_todo
+# def note_todo_switcher(note_or_todo: Note | Todo) -> Todo:
+#     note_or_todo.box_char = "-"
+#     note_or_todo._text = "".join(
+#         [
+#             note_or_todo.indent_level * " ",
+#             note_or_todo.box_char,
+#             f"{note_or_todo.color} ",
+#             note_or_todo.display_text,
+#         ]
+#     )
+#     new_class = Todo if isinstance(note_or_todo, Note) else Note
+#     note_or_todo.__class__ = new_class(note_or_todo._text).__class__
+#     return note_or_todo
 
 
 def empty_todo_to_todo(todo: Todo, text: str) -> Todo:
@@ -388,7 +377,7 @@ def validate_file(raw_data: str) -> list[Todo]:
         elif re_match(r"^( *)?(\+|-)\d? .*$", line):
             usable_data.append(Todo(line))
         elif re_match(r"^( *\d )?.*$", line):
-            usable_data.append(Note(line))
+            usable_data.append(Todo(line))  # note
         else:
             raise ValueError(f"Invalid todo: {line}")
     return usable_data
@@ -561,7 +550,9 @@ def print(message: str, end: str = "\n") -> None:
 
 def wgetnstr_success(todo: Todo, chars: list[str], note: bool) -> Todo:
     todo.set_display_text("".join(chars))
-    return note_todo_switcher(todo) if note else todo
+    if note:
+        todo.box_char = None
+    return todo
 
 
 def wgetnstr(
@@ -765,7 +756,7 @@ def insert_todo(
             todo=EmptyTodo(),
             mode=mode,
             indent_level=todos[index - 1].indent_level if len(todos) > 0 else 0,
-            note=isinstance(todos[index - 1], Note) if len(todos) > 0 else False,
+            note=(not todos[index - 1].has_box()) if len(todos) > 0 else False,
         ),
         EmptyTodo,
     ):
@@ -1130,13 +1121,12 @@ def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
             "".join(
                 [
                     v.indent_level * " ",
-                    "" if isinstance(v, Note) else f"{v.get_box()} ",
+                    f"{v.get_box()}",
                     (
                         f"{get_bullet(v.indent_level)} "
-                        if isinstance(v, Note) and BULLETS
+                        if not v.has_box() and BULLETS
                         else ""
                     ),
-                    "" if SIMPLE_BOXES or isinstance(v, Note) else " ",
                     (
                         f"{todos.index(v) + 1}. "
                         if ENUMERATE and not RELATIVE_ENUMERATE
@@ -1377,12 +1367,10 @@ def dedent(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
     return todos, selected.positions[0]
 
 
-def toggle_todo_note(todos: list[Any], selected: Cursor) -> None:
+def toggle_todo_note(todos: list[Todo], selected: Cursor) -> None:
     for pos in selected.positions:
-        if isinstance(todos[pos], Note):
-            todos[pos].to_todo()
-        elif isinstance(todos[pos], Todo):
-            note_todo_switcher(todos[pos])
+        todo = todos[pos]
+        todo.box_char = None if todo.has_box() else "-"
     update_file(FILENAME, todos)
 
 
@@ -1530,7 +1518,8 @@ def main(stdscr: Any, header: str) -> int:
         elif key in (24, 11):  # ctrl + x/k
             mode.toggle()
         elif key == 330:  # delete
-            toggle_todo_note(todos, selected)
+            history.do(toggle_todo_note, todos, selected)
+            history.add_undo(toggle_todo_note, todos, selected)
         elif key == 115:  # s
             todos = selected.todo_set_to(sort_menu(stdscr, todos, selected, history))
         elif key == 10:  # enter
