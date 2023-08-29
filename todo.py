@@ -1144,14 +1144,26 @@ def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
             else "⎯" * 8
         )[: width - 1].ljust(width - 1, " ")
         counter = 0
-        while counter < len(display_string):
-            win.addch(
-                i + 1,
-                counter,
-                display_string[counter],
-                curses.color_pair(v.color or get_color("White"))
-                | (curses.A_REVERSE if i in highlight else 0),
-            )
+        while counter < len(display_string) - 1:
+            try:
+                win.addch(
+                    i + 1,
+                    counter,
+                    display_string[counter],
+                    curses.color_pair(v.color or get_color("White"))
+                    | (curses.A_REVERSE if i in highlight else 0),
+                )
+            except OverflowError:
+                """
+                This function call will throw an OverflowError if
+                the terminal doesn't support the box character as it
+                is technically a wide character. By `continue`-ing,
+                we don't print the box character and indirectly
+                prompt the user to use the -x option and use simple
+                boxes when printing.
+                """
+                counter += 1
+                continue
             counter += 1
 
 
