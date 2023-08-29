@@ -367,7 +367,7 @@ def get_args() -> Namespace:
                 CONTROLS_BEGIN_INDEX,
                 CONTROLS_END_INDEX,
                 str(HELP_FILE),
-                ["<kbd>", "</kbd>"],
+                ("<kbd>", "</kbd>"),
             )
         ),
     )
@@ -783,7 +783,7 @@ def md_table_to_lines(
     first_line_idx: int,
     last_line_idx: int,
     filename: str = "README.md",
-    remove: list[str] = [],
+    remove: tuple[str, ...] = (),
 ) -> list[str]:
     """
     Converts a Markdown table to a list of formatted strings.
@@ -860,7 +860,7 @@ def help_menu(parent_win: Any) -> None:
         CONTROLS_BEGIN_INDEX,
         CONTROLS_END_INDEX,
         str(HELP_FILE),
-        ["<kbd>", "</kbd>", "(arranged alphabetically)"],
+        ("<kbd>", "</kbd>", "(arranged alphabetically)"),
     ):
         lines.append(line[:-2])
     win = curses.newwin(
