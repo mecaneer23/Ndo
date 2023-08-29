@@ -325,14 +325,6 @@ class ExternalModuleNotFoundError(Exception):
         )
 
 
-def empty_todo_to_todo(todo: Todo, text: str) -> Todo:
-    todo.box_char = "-"
-    todo.display_text = text
-    todo._text = f"{todo.box_char}{todo.color} {text}"
-    todo.__class__ = Todo(todo._text).__class__
-    return todo
-
-
 def read_file(filename: Path) -> str:
     if not filename.exists():
         with filename.open("w"):
