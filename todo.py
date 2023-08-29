@@ -18,6 +18,7 @@ FILENAME = Path(DEFAULT_TODO)
 HEADER = ""
 HELP_FILE = Path(__file__).parent.joinpath("README.md").absolute()
 INDENT = 2
+NO_GUI = False
 RELATIVE_ENUMERATE = False
 SIMPLE_BOXES = False
 STRIKETHROUGH = False
@@ -431,6 +432,15 @@ def get_args() -> Namespace:
             Default is `{INDENT}`.",
     )
     parser.add_argument(
+        "--no-gui",
+        "-n",
+        action="store_true",
+        default=NO_GUI,
+        help=f"Boolean: If true, do not start a curses gui,\
+            rather, just print out the todo list. Default is\
+            `{NO_GUI}`.",
+    )
+    parser.add_argument(
         "--relative-enumeration",
         "-r",
         action="store_true",
@@ -478,6 +488,7 @@ def handle_args(args: Namespace) -> None:
     global HEADER
     global HELP_FILE
     global INDENT
+    global NO_GUI
     global RELATIVE_ENUMERATE
     global SIMPLE_BOXES
     global STRIKETHROUGH
@@ -492,6 +503,7 @@ def handle_args(args: Namespace) -> None:
     HEADER = FILENAME.as_posix() if args.title == HEADER else " ".join(args.title)
     HELP_FILE = Path(args.help_file)
     INDENT = args.indentation_level
+    NO_GUI = args.no_gui
     RELATIVE_ENUMERATE = args.relative_enumeration
     SIMPLE_BOXES = args.simple_boxes
     STRIKETHROUGH = args.strikethrough
@@ -516,7 +528,7 @@ def update_file(filename: Path, lst: list[Todo], save: bool = AUTOSAVE) -> int:
         return f.write("\n".join(map(repr, lst)))
 
 
-def print(message: str, end: str = "\n") -> None:
+def _print(message: str, end: str = "\n") -> None:
     with open("debugging/log.txt", "a") as f:
         f.write(f"{message}{end}")
 
@@ -1073,7 +1085,12 @@ def make_printable_sublist(
 
 
 def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
-    height, width = win.getmaxyx()
+    if win is None:
+        from os import get_terminal_size
+
+        width, height = get_terminal_size()
+    else:
+        height, width = win.getmaxyx()
     new_todos, temp_selected = make_printable_sublist(height - 1, todos, int(selected))
     highlight = range(temp_selected, len(selected) + temp_selected)
     for relative, (i, v) in zip(
@@ -1109,6 +1126,21 @@ def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
             else "⎯" * 8
         )[: width - 1].ljust(width - 1, " ")
         counter = 0
+        if win is None:
+            print(
+                {
+                    1: "\u001b[31m",
+                    2: "\u001b[32m",
+                    3: "\u001b[33m",
+                    4: "\u001b[34m",
+                    5: "\u001b[35m",
+                    6: "\u001b[36m",
+                    7: "\u001b[37m",
+                }[v.color]
+                + display_string
+                + "\u001b[0m"
+            )
+            continue
         while counter < len(display_string) - 1:
             try:
                 win.addch(
@@ -1511,4 +1543,8 @@ def main(stdscr: Any, header: str) -> int:
 
 if __name__ == "__main__":
     handle_args(get_args())
+    if NO_GUI:
+        print(f"{HEADER}:")
+        print_todos(None, validate_file(read_file(FILENAME)), Cursor(0))
+        exit()
     curses.wrapper(main, header=HEADER)

@@ -8,4 +8,4 @@
 - add `:` prompt to modify constants
 - add config variable defaults in README
   - so the user doesn't need to use flags every time
-- add feature to just print out once and exit - like bat
++ add feature to just print out once and exit - like bat
