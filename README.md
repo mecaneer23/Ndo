@@ -78,6 +78,16 @@ Options:
 | <kbd>u</kbd>                                   | Undo change                         |
 | <kbd>y</kbd>                                   | Copy todo to clipboard              |
 
+## Troubleshooting
+
+### Docker error
+
+`Cannot connect to the Docker daemon at ... Is the Docker daemon running?`
+
+```bash
+systemctl start docker
+```
+
 ## Bugs
 
 - Long todos don't render properly in strikethrough mode (in certain terminals)
