@@ -4,8 +4,3 @@ __pycache__
 .vscode
 .mypy_cache
 todo.bat
-
-.dockerignore
-compose.yaml
-docker*
-Dockerfile

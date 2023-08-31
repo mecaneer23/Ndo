@@ -20,6 +20,13 @@ pip install windows-curses
 python3 todo.py [options] [filename]
 ```
 
+Or with Docker:
+
+```bash
+./docker_build.sh
+./docker_run.sh filename
+```
+
 ## Flags
 
 Positional arguments:
