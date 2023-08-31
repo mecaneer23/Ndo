@@ -727,7 +727,7 @@ def insert_todo(
         stdscr,
         curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8),
         todo=Todo(),
-        prev_todo=todos[index - 1],
+        prev_todo=todos[index - 1] if len(todos) > 0 else Todo(),
         mode=mode,
     )
     if todo.is_empty():
