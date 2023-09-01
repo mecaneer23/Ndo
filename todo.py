@@ -1376,6 +1376,170 @@ def toggle_todo_note(todos: list[Todo], selected: Cursor) -> None:
     update_file(FILENAME, todos)
 
 
+def handle_cursor_up(todos: list[Todo], selected: Cursor, history: UndoRedo) -> None:
+    history.add_undo(cursor_to, int(selected), len(todos))
+    selected.set_to(history.do(cursor_up, int(selected), len(todos)))
+
+
+def handle_cursor_down(todos: list[Todo], selected: Cursor, history: UndoRedo) -> None:
+    history.add_undo(cursor_to, int(selected), len(todos))
+    selected.set_to(history.do(cursor_down, int(selected), len(todos)))
+
+
+def handle_new_todo_next(
+    stdscr: Any, todos: list[Todo], selected: Cursor, history: UndoRedo
+) -> list[Todo]:
+    todos = selected.todo_set_to(
+        history.do(new_todo_next, stdscr, todos, int(selected))
+    )
+    history.add_undo(delete_todo, stdscr, todos, selected)
+    return todos
+
+
+def handle_new_todo_current(
+    stdscr: Any, todos: list[Todo], selected: Cursor, history: UndoRedo
+) -> list[Todo]:
+    todos = history.do(new_todo_current, stdscr, todos, int(selected))
+    history.add_undo(delete_todo, stdscr, todos, selected)
+    return todos
+
+
+def handle_delete_todo(
+    stdscr: Any, todos: list[Todo], selected: Cursor, history: UndoRedo
+) -> list[Todo]:
+    history.add_undo(lambda a, b: (a, b), todos, int(selected))
+    return selected.todo_set_to(history.do(delete_todo, stdscr, todos, selected))
+
+
+def handle_undo(todos: list[Todo], selected: Cursor, history: UndoRedo) -> list[Todo]:
+    todos = selected.todo_set_to(
+        history.handle_return(history.undo, todos, int(selected))
+    )
+    update_file(FILENAME, todos)
+    return todos
+
+
+def handle_color(
+    stdscr: Any, todos: list[Todo], selected: Cursor, history: UndoRedo
+) -> list[Todo]:
+    history.add_undo(reset_todos, todos)
+    return history.do(color_todo, stdscr, todos, selected)
+
+
+def handle_edit(stdscr: Any, todos: list[Todo], selected: Cursor, history: UndoRedo):
+    if len(todos) <= 0:
+        return todos
+    history.add_undo(reset_todos, todos)
+    return history.do(edit_todo, stdscr, todos, int(selected))
+
+
+def handle_to_top(todos: list[Todo], selected: Cursor, history: UndoRedo) -> None:
+    history.add_undo(cursor_to, int(selected), len(todos))
+    selected.set_to(history.do(cursor_top, len(todos)))
+
+
+def handle_to_bottom(todos: list[Todo], selected: Cursor, history: UndoRedo) -> None:
+    history.add_undo(cursor_to, int(selected), len(todos))
+    selected.set_to(history.do(cursor_bottom, len(todos)))
+
+
+def handle_paste(
+    stdscr: Any,
+    todos: list[Todo],
+    selected: Cursor,
+    history: UndoRedo,
+    copied_todo: Todo,
+) -> list[Todo]:
+    todos = selected.todo_set_to(
+        history.do(paste_todo, stdscr, todos, int(selected), copied_todo)
+    )
+    history.add_undo(delete_todo, stdscr, todos, selected)
+    return todos
+
+
+def handle_insert_blank_todo(
+    stdscr: Any,
+    todos: list[Todo],
+    selected: Cursor,
+    history: UndoRedo,
+) -> list[Todo]:
+    todos = selected.todo_set_to(history.do(blank_todo, todos, int(selected)))
+    history.add_undo(delete_todo, stdscr, todos, selected)
+    return todos
+
+
+def handle_todo_down(
+    todos: list[Todo],
+    selected: Cursor,
+    history: UndoRedo,
+) -> list[Todo]:
+    history.add_undo(todo_up, todos, int(selected) + 1)
+    return selected.todo_set_to(history.do(todo_down, todos, int(selected)))
+
+
+def handle_todo_up(
+    todos: list[Todo],
+    selected: Cursor,
+    history: UndoRedo,
+):
+    history.add_undo(todo_down, todos, int(selected) - 1)
+    return selected.todo_set_to(history.do(todo_up, todos, int(selected)))
+
+
+def handle_indent(
+    todos: list[Todo],
+    selected: Cursor,
+    history: UndoRedo,
+) -> list[Todo]:
+    history.add_undo(reset_todos, todos)
+    return selected.todo_set_to(history.do(indent, todos, selected))
+
+
+def handle_dedent(
+    todos: list[Todo],
+    selected: Cursor,
+    history: UndoRedo,
+) -> list[Todo]:
+    history.add_undo(reset_todos, todos)
+    return selected.todo_set_to(history.do(dedent, todos, selected))
+
+
+def handle_toggle_box(
+    todos: list[Todo],
+    selected: Cursor,
+    history: UndoRedo,
+) -> None:
+    history.do(toggle_todo_note, todos, selected)
+    history.add_undo(toggle_todo_note, todos, selected)
+
+
+def handle_sort_menu(
+    stdscr: Any,
+    todos: list[Todo],
+    selected: Cursor,
+    history: UndoRedo,
+) -> list[Todo]:
+    return selected.todo_set_to(sort_menu(stdscr, todos, selected, history))
+
+
+def handle_toggle(
+    todos: list[Todo],
+    selected: Cursor,
+    history: UndoRedo,
+) -> list[Todo]:
+    todos = history.do(toggle, todos, selected)
+    history.add_undo(toggle, todos, selected)
+    return todos
+
+
+def handle_digits(
+    stdscr: Any, todos: list[Todo], selected: Cursor, history: UndoRedo, digit: int
+) -> None:
+    selected.set_to(
+        relative_cursor_to(stdscr, history, todos, int(selected), digit - 48)
+    )
+
+
 def init() -> None:
     curses.use_default_colors()
     curses.curs_set(0)
@@ -1401,6 +1565,60 @@ def main(stdscr: Any, header: str) -> int:
     history = UndoRedo()
     mode = Mode(True)
     copied_todo = Todo("- placeholder")
+    # keycode: ("keypress", function, (arg1, arg2), todos_returned?)
+    keys: dict[int, tuple[str, Callable[..., Any], tuple[Any, ...] | None, bool]] = {
+        113: ("q", quit_program, (todos,), False),
+        259: ("up", handle_cursor_up, (todos, selected, history), False),
+        107: ("k", handle_cursor_up, (todos, selected, history), False),
+        258: ("down", handle_cursor_down, (todos, selected, history), False),
+        106: ("j", handle_cursor_down, (todos, selected, history), False),
+        75: ("K", selected.multiselect_up, None, False),
+        74: ("J", selected.multiselect_down, (len(todos),), False),
+        111: ("o", handle_new_todo_next, (stdscr, todos, selected, history), True),
+        79: ("O", handle_new_todo_current, (stdscr, todos, selected, history), True),
+        100: ("d", handle_delete_todo, (stdscr, todos, selected, history), True),
+        117: ("u", handle_undo, (todos, selected, history), True),
+        99: ("c", handle_color, (stdscr, todos, selected, history), True),
+        105: ("i", handle_edit, (stdscr, todos, selected, history), True),
+        103: ("g", handle_to_top, (todos, selected, history), False),
+        71: ("G", handle_to_bottom, (todos, selected, history), False),
+        121: ("y", copy_todo, (todos, int(selected), copied_todo), False),
+        112: ("p", handle_paste, (stdscr, todos, selected, history, copied_todo), True),
+        45: ("-", handle_insert_blank_todo, (stdscr, todos, selected, history), False),
+        104: ("h", help_menu, (stdscr,), False),
+        98: ("b", magnify, (stdscr, todos, selected), False),
+        426: (
+            "alt + j (on windows)",
+            handle_todo_down,
+            (todos, selected, history),
+            True,
+        ),
+        427: (
+            "alt + k (on windows)",
+            handle_todo_up,
+            (todos, selected, history),
+            True,
+        ),
+        9: ("tab", handle_indent, (todos, selected, history), True),
+        351: ("shift + tab", handle_dedent, (todos, selected, history), True),
+        353: ("shift + tab", handle_dedent, (todos, selected, history), True),
+        47: ("/", search, (stdscr, todos, selected), False),
+        11: ("ctrl + k", mode.toggle, None, False),
+        24: ("ctrl + x", mode.toggle, None, False),
+        330: ("delete", handle_toggle_box, (todos, selected, history), False),
+        115: ("s", handle_sort_menu, (stdscr, todos, selected, history), True),
+        10: ("enter", handle_toggle, (todos, selected, history), True),
+        48: ("0", handle_digits, (stdscr, todos, selected, history, 48), False),
+        49: ("1", handle_digits, (stdscr, todos, selected, history, 49), False),
+        50: ("2", handle_digits, (stdscr, todos, selected, history, 50), False),
+        51: ("3", handle_digits, (stdscr, todos, selected, history, 51), False),
+        52: ("4", handle_digits, (stdscr, todos, selected, history, 52), False),
+        53: ("5", handle_digits, (stdscr, todos, selected, history, 53), False),
+        54: ("6", handle_digits, (stdscr, todos, selected, history, 54), False),
+        55: ("7", handle_digits, (stdscr, todos, selected, history, 55), False),
+        56: ("8", handle_digits, (stdscr, todos, selected, history, 56), False),
+        57: ("9", handle_digits, (stdscr, todos, selected, history, 57), False),
+    }
 
     while True:
         if AUTOSAVE and is_file_externally_updated(FILENAME, todos):
@@ -1421,33 +1639,22 @@ def main(stdscr: Any, header: str) -> int:
         if key == 113:  # q
             return quit_program(todos)
         elif key in (259, 107):  # up | k
-            history.add_undo(cursor_to, int(selected), len(todos))
-            selected.set_to(history.do(cursor_up, int(selected), len(todos)))
+            handle_cursor_up(todos, selected, history)
         elif key in (258, 106):  # down | j
-            history.add_undo(cursor_to, int(selected), len(todos))
-            selected.set_to(history.do(cursor_down, int(selected), len(todos)))
+            handle_cursor_down(todos, selected, history)
         elif key == 75:  # K
             selected.multiselect_up()
         elif key == 74:  # J
             selected.multiselect_down(len(todos))
         elif key == 111:  # o
-            todos = selected.todo_set_to(
-                history.do(new_todo_next, stdscr, todos, int(selected))
-            )
-            history.add_undo(delete_todo, stdscr, todos, selected)
+            todos = handle_new_todo_next(stdscr, todos, selected, history)
         elif key == 79:  # O
-            todos = history.do(new_todo_current, stdscr, todos, int(selected))
-            history.add_undo(delete_todo, stdscr, todos, selected)
+            todos = handle_new_todo_current(stdscr, todos, selected, history)
         elif key == 100:  # d
-            history.add_undo(lambda a, b: (a, b), todos, int(selected))
-            todos = selected.todo_set_to(
-                history.do(delete_todo, stdscr, todos, selected)
-            )
+            todos = handle_delete_todo(stdscr, todos, selected, history)
         elif key == 117:  # u
-            todos = selected.todo_set_to(
-                history.handle_return(history.undo, todos, int(selected))
-            )
-            update_file(FILENAME, todos)
+            todos = handle_undo(todos, selected, history)
+        # skip this one
         elif key == 18:  # ^R
             continue  # redo doesn't work right now
             todos = selected.todo_set_to(
@@ -1455,34 +1662,26 @@ def main(stdscr: Any, header: str) -> int:
             )
             update_file(FILENAME, todos)
         elif key == 99:  # c
-            history.add_undo(reset_todos, todos)
-            todos = history.do(color_todo, stdscr, todos, selected)
+            todos = handle_color(stdscr, todos, selected, history)
         elif key == 105:  # i
-            if len(todos) <= 0:
-                continue
-            history.add_undo(reset_todos, todos)
-            todos = history.do(edit_todo, stdscr, todos, int(selected))
+            todos = handle_edit(stdscr, todos, selected, history)
         elif key == 103:  # g
-            history.add_undo(cursor_to, int(selected), len(todos))
-            selected.set_to(history.do(cursor_top, len(todos)))
+            handle_to_top(todos, selected, history)
         elif key == 71:  # G
-            history.add_undo(cursor_to, int(selected), len(todos))
-            selected.set_to(history.do(cursor_bottom, len(todos)))
+            handle_to_bottom(todos, selected, history)
+        # skip this one (sorta)
         elif key == 121:  # y
             # TODO: not currently undoable (copy previous item in clipboard)
             copy_todo(todos, int(selected), copied_todo)
         elif key == 112:  # p
-            todos = selected.todo_set_to(
-                history.do(paste_todo, stdscr, todos, int(selected), copied_todo)
-            )
-            history.add_undo(delete_todo, stdscr, todos, selected)
+            todos = handle_paste(stdscr, todos, selected, history, copied_todo)
         elif key == 45:  # -
-            todos = selected.todo_set_to(history.do(blank_todo, todos, int(selected)))
-            history.add_undo(delete_todo, stdscr, todos, selected)
+            handle_insert_blank_todo(stdscr, todos, selected, history)
         elif key == 104:  # h
             help_menu(stdscr)
         elif key == 98:  # b
             magnify(stdscr, todos, selected)
+        # skip this one
         elif key == 27:  # any escape sequence
             stdscr.nodelay(True)
             subch = stdscr.getch()
@@ -1504,33 +1703,25 @@ def main(stdscr: Any, header: str) -> int:
             elif subch in range(48, 58):  # digits:
                 selected.multiselect_from(stdscr, subch - 48, len(todos))
         elif key == 426:  # alt + j (on windows)
-            history.add_undo(todo_up, todos, int(selected) + 1)
-            todos = selected.todo_set_to(history.do(todo_down, todos, int(selected)))
+            todos = handle_todo_down(todos, selected, history)
         elif key == 427:  # alt + k (on windows)
-            history.add_undo(todo_down, todos, int(selected) - 1)
-            todos = selected.todo_set_to(history.do(todo_up, todos, int(selected)))
+            todos = handle_todo_up(todos, selected, history)
         elif key == 9:  # tab
-            history.add_undo(reset_todos, todos)
-            todos = selected.todo_set_to(history.do(indent, todos, selected))
+            todos = handle_indent(todos, selected, history)
         elif key in (351, 353):  # shift + tab
-            history.add_undo(reset_todos, todos)
-            todos = selected.todo_set_to(history.do(dedent, todos, selected))
+            todos = handle_dedent(todos, selected, history)
         elif key == 47:  # /
             search(stdscr, todos, selected)
         elif key in (24, 11):  # ctrl + x/k
             mode.toggle()
         elif key == 330:  # delete
-            history.do(toggle_todo_note, todos, selected)
-            history.add_undo(toggle_todo_note, todos, selected)
+            handle_toggle_box(todos, selected, history)
         elif key == 115:  # s
-            todos = selected.todo_set_to(sort_menu(stdscr, todos, selected, history))
+            todos = handle_sort_menu(stdscr, todos, selected, history)
         elif key == 10:  # enter
-            todos = history.do(toggle, todos, selected)
-            history.add_undo(toggle, todos, selected)
+            todos = handle_toggle(todos, selected, history)
         elif key in range(48, 58):  # digits
-            selected.set_to(
-                relative_cursor_to(stdscr, history, todos, int(selected), key - 48)
-            )
+            handle_digits(stdscr, todos, selected, history, key)
         else:
             continue
 

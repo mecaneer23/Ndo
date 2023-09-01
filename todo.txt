@@ -8,3 +8,5 @@
 - add `:` prompt to modify constants
 - add config variable defaults in README
   - so the user doesn't need to use flags every time
+- simplify main()
+- simplify wgetnstr()
