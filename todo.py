@@ -1455,8 +1455,8 @@ def main(stdscr: Any, header: str) -> int:
             )
             update_file(FILENAME, todos)
         elif key == 99:  # c
-            # TODO: not currently undoable (color to previous state)
-            todos = color_todo(stdscr, todos, selected)
+            history.add_undo(reset_todos, todos)
+            todos = history.do(color_todo, stdscr, todos, selected)
         elif key == 105:  # i
             if len(todos) <= 0:
                 continue
