@@ -1564,7 +1564,7 @@ def main(stdscr: Any, header: str) -> int:
     selected = Cursor(0)
     history = UndoRedo()
     mode = Mode(True)
-    copied_todo = Todo("- placeholder")
+    copied_todo = Todo()
     # keycode: ("keypress", function, (arg1, arg2), todos_returned?)
     keys: dict[int, tuple[str, Callable[..., Any], tuple[Any, ...] | None, bool]] = {
         259: ("up", handle_cursor_up, (todos, selected, history), False),
