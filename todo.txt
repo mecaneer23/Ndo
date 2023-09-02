@@ -8,5 +8,6 @@
 - add `:` prompt to modify constants
 - add config variable defaults in README
   - so the user doesn't need to use flags every time
-- simplify main()
++ simplify main()
 - simplify wgetnstr()
+- make all undo/redo use reset_todos() - simplify

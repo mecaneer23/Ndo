@@ -1292,13 +1292,13 @@ def edit_todo(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo]:
     return todos
 
 
-def copy_todo(todos: list[Todo], selected: int, copied_todo: Todo) -> None:
+def copy_todo(todos: list[Todo], selected: Cursor, copied_todo: Todo) -> None:
     try:
         from pyperclip import copy
     except ModuleNotFoundError:
         raise ExternalModuleNotFoundError("pyperclip", todos, "copy")
-    copy(todos[selected].display_text)
-    copied_todo.call_init(todos[selected].text)
+    copy(todos[int(selected)].display_text)
+    copied_todo.call_init(todos[int(selected)].text)
 
 
 def paste_todo(
@@ -1567,7 +1567,6 @@ def main(stdscr: Any, header: str) -> int:
     copied_todo = Todo("- placeholder")
     # keycode: ("keypress", function, (arg1, arg2), todos_returned?)
     keys: dict[int, tuple[str, Callable[..., Any], tuple[Any, ...] | None, bool]] = {
-        113: ("q", quit_program, (todos,), False),
         259: ("up", handle_cursor_up, (todos, selected, history), False),
         107: ("k", handle_cursor_up, (todos, selected, history), False),
         258: ("down", handle_cursor_down, (todos, selected, history), False),
@@ -1582,7 +1581,7 @@ def main(stdscr: Any, header: str) -> int:
         105: ("i", handle_edit, (stdscr, todos, selected, history), True),
         103: ("g", handle_to_top, (todos, selected, history), False),
         71: ("G", handle_to_bottom, (todos, selected, history), False),
-        121: ("y", copy_todo, (todos, int(selected), copied_todo), False),
+        121: ("y", copy_todo, (todos, selected, copied_todo), False),
         112: ("p", handle_paste, (stdscr, todos, selected, history, copied_todo), True),
         45: ("-", handle_insert_blank_todo, (stdscr, todos, selected, history), False),
         104: ("h", help_menu, (stdscr,), False),
@@ -1636,52 +1635,20 @@ def main(stdscr: Any, header: str) -> int:
             key = stdscr.getch()
         except KeyboardInterrupt:  # exit on ^C
             return quit_program(todos)
-        if key == 113:  # q
+        if key in keys:
+            _, func, args, todos_returned = keys[key]
+            if todos_returned:
+                todos = func(*args) if args is not None else func()
+                continue
+            func(*args) if args is not None else func()
+        elif key == 113:  # q
             return quit_program(todos)
-        elif key in (259, 107):  # up | k
-            handle_cursor_up(todos, selected, history)
-        elif key in (258, 106):  # down | j
-            handle_cursor_down(todos, selected, history)
-        elif key == 75:  # K
-            selected.multiselect_up()
-        elif key == 74:  # J
-            selected.multiselect_down(len(todos))
-        elif key == 111:  # o
-            todos = handle_new_todo_next(stdscr, todos, selected, history)
-        elif key == 79:  # O
-            todos = handle_new_todo_current(stdscr, todos, selected, history)
-        elif key == 100:  # d
-            todos = handle_delete_todo(stdscr, todos, selected, history)
-        elif key == 117:  # u
-            todos = handle_undo(todos, selected, history)
-        # skip this one
         elif key == 18:  # ^R
             continue  # redo doesn't work right now
             todos = selected.todo_set_to(
                 history.handle_return(history.redo, todos, int(selected))
             )
             update_file(FILENAME, todos)
-        elif key == 99:  # c
-            todos = handle_color(stdscr, todos, selected, history)
-        elif key == 105:  # i
-            todos = handle_edit(stdscr, todos, selected, history)
-        elif key == 103:  # g
-            handle_to_top(todos, selected, history)
-        elif key == 71:  # G
-            handle_to_bottom(todos, selected, history)
-        # skip this one (sorta)
-        elif key == 121:  # y
-            # TODO: not currently undoable (copy previous item in clipboard)
-            copy_todo(todos, int(selected), copied_todo)
-        elif key == 112:  # p
-            todos = handle_paste(stdscr, todos, selected, history, copied_todo)
-        elif key == 45:  # -
-            handle_insert_blank_todo(stdscr, todos, selected, history)
-        elif key == 104:  # h
-            help_menu(stdscr)
-        elif key == 98:  # b
-            magnify(stdscr, todos, selected)
-        # skip this one
         elif key == 27:  # any escape sequence
             stdscr.nodelay(True)
             subch = stdscr.getch()
@@ -1702,26 +1669,6 @@ def main(stdscr: Any, header: str) -> int:
                 selected.multiselect_bottom(len(todos))
             elif subch in range(48, 58):  # digits:
                 selected.multiselect_from(stdscr, subch - 48, len(todos))
-        elif key == 426:  # alt + j (on windows)
-            todos = handle_todo_down(todos, selected, history)
-        elif key == 427:  # alt + k (on windows)
-            todos = handle_todo_up(todos, selected, history)
-        elif key == 9:  # tab
-            todos = handle_indent(todos, selected, history)
-        elif key in (351, 353):  # shift + tab
-            todos = handle_dedent(todos, selected, history)
-        elif key == 47:  # /
-            search(stdscr, todos, selected)
-        elif key in (24, 11):  # ctrl + x/k
-            mode.toggle()
-        elif key == 330:  # delete
-            handle_toggle_box(todos, selected, history)
-        elif key == 115:  # s
-            todos = handle_sort_menu(stdscr, todos, selected, history)
-        elif key == 10:  # enter
-            todos = handle_toggle(todos, selected, history)
-        elif key in range(48, 58):  # digits
-            handle_digits(stdscr, todos, selected, history, key)
         else:
             continue
 
