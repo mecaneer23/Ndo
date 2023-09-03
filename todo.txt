@@ -9,3 +9,4 @@
 - add config variable defaults in README
   - so the user doesn't need to use flags every time
 - make all undo/redo use reset_todos() - simplify
+- fix empty todo printing
