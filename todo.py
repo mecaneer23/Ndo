@@ -66,8 +66,8 @@ class Todo:
     def call_init(self, text: str) -> None:
         self.text = text
         self.indent_level = len(text) - len(text.lstrip())
-        if not self.text or (len(self.text) == 1 and len(self.display_text) == 1):
-            self.box_char = None
+        if not self.text:
+            self.box_char = "-"
             self.color = 7
             self.display_text = ""
             return
@@ -1047,7 +1047,7 @@ def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
             "".join(
                 [
                     v.indent_level * " ",
-                    f"{v.get_box()}",
+                    v.get_box() if not v.is_empty() else "",
                     (
                         f"{get_bullet(v.indent_level)} "
                         if not v.has_box() and BULLETS

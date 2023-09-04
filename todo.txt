@@ -1,4 +1,3 @@
-- fix todo initialization for "2asoid"
 - fix undo
 - make delete copy to clipboard
 -1 fix strikethrough
@@ -13,3 +12,4 @@
   - so the user doesn't need to use flags every time
 - make all undo/redo use reset_todos() - simplify
 + fix empty todo printing
+- add default text if file is empty
