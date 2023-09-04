@@ -1337,7 +1337,7 @@ def handle_cursor_down(todos: list[Todo], selected: Cursor) -> None:
 def handle_new_todo_next(
     stdscr: Any, todos: list[Todo], selected: Cursor, mode: Mode
 ) -> list[Todo]:
-    todos = selected.todo_set_to(
+    return selected.todo_set_to(
         new_todo_next(
             stdscr,
             todos,
@@ -1345,7 +1345,6 @@ def handle_new_todo_next(
             mode,
         )
     )
-    return todos
 
 
 def handle_delete_todo(stdscr: Any, todos: list[Todo], selected: Cursor) -> list[Todo]:
@@ -1362,10 +1361,6 @@ def handle_redo(todos: list[Todo], selected: Cursor, history: UndoRedo) -> list[
     todos = selected.todo_set_to(history.redo())
     update_file(FILENAME, todos)
     return todos
-
-
-def handle_color(stdscr: Any, todos: list[Todo], selected: Cursor) -> list[Todo]:
-    return color_todo(stdscr, todos, selected)
 
 
 def handle_edit(
@@ -1392,7 +1387,7 @@ def handle_paste(
     selected: Cursor,
     copied_todo: Todo,
 ) -> list[Todo]:
-    todos = selected.todo_set_to(
+    return selected.todo_set_to(
         paste_todo(
             stdscr,
             todos,
@@ -1400,15 +1395,13 @@ def handle_paste(
             copied_todo,
         )
     )
-    return todos
 
 
 def handle_insert_blank_todo(
     todos: list[Todo],
     selected: Cursor,
 ) -> list[Todo]:
-    todos = selected.todo_set_to(blank_todo(todos, int(selected)))
-    return todos
+    return selected.todo_set_to(blank_todo(todos, int(selected)))
 
 
 def handle_todo_down(
@@ -1439,27 +1432,12 @@ def handle_dedent(
     return selected.todo_set_to(dedent(todos, selected))
 
 
-def handle_toggle_box(
-    todos: list[Todo],
-    selected: Cursor,
-) -> None:
-    toggle_todo_note(todos, selected)
-
-
 def handle_sort_menu(
     stdscr: Any,
     todos: list[Todo],
     selected: Cursor,
 ) -> list[Todo]:
     return selected.todo_set_to(sort_menu(stdscr, todos, selected))
-
-
-def handle_toggle(
-    todos: list[Todo],
-    selected: Cursor,
-) -> list[Todo]:
-    todos = toggle(todos, selected)
-    return todos
 
 
 def handle_digits(stdscr: Any, todos: list[Todo], selected: Cursor, digit: int) -> None:
@@ -1494,7 +1472,7 @@ def main(stdscr: Any, header: str) -> int:
     # keycode: ("keypress", function, (arg1, arg2), todos_returned?)
     keys: dict[int, tuple[str, Callable[..., Any], tuple[Any, ...] | None, bool]] = {
         9: ("tab", handle_indent, (todos, selected), True),
-        10: ("enter", handle_toggle, (todos, selected), True),
+        10: ("enter", toggle, (todos, selected), True),
         11: ("ctrl + k", mode.toggle, None, False),
         18: ("ctrl + r", handle_redo, (todos, selected, history), True),
         24: ("ctrl + x", mode.toggle, None, False),
@@ -1515,7 +1493,7 @@ def main(stdscr: Any, header: str) -> int:
         75: ("K", selected.multiselect_up, None, False),
         79: ("O", new_todo_current, (stdscr, todos, int(selected)), True),
         98: ("b", magnify, (stdscr, todos, selected), False),
-        99: ("c", handle_color, (stdscr, todos, selected), True),
+        99: ("c", color_todo, (stdscr, todos, selected), True),
         100: ("d", handle_delete_todo, (stdscr, todos, selected), True),
         103: ("g", handle_to_top, (todos, selected), False),
         104: ("h", help_menu, (stdscr,), False),
@@ -1534,7 +1512,7 @@ def main(stdscr: Any, header: str) -> int:
         121: ("y", copy_todo, (todos, selected, copied_todo), False),
         258: ("down", handle_cursor_down, (todos, selected), False),
         259: ("up", handle_cursor_up, (todos, selected), False),
-        330: ("delete", handle_toggle_box, (todos, selected), False),
+        330: ("delete", toggle_todo_note, (todos, selected), False),
         351: ("shift + tab", handle_dedent, (todos, selected), True),
         353: ("shift + tab", handle_dedent, (todos, selected), True),
         426: (
