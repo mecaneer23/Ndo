@@ -1106,6 +1106,8 @@ def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
                 counter += 1
                 continue
             counter += 1
+    if win is None:
+        return
     for i in range(height - len(new_todos) - 1):
         win.addstr(i + len(new_todos) + 1, 0, " " * (width - 1))
 
