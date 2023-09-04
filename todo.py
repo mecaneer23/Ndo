@@ -1355,9 +1355,7 @@ def handle_new_todo_current(
     return todos
 
 
-def handle_delete_todo(
-    stdscr: Any, todos: list[Todo], selected: Cursor
-) -> list[Todo]:
+def handle_delete_todo(stdscr: Any, todos: list[Todo], selected: Cursor) -> list[Todo]:
     return selected.todo_set_to(delete_todo(stdscr, todos, selected))
 
 
@@ -1373,13 +1371,15 @@ def handle_redo(todos: list[Todo], selected: Cursor, history: UndoRedo) -> list[
     return todos
 
 
-def handle_color(
-    stdscr: Any, todos: list[Todo], selected: Cursor
-) -> list[Todo]:
+def handle_color(stdscr: Any, todos: list[Todo], selected: Cursor) -> list[Todo]:
     return color_todo(stdscr, todos, selected)
 
 
-def handle_edit(stdscr: Any, todos: list[Todo], selected: Cursor, ):
+def handle_edit(
+    stdscr: Any,
+    todos: list[Todo],
+    selected: Cursor,
+):
     if len(todos) <= 0:
         return todos
     return edit_todo(stdscr, todos, int(selected))
