@@ -8,7 +8,7 @@
 - add `:` prompt to modify constants
 - add config variable defaults in README
   - so the user doesn't need to use flags every time
-- make all undo/redo use reset_todos() - simplify
 - fix undo
 - add default text if file is empty
-- make delete copy to clipboard
++ make delete copy to clipboard
+- make move todos work with multiselect
