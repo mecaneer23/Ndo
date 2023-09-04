@@ -1348,13 +1348,6 @@ def handle_new_todo_next(
     return todos
 
 
-def handle_new_todo_current(
-    stdscr: Any, todos: list[Todo], selected: Cursor
-) -> list[Todo]:
-    todos = new_todo_current(stdscr, todos, int(selected))
-    return todos
-
-
 def handle_delete_todo(stdscr: Any, todos: list[Todo], selected: Cursor) -> list[Todo]:
     return selected.todo_set_to(delete_todo(stdscr, todos, selected))
 
@@ -1520,7 +1513,7 @@ def main(stdscr: Any, header: str) -> int:
         71: ("G", handle_to_bottom, (todos, selected), False),
         74: ("J", selected.multiselect_down, (len(todos),), False),
         75: ("K", selected.multiselect_up, None, False),
-        79: ("O", handle_new_todo_current, (stdscr, todos, selected), True),
+        79: ("O", new_todo_current, (stdscr, todos, int(selected)), True),
         98: ("b", magnify, (stdscr, todos, selected), False),
         99: ("c", handle_color, (stdscr, todos, selected), True),
         100: ("d", handle_delete_todo, (stdscr, todos, selected), True),
