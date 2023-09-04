@@ -1387,10 +1387,10 @@ def handle_cursor_down(todos: list[Todo], selected: Cursor, history: UndoRedo) -
 
 
 def handle_new_todo_next(
-    stdscr: Any, todos: list[Todo], selected: Cursor, history: UndoRedo
+    stdscr: Any, todos: list[Todo], selected: Cursor, history: UndoRedo, mode: Mode
 ) -> list[Todo]:
     todos = selected.todo_set_to(
-        history.do(new_todo_next, stdscr, todos, int(selected))
+        history.do(new_todo_next, stdscr, todos, int(selected), mode)
     )
     history.add_undo(delete_todo, stdscr, todos, selected)
     return todos
@@ -1573,7 +1573,12 @@ def main(stdscr: Any, header: str) -> int:
         106: ("j", handle_cursor_down, (todos, selected, history), False),
         75: ("K", selected.multiselect_up, None, False),
         74: ("J", selected.multiselect_down, (len(todos),), False),
-        111: ("o", handle_new_todo_next, (stdscr, todos, selected, history), True),
+        111: (
+            "o",
+            handle_new_todo_next,
+            (stdscr, todos, selected, history, mode),
+            True,
+        ),
         79: ("O", handle_new_todo_current, (stdscr, todos, selected, history), True),
         100: ("d", handle_delete_todo, (stdscr, todos, selected, history), True),
         117: ("u", handle_undo, (todos, selected, history), True),
@@ -1620,16 +1625,14 @@ def main(stdscr: Any, header: str) -> int:
     }
 
     while True:
+        _print(history)
         if AUTOSAVE and is_file_externally_updated(FILENAME, todos):
             todos = validate_file(read_file(FILENAME))
         set_header(stdscr, f"{header}:")
         print_todos(stdscr, todos, selected)
         stdscr.refresh()
         if not mode.toggle_mode:
-            todos = selected.todo_set_to(
-                history.do(new_todo_next, stdscr, todos, int(selected), mode)
-            )
-            history.add_undo(delete_todo, stdscr, todos, selected)
+            todos = handle_new_todo_next(stdscr, todos, selected, history, mode)
             continue
         try:
             key = stdscr.getch()
