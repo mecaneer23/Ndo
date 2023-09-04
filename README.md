@@ -78,6 +78,22 @@ Options:
 | <kbd>u</kbd>                                   | Undo change                         |
 | <kbd>y</kbd>                                   | Copy todo to clipboard              |
 
+## Contributing
+
+Use the following linters and formatters:
+
+### Python files
+
+- pylance
+- black
+- ruff
+- mypy
+- vulture
+
+### Markdown files
+
+- markdownlint
+
 ## Troubleshooting
 
 ### Docker error
