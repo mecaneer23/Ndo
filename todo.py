@@ -66,8 +66,8 @@ class Todo:
     def call_init(self, text: str) -> None:
         self.text = text
         self.indent_level = len(text) - len(text.lstrip())
-        if self.text == "":
-            self.box_char = "-"
+        if not self.text or len(self.text) < 2:
+            self.box_char = None
             self.color = 7
             self.display_text = ""
             return
