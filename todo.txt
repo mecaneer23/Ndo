@@ -1,5 +1,3 @@
-- fix undo
-- make delete copy to clipboard
 -1 fix strikethrough
 -2 make editing work on VT100 terminals (alacritty/xterm)
 -3 fix redo
@@ -11,5 +9,6 @@
 - add config variable defaults in README
   - so the user doesn't need to use flags every time
 - make all undo/redo use reset_todos() - simplify
-+ fix empty todo printing
+- fix undo
 - add default text if file is empty
+- make delete copy to clipboard
