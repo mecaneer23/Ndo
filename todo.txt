@@ -1,3 +1,6 @@
+- fix todo initialization for "2asoid"
+- fix undo
+- make delete copy to clipboard
 -1 fix strikethrough
 -2 make editing work on VT100 terminals (alacritty/xterm)
 -3 fix redo

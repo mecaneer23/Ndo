@@ -57,7 +57,7 @@ class Todo:
         pointer = self.indent_level
         box_char, pointer = self._init_box_char(pointer)
         color, pointer = self._init_color(pointer)
-        if self.text[pointer] == " ":
+        if len(self.text) > pointer and self.text[pointer] == " ":
             pointer += 1
         display_text = self.text[pointer:]
 
@@ -66,7 +66,7 @@ class Todo:
     def call_init(self, text: str) -> None:
         self.text = text
         self.indent_level = len(text) - len(text.lstrip())
-        if not self.text or len(self.text) < 2:
+        if not self.text or (len(self.text) == 1 and len(self.display_text) == 1):
             self.box_char = None
             self.color = 7
             self.display_text = ""
