@@ -247,6 +247,12 @@ class UndoRedo:
         self.history: list[tuple[tuple[Todo, ...], int]] = []
         self.index = -1
 
+    def add(self, todos: list[Todo], selected: int) -> None:
+        if self.index < len(self.history) - 1:
+            del self.history[self.index + 1 :]
+        self.history.append((tuple(todos), int(selected)))
+        self.index = len(self.history) - 1
+
     def undo(self) -> tuple[list[Todo], int]:
         if self.index > 0:
             self.index -= 1
@@ -258,11 +264,6 @@ class UndoRedo:
             self.index += 1
         todos, selected = self.history[self.index]
         return list(todos), selected
-
-    def add(self, todos: list[Todo], selected: int) -> None:
-        if self.index == len(self.history) - 1:
-            self.history.append((tuple(todos), int(selected)))
-        self.index = len(self.history) - 1
 
     def __repr__(self) -> str:
         return "\n".join(
