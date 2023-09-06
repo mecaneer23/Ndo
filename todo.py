@@ -23,6 +23,9 @@ RELATIVE_ENUMERATE = False
 SIMPLE_BOXES = False
 STRIKETHROUGH = False
 
+PRINT_HISTORY = False
+HISTORY_FILE = "debugging/log.txt"
+
 COLORS = {
     "Red": 1,
     "Green": 2,
@@ -261,8 +264,6 @@ class UndoRedo:
         self.index = -1
 
     def add(self, todos: list[Todo], selected: int) -> None:
-        # if self.index < len(self.history) - 1:
-        #     del self.history[self.index + 1 :]
         self.history.append(Restorable(todos, selected))
         self.index = len(self.history) - 1
 
@@ -605,7 +606,7 @@ def wgetnstr(
             escape = win.getch()  # skip `[`
             if escape == -1:  # escape
                 if mode is not None:
-                    mode.toggle()
+                    mode.toggle_mode = True
                 return original
             elif escape == 100:  # ctrl + delete
                 if position < len(chars) - 1:
@@ -1460,6 +1461,12 @@ def handle_digits(stdscr: Any, todos: list[Todo], selected: Cursor, digit: int) 
     selected.set_to(relative_cursor_to(stdscr, todos, int(selected), digit - 48))
 
 
+def print_history(history: UndoRedo) -> None:
+    if PRINT_HISTORY:
+        with open(HISTORY_FILE, "w") as f:
+            print(history, file=f)
+
+
 def init() -> None:
     curses.use_default_colors()
     curses.curs_set(0)
@@ -1536,6 +1543,8 @@ def main(stdscr: Any, header: str) -> int:
             "todos, selected",
         ),
     }
+    history.add(todos, int(selected))
+    print_history(history)
 
     while True:
         if AUTOSAVE and is_file_externally_updated(FILENAME, todos):
@@ -1543,7 +1552,6 @@ def main(stdscr: Any, header: str) -> int:
         set_header(stdscr, f"{header}:")
         print_todos(stdscr, todos, selected)
         stdscr.refresh()
-        history.add(todos, int(selected))
         if not mode.toggle_mode:
             todos = handle_new_todo_next(stdscr, todos, selected, mode)
             continue
@@ -1554,13 +1562,6 @@ def main(stdscr: Any, header: str) -> int:
         if key in keys:
             _, func, args = keys[key]
             possible_args = {
-                "stdscr": stdscr,
-                "todos": todos,
-                "len(todos)": len(todos),
-                "selected": selected,
-                "history": history,
-                "copied_todo": copied_todo,
-                "None": None,
                 "48": 48,
                 "49": 49,
                 "50": 50,
@@ -1571,10 +1572,25 @@ def main(stdscr: Any, header: str) -> int:
                 "55": 55,
                 "56": 56,
                 "57": 57,
+                "copied_todo": copied_todo,
+                "history": history,
+                "len(todos)": len(todos),
+                "mode": mode,
+                "None": "None",
+                "selected": selected,
+                "stdscr": stdscr,
+                "todos": todos,
             }
-            possible_todos = func(*[possible_args[arg] for arg in args.split(", ")])
+            temp_args: list[Any] = []
+            for arg in args.split(", "):
+                if not arg == "None":
+                    temp_args.append(possible_args[arg])
+            possible_todos = func(*temp_args)
             if possible_todos is not None:
                 todos = possible_todos
+            if key not in (18, 117):  # redo/undo
+                history.add(todos, int(selected))
+            print_history(history)
             continue
         elif key == 113:  # q
             return quit_program(todos)
