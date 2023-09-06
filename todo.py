@@ -242,34 +242,45 @@ class Cursor:
             return
 
 
+class Restorable:
+    def __init__(self, todos: list[Todo], selected: int) -> None:
+        self.stored = " |SEP|".join([todo.text for todo in todos])
+        self.selected = selected
+
+    def get(self) -> tuple[list[Todo], int]:
+        stored = self.stored.split(" |SEP|")
+        return [Todo(line) for line in stored], self.selected
+
+    def __repr__(self) -> str:
+        return self.stored.replace(" |SEP|", ", ") + f": {self.selected}"
+
+
 class UndoRedo:
     def __init__(self) -> None:
-        self.history: list[tuple[tuple[Todo, ...], int]] = []
+        self.history: list[Restorable] = []
         self.index = -1
 
     def add(self, todos: list[Todo], selected: int) -> None:
-        if self.index < len(self.history) - 1:
-            del self.history[self.index + 1 :]
-        self.history.append((tuple(todos), int(selected)))
+        # if self.index < len(self.history) - 1:
+        #     del self.history[self.index + 1 :]
+        self.history.append(Restorable(todos, selected))
         self.index = len(self.history) - 1
 
     def undo(self) -> tuple[list[Todo], int]:
         if self.index > 0:
             self.index -= 1
-        todos, selected = self.history[self.index]
-        return list(todos), selected
+        return self.history[self.index].get()
 
     def redo(self) -> tuple[list[Todo], int]:
         if self.index < len(self.history) - 1:
             self.index += 1
-        todos, selected = self.history[self.index]
-        return list(todos), selected
+        return self.history[self.index].get()
 
     def __repr__(self) -> str:
         return "\n".join(
-            f"{'>' if i == self.index else ' '}  {v[0]}: {v[1]}"
+            f"{'>' if i == self.index else ' '}  {v}"
             for i, v in enumerate(self.history)
-        )
+        ) + f"\nlength: ({len(self.history)})\nindex: ({self.index})"
 
 
 class Mode:
@@ -474,11 +485,6 @@ def update_file(filename: Path, lst: list[Todo], save: bool = AUTOSAVE) -> int:
         return 0
     with filename.open("w", newline="\n") as f:
         return f.write("\n".join(map(repr, lst)))
-
-
-def _print(message: Any, end: str = "\n") -> None:
-    with open("debugging/log.txt", "w") as f:
-        f.write(f"{message}{end}")
 
 
 def wgetnstr_success(todo: Todo, chars: list[str]) -> Todo:
@@ -1541,7 +1547,6 @@ def main(stdscr: Any, header: str) -> int:
         set_header(stdscr, f"{header}:")
         print_todos(stdscr, todos, selected)
         stdscr.refresh()
-        history.add(todos, int(selected))
         if not mode.toggle_mode:
             todos = handle_new_todo_next(stdscr, todos, selected, mode)
             continue
@@ -1550,6 +1555,10 @@ def main(stdscr: Any, header: str) -> int:
         except KeyboardInterrupt:  # exit on ^C
             return quit_program(todos)
         if key in keys:
+            if key not in (18, 117):  # redo/undo
+                history.add(todos, int(selected))
+                # with open("log.txt", "w") as f:
+                #     print(history, file=f)
             _, func, args, todos_returned = keys[key]
             if todos_returned:
                 if args is None:
