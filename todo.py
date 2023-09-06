@@ -1362,7 +1362,7 @@ def handle_new_todo_next(
 def handle_delete_todo(
     stdscr: Any, todos: list[Todo], selected: Cursor, copied_todo: Todo
 ) -> list[Todo]:
-    copy_todo(todos, selected, copied_todo)
+        copy_todo(todos, selected, copied_todo)
     return selected.todo_set_to(delete_todo(stdscr, todos, selected))
 
 
