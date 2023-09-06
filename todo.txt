@@ -10,5 +10,4 @@
   - so the user doesn't need to use flags every time
 - fix undo
 - add default text if file is empty
-+ make delete copy to clipboard
 - make move todos work with multiselect

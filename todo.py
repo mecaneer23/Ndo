@@ -277,10 +277,13 @@ class UndoRedo:
         return self.history[self.index].get()
 
     def __repr__(self) -> str:
-        return "\n".join(
-            f"{'>' if i == self.index else ' '}  {v}"
-            for i, v in enumerate(self.history)
-        ) + f"\nlength: ({len(self.history)})\nindex: ({self.index})"
+        return (
+            "\n".join(
+                f"{'>' if i == self.index else ' '}  {v}"
+                for i, v in enumerate(self.history)
+            )
+            + f"\nlength: ({len(self.history)})\nindex: ({self.index})"
+        )
 
 
 class Mode:
@@ -1481,63 +1484,55 @@ def main(stdscr: Any, header: str) -> int:
     history = UndoRedo()
     mode = Mode(True)
     copied_todo = Todo()
-    # keycode: ("keypress", function, (arg1, arg2), todos_returned?)
-    keys: dict[int, tuple[str, Callable[..., Any], tuple[Any, ...] | None, bool]] = {
-        9: ("tab", handle_indent, (todos, selected), True),
-        10: ("enter", toggle, (todos, selected), True),
-        11: ("ctrl + k", mode.toggle, None, False),
-        18: ("ctrl + r", handle_redo, (todos, selected, history), True),
-        24: ("ctrl + x", mode.toggle, None, False),
-        45: ("-", handle_insert_blank_todo, (todos, selected), False),
-        47: ("/", search, (stdscr, todos, selected), False),
-        48: ("0", handle_digits, (stdscr, todos, selected, 48), False),
-        49: ("1", handle_digits, (stdscr, todos, selected, 49), False),
-        50: ("2", handle_digits, (stdscr, todos, selected, 50), False),
-        51: ("3", handle_digits, (stdscr, todos, selected, 51), False),
-        52: ("4", handle_digits, (stdscr, todos, selected, 52), False),
-        53: ("5", handle_digits, (stdscr, todos, selected, 53), False),
-        54: ("6", handle_digits, (stdscr, todos, selected, 54), False),
-        55: ("7", handle_digits, (stdscr, todos, selected, 55), False),
-        56: ("8", handle_digits, (stdscr, todos, selected, 56), False),
-        57: ("9", handle_digits, (stdscr, todos, selected, 57), False),
-        71: ("G", handle_to_bottom, (todos, selected), False),
-        74: ("J", selected.multiselect_down, (len(todos),), False),
-        75: ("K", selected.multiselect_up, None, False),
-        79: ("O", new_todo_current, (stdscr, todos, int(selected)), True),
-        98: ("b", magnify, (stdscr, todos, selected), False),
-        99: ("c", color_todo, (stdscr, todos, selected), True),
-        100: ("d", handle_delete_todo, (stdscr, todos, selected, copied_todo), True),
-        103: ("g", handle_to_top, (todos, selected), False),
-        104: ("h", help_menu, (stdscr,), False),
-        105: ("i", handle_edit, (stdscr, todos, selected), True),
-        106: ("j", handle_cursor_down, (todos, selected), False),
-        107: ("k", handle_cursor_up, (todos, selected), False),
-        111: (
-            "o",
-            handle_new_todo_next,
-            (stdscr, todos, selected, mode),
-            True,
-        ),
-        112: ("p", handle_paste, (stdscr, todos, selected, copied_todo), True),
-        115: ("s", handle_sort_menu, (stdscr, todos, selected), True),
-        117: ("u", handle_undo, (todos, selected, history), True),
-        121: ("y", copy_todo, (todos, selected, copied_todo), False),
-        258: ("down", handle_cursor_down, (todos, selected), False),
-        259: ("up", handle_cursor_up, (todos, selected), False),
-        330: ("delete", toggle_todo_note, (todos, selected), False),
-        351: ("shift + tab", handle_dedent, (todos, selected), True),
-        353: ("shift + tab", handle_dedent, (todos, selected), True),
+    keys: dict[int, tuple[str, Callable[..., Any], str]] = {
+        9: ("tab", handle_indent, "todos, selected"),
+        10: ("enter", toggle, "todos, selected"),
+        11: ("ctrl + k", mode.toggle, "None"),
+        18: ("ctrl + r", handle_redo, "todos, selected, history"),
+        24: ("ctrl + x", mode.toggle, "None"),
+        45: ("-", handle_insert_blank_todo, "todos, selected"),
+        47: ("/", search, "stdscr, todos, selected"),
+        48: ("0", handle_digits, "stdscr, todos, selected, 48"),
+        49: ("1", handle_digits, "stdscr, todos, selected, 49"),
+        50: ("2", handle_digits, "stdscr, todos, selected, 50"),
+        51: ("3", handle_digits, "stdscr, todos, selected, 51"),
+        52: ("4", handle_digits, "stdscr, todos, selected, 52"),
+        53: ("5", handle_digits, "stdscr, todos, selected, 53"),
+        54: ("6", handle_digits, "stdscr, todos, selected, 54"),
+        55: ("7", handle_digits, "stdscr, todos, selected, 55"),
+        56: ("8", handle_digits, "stdscr, todos, selected, 56"),
+        57: ("9", handle_digits, "stdscr, todos, selected, 57"),
+        71: ("G", handle_to_bottom, "todos, selected"),
+        74: ("J", selected.multiselect_down, "len(todos)"),
+        75: ("K", selected.multiselect_up, "None"),
+        79: ("O", new_todo_current, "stdscr, todos, int(selected"),
+        98: ("b", magnify, "stdscr, todos, selected"),
+        99: ("c", color_todo, "stdscr, todos, selected"),
+        100: ("d", handle_delete_todo, "stdscr, todos, selected, copied_todo"),
+        103: ("g", handle_to_top, "todos, selected"),
+        104: ("h", help_menu, "stdscr"),
+        105: ("i", handle_edit, "stdscr, todos, selected"),
+        106: ("j", handle_cursor_down, "todos, selected"),
+        107: ("k", handle_cursor_up, "todos, selected"),
+        111: ("o", handle_new_todo_next, "stdscr, todos, selected, mode"),
+        112: ("p", handle_paste, "stdscr, todos, selected, copied_todo"),
+        115: ("s", handle_sort_menu, "stdscr, todos, selected"),
+        117: ("u", handle_undo, "todos, selected, history"),
+        121: ("y", copy_todo, "todos, selected, copied_todo"),
+        258: ("down", handle_cursor_down, "todos, selected"),
+        259: ("up", handle_cursor_up, "todos, selected"),
+        330: ("delete", toggle_todo_note, "todos, selected"),
+        351: ("shift + tab", handle_dedent, "todos, selected"),
+        353: ("shift + tab", handle_dedent, "todos, selected"),
         426: (
             "alt + j (on windows)",
             handle_todo_down,
-            (todos, selected),
-            True,
+            "todos, selected",
         ),
         427: (
             "alt + k (on windows)",
             handle_todo_up,
-            (todos, selected),
-            True,
+            "todos, selected",
         ),
     }
 
@@ -1547,6 +1542,7 @@ def main(stdscr: Any, header: str) -> int:
         set_header(stdscr, f"{header}:")
         print_todos(stdscr, todos, selected)
         stdscr.refresh()
+        history.add(todos, int(selected))
         if not mode.toggle_mode:
             todos = handle_new_todo_next(stdscr, todos, selected, mode)
             continue
@@ -1555,18 +1551,30 @@ def main(stdscr: Any, header: str) -> int:
         except KeyboardInterrupt:  # exit on ^C
             return quit_program(todos)
         if key in keys:
-            if key not in (18, 117):  # redo/undo
-                history.add(todos, int(selected))
-                # with open("log.txt", "w") as f:
-                #     print(history, file=f)
-            _, func, args, todos_returned = keys[key]
-            if todos_returned:
-                if args is None:
-                    todos = func()
-                    continue
-                todos = func(*args)
-                continue
-            func(*args) if args is not None else func()
+            _, func, args = keys[key]
+            possible_args = {
+                "stdscr": stdscr,
+                "todos": todos,
+                "len(todos)": len(todos),
+                "selected": selected,
+                "history": history,
+                "copied_todo": copied_todo,
+                "None": None,
+                "48": 48,
+                "49": 49,
+                "50": 50,
+                "51": 51,
+                "52": 52,
+                "53": 53,
+                "54": 54,
+                "55": 55,
+                "56": 56,
+                "57": 57,
+            }
+            possible_todos = func(*[possible_args[arg] for arg in args.split(", ")])
+            if possible_todos is not None:
+                todos = possible_todos
+            continue
         elif key == 113:  # q
             return quit_program(todos)
         elif key == 27:  # any escape sequence
