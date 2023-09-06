@@ -1,6 +1,5 @@
 -1 fix strikethrough
 -2 make editing work on VT100 terminals (alacritty/xterm)
--3 fix redo
 -4 implement multiline todos (not with newlines, just really long todos)
   -4 allow multiline paste
   -4 allow multiline print
@@ -8,6 +7,5 @@
 - add `:` prompt to modify constants
 - add config variable defaults in README
   - so the user doesn't need to use flags every time
-+ fix undo
 - add default text if file is empty
 - make move todos work with multiselect
