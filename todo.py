@@ -1460,9 +1460,19 @@ def print_history(history: UndoRedo) -> None:
 
 
 def init() -> None:
+    """
+    Initialize the curses library and color pairs for the terminal UI.
+
+    This function sets up default colors and hides the cursor. It also
+    initializes color pairs for various text attributes like red, green,
+    yellow, blue, magenta, cyan, and white.
+
+    Returns:
+        None: This function does not return a value.
+    """
     curses.use_default_colors()
     curses.curs_set(0)
-    for i, v in enumerate(
+    for i, color in enumerate(
         [
             curses.COLOR_RED,
             curses.COLOR_GREEN,
@@ -1474,10 +1484,20 @@ def init() -> None:
         ],
         start=1,
     ):
-        curses.init_pair(i, v, -1)
+        curses.init_pair(i, color, -1)
 
 
 def main(stdscr: Any, header: str) -> int:
+    """
+    The main function for Ndo, a terminal-based todo list application.
+
+    Args:
+        stdscr (Any): The standard screen object for terminal UI.
+        header (str): The header text to display at the top of the UI.
+
+    Returns:
+        int: An exit code indicating the program's termination status.
+    """
     init()
     todos = validate_file(read_file(FILENAME))
     selected = Cursor(0)
@@ -1611,11 +1631,9 @@ def main(stdscr: Any, header: str) -> int:
                 "stdscr": stdscr,
                 "todos": todos,
             }
-            temp_args: list[Any] = []
-            for arg in args.split(", "):
-                if not arg == "None":
-                    temp_args.append(possible_args[arg])
-            possible_todos = func(*temp_args)
+            possible_todos = func(
+                *[possible_args[arg] for arg in args.split(", ") if arg != "None"]
+            )
             if possible_todos is not None:
                 todos = possible_todos
             del possible_todos
