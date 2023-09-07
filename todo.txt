@@ -9,3 +9,5 @@
   - so the user doesn't need to use flags every time
 - add default text if file is empty
 - make move todos work with multiselect
+- refactor using pylint
++ add sort by completed

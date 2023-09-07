@@ -949,32 +949,25 @@ def get_indented_sections(todos: list[Todo]) -> list[list[Todo]]:
     return indented_sections
 
 
-def flatten_todos(
-    todos: list[Todo], selected: int, key: Callable[..., str]
-) -> tuple[list[Todo], int]:
-    selected_todo = todos[selected]
-    sorted_todos = []
-    for section in sorted(get_indented_sections(todos), key=key):
-        for todo in section:
-            sorted_todos.append(todo)
-    return sorted_todos, sorted_todos.index(selected_todo)
-
-
-def sorting_methods() -> dict[str, Callable[..., str]]:
+def get_sorting_methods() -> dict[str, Callable[..., str]]:
     return {
         "Alphabetical": lambda top_level_todo: top_level_todo[0].display_text,
+        "Completed": lambda top_level_todo: "1"
+        if top_level_todo[0].is_toggled()
+        else "0",
         "Color": lambda top_level_todo: str(top_level_todo[0].color),
     }
 
 
 def sort_by(method: str, todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
-    if method in sorting_methods():
-        return flatten_todos(
-            todos,
-            int(selected),
-            sorting_methods()[method],
-        )
-    return todos, int(selected)
+    key = get_sorting_methods()[method]
+    selected_todo = todos[int(selected)]
+    sorted_todos = []
+    for section in sorted(get_indented_sections(todos), key=key):
+        for todo in section:
+            sorted_todos.append(todo)
+    update_file(FILENAME, sorted_todos)
+    return sorted_todos, sorted_todos.index(selected_todo)
 
 
 def sort_menu(
@@ -982,7 +975,7 @@ def sort_menu(
 ) -> tuple[list[Todo], int]:
     parent_win.clear()
     set_header(parent_win, "Sort by:")
-    lines = list(sorting_methods().keys())
+    lines = list(get_sorting_methods().keys())
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
@@ -1498,6 +1491,7 @@ def main(stdscr: Any, header: str) -> int:
         11: ("ctrl + k", mode.toggle, "None"),
         18: ("ctrl + r", handle_redo, "todos, selected, history"),
         24: ("ctrl + x", mode.toggle, "None"),
+        27: ("esc sequence", lambda: None, "None"),
         45: ("-", handle_insert_blank_todo, "todos, selected"),
         47: ("/", search, "stdscr, todos, selected"),
         48: ("0", handle_digits, "stdscr, todos, selected, 48"),
@@ -1543,6 +1537,22 @@ def main(stdscr: Any, header: str) -> int:
             "todos, selected",
         ),
     }
+    esc_keys: dict[int, tuple[str, Callable[..., Any], str]]  = {
+        71: ("alt + G", selected.multiselect_bottom, "len(todos)"),
+        103: ("alt + g", selected.multiselect_top, "None"),
+        106: ("alt + j", handle_todo_down, "todos, selected"),
+        107: ("alt + k", handle_todo_up, "todos, selected"),
+        48: ("0", selected.multiselect_from, "stdscr, 0, len(todos)"),
+        49: ("1", selected.multiselect_from, "stdscr, 1, len(todos)"),
+        50: ("2", selected.multiselect_from, "stdscr, 2, len(todos)"),
+        51: ("3", selected.multiselect_from, "stdscr, 3, len(todos)"),
+        52: ("4", selected.multiselect_from, "stdscr, 4, len(todos)"),
+        53: ("5", selected.multiselect_from, "stdscr, 5, len(todos)"),
+        54: ("6", selected.multiselect_from, "stdscr, 6, len(todos)"),
+        55: ("7", selected.multiselect_from, "stdscr, 7, len(todos)"),
+        56: ("8", selected.multiselect_from, "stdscr, 8, len(todos)"),
+        57: ("9", selected.multiselect_from, "stdscr, 9, len(todos)"),
+    }
     history.add(todos, int(selected))
     print_history(history)
 
@@ -1552,6 +1562,8 @@ def main(stdscr: Any, header: str) -> int:
         set_header(stdscr, f"{header}:")
         print_todos(stdscr, todos, selected)
         stdscr.refresh()
+        with open("debugging/log.txt", "w") as f:
+            print("\n".join(map(str, todos)), file=f)
         if not mode.toggle_mode:
             todos = handle_new_todo_next(stdscr, todos, selected, mode)
             continue
@@ -1561,7 +1573,24 @@ def main(stdscr: Any, header: str) -> int:
             return quit_program(todos)
         if key in keys:
             _, func, args = keys[key]
+            if key == 27:
+                stdscr.nodelay(True)
+                subch = stdscr.getch()
+                stdscr.nodelay(False)
+                if subch == -1:  # escape, otherwise skip `[`
+                    return quit_program(todos)
+                _, func, args = esc_keys[subch]
             possible_args = {
+                "0": 0,
+                "1": 1,
+                "2": 2,
+                "3": 3,
+                "4": 4,
+                "5": 5,
+                "6": 6,
+                "7": 7,
+                "8": 8,
+                "9": 9,
                 "48": 48,
                 "49": 49,
                 "50": 50,
@@ -1588,28 +1617,13 @@ def main(stdscr: Any, header: str) -> int:
             possible_todos = func(*temp_args)
             if possible_todos is not None:
                 todos = possible_todos
+            del possible_todos
             if key not in (18, 117):  # redo/undo
                 history.add(todos, int(selected))
             print_history(history)
             continue
         elif key == 113:  # q
             return quit_program(todos)
-        elif key == 27:  # any escape sequence
-            stdscr.nodelay(True)
-            subch = stdscr.getch()
-            stdscr.nodelay(False)
-            if subch == -1:  # escape, otherwise skip `[`
-                return quit_program(todos)
-            elif subch == 106:  # alt + j
-                todos = selected.todo_set_to(todo_down(todos, int(selected)))
-            elif subch == 107:  # alt + k
-                todos = selected.todo_set_to(todo_up(todos, int(selected)))
-            elif subch == 103:  # alt + g
-                selected.multiselect_top()
-            elif subch == 71:  # alt + G
-                selected.multiselect_bottom(len(todos))
-            elif subch in range(48, 58):  # digits:
-                selected.multiselect_from(stdscr, subch - 48, len(todos))
         else:
             continue
 
