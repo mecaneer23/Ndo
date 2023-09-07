@@ -1275,8 +1275,6 @@ def new_todo_next(
     todos: list[Todo],
     selected: int,
     mode: Mode | None = None,
-    paste: bool = False,
-    copied_todo: Todo | None = None,
 ) -> tuple[list[Todo], int]:
     """
     Insert a new todo item below the current cursor position and update the todo list.
@@ -1286,26 +1284,17 @@ def new_todo_next(
         todos (list[Todo]): The list of todos.
         selected (int): The current cursor position.
         mode (Mode | None): The editing mode (optional).
-        paste (bool): Indicates whether the new todo item is pasted from the clipboard
-        (default is False).
-        copied_todo (Todo | None): The todo item containing copied text (optional).
 
     Returns:
         tuple[list[Todo], int]: A tuple containing the updated list of todos and the
         new cursor position.
     """
     temp = todos.copy()
-    todos = (
-        insert_todo(
-            stdscr,
-            todos,
-            selected + 1,
-            mode,
-        )
-        if not paste
-        else todo_from_clipboard(
-            todos, selected, copied_todo if copied_todo is not None else Todo()
-        )
+    todos = insert_todo(
+        stdscr,
+        todos,
+        selected + 1,
+        mode,
     )
     stdscr.clear()
     if temp != todos:
@@ -1448,7 +1437,13 @@ def paste_todo(
         tuple[list[Todo], int]: A tuple containing the updated list of todos and the
         new cursor position.
     """
-    return new_todo_next(stdscr, todos, selected, paste=True, copied_todo=copied_todo)
+    temp = todos.copy()
+    todos = todo_from_clipboard(todos, selected, copied_todo)
+    stdscr.clear()
+    if temp != todos:
+        selected = cursor_down(selected, len(todos))
+    update_file(FILENAME, todos)
+    return todos, selected
 
 
 def blank_todo(todos: list[Todo], selected: int) -> tuple[list[Todo], int]:
