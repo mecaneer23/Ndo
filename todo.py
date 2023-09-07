@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 # pyright: reportMissingModuleSource=false
+# pylint: disable=no-name-in-module, missing-class-docstring, missing-function-docstring
 
 import curses
 from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
+from os import get_terminal_size
 from pathlib import Path
 from re import match as re_match
 from sys import exit as sys_exit
 from typing import Any, Callable, TypeVar
+
+from pyfiglet import figlet_format as big
+from pyperclip import copy, paste
 
 T = TypeVar("T")
 AUTOSAVE = True
@@ -295,14 +300,8 @@ class Mode:
     def toggle(self) -> None:
         self.toggle_mode = not self.toggle_mode
 
-
-class ExternalModuleNotFoundError(Exception):
-    def __init__(self, module: str, todos: list[Todo], operation: str):
-        update_file(FILENAME, todos, True)
-        sys_exit(
-            f"`{module}` module required for {operation} operation. "
-            f"Try `pip install {module}`"
-        )
+    def is_not_on(self) -> bool:
+        return not self.toggle_mode
 
 
 def read_file(filename: Path) -> str:
@@ -450,35 +449,6 @@ def get_args() -> Namespace:
             Default is filename.",
     )
     return parser.parse_args()
-
-
-def handle_args(args: Namespace) -> None:
-    global AUTOSAVE
-    global BULLETS
-    global ENUMERATE
-    global FILENAME
-    global HEADER
-    global HELP_FILE
-    global INDENT
-    global NO_GUI
-    global RELATIVE_ENUMERATE
-    global SIMPLE_BOXES
-    global STRIKETHROUGH
-    AUTOSAVE = args.autosave
-    BULLETS = args.bullet_display
-    ENUMERATE = args.enumerate
-    FILENAME = (
-        Path(args.filename, DEFAULT_TODO)
-        if Path(args.filename).is_dir()
-        else Path(args.filename)
-    )
-    HEADER = FILENAME.as_posix() if args.title == HEADER else " ".join(args.title)
-    HELP_FILE = Path(args.help_file)
-    INDENT = args.indentation_level
-    NO_GUI = args.no_gui
-    RELATIVE_ENUMERATE = args.relative_enumeration
-    SIMPLE_BOXES = args.simple_boxes
-    STRIKETHROUGH = args.strikethrough
 
 
 def clamp(counter: int, minimum: int, maximum: int) -> int:
@@ -744,6 +714,7 @@ def swap_todos(todos: list[Todo], idx1: int, idx2: int) -> list[Todo]:
     return todos
 
 
+# TODO: split into four smaller functions
 def md_table_to_lines(
     first_line_idx: int,
     last_line_idx: int,
@@ -860,11 +831,6 @@ def help_menu(parent_win: Any) -> None:
 
 
 def magnify(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
-    try:
-        from pyfiglet import figlet_format as big
-    except ModuleNotFoundError as err:
-        raise ExternalModuleNotFoundError("pyfiglet", todos, "magnify") from err
-
     stdscr.clear()
     set_header(stdscr, "Magnifying...")
     big_text = big(todos[int(selected)].display_text, width=stdscr.getmaxyx()[1]).split(
@@ -903,12 +869,12 @@ def color_menu(parent_win: Any, original: int) -> int:
     selected = original - 1
     while True:
         parent_win.refresh()
-        for i, v in enumerate(lines):
+        for i, line in enumerate(lines):
             win.addstr(
                 i + 1,
                 1,
-                v,
-                curses.color_pair(get_color(v.strip()))
+                line,
+                curses.color_pair(get_color(line.strip()))
                 | (curses.A_REVERSE if i == selected else 0),
             )
         try:
@@ -987,11 +953,11 @@ def sort_menu(
     cursor = 0
     while True:
         parent_win.refresh()
-        for i, v in enumerate(lines):
+        for i, line in enumerate(lines):
             win.addstr(
                 i + 1,
                 1,
-                v,
+                line,
                 curses.A_REVERSE if i == cursor else 0,
             )
         try:
@@ -1034,43 +1000,41 @@ def make_printable_sublist(
 
 def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
     if win is None:
-        from os import get_terminal_size
-
         width, height = get_terminal_size()
     else:
         height, width = win.getmaxyx()
     new_todos, temp_selected = make_printable_sublist(height - 1, todos, int(selected))
     highlight = range(temp_selected, len(selected) + temp_selected)
-    for relative, (i, v) in zip(
+    for relative, (i, todo) in zip(
         [*range(temp_selected - 1, -1, -1), int(selected), *range(0, len(new_todos))],
         enumerate(new_todos),
     ):
-        if v.color is None:
-            raise ValueError(f"Invalid color for `{v}`")
+        if todo.color is None:
+            raise ValueError(f"Invalid color for `{todo}`")
         display_string = (
             "".join(
                 [
-                    v.indent_level * " ",
-                    v.get_box() if not v.is_empty() else "",
+                    todo.indent_level * " ",
+                    todo.get_box() if not todo.is_empty() else "",
                     (
-                        f"{get_bullet(v.indent_level)} "
-                        if not v.has_box() and BULLETS
+                        f"{get_bullet(todo.indent_level)} "
+                        if not todo.has_box() and BULLETS
                         else ""
                     ),
                     (
-                        f"{todos.index(v) + 1}. "
+                        f"{todos.index(todo) + 1}. "
                         if ENUMERATE and not RELATIVE_ENUMERATE
                         else ""
                     ),
                     f"{relative + 1}. " if RELATIVE_ENUMERATE else "",
                     (
-                        strikethrough(v.display_text)
-                        if v.is_toggled()
-                        else v.display_text
+                        strikethrough(todo.display_text)
+                        if todo.is_toggled()
+                        else todo.display_text
                     ),
                 ]
             )
-            if i not in highlight or not v.is_empty()
+            if i not in highlight or not todo.is_empty()
             else "⎯" * 8
         )[: width - 1].ljust(width - 1, " ")
         counter = 0
@@ -1084,7 +1048,7 @@ def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
                     5: "\u001b[35m",
                     6: "\u001b[36m",
                     7: "\u001b[37m",
-                }[v.color]
+                }[todo.color]
                 + display_string
                 + "\u001b[0m"
             )
@@ -1095,7 +1059,7 @@ def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
                     i + 1,
                     counter,
                     display_string[counter],
-                    curses.color_pair(v.color or get_color("White"))
+                    curses.color_pair(todo.color or get_color("White"))
                     | (curses.A_REVERSE if i in highlight else 0),
                 )
             except OverflowError:
@@ -1154,10 +1118,6 @@ def todo_from_clipboard(
     Note:
         This function requires the 'pyperclip' module for clipboard access.
     """
-    try:
-        from pyperclip import paste
-    except ModuleNotFoundError as err:
-        raise ExternalModuleNotFoundError("pyperclip", todos, "paste") from err
     todo = paste()
     if copied_todo.display_text == todo:
         todos.insert(selected + 1, Todo(copied_todo.text))
@@ -1412,10 +1372,6 @@ def copy_todo(todos: list[Todo], selected: Cursor, copied_todo: Todo) -> None:
     Note:
         This function requires the 'pyperclip' module for clipboard access.
     """
-    try:
-        from pyperclip import copy
-    except ModuleNotFoundError as err:
-        raise ExternalModuleNotFoundError("pyperclip", todos, "copy") from err
     copy(todos[int(selected)].display_text)
     copied_todo.call_init(todos[int(selected)].text)
 
@@ -2025,7 +1981,7 @@ def main(stdscr: Any, header: str) -> int:
         set_header(stdscr, f"{header}:")
         print_todos(stdscr, todos, selected)
         stdscr.refresh()
-        if not mode.toggle_mode:
+        if mode.is_not_on():
             todos = handle_new_todo_next(stdscr, todos, selected, mode)
             continue
         try:
@@ -2085,7 +2041,27 @@ def main(stdscr: Any, header: str) -> int:
 
 
 if __name__ == "__main__":
-    handle_args(get_args())
+    command_line_args = get_args()
+    AUTOSAVE = command_line_args.autosave
+    BULLETS = command_line_args.bullet_display
+    ENUMERATE = command_line_args.enumerate
+    FILENAME = (
+        Path(command_line_args.filename, DEFAULT_TODO)
+        if Path(command_line_args.filename).is_dir()
+        else Path(command_line_args.filename)
+    )
+    HEADER = (
+        FILENAME.as_posix()
+        if command_line_args.title == HEADER
+        else " ".join(command_line_args.title)
+    )
+    HELP_FILE = Path(command_line_args.help_file)
+    INDENT = command_line_args.indentation_level
+    NO_GUI = command_line_args.no_gui
+    RELATIVE_ENUMERATE = command_line_args.relative_enumeration
+    SIMPLE_BOXES = command_line_args.simple_boxes
+    STRIKETHROUGH = command_line_args.strikethrough
+    del command_line_args
     if NO_GUI:
         print(f"{HEADER}:")
         print_todos(None, validate_file(read_file(FILENAME)), Cursor(0))
