@@ -1115,6 +1115,15 @@ def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
 
 
 def get_bullet(indentation_level: int) -> str:
+    """
+    Get the bullet symbol based on the indentation level.
+
+    Args:
+        indentation_level (int): The indentation level of the todo item.
+
+    Returns:
+        str: The bullet symbol to represent the todo item.
+    """
     symbols = [
         "•",
         "◦",
@@ -1127,6 +1136,24 @@ def get_bullet(indentation_level: int) -> str:
 def todo_from_clipboard(
     todos: list[Todo], selected: int, copied_todo: Todo
 ) -> list[Todo]:
+    """
+    Create a new todo item from the clipboard contents and insert it below the selected
+    todo.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (int): The current cursor position.
+        copied_todo (Todo): The todo item to store a copy of the text.
+
+    Returns:
+        list[Todo]: The updated list of todos.
+
+    Raises:
+        ExternalModuleNotFoundError: If the 'pyperclip' module is not found.
+
+    Note:
+        This function requires the 'pyperclip' module for clipboard access.
+    """
     try:
         from pyperclip import paste
     except ModuleNotFoundError as err:
@@ -1142,32 +1169,102 @@ def todo_from_clipboard(
 
 
 def cursor_up(selected: int, len_todos: int) -> int:
+    """
+    Move the cursor up to the previous line.
+
+    Args:
+        selected (int): The current cursor position.
+        len_todos (int): The total number of todos.
+
+    Returns:
+        int: The new cursor position after moving up.
+    """
     return clamp(selected - 1, 0, len_todos)
 
 
 def cursor_down(selected: int, len_todos: int) -> int:
+    """
+    Move the cursor down to the next line.
+
+    Args:
+        selected (int): The current cursor position.
+        len_todos (int): The total number of todos.
+
+    Returns:
+        int: The new cursor position after moving down.
+    """
     return clamp(selected + 1, 0, len_todos)
 
 
 def cursor_top(len_todos: int) -> int:
+    """
+    Move the cursor to the top of the todo list.
+
+    Args:
+        len_todos (int): The total number of todos.
+
+    Returns:
+        int: The new cursor position at the top of the list.
+    """
     return clamp(0, 0, len_todos)
 
 
 def cursor_bottom(len_todos: int) -> int:
+    """
+    Move the cursor to the bottom of the todo list.
+
+    Args:
+        len_todos (int): The total number of todos.
+
+    Returns:
+        int: The new cursor position at the bottom of the list.
+    """
     return clamp(len_todos, 0, len_todos)
 
 
 def cursor_to(position: int, len_todos: int) -> int:
+    """
+    Move the cursor to a specific position in the todo list.
+
+    Args:
+        position (int): The target cursor position.
+        len_todos (int): The total number of todos.
+
+    Returns:
+        int: The new cursor position after moving to the specified position.
+    """
     return clamp(position, 0, len_todos)
 
 
 def todo_up(todos: list[Todo], selected: int) -> tuple[list[Todo], int]:
+    """
+    Move the selected todo item up in the list and update the todo list.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (int): The index of the selected todo item.
+
+    Returns:
+        tuple[list[Todo], int]: A tuple containing the updated list of todos
+        and the new cursor position.
+    """
     todos = swap_todos(todos, selected, selected - 1)
     update_file(FILENAME, todos)
     return todos, cursor_up(selected, len(todos))
 
 
 def todo_down(todos: list[Todo], selected: int) -> tuple[list[Todo], int]:
+    """
+    Move the selected todo item down in the list and update the todo list.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (int): The index of the selected todo item.
+
+    Returns:
+        tuple[list[Todo], int]: A tuple containing the updated list of todos and the
+        new cursor position.
+    """
     todos = swap_todos(todos, selected, selected + 1)
     update_file(FILENAME, todos)
     return todos, cursor_down(selected, len(todos))
@@ -1181,6 +1278,22 @@ def new_todo_next(
     paste: bool = False,
     copied_todo: Todo | None = None,
 ) -> tuple[list[Todo], int]:
+    """
+    Insert a new todo item below the current cursor position and update the todo list.
+
+    Args:
+        stdscr (Any): The standard screen object for terminal UI.
+        todos (list[Todo]): The list of todos.
+        selected (int): The current cursor position.
+        mode (Mode | None): The editing mode (optional).
+        paste (bool): Indicates whether the new todo item is pasted from the clipboard
+        (default is False).
+        copied_todo (Todo | None): The todo item containing copied text (optional).
+
+    Returns:
+        tuple[list[Todo], int]: A tuple containing the updated list of todos and the
+        new cursor position.
+    """
     temp = todos.copy()
     todos = (
         insert_todo(
@@ -1202,6 +1315,17 @@ def new_todo_next(
 
 
 def new_todo_current(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo]:
+    """
+    Insert a new todo item at the current cursor position and update the todo list.
+
+    Args:
+        stdscr (Any): The standard screen object for terminal UI.
+        todos (list[Todo]): The list of todos.
+        selected (int): The current cursor position.
+
+    Returns:
+        list[Todo]: The updated list of todos.
+    """
     todos = insert_todo(stdscr, todos, selected)
     stdscr.clear()
     update_file(FILENAME, todos)
@@ -1211,6 +1335,18 @@ def new_todo_current(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo
 def delete_todo(
     stdscr: Any, todos: list[Todo], selected: Cursor
 ) -> tuple[list[Todo], int]:
+    """
+    Delete the selected todo items and update the todo list.
+
+    Args:
+        stdscr (Any): The standard screen object for terminal UI.
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo(s).
+
+    Returns:
+        tuple[list[Todo], int]: A tuple containing the updated list of todos and the
+        new cursor position.
+    """
     positions = selected.get_deletable()
     selected.set_to(clamp(int(selected), 0, len(todos) - 1))
     for pos in positions:
@@ -1221,6 +1357,17 @@ def delete_todo(
 
 
 def color_todo(stdscr: Any, todos: list[Todo], selected: Cursor) -> list[Todo]:
+    """
+    Change the color of the selected todo item(s) and update the todo list.
+
+    Args:
+        stdscr (Any): The standard screen object for terminal UI.
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo(s).
+
+    Returns:
+        list[Todo]: The updated list of todos.
+    """
     new_color = color_menu(stdscr, todos[int(selected)].color)
     for pos in selected.positions:
         todos[pos].set_color(new_color)
@@ -1230,13 +1377,26 @@ def color_todo(stdscr: Any, todos: list[Todo], selected: Cursor) -> list[Todo]:
 
 
 def edit_todo(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo]:
-    y, x = stdscr.getmaxyx()
+    """
+    Edit the text of the selected todo item and update the todo list.
+
+    Args:
+        stdscr (Any): The standard screen object for terminal UI.
+        todos (list[Todo]): The list of todos.
+        selected (int): The index of the selected todo item.
+
+    Returns:
+        list[Todo]: The updated list of todos.
+    """
+    max_y, max_x = stdscr.getmaxyx()
     todo = todos[selected].display_text
-    ncols = max(x * 3 // 4, len(todo) + 3) if len(todo) < x - 1 else x * 3 // 4
-    begin_x = x // 8 if len(todo) < x - 1 - ncols else (x - ncols) // 2
+    ncols = (
+        max(max_x * 3 // 4, len(todo) + 3) if len(todo) < max_x - 1 else max_x * 3 // 4
+    )
+    begin_x = max_x // 8 if len(todo) < max_x - 1 - ncols else (max_x - ncols) // 2
     edited_todo = wgetnstr(
         stdscr,
-        curses.newwin(3, ncols, y // 2 - 3, begin_x),
+        curses.newwin(3, ncols, max_y // 2 - 3, begin_x),
         todo=todos[selected],
         prev_todo=Todo(),
     )
@@ -1249,6 +1409,20 @@ def edit_todo(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo]:
 
 
 def copy_todo(todos: list[Todo], selected: Cursor, copied_todo: Todo) -> None:
+    """
+    Copy the text of the selected todo item to the clipboard.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo(s).
+        copied_todo (Todo): The todo item to store a copy of the text.
+
+    Raises:
+        ExternalModuleNotFoundError: If the 'pyperclip' module is not found.
+
+    Note:
+        This function requires the 'pyperclip' module for clipboard access.
+    """
     try:
         from pyperclip import copy
     except ModuleNotFoundError as err:
@@ -1260,10 +1434,36 @@ def copy_todo(todos: list[Todo], selected: Cursor, copied_todo: Todo) -> None:
 def paste_todo(
     stdscr: Any, todos: list[Todo], selected: int, copied_todo: Todo
 ) -> tuple[list[Todo], int]:
+    """
+    Paste the copied todo item's text at the current cursor position and update the
+    todo list.
+
+    Args:
+        stdscr (Any): The standard screen object for terminal UI.
+        todos (list[Todo]): The list of todos.
+        selected (int): The current cursor position.
+        copied_todo (Todo): The todo item containing the text to paste.
+
+    Returns:
+        tuple[list[Todo], int]: A tuple containing the updated list of todos and the
+        new cursor position.
+    """
     return new_todo_next(stdscr, todos, selected, paste=True, copied_todo=copied_todo)
 
 
 def blank_todo(todos: list[Todo], selected: int) -> tuple[list[Todo], int]:
+    """
+    Insert a new blank todo item below the current cursor position and update the todo
+    list.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (int): The current cursor position.
+
+    Returns:
+        tuple[list[Todo], int]: A tuple containing the updated list of todos and the
+        new cursor position.
+    """
     insert_empty_todo(todos, selected + 1)
     selected = cursor_down(selected, len(todos))
     update_file(FILENAME, todos)
@@ -1271,6 +1471,16 @@ def blank_todo(todos: list[Todo], selected: int) -> tuple[list[Todo], int]:
 
 
 def toggle(todos: list[Todo], selected: Cursor) -> list[Todo]:
+    """
+    Toggle the completion status of the selected todo items.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo(s).
+
+    Returns:
+        list[Todo]: The updated list of todos.
+    """
     for pos in selected.positions:
         todos[pos].toggle()
     update_file(FILENAME, todos)
@@ -1278,6 +1488,15 @@ def toggle(todos: list[Todo], selected: Cursor) -> list[Todo]:
 
 
 def quit_program(todos: list[Todo]) -> int:
+    """
+    Quit the program, optionally saving changes and reloading todos.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+
+    Returns:
+        int: An exit code indicating the program's termination status.
+    """
     if is_file_externally_updated(FILENAME, todos):
         todos = validate_file(read_file(FILENAME))
     return update_file(FILENAME, todos, True)
@@ -1286,6 +1505,18 @@ def quit_program(todos: list[Todo]) -> int:
 def relative_cursor_to(
     win: Any, todos: list[Todo], selected: int, first_digit: int
 ) -> int:
+    """
+    Adjust the cursor position based on numeric input while in numeric input mode.
+
+    Args:
+        win (Any): The window object for terminal UI.
+        todos (list[Todo]): The list of todos.
+        selected (int): The current cursor position.
+        first_digit (int): The first digit of the numeric input.
+
+    Returns:
+        int: The adjusted cursor position.
+    """
     total = str(first_digit)
     while True:
         try:
@@ -1311,6 +1542,17 @@ def relative_cursor_to(
 
 
 def indent(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
+    """
+    Indent the selected todo items.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo(s).
+
+    Returns:
+        tuple[list[Todo], int]: A tuple containing the updated list of todos and the
+        new cursor position.
+    """
     for pos in selected.positions:
         todos[pos].indent()
     update_file(FILENAME, todos)
@@ -1318,6 +1560,17 @@ def indent(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
 
 
 def dedent(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
+    """
+    Dedent the selected todo items.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo(s).
+
+    Returns:
+        tuple[list[Todo], int]: A tuple containing the updated list of todos and the
+        new cursor position.
+    """
     for pos in selected.positions:
         todos[pos].dedent()
     update_file(FILENAME, todos)
@@ -1325,6 +1578,13 @@ def dedent(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
 
 
 def toggle_todo_note(todos: list[Todo], selected: Cursor) -> None:
+    """
+    Toggle the visibility of todo item notes for the selected todo items.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo(s).
+    """
     for pos in selected.positions:
         todo = todos[pos]
         todo.box_char = None if todo.has_box() else "-"
@@ -1332,16 +1592,42 @@ def toggle_todo_note(todos: list[Todo], selected: Cursor) -> None:
 
 
 def handle_cursor_up(todos: list[Todo], selected: Cursor) -> None:
+    """
+    Move the cursor up to the previous line.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+    """
     selected.set_to(cursor_up(int(selected), len(todos)))
 
 
 def handle_cursor_down(todos: list[Todo], selected: Cursor) -> None:
+    """
+    Move the cursor down to the next line.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+    """
     selected.set_to(cursor_down(int(selected), len(todos)))
 
 
 def handle_new_todo_next(
     stdscr: Any, todos: list[Todo], selected: Cursor, mode: Mode
 ) -> list[Todo]:
+    """
+    Handle creating a new todo item and moving the selection to the next line.
+
+    Args:
+        stdscr (Any): The standard screen object for terminal UI.
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+        mode (Mode): The mode object representing the current editing mode.
+
+    Returns:
+        list[Todo]: The updated list of todos.
+    """
     return selected.todo_set_to(
         new_todo_next(
             stdscr,
@@ -1355,18 +1641,52 @@ def handle_new_todo_next(
 def handle_delete_todo(
     stdscr: Any, todos: list[Todo], selected: Cursor, copied_todo: Todo
 ) -> list[Todo]:
+    """
+    Handle deleting a todo item and copying it to the clipboard if applicable.
+
+    Args:
+        stdscr (Any): The standard screen object for terminal UI.
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+        copied_todo (Todo): The todo item to store a copy if deleted.
+
+    Returns:
+        list[Todo]: The updated list of todos.
+    """
     if len(todos) > 0:
         copy_todo(todos, selected, copied_todo)
     return selected.todo_set_to(delete_todo(stdscr, todos, selected))
 
 
 def handle_undo(todos: list[Todo], selected: Cursor, history: UndoRedo) -> list[Todo]:
+    """
+    Handle undoing the most recent action and updating the todo list.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+        history (UndoRedo): The history object for undoing and redoing actions.
+
+    Returns:
+        list[Todo]: The updated list of todos.
+    """
     todos = selected.todo_set_to(history.undo())
     update_file(FILENAME, todos)
     return todos
 
 
 def handle_redo(todos: list[Todo], selected: Cursor, history: UndoRedo) -> list[Todo]:
+    """
+    Handle redoing the most recently undone action and updating the todo list.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+        history (UndoRedo): The history object for undoing and redoing actions.
+
+    Returns:
+        list[Todo]: The updated list of todos.
+    """
     todos = selected.todo_set_to(history.redo())
     update_file(FILENAME, todos)
     return todos
@@ -1377,16 +1697,48 @@ def handle_edit(
     todos: list[Todo],
     selected: Cursor,
 ):
+    """
+    Handle editing the currently selected todo item.
+
+    Args:
+        stdscr (Any): The standard screen object for terminal UI.
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+
+    Returns:
+        None
+    """
     if len(todos) <= 0:
         return todos
     return edit_todo(stdscr, todos, int(selected))
 
 
 def handle_to_top(todos: list[Todo], selected: Cursor) -> None:
+    """
+    Move the cursor to the top of the todo list.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+
+    Returns:
+        None
+    """
+
     selected.set_to(cursor_top(len(todos)))
 
 
 def handle_to_bottom(todos: list[Todo], selected: Cursor) -> None:
+    """
+    Move the cursor to the bottom of the todo list.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+
+    Returns:
+        None
+    """
     selected.set_to(cursor_bottom(len(todos)))
 
 
@@ -1396,6 +1748,18 @@ def handle_paste(
     selected: Cursor,
     copied_todo: Todo,
 ) -> list[Todo]:
+    """
+    Handle pasting a copied todo item into the todo list.
+
+    Args:
+        stdscr (Any): The standard screen object for terminal UI.
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+        copied_todo (Todo): The todo item to paste.
+
+    Returns:
+        list[Todo]: The updated list of todos.
+    """
     return selected.todo_set_to(
         paste_todo(
             stdscr,
@@ -1410,6 +1774,16 @@ def handle_insert_blank_todo(
     todos: list[Todo],
     selected: Cursor,
 ) -> list[Todo]:
+    """
+    Handle inserting a new blank todo item.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+
+    Returns:
+        list[Todo]: The updated list of todos.
+    """
     return selected.todo_set_to(blank_todo(todos, int(selected)))
 
 
@@ -1417,6 +1791,16 @@ def handle_todo_down(
     todos: list[Todo],
     selected: Cursor,
 ) -> list[Todo]:
+    """
+    Move the selected todo item down in the list.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+
+    Returns:
+        list[Todo]: The updated list of todos.
+    """
     return selected.todo_set_to(todo_down(todos, int(selected)))
 
 
@@ -1424,6 +1808,16 @@ def handle_todo_up(
     todos: list[Todo],
     selected: Cursor,
 ):
+    """
+    Move the selected todo item up in the list.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+
+    Returns:
+        None
+    """
     return selected.todo_set_to(todo_up(todos, int(selected)))
 
 
@@ -1431,6 +1825,16 @@ def handle_indent(
     todos: list[Todo],
     selected: Cursor,
 ) -> list[Todo]:
+    """
+    Indent the selected todo item.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+
+    Returns:
+        list[Todo]: The updated list of todos.
+    """
     return selected.todo_set_to(indent(todos, selected))
 
 
@@ -1438,6 +1842,16 @@ def handle_dedent(
     todos: list[Todo],
     selected: Cursor,
 ) -> list[Todo]:
+    """
+    Dedent the selected todo item.
+
+    Args:
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+
+    Returns:
+        list[Todo]: The updated list of todos.
+    """
     return selected.todo_set_to(dedent(todos, selected))
 
 
@@ -1446,17 +1860,50 @@ def handle_sort_menu(
     todos: list[Todo],
     selected: Cursor,
 ) -> list[Todo]:
+    """
+    Handle sorting of todos using a menu and return the updated list of todos.
+
+    Args:
+        stdscr (Any): The standard screen object for terminal UI.
+        todos (list[Todo]): The list of todos to be sorted.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+
+    Returns:
+        list[Todo]: The updated list of todos after sorting.
+    """
     return selected.todo_set_to(sort_menu(stdscr, todos, selected))
 
 
 def handle_digits(stdscr: Any, todos: list[Todo], selected: Cursor, digit: int) -> None:
+    """
+    Handle numeric key presses to set the selected cursor position based on the digit
+    pressed.
+
+    Args:
+        stdscr (Any): The standard screen object for terminal UI.
+        todos (list[Todo]): The list of todos.
+        selected (Cursor): The cursor object indicating the currently selected todo.
+        digit (int): The numeric digit corresponding to the desired cursor position.
+
+    Returns:
+        None: This function updates the selected cursor position in place.
+    """
     selected.set_to(relative_cursor_to(stdscr, todos, int(selected), digit - 48))
 
 
 def print_history(history: UndoRedo) -> None:
+    """
+    Print the history of actions to a file if the PRINT_HISTORY flag is enabled.
+
+    Args:
+        history (UndoRedo): An UndoRedo object containing the history of actions.
+
+    Returns:
+        None: This function does not return a value.
+    """
     if PRINT_HISTORY:
-        with open(HISTORY_FILE, "w", encoding="utf-8") as f:
-            print(history, file=f)
+        with open(HISTORY_FILE, "w", encoding="utf-8") as log_file:
+            print(history, file=log_file)
 
 
 def init() -> None:
