@@ -1485,6 +1485,8 @@ def main(stdscr: Any, header: str) -> int:
     history = UndoRedo()
     mode = Mode(True)
     copied_todo = Todo()
+    # if adding a new feature that updates `todos`,
+    # make sure it also calls update_file()
     keys: dict[int, tuple[str, Callable[..., Any], str]] = {
         9: ("tab", handle_indent, "todos, selected"),
         10: ("enter", toggle, "todos, selected"),
@@ -1562,8 +1564,6 @@ def main(stdscr: Any, header: str) -> int:
         set_header(stdscr, f"{header}:")
         print_todos(stdscr, todos, selected)
         stdscr.refresh()
-        with open("debugging/log.txt", "w") as f:
-            print("\n".join(map(str, todos)), file=f)
         if not mode.toggle_mode:
             todos = handle_new_todo_next(stdscr, todos, selected, mode)
             continue
