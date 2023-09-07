@@ -308,8 +308,8 @@ def read_file(filename: Path) -> str:
     if not filename.exists():
         with filename.open("w"):
             return ""
-    with filename.open() as f:
-        return f.read()
+    with filename.open() as file_obj:
+        return file_obj.read()
 
 
 def validate_file(raw_data: str) -> list[Todo]:
@@ -329,8 +329,8 @@ def validate_file(raw_data: str) -> list[Todo]:
 
 
 def is_file_externally_updated(filename: Path, todos: list[Todo]) -> bool:
-    with filename.open() as f:
-        return not validate_file(f.read()) == todos
+    with filename.open() as file_obj:
+        return not validate_file(file_obj.read()) == todos
 
 
 def get_args() -> Namespace:
@@ -458,8 +458,8 @@ def clamp(counter: int, minimum: int, maximum: int) -> int:
 def update_file(filename: Path, lst: list[Todo], save: bool = AUTOSAVE) -> int:
     if not save:
         return 0
-    with filename.open("w", newline="\n") as f:
-        return f.write("\n".join(map(repr, lst)))
+    with filename.open("w", newline="\n") as file_obj:
+        return file_obj.write("\n".join(map(repr, lst)))
 
 
 def wgetnstr_success(todo: Todo, chars: list[str]) -> Todo:
@@ -473,7 +473,7 @@ def wgetnstr(
     todo: Todo,
     prev_todo: Todo,
     mode: Mode | None = None,
-    n: int = 1024,
+    max_chars: int = 1024,
 ) -> Todo:
     """
     Reads a string from the given window. Returns a todo from the user
@@ -501,7 +501,7 @@ def wgetnstr(
             If adding todos in entry mode (used for rapid
             repetition), allow toggling of that mode by
             passing a Mode object.
-        n (int, optional):
+        max_chars (int, optional):
             Max number of characters in the read string.
             It might error if this number is greater than
             the area of the window. Defaults to 1024.
@@ -540,26 +540,26 @@ def wgetnstr(
             if len(chars) + 1 >= win.getmaxyx()[1] - 1:
                 return wgetnstr_success(todo, chars)
             win.addstr(1, len(chars) + 1, "█")
-        for i, v in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
-            win.addstr(1, i + 1, v, curses.A_REVERSE if i == position else 0)
+        for i, char in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
+            win.addstr(1, i + 1, char, curses.A_REVERSE if i == position else 0)
         win.refresh()
         try:
-            ch = win.getch()
+            input_char = win.getch()
         except KeyboardInterrupt:  # ctrl+c
             if mode is not None:
                 mode.toggle()
             return original
-        if ch in (10, 13):  # enter
+        if input_char in (10, 13):  # enter
             break
-        if ch in (8, 127, 263):  # backspace
+        if input_char in (8, 127, 263):  # backspace
             if position > 0:
                 position -= 1
                 chars.pop(position)
-        elif ch in (24, 11):  # ctrl + x/k
+        elif input_char in (24, 11):  # ctrl + x/k
             if mode is not None:
                 mode.toggle()
                 return wgetnstr_success(todo, chars)
-        elif ch == 23:  # ctrl + backspace
+        elif input_char == 23:  # ctrl + backspace
             while True:
                 if position <= 0:
                     break
@@ -568,11 +568,11 @@ def wgetnstr(
                     chars.pop(position)
                     break
                 chars.pop(position)
-        elif ch == 9:  # tab
+        elif input_char == 9:  # tab
             todo.indent()
             set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
             stdscr.refresh()
-        elif ch == 27:  # any escape sequence `^[`
+        elif input_char == 27:  # any escape sequence `^[`
             win.nodelay(True)
             escape = win.getch()  # skip `[`
             if escape == -1:  # escape
@@ -636,31 +636,31 @@ def wgetnstr(
             else:
                 raise ValueError(repr(subch))
         else:  # typable characters (basically alphanum)
-            if len(chars) >= n:
+            if len(chars) >= max_chars:
                 curses.beep()
                 continue
-            if ch == -1:
+            if input_char == -1:
                 continue
-            chars.insert(position, chr(ch))
+            chars.insert(position, chr(input_char))
             if position < len(chars):
                 position += 1
 
     return wgetnstr_success(todo, chars)
 
 
-def hline(win: Any, y: int, x: int, ch: str | int, n: int) -> None:
-    win.addch(y, x, curses.ACS_LTEE)
-    win.hline(y, x + 1, ch, n - 2)
-    win.addch(y, x + n - 1, curses.ACS_RTEE)
+def hline(win: Any, y_loc: int, x_loc: int, char: str | int, width: int) -> None:
+    win.addch(y_loc, x_loc, curses.ACS_LTEE)
+    win.hline(y_loc, x_loc + 1, char, width - 2)
+    win.addch(y_loc, x_loc + width - 1, curses.ACS_RTEE)
 
 
 def insert_todo(
     stdscr: Any, todos: list[Todo], index: int, mode: Mode | None = None
 ) -> list[Todo]:
-    y, x = stdscr.getmaxyx()
+    max_y, max_x = stdscr.getmaxyx()
     todo = wgetnstr(
         stdscr,
-        curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8),
+        curses.newwin(3, max_x * 3 // 4, max_y // 2 - 3, max_x // 8),
         todo=Todo(),
         prev_todo=todos[index - 1] if len(todos) > 0 else Todo(),
         mode=mode,
@@ -679,9 +679,12 @@ def insert_empty_todo(todos: list[Todo], index: int) -> list[Todo]:
 def search(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
     set_header(stdscr, "Searching...")
     stdscr.refresh()
-    y, x = stdscr.getmaxyx()
+    max_y, max_x = stdscr.getmaxyx()
     sequence = wgetnstr(
-        stdscr, curses.newwin(3, x * 3 // 4, y // 2 - 3, x // 8), Todo(), Todo()
+        stdscr,
+        curses.newwin(3, max_x * 3 // 4, max_y // 2 - 3, max_x // 8),
+        Todo(),
+        Todo(),
     ).display_text
     stdscr.clear()
     for i, todo in enumerate(todos[int(selected) :], start=int(selected)):
@@ -751,8 +754,8 @@ def md_table_to_lines(
 
     # Get raw lines from the markdown file
     try:
-        with open(filename, encoding="utf-8") as f:
-            lines = f.readlines()[first_line_idx - 1 : last_line_idx - 1]
+        with open(filename, encoding="utf-8") as markdown_file:
+            lines = markdown_file.readlines()[first_line_idx - 1 : last_line_idx - 1]
     except FileNotFoundError as err:
         raise FileNotFoundError("Markdown file not found.") from err
 
@@ -772,15 +775,15 @@ def md_table_to_lines(
             columns[i][1].append(line[i])
 
     # Find the maximum length of each column
-    for i, (_, v) in enumerate(columns):
-        columns[i][0] = len(max(map(str.strip, v), key=len))
+    for i, (_, column) in enumerate(columns):
+        columns[i][0] = len(max(map(str.strip, column), key=len))
     split_lines[1] = ["-" * (length + 1) for length, _ in columns]
 
     # Join the lines together into a list of formatted strings
     joined_lines: list[str] = [""] * len(split_lines)
     for i, line in enumerate(split_lines):
-        for j, v in enumerate(line):
-            line[j] = v.strip().ljust(columns[j][0] + 2)
+        for j, char in enumerate(line):
+            line[j] = char.strip().ljust(columns[j][0] + 2)
         joined_lines[i] = "".join(split_lines[i])
     joined_lines[1] = "-" * (
         sum(columns[i][0] for i, _ in enumerate(columns)) + 2 * (len(columns) - 1)
@@ -814,8 +817,8 @@ def help_menu(parent_win: Any) -> None:
         new_lines, _ = make_printable_sublist(
             win.getmaxyx()[0] - 4, lines[2:], cursor, 0
         )
-        for i, v in enumerate(new_lines):
-            win.addstr(i + 3, 1, v)
+        for i, line in enumerate(new_lines):
+            win.addstr(i + 3, 1, line)
         win.refresh()
         try:
             key = win.getch()
