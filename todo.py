@@ -5,6 +5,7 @@ import curses
 from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from pathlib import Path
 from re import match as re_match
+from sys import exit as sys_exit
 from typing import Any, Callable, TypeVar
 
 T = TypeVar("T")
@@ -298,7 +299,7 @@ class Mode:
 class ExternalModuleNotFoundError(Exception):
     def __init__(self, module: str, todos: list[Todo], operation: str):
         update_file(FILENAME, todos, True)
-        exit(
+        sys_exit(
             f"`{module}` module required for {operation} operation. "
             f"Try `pip install {module}`"
         )
@@ -552,7 +553,7 @@ def wgetnstr(
             "Window is too short, it won't be able to\
             display the minimum 1 line of text."
         )
-    elif win.getmaxyx()[0] > 3:
+    if win.getmaxyx()[0] > 3:
         raise NotImplementedError("Multiline text editing is not supported")
     if todo.is_empty():
         todo.set_indent_level(prev_todo.indent_level)
@@ -580,7 +581,7 @@ def wgetnstr(
             return original
         if ch in (10, 13):  # enter
             break
-        elif ch in (8, 127, 263):  # backspace
+        if ch in (8, 127, 263):  # backspace
             if position > 0:
                 position -= 1
                 chars.pop(position)
@@ -608,7 +609,7 @@ def wgetnstr(
                 if mode is not None:
                     mode.toggle_mode = True
                 return original
-            elif escape == 100:  # ctrl + delete
+            if escape == 100:  # ctrl + delete
                 if position < len(chars) - 1:
                     chars.pop(position)
                     position -= 1
@@ -779,10 +780,10 @@ def md_table_to_lines(
 
     # Get raw lines from the markdown file
     try:
-        with open(filename) as f:
+        with open(filename, encoding="utf-8") as f:
             lines = f.readlines()[first_line_idx - 1 : last_line_idx - 1]
-    except FileNotFoundError:
-        raise FileNotFoundError("Markdown file not found.")
+    except FileNotFoundError as err:
+        raise FileNotFoundError("Markdown file not found.") from err
 
     # Remove unwanted characters and split each line into a list of values
     split_lines: list[list[str]] = [[]] * len(lines)
@@ -801,7 +802,7 @@ def md_table_to_lines(
 
     # Find the maximum length of each column
     for i, (_, v) in enumerate(columns):
-        columns[i][0] = len(max([w.strip() for w in v], key=len))
+        columns[i][0] = len(max(map(str.strip, v), key=len))
     split_lines[1] = ["-" * (length + 1) for length, _ in columns]
 
     # Join the lines together into a list of formatted strings
@@ -861,8 +862,8 @@ def help_menu(parent_win: Any) -> None:
 def magnify(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
     try:
         from pyfiglet import figlet_format as big
-    except ModuleNotFoundError:
-        raise ExternalModuleNotFoundError("pyfiglet", todos, "magnify")
+    except ModuleNotFoundError as err:
+        raise ExternalModuleNotFoundError("pyfiglet", todos, "magnify") from err
 
     stdscr.clear()
     set_header(stdscr, "Magnifying...")
@@ -891,7 +892,7 @@ def get_color(color: str) -> int:
 def color_menu(parent_win: Any, original: int) -> int:
     parent_win.clear()
     set_header(parent_win, "Colors:")
-    lines = [i.ljust(len(max(COLORS.keys(), key=len))) for i in COLORS.keys()]
+    lines = [i.ljust(len(max(COLORS.keys(), key=len))) for i in COLORS]
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
@@ -1098,14 +1099,12 @@ def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
                     | (curses.A_REVERSE if i in highlight else 0),
                 )
             except OverflowError:
-                """
-                This function call will throw an OverflowError if
-                the terminal doesn't support the box character as it
-                is technically a wide character. By `continue`-ing,
-                we don't print the box character and indirectly
-                prompt the user to use the -x option and use simple
-                boxes when printing.
-                """
+                # This function call will throw an OverflowError if
+                # the terminal doesn't support the box character as it
+                # is technically a wide character. By `continue`-ing,
+                # we don't print the box character and indirectly
+                # prompt the user to use the -x option and use simple
+                # boxes when printing.
                 counter += 1
                 continue
             counter += 1
@@ -1130,8 +1129,8 @@ def todo_from_clipboard(
 ) -> list[Todo]:
     try:
         from pyperclip import paste
-    except ModuleNotFoundError:
-        raise ExternalModuleNotFoundError("pyperclip", todos, "paste")
+    except ModuleNotFoundError as err:
+        raise ExternalModuleNotFoundError("pyperclip", todos, "paste") from err
     todo = paste()
     if copied_todo.display_text == todo:
         todos.insert(selected + 1, Todo(copied_todo.text))
@@ -1252,8 +1251,8 @@ def edit_todo(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo]:
 def copy_todo(todos: list[Todo], selected: Cursor, copied_todo: Todo) -> None:
     try:
         from pyperclip import copy
-    except ModuleNotFoundError:
-        raise ExternalModuleNotFoundError("pyperclip", todos, "copy")
+    except ModuleNotFoundError as err:
+        raise ExternalModuleNotFoundError("pyperclip", todos, "copy") from err
     copy(todos[int(selected)].display_text)
     copied_todo.call_init(todos[int(selected)].text)
 
@@ -1298,14 +1297,14 @@ def relative_cursor_to(
                 selected - int(total),
                 len(todos),
             )
-        elif key in (258, 106):  # down | j
+        if key in (258, 106):  # down | j
             return cursor_to(
                 selected + int(total),
                 len(todos),
             )
-        elif key in (103, 71):  # g | G
+        if key in (103, 71):  # g | G
             return cursor_to(int(total) - 1, len(todos))
-        elif key in range(48, 58):  # digits
+        if key in range(48, 58):  # digits
             total += str(key - 48)
             continue
         return selected
@@ -1456,7 +1455,7 @@ def handle_digits(stdscr: Any, todos: list[Todo], selected: Cursor, digit: int) 
 
 def print_history(history: UndoRedo) -> None:
     if PRINT_HISTORY:
-        with open(HISTORY_FILE, "w") as f:
+        with open(HISTORY_FILE, "w", encoding="utf-8") as f:
             print(history, file=f)
 
 
@@ -1539,7 +1538,7 @@ def main(stdscr: Any, header: str) -> int:
             "todos, selected",
         ),
     }
-    esc_keys: dict[int, tuple[str, Callable[..., Any], str]]  = {
+    esc_keys: dict[int, tuple[str, Callable[..., Any], str]] = {
         71: ("alt + G", selected.multiselect_bottom, "len(todos)"),
         103: ("alt + g", selected.multiselect_top, "None"),
         106: ("alt + j", handle_todo_down, "todos, selected"),
@@ -1570,6 +1569,8 @@ def main(stdscr: Any, header: str) -> int:
         try:
             key = stdscr.getch()
         except KeyboardInterrupt:  # exit on ^C
+            return quit_program(todos)
+        if key == 113:  # q
             return quit_program(todos)
         if key in keys:
             _, func, args = keys[key]
@@ -1621,11 +1622,6 @@ def main(stdscr: Any, header: str) -> int:
             if key not in (18, 117):  # redo/undo
                 history.add(todos, int(selected))
             print_history(history)
-            continue
-        elif key == 113:  # q
-            return quit_program(todos)
-        else:
-            continue
 
 
 if __name__ == "__main__":
@@ -1633,5 +1629,5 @@ if __name__ == "__main__":
     if NO_GUI:
         print(f"{HEADER}:")
         print_todos(None, validate_file(read_file(FILENAME)), Cursor(0))
-        exit()
+        sys_exit()
     curses.wrapper(main, header=HEADER)
