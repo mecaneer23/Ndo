@@ -1658,7 +1658,7 @@ def handle_delete_todo(
     return selected.todo_set_to(delete_todo(stdscr, todos, selected))
 
 
-def handle_undo(todos: list[Todo], selected: Cursor, history: UndoRedo) -> list[Todo]:
+def handle_undo(selected: Cursor, history: UndoRedo) -> list[Todo]:
     """
     Handle undoing the most recent action and updating the todo list.
 
@@ -1675,7 +1675,7 @@ def handle_undo(todos: list[Todo], selected: Cursor, history: UndoRedo) -> list[
     return todos
 
 
-def handle_redo(todos: list[Todo], selected: Cursor, history: UndoRedo) -> list[Todo]:
+def handle_redo(selected: Cursor, history: UndoRedo) -> list[Todo]:
     """
     Handle redoing the most recently undone action and updating the todo list.
 
@@ -1957,7 +1957,7 @@ def main(stdscr: Any, header: str) -> int:
         9: ("tab", handle_indent, "todos, selected"),
         10: ("enter", toggle, "todos, selected"),
         11: ("ctrl + k", mode.toggle, "None"),
-        18: ("ctrl + r", handle_redo, "todos, selected, history"),
+        18: ("ctrl + r", handle_redo, "selected, history"),
         24: ("ctrl + x", mode.toggle, "None"),
         27: ("esc sequence", lambda: None, "None"),
         45: ("-", handle_insert_blank_todo, "todos, selected"),
@@ -1987,7 +1987,7 @@ def main(stdscr: Any, header: str) -> int:
         111: ("o", handle_new_todo_next, "stdscr, todos, selected, mode"),
         112: ("p", handle_paste, "stdscr, todos, selected, copied_todo"),
         115: ("s", handle_sort_menu, "stdscr, todos, selected"),
-        117: ("u", handle_undo, "todos, selected, history"),
+        117: ("u", handle_undo, "selected, history"),
         121: ("y", copy_todo, "todos, selected, copied_todo"),
         258: ("down", handle_cursor_down, "todos, selected"),
         259: ("up", handle_cursor_up, "todos, selected"),
