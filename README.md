@@ -84,7 +84,7 @@ Use the following linters and formatters:
 
 ### Python files
 
-- pylance
+- pylint
 - black
 - ruff
 - mypy
