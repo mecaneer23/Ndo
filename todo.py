@@ -101,19 +101,24 @@ class Todo:
         self.color = color
 
     def get_box(self) -> str:
-        table = (
-            {
-                "+": "☑  ",
-                "-": "☐  ",
-                None: "",
-            }
-            if not SIMPLE_BOXES
-            else {
-                "+": "[x] ",
-                "-": "[ ] ",
-                None: "",
-            }
+        table = {
+            "+": "☑  ",
+            "-": "☐  ",
+            None: "",
+        }
+
+        if self.box_char in table:
+            return table[self.box_char]
+        raise KeyError(
+            f"The completion indicator of `{self.text}` is not one of (+, -)"
         )
+
+    def get_simple_box(self) -> str:
+        table = {
+            "+": "[x] ",
+            "-": "[ ] ",
+            None: "",
+        }
 
         if self.box_char in table:
             return table[self.box_char]
@@ -736,9 +741,7 @@ def to_lines_join(split_lines: list[list[str]], columns: list[list[int]]) -> lis
         for j, char in enumerate(line):
             line[j] = char.strip().ljust(columns[j][0] + 2)
         joined_lines[i] = "".join(split_lines[i])
-    joined_lines[1] = "-" * (
-        sum(list(zip(*columns))[0]) + 2 * (len(columns) - 1)
-    )
+    joined_lines[1] = "-" * (sum(list(zip(*columns))[0]) + 2 * (len(columns) - 1))
     return joined_lines
 
 
@@ -1028,7 +1031,10 @@ def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
             "".join(
                 [
                     todo.indent_level * " ",
-                    todo.get_box() if not todo.is_empty() else "",
+                    todo.get_box() if not todo.is_empty() and not SIMPLE_BOXES else "",
+                    todo.get_simple_box()
+                    if not todo.is_empty() and SIMPLE_BOXES
+                    else "",
                     (
                         f"{get_bullet(todo.indent_level)} "
                         if not todo.has_box() and BULLETS
