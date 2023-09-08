@@ -717,7 +717,31 @@ def swap_todos(todos: list[Todo], idx1: int, idx2: int) -> list[Todo]:
     return todos
 
 
-# TODO: split into four smaller functions
+def to_lines_split(
+    lines: list[str], remove: tuple[str, ...]
+) -> tuple[int, list[list[str]]]:
+    split: list[list[str]] = [[]] * len(lines)
+    for i, _ in enumerate(lines):
+        for item in remove:
+            lines[i] = lines[i].replace(item, "")
+        split[i] = lines[i].split("|")[1:-1]
+    column_count = len(split[0])
+    split[1] = ["-" for _ in range(column_count)]
+    return column_count, split
+
+
+def to_lines_join(split_lines: list[list[str]], columns: list[list[int]]) -> list[str]:
+    joined_lines: list[str] = [""] * len(split_lines)
+    for i, line in enumerate(split_lines):
+        for j, char in enumerate(line):
+            line[j] = char.strip().ljust(columns[j][0] + 2)
+        joined_lines[i] = "".join(split_lines[i])
+    joined_lines[1] = "-" * (
+        sum(list(zip(*columns))[0]) + 2 * (len(columns) - 1)
+    )
+    return joined_lines
+
+
 def md_table_to_lines(
     first_line_idx: int,
     last_line_idx: int,
@@ -760,13 +784,7 @@ def md_table_to_lines(
         raise FileNotFoundError("Markdown file not found.") from err
 
     # Remove unwanted characters and split each line into a list of values
-    split_lines: list[list[str]] = [[]] * len(lines)
-    for i, _ in enumerate(lines):
-        for item in remove:
-            lines[i] = lines[i].replace(item, "")
-        split_lines[i] = lines[i].split("|")[1:-1]
-    column_count = len(split_lines[0])
-    split_lines[1] = ["-" for _ in range(column_count)]
+    column_count, split_lines = to_lines_split(lines, remove)
 
     # Create lists of columns
     columns: list[list[Any]] = [[0, []] for _ in range(column_count)]
@@ -780,15 +798,7 @@ def md_table_to_lines(
     split_lines[1] = ["-" * (length + 1) for length, _ in columns]
 
     # Join the lines together into a list of formatted strings
-    joined_lines: list[str] = [""] * len(split_lines)
-    for i, line in enumerate(split_lines):
-        for j, char in enumerate(line):
-            line[j] = char.strip().ljust(columns[j][0] + 2)
-        joined_lines[i] = "".join(split_lines[i])
-    joined_lines[1] = "-" * (
-        sum(columns[i][0] for i, _ in enumerate(columns)) + 2 * (len(columns) - 1)
-    )
-    return joined_lines
+    return to_lines_join(split_lines, columns)
 
 
 def help_menu(parent_win: Any) -> None:
