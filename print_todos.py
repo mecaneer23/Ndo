@@ -74,11 +74,26 @@ def make_printable_sublist(
     return lst[start:end], cursor - start
 
 
+def info_message(win: Any, height: int, width: int) -> None:
+    text = [
+        "Ndo - an ncurses todo application",
+        "",
+        "by Gabriel Natenshon",
+        "Type `o` to add a new todo",
+    ]
+    maxlen = len(max(text, key=len))
+    for i, line in enumerate(text):
+        win.addstr(height // 3 + i, (width - maxlen) // 2, line.center(maxlen))
+
+
 def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
     if win is None:
         width, height = get_terminal_size()
     else:
         height, width = win.getmaxyx()
+    if len(todos) < 1:
+        info_message(win, height, width)
+        return
     new_todos, temp_selected = make_printable_sublist(height - 1, todos, int(selected))
     highlight = range(temp_selected, len(selected) + temp_selected)
     for relative, (i, todo) in zip(
