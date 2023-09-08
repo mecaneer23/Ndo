@@ -4,7 +4,6 @@
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
 import curses
-from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from os import get_terminal_size
 from pathlib import Path
 from re import match as re_match
@@ -19,7 +18,10 @@ from class_history import UndoRedo
 from class_mode import Mode
 from class_todo import Todo
 from class_todo import init as init_todo_class
+from get_args import get_args
+from get_args import init as init_get_args
 from get_todo import hline, set_header, wgetnstr
+from get_todo import init as init_wgetnstr
 from md_to_py import md_table_to_lines
 
 T = TypeVar("T")
@@ -78,115 +80,6 @@ def validate_file(raw_data: str) -> list[Todo]:
 def is_file_externally_updated(filename: Path, todos: list[Todo]) -> bool:
     with filename.open() as file_obj:
         return not validate_file(file_obj.read()) == todos
-
-
-def get_args() -> Namespace:
-    parser = ArgumentParser(
-        description="Ndo is a todo list program to help you manage your todo lists",
-        add_help=False,
-        formatter_class=RawDescriptionHelpFormatter,
-        epilog="Controls:\n  "
-        + "\n  ".join(
-            md_table_to_lines(
-                CONTROLS_BEGIN_INDEX,
-                CONTROLS_END_INDEX,
-                str(HELP_FILE),
-                ("<kbd>", "</kbd>"),
-            )
-        ),
-    )
-    parser.add_argument(
-        "filename",
-        type=str,
-        nargs="?",
-        default=FILENAME,
-        help=f"Provide a filename to store the todo list in.\
-            Default is `{FILENAME}`.",
-    )
-    parser.add_argument(
-        "--bullet-display",
-        "-b",
-        action="store_true",
-        default=BULLETS,
-        help=f"Boolean: determine if Notes are displayed with\
-            a bullet point in front or not. Default is `{BULLETS}`.",
-    )
-    parser.add_argument(
-        "--enumerate",
-        "-e",
-        action="store_true",
-        default=ENUMERATE,
-        help=f"Boolean: determines if todos are numbered when\
-            printed or not. Default is `{ENUMERATE}`.",
-    )
-    parser.add_argument(
-        "--help",
-        "-h",
-        action="help",
-        help="Show this help message and exit.",
-    )
-    parser.add_argument(
-        "--help-file",
-        type=str,
-        default=HELP_FILE,
-        help=f"Allows passing alternate file to\
-        specify help menu. Default is `{HELP_FILE}`.",
-    )
-    parser.add_argument(
-        "--indentation-level",
-        "-i",
-        type=int,
-        default=INDENT,
-        help=f"Allows specification of indentation level. \
-            Default is `{INDENT}`.",
-    )
-    parser.add_argument(
-        "--no-gui",
-        "-n",
-        action="store_true",
-        default=NO_GUI,
-        help=f"Boolean: If true, do not start a curses gui,\
-            rather, just print out the todo list. Default is\
-            `{NO_GUI}`.",
-    )
-    parser.add_argument(
-        "--relative-enumeration",
-        "-r",
-        action="store_true",
-        default=RELATIVE_ENUMERATE,
-        help=f"Boolean: determines if todos are numbered\
-            when printed. Numbers relatively rather than\
-            absolutely. Default is `{RELATIVE_ENUMERATE}`.",
-    )
-    parser.add_argument(
-        "--simple-boxes",
-        "-x",
-        action="store_true",
-        default=SIMPLE_BOXES,
-        help=f"Boolean: allow rendering simpler checkboxes if\
-            terminal doesn't support default ascii checkboxes.\
-            Default is `{SIMPLE_BOXES}`.",
-    )
-    parser.add_argument(
-        "--strikethrough",
-        "-s",
-        action="store_true",
-        default=STRIKETHROUGH,
-        help=f"Boolean: strikethrough completed todos\
-            - option to disable because some terminals\
-            don't support strikethroughs. Default is\
-            `{STRIKETHROUGH}`.",
-    )
-    parser.add_argument(
-        "--title",
-        "-t",
-        type=str,
-        nargs="+",
-        default=HEADER,
-        help="Allows passing alternate header.\
-            Default is filename.",
-    )
-    return parser.parse_args()
 
 
 def clamp(counter: int, minimum: int, maximum: int) -> int:
@@ -930,6 +823,7 @@ def init() -> None:
 def main(stdscr: Any, header: str) -> int:
     init()
     init_todo_class(INDENT)
+    init_wgetnstr(INDENT)
     todos = validate_file(read_file(FILENAME))
     selected = Cursor(0)
     history = UndoRedo()
@@ -1076,6 +970,21 @@ def main(stdscr: Any, header: str) -> int:
 
 
 if __name__ == "__main__":
+    init_get_args(
+        BULLETS,
+        CONTROLS_BEGIN_INDEX,
+        CONTROLS_END_INDEX,
+        DEFAULT_TODO,
+        ENUMERATE,
+        FILENAME,
+        HEADER,
+        HELP_FILE,
+        INDENT,
+        NO_GUI,
+        RELATIVE_ENUMERATE,
+        SIMPLE_BOXES,
+        STRIKETHROUGH,
+    )
     command_line_args = get_args()
     BULLETS = command_line_args.bullet_display
     ENUMERATE = command_line_args.enumerate
