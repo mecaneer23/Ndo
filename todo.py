@@ -1074,7 +1074,7 @@ def handle_cursor_up(todos: list[Todo], selected: Cursor) -> None:
 
 
 def handle_cursor_down(todos: list[Todo], selected: Cursor) -> None:
-   selected.set_to(cursor_down(int(selected), len(todos)))
+    selected.set_to(cursor_down(int(selected), len(todos)))
 
 
 def handle_new_todo_next(
