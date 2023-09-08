@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # pyright: reportMissingModuleSource=false
-# pylint: disable=no-name-in-module, missing-class-docstring, missing-function-docstring
+# pylint: disable=no-name-in-module, missing-class-docstring
+# pylint: disable=missing-function-docstring, missing-module-docstring
 
 import curses
 from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
@@ -12,6 +13,12 @@ from typing import Any, Callable, TypeVar
 
 from pyfiglet import figlet_format as big
 from pyperclip import copy, paste
+
+from class_cursor import Cursor
+from class_history import UndoRedo
+from class_mode import Mode
+from class_todo import Todo
+from class_todo import init as init_todo_class
 
 T = TypeVar("T")
 AUTOSAVE = True
@@ -41,272 +48,6 @@ COLORS = {
     "Cyan": 6,
     "White": 7,
 }
-
-
-class Todo:
-    def __init__(self, text: str = "") -> None:
-        self.box_char: str | None = None
-        self.color: int = 7
-        self.display_text: str = ""
-        self.text: str = ""
-        self.indent_level: int = 0
-        self.call_init(text)
-
-    def _init_box_char(self, pointer: int) -> tuple[str | None, int]:
-        if self.text[pointer] in "-+":
-            return self.text[pointer], pointer + 1
-        return None, pointer
-
-    def _init_color(self, pointer: int) -> tuple[int, int]:
-        if self.text[pointer].isdigit():
-            return int(self.text[pointer]), pointer + 2
-        return 7, pointer
-
-    def _init_attrs(self) -> tuple[str | None, int, str]:
-        pointer = self.indent_level
-        box_char, pointer = self._init_box_char(pointer)
-        color, pointer = self._init_color(pointer)
-        if len(self.text) > pointer and self.text[pointer] == " ":
-            pointer += 1
-        display_text = self.text[pointer:]
-
-        return box_char, color, display_text
-
-    def call_init(self, text: str) -> None:
-        self.text = text
-        self.indent_level = len(text) - len(text.lstrip())
-        if not self.text:
-            self.box_char = "-"
-            self.color = 7
-            self.display_text = ""
-            return
-        self.box_char, self.color, self.display_text = self._init_attrs()
-
-    def __getitem__(self, key: int) -> str:
-        return self.text[key]
-
-    def set_display_text(self, display_text: str) -> None:
-        self.display_text = display_text
-        self.text = repr(self)
-
-    def is_toggled(self) -> bool:
-        if self.box_char is None:
-            return False
-        return self.box_char == "+"
-
-    def set_indent_level(self, indent_level: int) -> None:
-        self.indent_level = indent_level
-
-    def set_color(self, color: int) -> None:
-        self.color = color
-
-    def get_box(self) -> str:
-        table = {
-            "+": "☑  ",
-            "-": "☐  ",
-            None: "",
-        }
-
-        if self.box_char in table:
-            return table[self.box_char]
-        raise KeyError(
-            f"The completion indicator of `{self.text}` is not one of (+, -)"
-        )
-
-    def get_simple_box(self) -> str:
-        table = {
-            "+": "[x] ",
-            "-": "[ ] ",
-            None: "",
-        }
-
-        if self.box_char in table:
-            return table[self.box_char]
-        raise KeyError(
-            f"The completion indicator of `{self.text}` is not one of (+, -)"
-        )
-
-    def has_box(self) -> bool:
-        return self.box_char is not None
-
-    def is_empty(self) -> bool:
-        return self.display_text == ""
-
-    def toggle(self) -> None:
-        self.box_char = {"+": "-", "-": "+", None: ""}[self.box_char]
-        self.text = repr(self)
-
-    def indent(self) -> None:
-        self.indent_level += INDENT
-        self.text = repr(self)
-
-    def dedent(self) -> None:
-        if self.indent_level >= INDENT:
-            self.indent_level -= INDENT
-            self.text = repr(self)
-
-    def __repr__(self) -> str:
-        return "".join(
-            [
-                self.indent_level * " ",
-                self.box_char if self.box_char is not None else "",
-                str(self.color) if self.color != 7 else "",
-                " " if self.box_char is not None or self.color != 7 else "",
-                self.display_text,
-            ]
-        )
-
-
-class Cursor:
-    def __init__(self, position: int, *positions: int) -> None:
-        self.positions: list[int] = [position, *positions]
-        self.direction: str | None = None
-
-    def __len__(self) -> int:
-        return len(self.positions)
-
-    def __str__(self) -> str:
-        return str(self.positions[0])
-
-    def __int__(self) -> int:
-        return self.positions[0]
-
-    def __contains__(self, child: int) -> bool:
-        return child in self.positions
-
-    def set_to(self, position: int) -> None:
-        self.positions = [position]
-
-    def todo_set_to(self, todo_position: tuple[list[Todo], int]) -> list[Todo]:
-        self.positions[0] = todo_position[1]
-        return todo_position[0]
-
-    def select_next(self) -> None:
-        self.positions.append(max(self.positions) + 1)
-        self.positions.sort()
-
-    def deselect_next(self) -> None:
-        if len(self.positions) > 1:
-            self.positions.remove(max(self.positions))
-
-    def deselect_prev(self) -> None:
-        if len(self.positions) > 1:
-            self.positions.remove(min(self.positions))
-
-    def select_prev(self) -> None:
-        self.positions.append(min(self.positions) - 1)
-        self.positions.sort()
-
-    def get_deletable(self) -> list[int]:
-        return [min(self.positions) for _ in self.positions]
-
-    def multiselect_down(self, max_len: int) -> None:
-        if max(self.positions) >= max_len - 1:
-            return
-        if len(self.positions) == 1 or self.direction == "down":
-            self.select_next()
-            self.direction = "down"
-            return
-        self.deselect_prev()
-
-    def multiselect_up(self) -> None:
-        if min(self.positions) == 0 and self.direction == "up":
-            return
-        if len(self.positions) == 1 or self.direction == "up":
-            self.select_prev()
-            self.direction = "up"
-            return
-        self.deselect_next()
-
-    def multiselect_top(self) -> None:
-        for _ in range(self.positions[0], 0, -1):
-            self.multiselect_up()
-
-    def multiselect_bottom(self, max_len: int) -> None:
-        for _ in range(self.positions[0], max_len):
-            self.multiselect_down(max_len)
-
-    def multiselect_to(self, position: int, max_len: int) -> None:
-        direction = -1 if position < self.positions[0] else 1
-        for _ in range(self.positions[0], position, direction):
-            if direction == 1:
-                self.multiselect_down(max_len)
-                continue
-            self.multiselect_up()
-
-    def multiselect_from(self, stdscr: Any, first_digit: int, max_len: int) -> None:
-        total = str(first_digit)
-        while True:
-            try:
-                key = stdscr.getch()
-            except KeyboardInterrupt:  # exit on ^C
-                return
-            if key != 27:  # not an escape sequence
-                return
-            stdscr.nodelay(True)
-            subch = stdscr.getch()  # alt + ...
-            stdscr.nodelay(False)
-            if subch == 107:  # k
-                self.multiselect_to(self.positions[0] - int(total), max_len)
-            elif subch == 106:  # j
-                self.multiselect_to(self.positions[0] + int(total), max_len)
-            elif subch in range(48, 58):  # digits
-                total += str(subch - 48)
-                continue
-            return
-
-
-class Restorable:
-    def __init__(self, todos: list[Todo], selected: int) -> None:
-        self.stored = " |SEP|".join([todo.text for todo in todos])
-        self.selected = selected
-
-    def get(self) -> tuple[list[Todo], int]:
-        stored = self.stored.split(" |SEP|")
-        return [Todo(line) for line in stored], self.selected
-
-    def __repr__(self) -> str:
-        return self.stored.replace(" |SEP|", ", ") + f": {self.selected}"
-
-
-class UndoRedo:
-    def __init__(self) -> None:
-        self.history: list[Restorable] = []
-        self.index = -1
-
-    def add(self, todos: list[Todo], selected: int) -> None:
-        self.history.append(Restorable(todos, selected))
-        self.index = len(self.history) - 1
-
-    def undo(self) -> tuple[list[Todo], int]:
-        if self.index > 0:
-            self.index -= 1
-        return self.history[self.index].get()
-
-    def redo(self) -> tuple[list[Todo], int]:
-        if self.index < len(self.history) - 1:
-            self.index += 1
-        return self.history[self.index].get()
-
-    def __repr__(self) -> str:
-        return (
-            "\n".join(
-                f"{'>' if i == self.index else ' '}  {v}"
-                for i, v in enumerate(self.history)
-            )
-            + f"\nlength: ({len(self.history)})\nindex: ({self.index})"
-        )
-
-
-class Mode:
-    def __init__(self, toggle_mode: bool) -> None:
-        self.toggle_mode = toggle_mode
-
-    def toggle(self) -> None:
-        self.toggle_mode = not self.toggle_mode
-
-    def is_not_on(self) -> bool:
-        return not self.toggle_mode
 
 
 def read_file(filename: Path) -> str:
@@ -1916,6 +1657,7 @@ def main(stdscr: Any, header: str) -> int:
         int: An exit code indicating the program's termination status.
     """
     init()
+    init_todo_class(INDENT)
     todos = validate_file(read_file(FILENAME))
     selected = Cursor(0)
     history = UndoRedo()
