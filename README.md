@@ -39,7 +39,6 @@ Options:
 
 | Option                                                      | Description                                                                                                                         |
 | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| --autosave, -a                                              | Boolean: determines if file is saved on every action or only once at the program termination. Default is `True`.                    |
 | --bullet-display, -b                                        | Boolean: determine if Notes are displayed with a bullet point in front or not. Default is `False`.                                  |
 | --enumerate, -e                                             | Boolean: determines if todos are numbered when printed or not. Default is `False`.                                                  |
 | --help, -h                                                  | Show this help message and exit.                                                                                                    |

@@ -21,10 +21,9 @@ from class_todo import Todo
 from class_todo import init as init_todo_class
 
 T = TypeVar("T")
-AUTOSAVE = True
 BULLETS = False
-CONTROLS_BEGIN_INDEX = 56
-CONTROLS_END_INDEX = 80
+CONTROLS_BEGIN_INDEX = 55
+CONTROLS_END_INDEX = 79
 DEFAULT_TODO = "todo.txt"
 ENUMERATE = False
 FILENAME = Path(DEFAULT_TODO)
@@ -101,15 +100,6 @@ def get_args() -> Namespace:
         default=FILENAME,
         help=f"Provide a filename to store the todo list in.\
             Default is `{FILENAME}`.",
-    )
-    parser.add_argument(
-        "--autosave",
-        "-a",
-        action="store_true",
-        default=AUTOSAVE,
-        help=f"Boolean: determines if file is saved on every\
-            action or only once at the program termination.\
-            Default is `{AUTOSAVE}`.",
     )
     parser.add_argument(
         "--bullet-display",
@@ -201,9 +191,7 @@ def clamp(counter: int, minimum: int, maximum: int) -> int:
     return min(max(counter, minimum), maximum - 1)
 
 
-def update_file(filename: Path, lst: list[Todo], save: bool = AUTOSAVE) -> int:
-    if not save:
-        return 0
+def update_file(filename: Path, lst: list[Todo]) -> int:
     with filename.open("w", newline="\n") as file_obj:
         return file_obj.write("\n".join(map(repr, lst)))
 
@@ -1018,7 +1006,7 @@ def toggle(todos: list[Todo], selected: Cursor) -> list[Todo]:
 def quit_program(todos: list[Todo]) -> int:
     if is_file_externally_updated(FILENAME, todos):
         todos = validate_file(read_file(FILENAME))
-    return update_file(FILENAME, todos, True)
+    return update_file(FILENAME, todos)
 
 
 def relative_cursor_to(
@@ -1297,7 +1285,7 @@ def main(stdscr: Any, header: str) -> int:
     print_history(history)
 
     while True:
-        if AUTOSAVE and is_file_externally_updated(FILENAME, todos):
+        if is_file_externally_updated(FILENAME, todos):
             todos = validate_file(read_file(FILENAME))
         set_header(stdscr, f"{header}:")
         print_todos(stdscr, todos, selected)
@@ -1319,6 +1307,8 @@ def main(stdscr: Any, header: str) -> int:
                 stdscr.nodelay(False)
                 if subch == -1:  # escape, otherwise skip `[`
                     return quit_program(todos)
+                if subch not in esc_keys:
+                    continue
                 _, func, args = esc_keys[subch]
             possible_args = {
                 "0": 0,
@@ -1363,7 +1353,6 @@ def main(stdscr: Any, header: str) -> int:
 
 if __name__ == "__main__":
     command_line_args = get_args()
-    AUTOSAVE = command_line_args.autosave
     BULLETS = command_line_args.bullet_display
     ENUMERATE = command_line_args.enumerate
     FILENAME = (

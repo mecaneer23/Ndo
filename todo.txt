@@ -10,4 +10,3 @@
 - add default text if file is empty
 - make move todos work with multiselect
 - refactor using pylint
-- add `w` to save
