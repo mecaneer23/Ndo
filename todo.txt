@@ -7,5 +7,6 @@
 - add `:` prompt to modify constants
 - add config variable defaults in README
   - so the user doesn't need to use flags every time
-+ add default text if file is empty
 - make move todos work with multiselect
+- make enter add a new note if in note mode (edit handle_toggle)
+- 
