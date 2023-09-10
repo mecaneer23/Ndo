@@ -30,6 +30,98 @@ def hline(win: Any, y_loc: int, x_loc: int, char: str | int, width: int) -> None
     win.addch(y_loc, x_loc + width - 1, curses.ACS_RTEE)
 
 
+def ensure_valid(win: Any) -> None:
+    if win.getmaxyx()[0] < 3:
+        raise ValueError(
+            "Window is too short, it won't be able to\
+            display the minimum 1 line of text."
+        )
+    if win.getmaxyx()[0] > 3:
+        raise NotImplementedError("Multiline text editing is not supported")
+
+
+def init_todo(todo: Todo, prev_todo: Todo) -> Todo:
+    if todo.is_empty():
+        todo.set_indent_level(prev_todo.indent_level)
+        todo.set_color(prev_todo.color)
+        if not prev_todo.has_box():
+            todo.box_char = None
+    return todo
+
+
+def handle_escape(
+    stdscr: Any,
+    win: Any,
+    chars: list[str],
+    position: int,
+    mode: Mode | None,
+    todo: Todo,
+) -> tuple[list[str], int] | None:
+    win.nodelay(True)
+    escape = win.getch()  # skip `[`
+    if escape == -1:  # escape
+        if mode is not None:
+            mode.toggle_mode = True
+        return None
+    if escape == 100:  # ctrl + delete
+        if position < len(chars) - 1:
+            chars.pop(position)
+            position -= 1
+        while True:
+            if position >= len(chars) - 1:
+                break
+            position += 1
+            if chars[position] == " ":
+                break
+            chars.pop(position)
+            position -= 1
+        return chars, position
+    win.nodelay(False)
+    try:
+        subch = win.getch()
+    except KeyboardInterrupt:
+        return None
+    if subch == 68:  # left arrow
+        if position > 0:
+            position -= 1
+    elif subch == 67:  # right arrow
+        if position < len(chars):
+            position += 1
+    elif subch == 51:  # delete
+        win.getch()  # skip the `~`
+        if position < len(chars):
+            chars.pop(position)
+    elif subch == 49:  # ctrl + arrow
+        for _ in range(2):  # skip the `;5`
+            win.getch()
+        direction = win.getch()
+        if direction == 67:  # right arrow
+            while True:
+                if position >= len(chars) - 1:
+                    break
+                position += 1
+                if chars[position] == " ":
+                    break
+        elif direction == 68:  # left arrow
+            while True:
+                if position <= 0:
+                    break
+                position -= 1
+                if chars[position] == " ":
+                    break
+    elif subch == 72:  # home
+        position = 0
+    elif subch == 70:  # end
+        position = len(chars)
+    elif subch == 90:  # shift + tab
+        todo.dedent()
+        set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
+        stdscr.refresh()
+    else:
+        raise ValueError(repr(subch))
+    return chars, position
+
+
 def wgetnstr(
     stdscr: Any,
     win: Any,
@@ -76,18 +168,9 @@ def wgetnstr(
         Todo: Similar to the built in input() function,
         returns a Todo object containing the user's entry.
     """
-    if win.getmaxyx()[0] < 3:
-        raise ValueError(
-            "Window is too short, it won't be able to\
-            display the minimum 1 line of text."
-        )
-    if win.getmaxyx()[0] > 3:
-        raise NotImplementedError("Multiline text editing is not supported")
-    if todo.is_empty():
-        todo.set_indent_level(prev_todo.indent_level)
-        todo.set_color(prev_todo.color)
-        if not prev_todo.has_box():
-            todo.box_char = None
+
+    ensure_valid(win)
+    todo = init_todo(todo, prev_todo)
     original = todo
     chars = list(todo.display_text)
     position = len(chars)
@@ -131,68 +214,11 @@ def wgetnstr(
             set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
             stdscr.refresh()
         elif input_char == 27:  # any escape sequence `^[`
-            win.nodelay(True)
-            escape = win.getch()  # skip `[`
-            if escape == -1:  # escape
-                if mode is not None:
-                    mode.toggle_mode = True
+            next_step = handle_escape(stdscr, win, chars, position, mode, todo)
+            if next_step is None:
                 return original
-            if escape == 100:  # ctrl + delete
-                if position < len(chars) - 1:
-                    chars.pop(position)
-                    position -= 1
-                while True:
-                    if position >= len(chars) - 1:
-                        break
-                    position += 1
-                    if chars[position] == " ":
-                        break
-                    chars.pop(position)
-                    position -= 1
-                continue
-            win.nodelay(False)
-            try:
-                subch = win.getch()
-            except KeyboardInterrupt:
-                return original
-            if subch == 68:  # left arrow
-                if position > 0:
-                    position -= 1
-            elif subch == 67:  # right arrow
-                if position < len(chars):
-                    position += 1
-            elif subch == 51:  # delete
-                win.getch()  # skip the `~`
-                if position < len(chars):
-                    chars.pop(position)
-            elif subch == 49:  # ctrl + arrow
-                for _ in range(2):  # skip the `;5`
-                    win.getch()
-                direction = win.getch()
-                if direction == 67:  # right arrow
-                    while True:
-                        if position >= len(chars) - 1:
-                            break
-                        position += 1
-                        if chars[position] == " ":
-                            break
-                elif direction == 68:  # left arrow
-                    while True:
-                        if position <= 0:
-                            break
-                        position -= 1
-                        if chars[position] == " ":
-                            break
-            elif subch == 72:  # home
-                position = 0
-            elif subch == 70:  # end
-                position = len(chars)
-            elif subch == 90:  # shift + tab
-                todo.dedent()
-                set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
-                stdscr.refresh()
-            else:
-                raise ValueError(repr(subch))
+            chars, position = next_step
+            continue
         else:  # typable characters (basically alphanum)
             if input_char == -1:
                 continue
