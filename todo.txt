@@ -8,5 +8,4 @@
 - add config variable defaults in README
   - so the user doesn't need to use flags every time
 - make move todos work with multiselect
-- make enter add a new note if in note mode (edit handle_toggle)
-- 
++ make enter add a new note if in note mode (edit handle_toggle)

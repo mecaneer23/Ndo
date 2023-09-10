@@ -675,6 +675,15 @@ def handle_digits(stdscr: Any, todos: list[Todo], selected: Cursor, digit: int) 
     selected.set_to(relative_cursor_to(stdscr, todos, int(selected), digit - 48))
 
 
+def handle_enter(
+    stdscr: Any, todos: list[Todo], selected: Cursor, mode: Mode
+) -> list[Todo]:
+    prev_todo = todos[int(selected)] if len(todos) > 0 else Todo()
+    if prev_todo.has_box():
+        return toggle(todos, selected)
+    return selected.todo_set_to(new_todo_next(stdscr, todos, int(selected), mode))
+
+
 def print_history(history: UndoRedo) -> None:
     if PRINT_HISTORY:
         with open(HISTORY_FILE, "w", encoding="utf-8") as log_file:
@@ -712,7 +721,7 @@ def main(stdscr: Any, header: str) -> int:
     # make sure it also calls update_file()
     keys: dict[int, tuple[str, Callable[..., Any], str]] = {
         9: ("tab", handle_indent, "todos, selected"),
-        10: ("enter", toggle, "todos, selected"),
+        10: ("enter", handle_enter, "stdscr, todos, selected, mode"),
         11: ("ctrl + k", mode.toggle, "None"),
         18: ("ctrl + r", handle_redo, "selected, history"),
         24: ("ctrl + x", mode.toggle, "None"),
