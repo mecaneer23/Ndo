@@ -91,9 +91,9 @@ def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
         width, height = get_terminal_size()
     else:
         height, width = win.getmaxyx()
-    if len(todos) < 1:
-        info_message(win, height, width)
-        return
+        if len(todos) < 1:
+            info_message(win, height, width)
+            return
     new_todos, temp_selected = make_printable_sublist(height - 1, todos, int(selected))
     highlight = range(temp_selected, len(selected) + temp_selected)
     for relative, (i, todo) in zip(
