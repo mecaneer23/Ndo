@@ -219,9 +219,9 @@ def wgetnstr(
                 return original
             chars, position = next_step
             continue
+        elif input_char == -1:
+            continue
         else:  # typable characters (basically alphanum)
-            if input_char == -1:
-                continue
             chars.insert(position, chr(input_char))
             if position < len(chars):
                 position += 1
