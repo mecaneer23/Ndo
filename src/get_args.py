@@ -4,7 +4,7 @@
 from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from pathlib import Path
 
-from md_to_py import md_table_to_lines
+from src.md_to_py import md_table_to_lines
 
 BULLETS = False
 CONTROLS_BEGIN_INDEX = 0

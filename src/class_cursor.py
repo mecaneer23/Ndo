@@ -3,7 +3,7 @@
 
 from typing import Any
 
-from class_todo import Todo
+from src.class_todo import Todo
 
 
 class Cursor:

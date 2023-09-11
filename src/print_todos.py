@@ -5,8 +5,8 @@ from typing import Any, TypeVar
 from os import get_terminal_size
 import curses
 
-from class_todo import Todo
-from class_cursor import Cursor
+from src.class_todo import Todo
+from src.class_cursor import Cursor
 
 T = TypeVar("T")
 

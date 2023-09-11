@@ -4,8 +4,8 @@
 import curses
 from typing import Any
 
-from class_mode import Mode
-from class_todo import Todo
+from src.class_mode import Mode
+from src.class_todo import Todo
 
 INDENT = 0
 

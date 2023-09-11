@@ -12,18 +12,18 @@ from typing import Any, Callable
 from pyfiglet import figlet_format as big
 from pyperclip import copy, paste
 
-from class_cursor import Cursor
-from class_history import UndoRedo
-from class_mode import Mode
-from class_todo import Todo
-from class_todo import init as init_todo_class
-from get_args import get_args
-from get_args import init as init_get_args
-from get_todo import hline, set_header, wgetnstr
-from get_todo import init as init_wgetnstr
-from md_to_py import md_table_to_lines
-from print_todos import print_todos, make_printable_sublist
-from print_todos import init as init_print_todos
+from src.class_cursor import Cursor
+from src.class_history import UndoRedo
+from src.class_mode import Mode
+from src.class_todo import Todo
+from src.class_todo import init as init_todo_class
+from src.get_args import get_args
+from src.get_args import init as init_get_args
+from src.get_todo import hline, set_header, wgetnstr
+from src.get_todo import init as init_wgetnstr
+from src.md_to_py import md_table_to_lines
+from src.print_todos import print_todos, make_printable_sublist
+from src.print_todos import init as init_print_todos
 
 BULLETS = False
 CONTROLS_BEGIN_INDEX = 55
