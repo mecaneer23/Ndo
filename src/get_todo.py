@@ -49,76 +49,148 @@ def init_todo(todo: Todo, prev_todo: Todo) -> Todo:
     return todo
 
 
+def handle_right_arrow(chars: list[str], position: int) -> tuple[list[str], int]:
+    if position < len(chars):
+        position += 1
+    return chars, position
+
+
+def handle_ctrl_right_arrow(chars: list[str], position: int) -> tuple[list[str], int]:
+    while True:
+        if position >= len(chars) - 1:
+            break
+        position += 1
+        if chars[position] == " ":
+            break
+    return chars, position
+
+
+def handle_left_arrow(chars: list[str], position: int) -> tuple[list[str], int]:
+    if position > 0:
+        position -= 1
+    return chars, position
+
+
+def handle_ctrl_left_arrow(chars: list[str], position: int) -> tuple[list[str], int]:
+    while True:
+        if position <= 0:
+            break
+        position -= 1
+        if chars[position] == " ":
+            break
+    return chars, position
+
+
+def handle_ctrl_delete(chars: list[str], position: int) -> tuple[list[str], int]:
+    if position < len(chars) - 1:
+        chars.pop(position)
+        position -= 1
+    while True:
+        if position >= len(chars) - 1:
+            break
+        position += 1
+        if chars[position] == " ":
+            break
+        chars.pop(position)
+        position -= 1
+    return chars, position
+
+
+def set_mode_true(mode: Mode | None) -> None:
+    if mode is not None:
+        mode.toggle_mode = True
+
+
+def handle_delete(win: Any, chars: list[str], position: int) -> tuple[list[str], int]:
+    win.getch()  # skip the `~`
+    if position < len(chars):
+        chars.pop(position)
+    return chars, position
+
+
+def handle_ctrl_arrow(
+    win: Any, chars: list[str], position: int
+) -> tuple[list[str], int]:
+    for _ in range(2):  # skip the `;5`
+        win.getch()
+    direction = win.getch()
+    if direction == 67:  # right arrow
+        chars, position = handle_ctrl_right_arrow(chars, position)
+    elif direction == 68:  # left arrow
+        chars, position = handle_ctrl_left_arrow(chars, position)
+    return chars, position
+
+
 def handle_escape(
-    stdscr: Any,
-    win: Any,
+    stdscr_win: tuple[Any, Any],
     chars: list[str],
     position: int,
     mode: Mode | None,
     todo: Todo,
 ) -> tuple[list[str], int] | None:
-    win.nodelay(True)
-    escape = win.getch()  # skip `[`
+    stdscr_win[1].nodelay(True)
+    escape = stdscr_win[1].getch()  # skip `[`
     if escape == -1:  # escape
-        if mode is not None:
-            mode.toggle_mode = True
+        set_mode_true(mode)
         return None
     if escape == 100:  # ctrl + delete
-        if position < len(chars) - 1:
-            chars.pop(position)
-            position -= 1
-        while True:
-            if position >= len(chars) - 1:
-                break
-            position += 1
-            if chars[position] == " ":
-                break
-            chars.pop(position)
-            position -= 1
-        return chars, position
-    win.nodelay(False)
+        return handle_ctrl_delete(chars, position)
+    stdscr_win[1].nodelay(False)
     try:
-        subch = win.getch()
+        subch = stdscr_win[1].getch()
     except KeyboardInterrupt:
         return None
     if subch == 68:  # left arrow
-        if position > 0:
-            position -= 1
+        chars, position = handle_left_arrow(chars, position)
     elif subch == 67:  # right arrow
-        if position < len(chars):
-            position += 1
+        chars, position = handle_right_arrow(chars, position)
     elif subch == 51:  # delete
-        win.getch()  # skip the `~`
-        if position < len(chars):
-            chars.pop(position)
+        chars, position = handle_delete(stdscr_win[1], chars, position)
     elif subch == 49:  # ctrl + arrow
-        for _ in range(2):  # skip the `;5`
-            win.getch()
-        direction = win.getch()
-        if direction == 67:  # right arrow
-            while True:
-                if position >= len(chars) - 1:
-                    break
-                position += 1
-                if chars[position] == " ":
-                    break
-        elif direction == 68:  # left arrow
-            while True:
-                if position <= 0:
-                    break
-                position -= 1
-                if chars[position] == " ":
-                    break
+        chars, position = handle_ctrl_arrow(stdscr_win[1], chars, position)
     elif subch == 72:  # home
         position = 0
     elif subch == 70:  # end
         position = len(chars)
     elif subch == 90:  # shift + tab
         todo.dedent()
-        set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
-        stdscr.refresh()
+        set_header(stdscr_win[0], f"Tab level: {todo.indent_level // INDENT} tabs")
+        stdscr_win[0].refresh()
     else:
         raise ValueError(repr(subch))
+    return chars, position
+
+
+def handle_backspace(chars: list[str], position: int) -> tuple[list[str], int]:
+    if position > 0:
+        position -= 1
+        chars.pop(position)
+    return chars, position
+
+
+def handle_ctrl_backspace(chars: list[str], position: int) -> tuple[list[str], int]:
+    while True:
+        if position <= 0:
+            break
+        position -= 1
+        if chars[position] == " ":
+            chars.pop(position)
+            break
+        chars.pop(position)
+    return chars, position
+
+
+def toggle_mode(mode: Mode | None) -> None:
+    if mode is not None:
+        mode.toggle()
+
+
+def handle_ascii(
+    chars: list[str], position: int, input_char: int
+) -> tuple[list[str], int]:
+    chars.insert(position, chr(input_char))
+    if position < len(chars):
+        position += 1
     return chars, position
 
 
@@ -187,43 +259,32 @@ def wgetnstr(
         try:
             input_char = win.getch()
         except KeyboardInterrupt:  # ctrl+c
-            if mode is not None:
-                mode.toggle()
+            toggle_mode(mode)
             return original
-        if input_char in (10, 13):  # enter
+        if input_char in (10, 13, -1):  # enter
+            # might need to continue on -1
+            # I don't know which character it represents
             break
-        if input_char in (8, 127, 263):  # backspace
-            if position > 0:
-                position -= 1
-                chars.pop(position)
-        elif input_char in (24, 11):  # ctrl + x/k
-            if mode is not None:
-                mode.toggle()
-                return wgetnstr_success(todo, chars)
-        elif input_char == 23:  # ctrl + backspace
-            while True:
-                if position <= 0:
-                    break
-                position -= 1
-                if chars[position] == " ":
-                    chars.pop(position)
-                    break
-                chars.pop(position)
-        elif input_char == 9:  # tab
-            todo.indent()
-            set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
-            stdscr.refresh()
-        elif input_char == 27:  # any escape sequence `^[`
-            next_step = handle_escape(stdscr, win, chars, position, mode, todo)
+        if input_char == 27:  # any escape sequence `^[`
+            next_step = handle_escape((stdscr, win), chars, position, mode, todo)
             if next_step is None:
                 return original
             chars, position = next_step
             continue
-        elif input_char == -1:
+        if input_char in (24, 11):  # ctrl + x/k
+            toggle_mode(mode)
+            return wgetnstr_success(todo, chars)
+        if input_char == 9:  # tab
+            todo.indent()
+            set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
+            stdscr.refresh()
             continue
-        else:  # typable characters (basically alphanum)
-            chars.insert(position, chr(input_char))
-            if position < len(chars):
-                position += 1
+        if input_char in (8, 127, 263):  # backspace
+            chars, position = handle_backspace(chars, position)
+            continue
+        if input_char == 23:  # ctrl + backspace
+            chars, position = handle_ctrl_backspace(chars, position)
+            continue
+        chars, position = handle_ascii(chars, position, input_char)
 
     return wgetnstr_success(todo, chars)

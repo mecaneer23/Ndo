@@ -8,4 +8,4 @@
 - add config variable defaults in README
   - so the user doesn't need to use flags every time
 - make move todos work with multiselect
-- make wgetnstr more readable - split into functions
++ make wgetnstr more readable - split into functions
