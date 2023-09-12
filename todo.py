@@ -490,9 +490,16 @@ def toggle(todos: list[Todo], selected: Cursor) -> list[Todo]:
     return todos
 
 
-def quit_program(todos: list[Todo]) -> int:
+def remove_file(filename: Path) -> int:
+    filename.unlink()
+    return 0
+
+
+def quit_program(todos: list[Todo], edits: int) -> int:
     if is_file_externally_updated(FILENAME, todos):
         todos = validate_file(read_file(FILENAME))
+    if edits < 2:
+        return remove_file(FILENAME)
     return update_file(FILENAME, todos)
 
 
@@ -706,6 +713,7 @@ def main(stdscr: Any, header: str) -> int:
     history = UndoRedo()
     mode = Mode(True)
     copied_todo = Todo()
+    edits = len(todos)
     # if adding a new feature that updates `todos`,
     # make sure it also calls update_file()
     keys: dict[int, tuple[str, Callable[..., Any], str]] = {
@@ -780,6 +788,7 @@ def main(stdscr: Any, header: str) -> int:
     print_history(history)
 
     while True:
+        edits += 1
         if is_file_externally_updated(FILENAME, todos):
             todos = validate_file(read_file(FILENAME))
         set_header(stdscr, f"{header}:")
@@ -791,20 +800,20 @@ def main(stdscr: Any, header: str) -> int:
         try:
             key = stdscr.getch()
         except KeyboardInterrupt:  # exit on ^C
-            return quit_program(todos)
+            return quit_program(todos, edits)
         if key == 113:  # q
-            return quit_program(todos)
+            return quit_program(todos, edits)
         if key in keys:
             _, func, args = keys[key]
             if key == 27:
                 stdscr.nodelay(True)
-                subch = stdscr.getch()
+                key = stdscr.getch()
                 stdscr.nodelay(False)
-                if subch == -1:  # escape, otherwise skip `[`
-                    return quit_program(todos)
-                if subch not in esc_keys:
+                if key == -1:  # escape, otherwise skip `[`
+                    return quit_program(todos, edits)
+                if key not in esc_keys:
                     continue
-                _, func, args = esc_keys[subch]
+                _, func, args = esc_keys[key]
             possible_args = {
                 "0": 0,
                 "1": 1,

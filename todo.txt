@@ -5,6 +5,4 @@
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
 - add `:` prompt to modify constants
-- add config variable defaults in README
-  - so the user doesn't need to use flags every time
-- if new file is created and is empty, don't save
++ if new file is created and is empty, don't save
