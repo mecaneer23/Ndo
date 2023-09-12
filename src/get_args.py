@@ -7,62 +7,18 @@ from pathlib import Path
 from src.md_to_py import md_table_to_lines
 
 BULLETS = False
-CONTROLS_BEGIN_INDEX = 0
-CONTROLS_END_INDEX = 0
-DEFAULT_TODO = ""
+CONTROLS_BEGIN_INDEX = 55
+CONTROLS_END_INDEX = 79
+DEFAULT_TODO = "todo.txt"
 ENUMERATE = False
-FILENAME = Path()
+FILENAME = Path(DEFAULT_TODO)
 HEADER = ""
-HELP_FILE = Path()
-INDENT = 0
+HELP_FILE = Path(__file__).parent.parent.joinpath("README.md").absolute()
+INDENT = 2
 NO_GUI = False
 RELATIVE_ENUMERATE = False
 SIMPLE_BOXES = False
 STRIKETHROUGH = False
-
-
-def init(
-    bullets,
-    controls_begin_index,
-    controls_end_index,
-    default_todo,
-    this_enumerate,
-    filename,
-    header,
-    help_file,
-    indent,
-    no_gui,
-    relative_enumerate,
-    simple_boxes,
-    strikethrough,
-):
-    global BULLETS
-    global CONTROLS_BEGIN_INDEX
-    global CONTROLS_END_INDEX
-    global DEFAULT_TODO
-    global ENUMERATE
-    global FILENAME
-    global HEADER
-    global HELP_FILE
-    global INDENT
-    global NO_GUI
-    global RELATIVE_ENUMERATE
-    global SIMPLE_BOXES
-    global STRIKETHROUGH
-
-    BULLETS = bullets
-    CONTROLS_BEGIN_INDEX = controls_begin_index
-    CONTROLS_END_INDEX = controls_end_index
-    DEFAULT_TODO = default_todo
-    ENUMERATE = this_enumerate
-    FILENAME = filename
-    HEADER = header
-    HELP_FILE = help_file
-    INDENT = indent
-    NO_GUI = no_gui
-    RELATIVE_ENUMERATE = relative_enumerate
-    SIMPLE_BOXES = simple_boxes
-    STRIKETHROUGH = strikethrough
 
 
 def get_args() -> Namespace:
@@ -172,3 +128,24 @@ def get_args() -> Namespace:
             Default is filename.",
     )
     return parser.parse_args()
+
+command_line_args = get_args()
+BULLETS = command_line_args.bullet_display
+ENUMERATE = command_line_args.enumerate
+FILENAME = (
+    Path(command_line_args.filename, DEFAULT_TODO)
+    if Path(command_line_args.filename).is_dir()
+    else Path(command_line_args.filename)
+)
+HEADER = (
+    FILENAME.as_posix()
+    if command_line_args.title == HEADER
+    else " ".join(command_line_args.title)
+)
+HELP_FILE = Path(command_line_args.help_file)
+INDENT = command_line_args.indentation_level
+NO_GUI = command_line_args.no_gui
+RELATIVE_ENUMERATE = command_line_args.relative_enumeration
+SIMPLE_BOXES = command_line_args.simple_boxes
+STRIKETHROUGH = command_line_args.strikethrough
+del command_line_args

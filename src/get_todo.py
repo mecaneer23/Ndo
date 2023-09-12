@@ -6,13 +6,7 @@ from typing import Any
 
 from src.class_mode import Mode
 from src.class_todo import Todo
-
-INDENT = 0
-
-
-def init(indent):
-    global INDENT
-    INDENT = indent
+from src.get_args import INDENT
 
 
 def set_header(stdscr: Any, message: str) -> None:

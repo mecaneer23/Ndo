@@ -16,28 +16,17 @@ from src.class_cursor import Cursor
 from src.class_history import UndoRedo
 from src.class_mode import Mode
 from src.class_todo import Todo
-from src.class_todo import init as init_todo_class
-from src.get_args import get_args
-from src.get_args import init as init_get_args
+from src.get_args import (
+    CONTROLS_BEGIN_INDEX,
+    CONTROLS_END_INDEX,
+    FILENAME,
+    HEADER,
+    HELP_FILE,
+    NO_GUI,
+)
 from src.get_todo import hline, set_header, wgetnstr
-from src.get_todo import init as init_wgetnstr
 from src.md_to_py import md_table_to_lines
-from src.print_todos import print_todos, make_printable_sublist
-from src.print_todos import init as init_print_todos
-
-BULLETS = False
-CONTROLS_BEGIN_INDEX = 55
-CONTROLS_END_INDEX = 79
-DEFAULT_TODO = "todo.txt"
-ENUMERATE = False
-FILENAME = Path(DEFAULT_TODO)
-HEADER = ""
-HELP_FILE = Path(__file__).parent.joinpath("README.md").absolute()
-INDENT = 2
-NO_GUI = False
-RELATIVE_ENUMERATE = False
-SIMPLE_BOXES = False
-STRIKETHROUGH = False
+from src.print_todos import make_printable_sublist, print_todos
 
 PRINT_HISTORY = False
 HISTORY_FILE = "debugging/log.txt"
@@ -712,8 +701,6 @@ def init() -> None:
 
 def main(stdscr: Any, header: str) -> int:
     init()
-    init_todo_class(INDENT)
-    init_wgetnstr(INDENT)
     todos = validate_file(read_file(FILENAME))
     selected = Cursor(0)
     history = UndoRedo()
@@ -860,50 +847,6 @@ def main(stdscr: Any, header: str) -> int:
 
 
 if __name__ == "__main__":
-    init_get_args(
-        BULLETS,
-        CONTROLS_BEGIN_INDEX,
-        CONTROLS_END_INDEX,
-        DEFAULT_TODO,
-        ENUMERATE,
-        FILENAME,
-        HEADER,
-        HELP_FILE,
-        INDENT,
-        NO_GUI,
-        RELATIVE_ENUMERATE,
-        SIMPLE_BOXES,
-        STRIKETHROUGH,
-    )
-    command_line_args = get_args()
-    BULLETS = command_line_args.bullet_display
-    ENUMERATE = command_line_args.enumerate
-    FILENAME = (
-        Path(command_line_args.filename, DEFAULT_TODO)
-        if Path(command_line_args.filename).is_dir()
-        else Path(command_line_args.filename)
-    )
-    HEADER = (
-        FILENAME.as_posix()
-        if command_line_args.title == HEADER
-        else " ".join(command_line_args.title)
-    )
-    HELP_FILE = Path(command_line_args.help_file)
-    INDENT = command_line_args.indentation_level
-    NO_GUI = command_line_args.no_gui
-    RELATIVE_ENUMERATE = command_line_args.relative_enumeration
-    SIMPLE_BOXES = command_line_args.simple_boxes
-    STRIKETHROUGH = command_line_args.strikethrough
-    del command_line_args
-    init_print_todos(
-        BULLETS,
-        ENUMERATE,
-        INDENT,
-        NO_GUI,
-        RELATIVE_ENUMERATE,
-        SIMPLE_BOXES,
-        STRIKETHROUGH,
-    )
     if NO_GUI:
         print(f"{HEADER}:")
         print_todos(None, validate_file(read_file(FILENAME)), Cursor(0))

@@ -1,13 +1,7 @@
 # pylint: disable=global-statement, missing-class-docstring
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
-INDENT = 0
-
-
-def init(indent):
-    global INDENT
-    INDENT = indent
-
+from src.get_args import INDENT
 
 class Todo:
     def __init__(self, text: str = "") -> None:

@@ -7,42 +7,17 @@ import curses
 
 from src.class_todo import Todo
 from src.class_cursor import Cursor
+from src.get_args import (
+    INDENT,
+    STRIKETHROUGH,
+    SIMPLE_BOXES,
+    BULLETS,
+    ENUMERATE,
+    RELATIVE_ENUMERATE,
+)
+
 
 T = TypeVar("T")
-
-BULLETS = False
-ENUMERATE = False
-INDENT = 0
-NO_GUI = False
-RELATIVE_ENUMERATE = False
-SIMPLE_BOXES = False
-STRIKETHROUGH = False
-
-
-def init(
-    bullets,
-    this_enumerate,
-    indent,
-    no_gui,
-    relative_enumerate,
-    simple_boxes,
-    should_strikethrough,
-):
-    global BULLETS
-    global ENUMERATE
-    global INDENT
-    global NO_GUI
-    global RELATIVE_ENUMERATE
-    global SIMPLE_BOXES
-    global STRIKETHROUGH
-
-    BULLETS = bullets
-    ENUMERATE = this_enumerate
-    INDENT = indent
-    NO_GUI = no_gui
-    RELATIVE_ENUMERATE = relative_enumerate
-    SIMPLE_BOXES = simple_boxes
-    STRIKETHROUGH = should_strikethrough
 
 
 def get_bullet(indentation_level: int) -> str:
