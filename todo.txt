@@ -7,4 +7,4 @@
 - add `:` prompt to modify constants
 - add config variable defaults in README
   - so the user doesn't need to use flags every time
-+ make move todos work with multiselect
+- if new file is created and is empty, don't save
