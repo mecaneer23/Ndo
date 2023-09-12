@@ -853,6 +853,8 @@ def main(stdscr: Any, header: str) -> int:
             if key not in (18, 117):  # redo/undo
                 history.add(todos, int(selected))
             print_history(history)
+            continue
+        edits -= 1
 
 
 if __name__ == "__main__":

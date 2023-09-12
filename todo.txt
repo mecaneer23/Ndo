@@ -1,8 +1,5 @@
 -1 fix strikethrough
--2 make editing work on VT100 terminals (alacritty/xterm)
 -4 implement multiline todos (not with newlines, just really long todos)
   -4 allow multiline paste
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
-- add `:` prompt to modify constants
-+ if new file is created and is empty, don't save
