@@ -1,5 +1,5 @@
 -1 fix strikethrough
--4 implement multiline todos (not with newlines, just really long todos)
+-4 implement multiline todos
   -4 allow multiline paste
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
