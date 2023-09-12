@@ -180,21 +180,30 @@ def help_menu(parent_win: Any) -> None:
 def magnify(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
     stdscr.clear()
     set_header(stdscr, "Magnifying...")
-    big_text = big(todos[int(selected)].display_text, width=stdscr.getmaxyx()[1]).split(
+    lines = big(todos[int(selected)].display_text, width=stdscr.getmaxyx()[1]).split(
         "\n"
     )
-    first_column = max((stdscr.getmaxyx()[1] - len(max(big_text, key=len))) // 2, 0)
-    first_row = max((stdscr.getmaxyx()[0] - len(big_text)) // 2 + 1, 1)
-    for i, line in enumerate(big_text):
-        for count, char in enumerate(line):
-            if (
-                first_row + i >= stdscr.getmaxyx()[0] - 1
-                or first_column + count >= stdscr.getmaxyx()[1] - 1
-            ):
-                continue
-            stdscr.addch(first_row + i, first_column + count, char)
+    lines.append("")
+    lines = [line.ljust(stdscr.getmaxyx()[1] - 2) for line in lines]
+    cursor = 0
+    while True:
+        new_lines, _ = make_printable_sublist(
+            stdscr.getmaxyx()[0] - 1, lines, cursor, 0
+        )
+        for i, line in enumerate(new_lines):
+            stdscr.addstr(i + 1, 1, line)
+        stdscr.refresh()
+        try:
+            key = stdscr.getch()
+        except KeyboardInterrupt:  # exit on ^C
+            break
+        if key in (259, 107):  # up | k
+            cursor = clamp(cursor - 1, 0, len(lines) - 2)
+        elif key in (258, 106, 10):  # down | j | enter
+            cursor = clamp(cursor + 1, 0, len(lines) - len(new_lines) - 1)
+        else:
+            break
     stdscr.refresh()
-    stdscr.getch()
     stdscr.clear()
 
 
