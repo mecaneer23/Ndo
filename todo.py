@@ -140,9 +140,9 @@ def remove_todo(todos: list[Todo], index: int) -> list[Todo]:
     return todos
 
 
-def swap_todos(todos: list[Todo], idx1: int, idx2: int) -> list[Todo]:
-    if min(idx1, idx2) >= 0 and max(idx1, idx2) < len(todos):
-        todos[idx1], todos[idx2] = todos[idx2], todos[idx1]
+def move_todos(todos: list[Todo], selected: int, destination: int) -> list[Todo]:
+    if min(selected, destination) >= 0 and max(selected, destination) < len(todos):
+        todos.insert(selected, todos.pop(destination))
     return todos
 
 
@@ -374,16 +374,18 @@ def cursor_to(position: int, len_todos: int) -> int:
     return clamp(position, 0, len_todos)
 
 
-def todo_up(todos: list[Todo], selected: int) -> tuple[list[Todo], int]:
-    todos = swap_todos(todos, selected, selected - 1)
+def todo_up(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], list[int]]:
+    todos = move_todos(todos, selected.positions[-1], selected.positions[0] - 1)
     update_file(FILENAME, todos)
-    return todos, cursor_up(selected, len(todos))
+    selected.slide_up()
+    return todos, selected.positions
 
 
-def todo_down(todos: list[Todo], selected: int) -> tuple[list[Todo], int]:
-    todos = swap_todos(todos, selected, selected + 1)
+def todo_down(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], list[int]]:
+    todos = move_todos(todos, selected.positions[0], selected.positions[-1] + 1)
     update_file(FILENAME, todos)
-    return todos, cursor_down(selected, len(todos))
+    selected.slide_down(len(todos))
+    return todos, selected.positions
 
 
 def new_todo_next(
@@ -430,9 +432,9 @@ def delete_todo(
     stdscr: Any, todos: list[Todo], selected: Cursor
 ) -> tuple[list[Todo], int]:
     positions = selected.get_deletable()
-    selected.set_to(clamp(int(selected), 0, len(todos) - 1))
     for pos in positions:
         todos = remove_todo(todos, pos)
+    selected.set_to(clamp(int(selected), 0, len(todos)))
     stdscr.clear()
     update_file(FILENAME, todos)
     return todos, int(selected)
@@ -639,14 +641,14 @@ def handle_todo_down(
     todos: list[Todo],
     selected: Cursor,
 ) -> list[Todo]:
-    return selected.todo_set_to(todo_down(todos, int(selected)))
+    return selected.todos_override(*todo_down(todos, selected))
 
 
 def handle_todo_up(
     todos: list[Todo],
     selected: Cursor,
 ):
-    return selected.todo_set_to(todo_up(todos, int(selected)))
+    return selected.todos_override(*todo_up(todos, selected))
 
 
 def handle_indent(

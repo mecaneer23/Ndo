@@ -30,6 +30,22 @@ class Cursor:
         self.positions[0] = todo_position[1]
         return todo_position[0]
 
+    def todos_override(self, todos: list[Todo], positions: list[int]) -> list[Todo]:
+        self.positions = positions
+        return todos
+
+    def slide_up(self) -> None:
+        if min(self.positions) == 0:
+            return
+        self.positions.insert(0, min(self.positions) - 1)
+        self.positions.pop()
+
+    def slide_down(self, max_len: int) -> None:
+        if max(self.positions) >= max_len - 1:
+            return
+        self.positions.append(max(self.positions) + 1)
+        self.positions.pop(0)
+
     def select_next(self) -> None:
         self.positions.append(max(self.positions) + 1)
         self.positions.sort()
