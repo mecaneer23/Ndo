@@ -129,6 +129,7 @@ def get_args() -> Namespace:
     )
     return parser.parse_args()
 
+
 command_line_args = get_args()
 BULLETS = command_line_args.bullet_display
 ENUMERATE = command_line_args.enumerate

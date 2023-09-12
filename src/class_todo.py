@@ -3,6 +3,7 @@
 
 from src.get_args import INDENT
 
+
 class Todo:
     def __init__(self, text: str = "") -> None:
         self.box_char: str | None = None
