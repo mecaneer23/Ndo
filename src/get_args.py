@@ -7,8 +7,8 @@ from pathlib import Path
 from src.md_to_py import md_table_to_lines
 
 BULLETS = False
-CONTROLS_BEGIN_INDEX = 55
-CONTROLS_END_INDEX = 79
+CONTROLS_BEGIN_INDEX = 57
+CONTROLS_END_INDEX = 81
 DEFAULT_TODO = "todo.txt"
 ENUMERATE = False
 FILENAME = Path(DEFAULT_TODO)
