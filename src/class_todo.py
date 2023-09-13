@@ -14,12 +14,16 @@ class Todo:
         self.call_init(text)
 
     def _init_box_char(self, pointer: int) -> tuple[str | None, int]:
-        if self.text[pointer] in "-+":
+        if len(self.text) > pointer and self.text[pointer] in "-+":
             return self.text[pointer], pointer + 1
         return None, pointer
 
     def _init_color(self, pointer: int) -> tuple[int, int]:
-        if self.text[pointer].isdigit():
+        if (
+            len(self.text) > pointer + 1
+            and self.text[pointer].isdigit()
+            and self.text[pointer + 1] == " "
+        ):
             return int(self.text[pointer]), pointer + 2
         return 7, pointer
 
@@ -110,9 +114,11 @@ class Todo:
         return "".join(
             [
                 self.indent_level * " ",
-                self.box_char if self.box_char is not None else "",
+                "" if self.box_char is None or self.is_empty() else self.box_char,
                 str(self.color) if self.color != 7 else "",
-                " " if self.box_char is not None or self.color != 7 else "",
+                ""
+                if (self.box_char is None or self.is_empty()) and self.color == 7
+                else " ",
                 self.display_text,
             ]
         )
