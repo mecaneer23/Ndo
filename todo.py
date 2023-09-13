@@ -135,6 +135,22 @@ def move_todos(todos: list[Todo], selected: int, destination: int) -> list[Todo]
     return todos
 
 
+def simple_scroll_keybinds(
+    win: Any, cursor: int, len_lines: int, len_new_lines: int
+) -> int:
+    try:
+        key = win.getch()
+    except KeyboardInterrupt:  # exit on ^C
+        return -1
+    if key in (259, 107):  # up | k
+        cursor = clamp(cursor - 1, 0, len_lines - 2)
+    elif key in (258, 106, 10):  # down | j | enter
+        cursor = clamp(cursor + 1, 0, len_lines - len_new_lines - 1)
+    else:
+        return -1
+    return cursor
+
+
 def help_menu(parent_win: Any) -> None:
     parent_win.clear()
     set_header(parent_win, "Help (k/j to scroll):")
@@ -164,15 +180,8 @@ def help_menu(parent_win: Any) -> None:
         for i, line in enumerate(new_lines):
             win.addstr(i + 3, 1, line)
         win.refresh()
-        try:
-            key = win.getch()
-        except KeyboardInterrupt:  # exit on ^C
-            break
-        if key in (259, 107):  # up | k
-            cursor = clamp(cursor - 1, 0, len(lines) - 2)
-        elif key in (258, 106, 10):  # down | j | enter
-            cursor = clamp(cursor + 1, 0, len(lines) - len(new_lines) - 1)
-        else:
+        cursor = simple_scroll_keybinds(win, cursor, len(lines), len(new_lines))
+        if cursor < 0:
             break
     parent_win.clear()
 
@@ -193,15 +202,8 @@ def magnify(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
         for i, line in enumerate(new_lines):
             stdscr.addstr(i + 1, 1, line)
         stdscr.refresh()
-        try:
-            key = stdscr.getch()
-        except KeyboardInterrupt:  # exit on ^C
-            break
-        if key in (259, 107):  # up | k
-            cursor = clamp(cursor - 1, 0, len(lines) - 2)
-        elif key in (258, 106, 10):  # down | j | enter
-            cursor = clamp(cursor + 1, 0, len(lines) - len(new_lines) - 1)
-        else:
+        cursor = simple_scroll_keybinds(stdscr, cursor, len(lines), len(new_lines))
+        if cursor < 0:
             break
     stdscr.refresh()
     stdscr.clear()
