@@ -39,13 +39,14 @@ def make_printable_sublist(
 ) -> tuple[list[T], int]:
     if len(lst) < height:
         return lst, cursor
-    distance = height * 3 // 7 if distance < 0 else distance
-    start = max(0, cursor - distance)
-    end = min(len(lst), start + height)
-    # If len(sublist) < height, stop moving list and resume moving cursor
-    if end - start < height:
-        start = len(lst) - height
+    distance = height * 4 // 5 if distance < 0 else distance
+    start = 0
+    if start < cursor - distance:
+        start = cursor - distance
+    end = start + height
+    if end > len(lst):
         end = len(lst)
+        start = end - height
     return lst[start:end], cursor - start
 
 
