@@ -10,7 +10,9 @@ from src.get_args import INDENT
 
 
 def set_header(stdscr: Any, message: str) -> None:
-    stdscr.addstr(0, 0, message.ljust(stdscr.getmaxyx()[1]), curses.A_BOLD)
+    stdscr.addstr(
+        0, 0, message.ljust(stdscr.getmaxyx()[1]), curses.A_BOLD | curses.color_pair(2)
+    )
 
 
 def wgetnstr_success(todo: Todo, chars: list[str]) -> Todo:
