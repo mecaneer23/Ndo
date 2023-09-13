@@ -12,6 +12,16 @@ A curses implementation of a todo list helper. Most of the keybindings are simil
 - MacOS is also supported however some keyboard shortcuts use different modifier keys.
 - In Windows, general editing is available using the following external package, although some keyboard shortcuts might not work.
 
+## Setup
+
+### Magnify, copy, and paste
+
+```bash
+pip install pyfiglet pyperclip
+```
+
+### Curses for Windows
+
 ```bash
 pip install windows-curses
 ```
