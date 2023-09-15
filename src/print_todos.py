@@ -35,19 +35,25 @@ def strikethrough(text: str) -> str:
 
 
 def make_printable_sublist(
-    height: int, lst: list[T], cursor: int, distance: int = -1
-) -> tuple[list[T], int]:
-    if len(lst) < height:
-        return lst, cursor
-    distance = height * 4 // 5 if distance < 0 else distance
+    height: int,
+    lst: list[T],
+    cursor: int,
+    distance: int = -1,
+    prev_start: int = -1,
+) -> tuple[list[T], int, int]:
     start = 0
+    if len(lst) < height:
+        return lst, cursor, start
+    distance = height * 7 // 10 if distance < 0 else distance
     if start < cursor - distance:
         start = cursor - distance
+        # if 0 < prev_start and prev_start == start - 1:
+        #     start += 1
     end = start + height
     if end > len(lst):
         end = len(lst)
         start = end - height
-    return lst[start:end], cursor - start
+    return lst[start:end], cursor - start, start
 
 
 def info_message(win: Any, height: int, width: int) -> None:
@@ -62,15 +68,19 @@ def info_message(win: Any, height: int, width: int) -> None:
         win.addstr(height // 3 + i, (width - maxlen) // 2, line.center(maxlen))
 
 
-def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
+def print_todos(
+    win: Any, todos: list[Todo], selected: Cursor, prev_selected: int = 0
+) -> int:
     if win is None:
         width, height = get_terminal_size()
     else:
         height, width = win.getmaxyx()
         if len(todos) < 1:
             info_message(win, height, width)
-            return
-    new_todos, temp_selected = make_printable_sublist(height - 1, todos, int(selected))
+            return 0
+    new_todos, temp_selected, prev_start = make_printable_sublist(
+        height - 1, todos, int(selected), prev_start=prev_selected
+    )
     highlight = range(temp_selected, len(selected) + temp_selected)
     for relative, (i, todo) in zip(
         [*range(temp_selected - 1, -1, -1), int(selected), *range(0, len(new_todos))],
@@ -143,6 +153,7 @@ def print_todos(win: Any, todos: list[Todo], selected: Cursor) -> None:
                 continue
             counter += 1
     if win is None:
-        return
+        return 0
     for i in range(height - len(new_todos) - 1):
         win.addstr(i + len(new_todos) + 1, 0, " " * (width - 1))
+    return prev_start

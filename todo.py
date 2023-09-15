@@ -174,7 +174,7 @@ def help_menu(parent_win: Any) -> None:
     win.addstr(1, 1, lines[0])
     hline(win, 2, 0, curses.ACS_HLINE, win.getmaxyx()[1])
     while True:
-        new_lines, _ = make_printable_sublist(
+        new_lines, _, _ = make_printable_sublist(
             win.getmaxyx()[0] - 4, lines[2:], cursor, 0
         )
         for i, line in enumerate(new_lines):
@@ -196,7 +196,7 @@ def magnify(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
     lines = [line.ljust(stdscr.getmaxyx()[1] - 2) for line in lines]
     cursor = 0
     while True:
-        new_lines, _ = make_printable_sublist(
+        new_lines, _, _ = make_printable_sublist(
             stdscr.getmaxyx()[0] - 1, lines, cursor, 0
         )
         for i, line in enumerate(new_lines):
@@ -699,6 +699,18 @@ def print_history(history: UndoRedo) -> None:
             print(history, file=log_file)
 
 
+def get_possible_todos(
+    func: Callable[..., list[Todo] | None],
+    args: str,
+    possible_args: dict[str, Any],
+) -> list[Todo] | None:
+    params = []
+    for arg in args.split(", "):
+        if arg != "None":
+            params.append(possible_args[arg])
+    return func(*params)
+
+
 def init() -> None:
     curses.use_default_colors()
     curses.curs_set(0)
@@ -721,6 +733,7 @@ def main(stdscr: Any, header: str) -> int:
     init()
     todos = validate_file(read_file(FILENAME))
     selected = Cursor(0)
+    sublist_top = 0
     history = UndoRedo()
     mode = Mode(True)
     copied_todo = Todo()
@@ -803,7 +816,7 @@ def main(stdscr: Any, header: str) -> int:
         if is_file_externally_updated(FILENAME, todos):
             todos = validate_file(read_file(FILENAME))
         set_header(stdscr, f"{header}:")
-        print_todos(stdscr, todos, selected)
+        sublist_top = print_todos(stdscr, todos, selected, sublist_top)
         stdscr.refresh()
         if mode.is_not_on():
             todos = handle_new_todo_next(stdscr, todos, selected, mode)
@@ -825,38 +838,39 @@ def main(stdscr: Any, header: str) -> int:
                 if key not in esc_keys:
                     continue
                 _, func, args = esc_keys[key]
-            possible_args = {
-                "0": 0,
-                "1": 1,
-                "2": 2,
-                "3": 3,
-                "4": 4,
-                "5": 5,
-                "6": 6,
-                "7": 7,
-                "8": 8,
-                "9": 9,
-                "48": 48,
-                "49": 49,
-                "50": 50,
-                "51": 51,
-                "52": 52,
-                "53": 53,
-                "54": 54,
-                "55": 55,
-                "56": 56,
-                "57": 57,
-                "copied_todo": copied_todo,
-                "history": history,
-                "len(todos)": len(todos),
-                "mode": mode,
-                "None": "None",
-                "selected": selected,
-                "stdscr": stdscr,
-                "todos": todos,
-            }
-            possible_todos = func(
-                *[possible_args[arg] for arg in args.split(", ") if arg != "None"]
+            possible_todos = get_possible_todos(
+                func,
+                args,
+                {
+                    "0": 0,
+                    "1": 1,
+                    "2": 2,
+                    "3": 3,
+                    "4": 4,
+                    "5": 5,
+                    "6": 6,
+                    "7": 7,
+                    "8": 8,
+                    "9": 9,
+                    "48": 48,
+                    "49": 49,
+                    "50": 50,
+                    "51": 51,
+                    "52": 52,
+                    "53": 53,
+                    "54": 54,
+                    "55": 55,
+                    "56": 56,
+                    "57": 57,
+                    "copied_todo": copied_todo,
+                    "history": history,
+                    "len(todos)": len(todos),
+                    "mode": mode,
+                    "None": "None",
+                    "selected": selected,
+                    "stdscr": stdscr,
+                    "todos": todos,
+                },
             )
             if possible_todos is not None:
                 todos = possible_todos
