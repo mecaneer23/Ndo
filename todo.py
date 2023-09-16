@@ -197,7 +197,7 @@ def magnify(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
     cursor = 0
     while True:
         new_lines, _, _ = make_printable_sublist(
-            stdscr.getmaxyx()[0] - 1, lines, cursor, 0
+            stdscr.getmaxyx()[0] - 2, lines, cursor, 0
         )
         for i, line in enumerate(new_lines):
             stdscr.addstr(i + 1, 1, line)

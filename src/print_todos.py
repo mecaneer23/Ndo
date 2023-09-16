@@ -44,13 +44,13 @@ def make_printable_sublist(
     start = prev_start if prev_start > 0 else 0
     if len(lst) < height:
         return lst, cursor, start
+    if distance == 0:
+        return lst[cursor : min(cursor + height, len(lst))], 0, 0
     distance = height // 4 if distance < 0 else distance
-    if start + distance <= cursor <= height - distance:
-        start = prev_start
-    elif cursor < start + distance:
-        start = max(0, cursor - distance)
-    elif cursor >= height - distance:
-        start = cursor - height + distance - 1
+    if cursor <= distance + start - 1:
+        start = max(0, cursor - distance + 1)
+    elif cursor > height - distance + start:
+        start = cursor - height + distance
     end = start + height
     if end > len(lst):
         end = len(lst)
