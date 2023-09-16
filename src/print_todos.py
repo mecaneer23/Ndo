@@ -41,14 +41,16 @@ def make_printable_sublist(
     distance: int = -1,
     prev_start: int = -1,
 ) -> tuple[list[T], int, int]:
-    start = 0
+    start = prev_start if prev_start > 0 else 0
     if len(lst) < height:
         return lst, cursor, start
-    distance = height * 7 // 10 if distance < 0 else distance
-    if start < cursor - distance:
-        start = cursor - distance
-        # if 0 < prev_start and prev_start == start - 1:
-        #     start += 1
+    distance = height // 4 if distance < 0 else distance
+    if start + distance <= cursor <= height - distance:
+        start = prev_start
+    elif cursor < start + distance:
+        start = max(0, cursor - distance)
+    elif cursor >= height - distance:
+        start = cursor - height + distance - 1
     end = start + height
     if end > len(lst):
         end = len(lst)
@@ -69,7 +71,7 @@ def info_message(win: Any, height: int, width: int) -> None:
 
 
 def print_todos(
-    win: Any, todos: list[Todo], selected: Cursor, prev_selected: int = 0
+    win: Any, todos: list[Todo], selected: Cursor, prev_start: int = 0
 ) -> int:
     if win is None:
         width, height = get_terminal_size()
@@ -79,7 +81,7 @@ def print_todos(
             info_message(win, height, width)
             return 0
     new_todos, temp_selected, prev_start = make_printable_sublist(
-        height - 1, todos, int(selected), prev_start=prev_selected
+        height - 1, todos, int(selected), prev_start=prev_start
     )
     highlight = range(temp_selected, len(selected) + temp_selected)
     for relative, (i, todo) in zip(
