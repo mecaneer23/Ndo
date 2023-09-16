@@ -3,6 +3,3 @@
   -4 allow multiline paste
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
-+6 use prev_start for better scrolling in make printable sublist
-- Implement option monad class unless built in option exists
-  - use option
