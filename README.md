@@ -118,4 +118,3 @@ systemctl start docker
 ## Bugs
 
 - Long todos don't render properly in strikethrough mode (in certain terminals)
-- Some terminals display the checkbox character weirdly (currently uses two space workaround)

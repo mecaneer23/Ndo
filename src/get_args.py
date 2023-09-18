@@ -2,11 +2,14 @@
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
 from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
+from curses import wrapper
 from pathlib import Path
+from typing import Any
 
 from src.md_to_py import md_table_to_lines
 
 BULLETS = False
+CHECKBOX = ""
 CONTROLS_BEGIN_INDEX = 67
 CONTROLS_END_INDEX = 91
 DEFAULT_TODO = "todo.txt"
@@ -19,6 +22,16 @@ NO_GUI = False
 RELATIVE_ENUMERATE = False
 SIMPLE_BOXES = False
 STRIKETHROUGH = False
+
+CHECKBOX_OPTIONS = ("🗹", "☑")
+
+
+def _get_checkbox(win: Any) -> str:
+    try:
+        win.addch(0, 0, CHECKBOX_OPTIONS[0])
+        return CHECKBOX_OPTIONS[0]
+    except TypeError:
+        return CHECKBOX_OPTIONS[1]
 
 
 def get_args() -> Namespace:
@@ -127,11 +140,14 @@ def get_args() -> Namespace:
         help="Allows passing alternate header.\
             Default is filename.",
     )
-    return parser.parse_args()
+    args = vars(parser.parse_args())
+    args["checkbox"] = wrapper(_get_checkbox) if not args["simple_boxes"] else ""
+    return Namespace(**args)
 
 
 command_line_args = get_args()
 BULLETS = command_line_args.bullet_display
+CHECKBOX = command_line_args.checkbox
 ENUMERATE = command_line_args.enumerate
 FILENAME = (
     Path(command_line_args.filename, DEFAULT_TODO)

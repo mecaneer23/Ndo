@@ -1,7 +1,7 @@
 # pylint: disable=global-statement, missing-class-docstring
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
-from src.get_args import INDENT
+from src.get_args import CHECKBOX, INDENT
 
 
 class Todo:
@@ -67,7 +67,7 @@ class Todo:
 
     def get_box(self) -> str:
         table = {
-            "+": "☑  ",
+            "+": f"{CHECKBOX}  ",
             "-": "☐  ",
             None: "",
         }
