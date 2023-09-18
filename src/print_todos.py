@@ -122,15 +122,19 @@ def print_todos(
         counter = 0
         if win is None:
             print(
-                {
-                    1: "\u001b[31m",
-                    2: "\u001b[32m",
-                    3: "\u001b[33m",
-                    4: "\u001b[34m",
-                    5: "\u001b[35m",
-                    6: "\u001b[36m",
-                    7: "\u001b[37m",
-                }[todo.color]
+                "\u001b["
+                + str(
+                    {
+                        1: 31,
+                        2: 32,
+                        3: 33,
+                        4: 34,
+                        5: 35,
+                        6: 36,
+                        7: 37,
+                    }[todo.color]
+                )
+                + "m"
                 + display_string
                 + "\u001b[0m"
             )
