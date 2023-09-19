@@ -30,10 +30,6 @@ def get_bullet(indentation_level: int) -> str:
     return symbols[indentation_level // INDENT % len(symbols)]
 
 
-def strikethrough(text: str) -> str:
-    return "\u0336".join(text) if STRIKETHROUGH else text
-
-
 def make_printable_sublist(
     height: int,
     lst: list[T],
@@ -98,22 +94,14 @@ def print_todos(
                     todo.get_simple_box()
                     if not todo.is_empty() and SIMPLE_BOXES
                     else "",
-                    (
-                        f"{get_bullet(todo.indent_level)} "
-                        if not todo.has_box() and BULLETS
-                        else ""
-                    ),
-                    (
-                        f"{todos.index(todo) + 1}. "
-                        if ENUMERATE and not RELATIVE_ENUMERATE
-                        else ""
-                    ),
+                    f"{get_bullet(todo.indent_level)} "
+                    if not todo.has_box() and BULLETS
+                    else "",
+                    f"{todos.index(todo) + 1}. "
+                    if ENUMERATE and not RELATIVE_ENUMERATE
+                    else "",
                     f"{relative + 1}. " if RELATIVE_ENUMERATE else "",
-                    (
-                        strikethrough(todo.display_text)
-                        if todo.is_toggled()
-                        else todo.display_text
-                    ),
+                    todo.display_text,
                 ]
             )
             if i not in highlight or not todo.is_empty()
@@ -141,6 +129,12 @@ def print_todos(
             continue
         while counter < len(display_string) - 1:
             try:
+                if (
+                    STRIKETHROUGH
+                    and todo.is_toggled()
+                    and todo.indent_level + 2 < counter < len(display_string.strip())
+                ):
+                    win.addch(i + 1, counter, "\u0336")
                 win.addch(
                     i + 1,
                     counter,
