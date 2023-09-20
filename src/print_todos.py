@@ -132,7 +132,9 @@ def print_todos(
                 if (
                     STRIKETHROUGH
                     and todo.is_toggled()
-                    and todo.indent_level + 2 < counter < len(display_string.strip())
+                    and todo.indent_level + 3
+                    < counter
+                    < len(display_string.strip()) + todo.indent_level + 1
                 ):
                     win.addch(i + 1, counter, "\u0336")
                 win.addch(
