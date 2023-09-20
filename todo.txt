@@ -1,5 +1,5 @@
 -1 fix strikethrough
-  -1 fix long lines
+  -1 fix long lines (longer than width // 2 - 1)
   -1 fix moving down onto a toggled line
 -4 implement multiline todos
   -4 allow multiline paste

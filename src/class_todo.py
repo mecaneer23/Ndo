@@ -50,6 +50,9 @@ class Todo:
     def __getitem__(self, key: int) -> str:
         return self.text[key]
 
+    def __len__(self) -> int:
+        return len(self.display_text)
+
     def set_display_text(self, display_text: str) -> None:
         self.display_text = display_text
         self.text = repr(self)
