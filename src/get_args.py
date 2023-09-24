@@ -1,4 +1,4 @@
-# pylint: disable=global-statement, missing-class-docstring
+# pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
 from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
