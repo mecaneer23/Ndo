@@ -250,7 +250,7 @@ def wgetnstr(
                 return wgetnstr_success(todo, chars)
             win.addstr(1, len(chars) + 1, "█")
         for i, char in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
-            win.addstr(1, i + 1, char, curses.A_REVERSE if i == position else 0)
+            win.addstr(1, i + 1, char, curses.A_STANDOUT if i == position else 0)
         win.refresh()
         try:
             input_char = win.getch()

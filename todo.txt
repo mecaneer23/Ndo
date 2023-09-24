@@ -6,5 +6,4 @@
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
 - make startup faster
-- make new_todo_current use empty todo?
 - add keybind to get_todo that allows for toggling between note and todo

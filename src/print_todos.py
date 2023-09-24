@@ -142,7 +142,7 @@ def print_todos(
                     counter,
                     display_string[counter],
                     curses.color_pair(todo.color or 7)
-                    | (curses.A_REVERSE if i in highlight else 0),
+                    | (curses.A_STANDOUT if i in highlight else 0),
                 )
             except OverflowError:
                 # This function call will throw an OverflowError if

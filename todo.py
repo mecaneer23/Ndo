@@ -233,7 +233,7 @@ def color_menu(parent_win: Any, original: int) -> int:
                 1,
                 line,
                 curses.color_pair(get_color(line.strip()))
-                | (curses.A_REVERSE if i == selected else 0),
+                | (curses.A_STANDOUT if i == selected else 0),
             )
         try:
             key = win.getch()
@@ -316,7 +316,7 @@ def sort_menu(
                 i + 1,
                 1,
                 line,
-                curses.A_REVERSE if i == cursor else 0,
+                curses.A_STANDOUT if i == cursor else 0,
             )
         try:
             key = win.getch()
