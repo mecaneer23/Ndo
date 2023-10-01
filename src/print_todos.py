@@ -59,7 +59,8 @@ def info_message(win: Any, height: int, width: int) -> None:
         "Ndo - an ncurses todo application",
         "",
         "by Gabriel Natenshon",
-        "Type `o` to add a new todo",
+        "Press `o` to add a new todo",
+        "Or press `h` to view a help menu",
     ]
     maxlen = len(max(text, key=len))
     for i, line in enumerate(text):
