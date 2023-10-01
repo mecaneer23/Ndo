@@ -107,13 +107,15 @@ def handle_delete(win: Any, chars: list[str], position: int) -> tuple[list[str],
 def handle_ctrl_arrow(
     win: Any, chars: list[str], position: int
 ) -> tuple[list[str], int]:
-    for _ in range(2):  # skip the `;5`
+    for _ in ";5":
         win.getch()
+    options = {
+        67: ("right arrow", handle_ctrl_right_arrow),
+        68: ("left arrow", handle_ctrl_left_arrow),
+    }
     direction = win.getch()
-    if direction == 67:  # right arrow
-        chars, position = handle_ctrl_right_arrow(chars, position)
-    elif direction == 68:  # left arrow
-        chars, position = handle_ctrl_left_arrow(chars, position)
+    if direction in options:
+        chars, position = options[direction][1](chars, position)
     return chars, position
 
 
