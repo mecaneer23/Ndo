@@ -294,6 +294,12 @@ def wgetnstr(
     position = len(chars)
     win.box()
     win.nodelay(False)
+    backspace_table = {
+        8: handle_backspace,
+        127: handle_backspace,
+        263: handle_backspace,
+        23: handle_ctrl_backspace,
+    }
     while True:
         if position == len(chars):
             if len(chars) + 1 >= win.getmaxyx()[1] - 1:
@@ -323,12 +329,6 @@ def wgetnstr(
             set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
             stdscr.refresh()
             continue
-        backspace_table = {
-            8: handle_backspace,
-            127: handle_backspace,
-            263: handle_backspace,
-            23: handle_ctrl_backspace,
-        }
         if input_char in backspace_table:
             chars, position = backspace_table[input_char](chars, position)
             continue
