@@ -226,20 +226,26 @@ def color_menu(parent_win: Any, original: int) -> int:
             key = win.getch()
         except KeyboardInterrupt:
             return original
-        if key == 107:  # k
-            selected -= 1
-        elif key == 106:  # j
-            selected += 1
-        elif key == 103:  # g
-            selected = 0
-        elif key == 71:  # G
-            selected = len(lines)
+        move_options = {
+            107: ("k", lambda selected: selected - 1),
+            106: ("j", lambda selected: selected + 1),
+            103: ("g", lambda _: 0),
+            71: ("G", lambda _: len(lines)),
+            49: ("1", lambda _: 0),
+            50: ("2", lambda _: 1),
+            51: ("3", lambda _: 2),
+            52: ("4", lambda _: 3),
+            53: ("5", lambda _: 4),
+            54: ("6", lambda _: 5),
+            55: ("7", lambda _: 6),
+        }
+        if key in move_options:
+            _, func = move_options[key]
+            selected = func(selected)
         elif key in (113, 27):  # q | esc
             return original
         elif key == 10:  # enter
             return get_color(lines[selected].strip())
-        elif key in range(49, 56):  # numbers
-            selected = key - 49
         else:
             continue
         selected = clamp(selected, 0, len(lines))
