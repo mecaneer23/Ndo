@@ -119,7 +119,7 @@ def handle_ctrl_arrow(
     return chars, position
 
 
-def delete_or_alt_delete(
+def handle_delete_modifiers(
     stdscr_win: tuple[Any, Any], todo: Todo, chars: list[str], position: int
 ) -> tuple[list[str], int]:
     try:
@@ -129,13 +129,21 @@ def delete_or_alt_delete(
     if input_char == 126:  # ~
         return handle_delete(stdscr_win[1], chars, position)
     if input_char == 59:  # ;
-        for _ in "3~":
+        # `2~` refers to the shift key,
+        # however it is the same length as
+        # `3~`, which refers to the alt key.
+        # As we ignore the value of the
+        # character and only use the length,
+        # shift+delete and alt+delete
+        # can both be used interchangably to
+        # perform this task.
+        for _ in "2~":
             stdscr_win[1].getch()
-        handle_alt_delete(stdscr_win[0], todo)
+        handle_toggle_note_todo(stdscr_win[0], todo)
     return chars, position
 
 
-def handle_alt_delete(
+def handle_toggle_note_todo(
     stdscr: Any, todo: Todo
 ) -> None:
     toggle_note_todo(todo)
@@ -171,7 +179,7 @@ def handle_escape(
     ] = {
         68: (handle_left_arrow, (chars, position)),
         67: (handle_right_arrow, (chars, position)),
-        51: (delete_or_alt_delete, (stdscr_win, todo, chars, position)),
+        51: (handle_delete_modifiers, (stdscr_win, todo, chars, position)),
         49: (handle_ctrl_arrow, (stdscr_win[1], chars, position)),
         72: (lambda chars: (chars, 0), (chars,)),  # home
         70: (lambda chars: (chars, len(chars)), (chars,)),  # end
