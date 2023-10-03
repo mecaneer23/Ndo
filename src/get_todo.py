@@ -190,8 +190,6 @@ def handle_escape(
         toggle_note_todo(todo)
         set_header(stdscr_win[0], "Note" if todo.box_char is None else "Todo")
         stdscr_win[0].refresh()
-    else:
-        raise ValueError(repr(subch))
     return chars, position
 
 
