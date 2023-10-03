@@ -315,14 +315,15 @@ def sort_menu(
             key = win.getch()
         except KeyboardInterrupt:
             return todos, cursor
-        if key == 107:  # k
-            cursor -= 1
-        elif key == 106:  # j
-            cursor += 1
-        elif key == 103:  # g
-            cursor = 0
-        elif key == 71:  # G
-            cursor = len(lines)
+        move_options = {
+            107: ("k", lambda cursor: cursor - 1),
+            106: ("j", lambda cursor: cursor + 1),
+            103: ("g", lambda _: 0),
+            71: ("G", lambda _: len(lines)),
+        }
+        if key in move_options:
+            _, func = move_options[key]
+            cursor = func(cursor)
         elif key in (113, 27):  # q | esc
             return todos, cursor
         elif key == 10:  # enter
