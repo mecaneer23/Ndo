@@ -15,11 +15,6 @@ def set_header(stdscr: Any, message: str) -> None:
     )
 
 
-def wgetnstr_success(todo: Todo, chars: list[str]) -> Todo:
-    todo.set_display_text("".join(chars))
-    return todo
-
-
 def hline(win: Any, y_loc: int, x_loc: int, char: str | int, width: int) -> None:
     win.addch(y_loc, x_loc, curses.ACS_LTEE)
     win.hline(y_loc, x_loc + 1, char, width - 2)
@@ -303,7 +298,7 @@ def wgetnstr(
     while True:
         if position == len(chars):
             if len(chars) + 1 >= win.getmaxyx()[1] - 1:
-                return wgetnstr_success(todo, chars)
+                break
             win.addstr(1, len(chars) + 1, "█")
         for i, char in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
             win.addstr(1, i + 1, char, curses.A_STANDOUT if i == position else 0)
@@ -323,7 +318,7 @@ def wgetnstr(
             continue
         if input_char in (24, 11):  # ctrl + x/k
             toggle_mode(mode)
-            return wgetnstr_success(todo, chars)
+            break
         if input_char == 9:  # tab
             todo.indent()
             set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
@@ -334,4 +329,5 @@ def wgetnstr(
             continue
         chars, position = handle_ascii(chars, position, input_char)
 
-    return wgetnstr_success(todo, chars)
+    todo.set_display_text("".join(chars))
+    return todo
