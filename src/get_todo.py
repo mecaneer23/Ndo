@@ -242,7 +242,7 @@ def wgetnstr(
     mode: Mode | None = None,
 ) -> Todo:
     """
-    Reads a string from the given window. Returns a todo from the user
+    Reads a string from the given window. Returns a todo from the user.
     Functions like a JavaScript alert box for user input.
 
     Args:
