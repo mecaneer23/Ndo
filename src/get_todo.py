@@ -138,12 +138,22 @@ def handle_delete_modifiers(
     return chars, position
 
 
-def handle_toggle_note_todo(
-    stdscr: Any, todo: Todo
-) -> None:
+def handle_toggle_note_todo(stdscr: Any, todo: Todo) -> None:
     toggle_note_todo(todo)
     set_header(stdscr, "Note" if todo.box_char is None else "Todo")
     stdscr.refresh()
+
+
+def handle_indent_dedent(
+    stdscr: Any, todo: Todo, action: str, chars: list[str], position: int
+) -> tuple[list[str], int]:
+    if action == "indent":
+        todo.indent()
+    elif action == "dedent":
+        todo.dedent()
+    set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
+    stdscr.refresh()
+    return chars, position
 
 
 def handle_escape(
@@ -178,15 +188,10 @@ def handle_escape(
         49: (handle_ctrl_arrow, (stdscr_win[1], chars, position)),
         72: (lambda chars: (chars, 0), (chars,)),  # home
         70: (lambda chars: (chars, len(chars)), (chars,)),  # end
+        90: (handle_indent_dedent, (stdscr_win[0], todo, "dedent", chars, position)),
     }
-    if subch in subch_table:
-        func, args = subch_table[subch]
-        chars, position = func(*args)
-    elif subch == 90:  # shift + tab
-        todo.dedent()
-        set_header(stdscr_win[0], f"Tab level: {todo.indent_level // INDENT} tabs")
-        stdscr_win[0].refresh()
-    return chars, position
+    func, args = subch_table[subch]
+    return func(*args)
 
 
 def handle_backspace(chars: list[str], position: int) -> tuple[list[str], int]:
@@ -314,9 +319,7 @@ def wgetnstr(
             toggle_mode(mode)
             break
         if input_char == 9:  # tab
-            todo.indent()
-            set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
-            stdscr.refresh()
+            handle_indent_dedent(stdscr, todo, "indent", chars, position)
             continue
         if input_char in backspace_table:
             chars, position = backspace_table[input_char](chars, position)
