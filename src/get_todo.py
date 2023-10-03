@@ -92,8 +92,7 @@ def set_mode_true(mode: Mode | None) -> None:
         mode.toggle_mode = True
 
 
-def handle_delete(win: Any, chars: list[str], position: int) -> tuple[list[str], int]:
-    win.getch()  # skip the `~`
+def handle_delete(chars: list[str], position: int) -> tuple[list[str], int]:
     if position < len(chars):
         chars.pop(position)
     return chars, position
@@ -122,19 +121,17 @@ def handle_delete_modifiers(
     except KeyboardInterrupt:
         return chars, position
     if input_char == 126:  # ~
-        return handle_delete(stdscr_win[1], chars, position)
+        return handle_delete(chars, position)
     if input_char == 59:  # ;
-        # `2~` refers to the shift key,
-        # however it is the same length as
-        # `3~`, which refers to the alt key.
-        # As we ignore the value of the
-        # character and only use the length,
-        # shift+delete and alt+delete
-        # can both be used interchangably to
-        # perform this task.
-        for _ in "2~":
-            stdscr_win[1].getch()
-        handle_toggle_note_todo(stdscr_win[0], todo)
+        try:
+            modifier = stdscr_win[1].getch()
+        except KeyboardInterrupt:
+            return chars, position
+        stdscr_win[1].getch()  # skip `~`
+        if modifier == 53:  # ctrl
+            return handle_ctrl_delete(chars, position)
+        if modifier in (50, 51):  # shift, alt
+            handle_toggle_note_todo(stdscr_win[0], todo)
     return chars, position
 
 
@@ -168,8 +165,7 @@ def handle_escape(
     escape_table: dict[
         int, tuple[Callable[..., tuple[list[str], int] | None], tuple[Any, ...]]
     ] = {
-        100: (handle_ctrl_delete, (chars, position)),
-        -1: (set_mode_true, (mode,)),
+        -1: (set_mode_true, (mode,)),  # escape
     }
     if escape in escape_table:
         func, args = escape_table[escape]
