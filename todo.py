@@ -704,6 +704,9 @@ def get_possible_todos(
 ) -> list[Todo] | None:
     params = []
     for arg in args.split(", "):
+        if arg.isdigit():
+            params.append(int(arg))
+            continue
         if arg != "None":
             params.append(possible_args[arg])
     return func(*params)
@@ -840,32 +843,11 @@ def main(stdscr: Any, header: str) -> int:
                 func,
                 args,
                 {
-                    "0": 0,
-                    "1": 1,
-                    "2": 2,
-                    "3": 3,
-                    "4": 4,
-                    "5": 5,
-                    "6": 6,
-                    "7": 7,
-                    "8": 8,
-                    "9": 9,
-                    "48": 48,
-                    "49": 49,
-                    "50": 50,
-                    "51": 51,
-                    "52": 52,
-                    "53": 53,
-                    "54": 54,
-                    "55": 55,
-                    "56": 56,
-                    "57": 57,
                     "copied_todo": copied_todo,
                     "int(selected)": int(selected),
                     "history": history,
                     "len(todos)": len(todos),
                     "mode": mode,
-                    "None": "None",
                     "selected": selected,
                     "stdscr": stdscr,
                     "todos": todos,
