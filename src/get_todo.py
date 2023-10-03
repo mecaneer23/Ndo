@@ -161,15 +161,9 @@ def handle_escape(
     todo: Todo,
 ) -> tuple[list[str], int] | None:
     stdscr_win[1].nodelay(True)
-    escape = stdscr_win[1].getch()  # skip `[`
-    escape_table: dict[
-        int, tuple[Callable[..., tuple[list[str], int] | None], tuple[Any, ...]]
-    ] = {
-        -1: (set_mode_true, (mode,)),  # escape
-    }
-    if escape in escape_table:
-        func, args = escape_table[escape]
-        return func(*args)
+    if stdscr_win[1].getch() == -1:  # skip `[` and check for escape
+        set_mode_true(mode)
+        return None
     stdscr_win[1].nodelay(False)
     try:
         subch = stdscr_win[1].getch()
