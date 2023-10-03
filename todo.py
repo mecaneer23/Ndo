@@ -301,6 +301,12 @@ def sort_menu(
         (parent_win.getmaxyx()[1] - (len(max(lines, key=len)) + 1)) // 2,
     )
     win.box()
+    move_options = {
+        107: ("k", lambda cursor: cursor - 1),
+        106: ("j", lambda cursor: cursor + 1),
+        103: ("g", lambda _: 0),
+        71: ("G", lambda _: len(lines)),
+    }
     cursor = 0
     while True:
         parent_win.refresh()
@@ -315,19 +321,17 @@ def sort_menu(
             key = win.getch()
         except KeyboardInterrupt:
             return todos, cursor
-        move_options = {
-            107: ("k", lambda cursor: cursor - 1),
-            106: ("j", lambda cursor: cursor + 1),
-            103: ("g", lambda _: 0),
-            71: ("G", lambda _: len(lines)),
+        return_options: dict[int, tuple[str, Callable[..., tuple[list[Todo], int]]]] = {
+            113: ("q", lambda: (todos, int(selected))),
+            27: ("esc", lambda: (todos, int(selected))),
+            10: ("enter", lambda: sort_by(lines[cursor], todos, selected)),
         }
         if key in move_options:
             _, func = move_options[key]
             cursor = func(cursor)
-        elif key in (113, 27):  # q | esc
-            return todos, cursor
-        elif key == 10:  # enter
-            return sort_by(lines[cursor], todos, selected)
+        elif key in return_options:  # q, esc, enter
+            _, func = return_options[key]
+            return func()
         else:
             continue
         cursor = clamp(cursor, 0, len(lines))
