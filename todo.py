@@ -5,7 +5,6 @@
 
 import curses
 from pathlib import Path
-from re import match as re_match
 from sys import exit as sys_exit
 from typing import Any, Callable
 
@@ -51,19 +50,7 @@ def read_file(filename: Path) -> str:
 
 
 def validate_file(raw_data: str) -> list[Todo]:
-    if len(raw_data) == 0:
-        return []
-    usable_data: list[Todo] = []
-    for line in raw_data.split("\n"):
-        if len(line) == 0:
-            usable_data.append(Todo())  # empty todo
-        elif re_match(r"^( *)?([+-])\d? .*$", line):
-            usable_data.append(Todo(line))
-        elif re_match(r"^( *\d )?.*$", line):
-            usable_data.append(Todo(line))  # note
-        else:
-            raise ValueError(f"Invalid todo: {line}")
-    return usable_data
+    return [Todo(line) for line in raw_data.split("\n")]
 
 
 def is_file_externally_updated(filename: Path, todos: list[Todo]) -> bool:
