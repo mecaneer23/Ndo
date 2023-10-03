@@ -186,10 +186,6 @@ def handle_escape(
         todo.dedent()
         set_header(stdscr_win[0], f"Tab level: {todo.indent_level // INDENT} tabs")
         stdscr_win[0].refresh()
-    elif subch == 363:  # shift + delete
-        toggle_note_todo(todo)
-        set_header(stdscr_win[0], "Note" if todo.box_char is None else "Todo")
-        stdscr_win[0].refresh()
     return chars, position
 
 
