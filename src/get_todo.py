@@ -2,7 +2,7 @@
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
 import curses
-from typing import Any
+from typing import Any, Callable
 
 from src.class_mode import Mode
 from src.class_todo import Todo
@@ -119,6 +119,30 @@ def handle_ctrl_arrow(
     return chars, position
 
 
+def delete_or_alt_delete(
+    stdscr_win: tuple[Any, Any], todo: Todo, chars: list[str], position: int
+) -> tuple[list[str], int]:
+    try:
+        input_char = stdscr_win[1].getch()
+    except KeyboardInterrupt:
+        return chars, position
+    if input_char == 126:  # ~
+        return handle_delete(stdscr_win[1], chars, position)
+    if input_char == 59:  # ;
+        for _ in "3~":
+            stdscr_win[1].getch()
+        handle_alt_delete(stdscr_win[0], todo)
+    return chars, position
+
+
+def handle_alt_delete(
+    stdscr: Any, todo: Todo
+) -> None:
+    toggle_note_todo(todo)
+    set_header(stdscr, "Note" if todo.box_char is None else "Todo")
+    stdscr.refresh()
+
+
 def handle_escape(
     stdscr_win: tuple[Any, Any],
     chars: list[str],
@@ -128,31 +152,40 @@ def handle_escape(
 ) -> tuple[list[str], int] | None:
     stdscr_win[1].nodelay(True)
     escape = stdscr_win[1].getch()  # skip `[`
-    if escape == -1:  # escape
-        set_mode_true(mode)
-        return None
-    if escape == 100:  # ctrl + delete
-        return handle_ctrl_delete(chars, position)
+    escape_table: dict[
+        int, tuple[Callable[..., tuple[list[str], int] | None], tuple[Any, ...]]
+    ] = {
+        100: (handle_ctrl_delete, (chars, position)),
+        -1: (set_mode_true, (mode,)),
+    }
+    if escape in escape_table:
+        func, args = escape_table[escape]
+        return func(*args)
     stdscr_win[1].nodelay(False)
     try:
         subch = stdscr_win[1].getch()
     except KeyboardInterrupt:
         return None
-    if subch == 68:  # left arrow
-        chars, position = handle_left_arrow(chars, position)
-    elif subch == 67:  # right arrow
-        chars, position = handle_right_arrow(chars, position)
-    elif subch == 51:  # delete
-        chars, position = handle_delete(stdscr_win[1], chars, position)
-    elif subch == 49:  # ctrl + arrow
-        chars, position = handle_ctrl_arrow(stdscr_win[1], chars, position)
-    elif subch == 72:  # home
-        position = 0
-    elif subch == 70:  # end
-        position = len(chars)
+    subch_table: dict[
+        int, tuple[Callable[..., tuple[list[str], int]], tuple[Any, ...]]
+    ] = {
+        68: (handle_left_arrow, (chars, position)),
+        67: (handle_right_arrow, (chars, position)),
+        51: (delete_or_alt_delete, (stdscr_win, todo, chars, position)),
+        49: (handle_ctrl_arrow, (stdscr_win[1], chars, position)),
+        72: (lambda chars: (chars, 0), (chars,)),  # home
+        70: (lambda chars: (chars, len(chars)), (chars,)),  # end
+    }
+    if subch in subch_table:
+        func, args = subch_table[subch]
+        chars, position = func(*args)
     elif subch == 90:  # shift + tab
         todo.dedent()
         set_header(stdscr_win[0], f"Tab level: {todo.indent_level // INDENT} tabs")
+        stdscr_win[0].refresh()
+    elif subch == 363:  # shift + delete
+        toggle_note_todo(todo)
+        set_header(stdscr_win[0], "Note" if todo.box_char is None else "Todo")
         stdscr_win[0].refresh()
     else:
         raise ValueError(repr(subch))
@@ -190,6 +223,13 @@ def handle_ascii(
     if position < len(chars):
         position += 1
     return chars, position
+
+
+def toggle_note_todo(todo: Todo) -> None:
+    if todo.box_char is None:
+        todo.box_char = "-"
+        return
+    todo.box_char = None
 
 
 def wgetnstr(
@@ -259,9 +299,7 @@ def wgetnstr(
         except KeyboardInterrupt:  # ctrl+c
             toggle_mode(mode)
             return original
-        if input_char in (10, 13, -1):  # enter
-            # might need to continue on -1
-            # I don't know which character it represents
+        if input_char in (10, 13):  # enter
             break
         if input_char == 27:  # any escape sequence `^[`
             next_step = handle_escape((stdscr, win), chars, position, mode, todo)
@@ -277,11 +315,14 @@ def wgetnstr(
             set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
             stdscr.refresh()
             continue
-        if input_char in (8, 127, 263):  # backspace
-            chars, position = handle_backspace(chars, position)
-            continue
-        if input_char == 23:  # ctrl + backspace
-            chars, position = handle_ctrl_backspace(chars, position)
+        backspace_table = {
+            8: handle_backspace,
+            127: handle_backspace,
+            263: handle_backspace,
+            23: handle_ctrl_backspace,
+        }
+        if input_char in backspace_table:
+            chars, position = backspace_table[input_char](chars, position)
             continue
         chars, position = handle_ascii(chars, position, input_char)
 
