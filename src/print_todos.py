@@ -67,16 +67,51 @@ def info_message(win: Any, height: int, width: int) -> None:
         win.addstr(height // 3 + i, (width - maxlen) // 2, line.center(maxlen))
 
 
+def get_height_width(win: Any | None, length: int) -> tuple[int, int]:
+    if win is None:
+        width, height = get_terminal_size()
+        return height, width
+    height, width = win.getmaxyx()
+    if length == 0:
+        info_message(win, height, width)
+        raise RuntimeError("No todos to display")
+    return height, width
+
+
+def get_display_string(
+    todos: list[Todo],
+    i_todo: tuple[int, Todo],
+    relative: int,
+    highlight: range,
+    height_width: tuple[int, int],
+) -> str:
+    i, todo = i_todo
+    _, width = height_width
+    if i in highlight and todo.is_empty():
+        return "⎯" * 8
+    output = []
+    output.append(todo.indent_level * " ")
+    if not todo.is_empty() and not SIMPLE_BOXES:
+        output.append(todo.get_box())
+    if not todo.is_empty() and SIMPLE_BOXES:
+        output.append(todo.get_simple_box())
+    if not todo.has_box() and BULLETS:
+        output.append(f"{get_bullet(todo.indent_level)} ")
+    if ENUMERATE and not RELATIVE_ENUMERATE:
+        output.append(f"{todos.index(todo) + 1}. ")
+    if RELATIVE_ENUMERATE:
+        output.append(f"{relative + 1}. ")
+    output.append(todo.display_text)
+    return "".join(output)[: width - 1].ljust(width - 1, " ")
+
+
 def print_todos(
     win: Any, todos: list[Todo], selected: Cursor, prev_start: int = 0
 ) -> int:
-    if win is None:
-        width, height = get_terminal_size()
-    else:
-        height, width = win.getmaxyx()
-        if len(todos) < 1:
-            info_message(win, height, width)
-            return 0
+    try:
+        height, width = get_height_width(win, len(todos))
+    except RuntimeError:
+        return 0
     new_todos, temp_selected, prev_start = make_printable_sublist(
         height - 1, todos, int(selected), prev_start=prev_start
     )
@@ -85,29 +120,9 @@ def print_todos(
         [*range(temp_selected - 1, -1, -1), int(selected), *range(0, len(new_todos))],
         enumerate(new_todos),
     ):
-        if todo.color is None:
-            raise ValueError(f"Invalid color for `{todo}`")
-        display_string = (
-            "".join(
-                [
-                    todo.indent_level * " ",
-                    todo.get_box() if not todo.is_empty() and not SIMPLE_BOXES else "",
-                    todo.get_simple_box()
-                    if not todo.is_empty() and SIMPLE_BOXES
-                    else "",
-                    f"{get_bullet(todo.indent_level)} "
-                    if not todo.has_box() and BULLETS
-                    else "",
-                    f"{todos.index(todo) + 1}. "
-                    if ENUMERATE and not RELATIVE_ENUMERATE
-                    else "",
-                    f"{relative + 1}. " if RELATIVE_ENUMERATE else "",
-                    todo.display_text,
-                ]
-            )
-            if i not in highlight or not todo.is_empty()
-            else "⎯" * 8
-        )[: width - 1].ljust(width - 1, " ")
+        display_string = get_display_string(
+            todos, (i, todo), relative, highlight, (height, width)
+        )
         counter = 0
         if win is None:
             print(
