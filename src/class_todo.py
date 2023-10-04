@@ -114,14 +114,14 @@ class Todo:
             self.text = repr(self)
 
     def __repr__(self) -> str:
-        return "".join(
-            [
-                self.indent_level * " ",
-                "" if self.box_char is None or self.is_empty() else self.box_char,
-                str(self.color) if self.color != 7 else "",
-                ""
-                if (self.box_char is None or self.is_empty()) and self.color == 7
-                else " ",
-                self.display_text,
-            ]
+        chunks: tuple[tuple[bool, str], ...] = (
+            (True, self.indent_level * " "),
+            (self.box_char is not None and not self.is_empty(), str(self.box_char)),
+            (self.color != 7, str(self.color)),
+            (
+                (self.box_char is not None and not self.is_empty()) or self.color != 7,
+                " ",
+            ),
+            (True, self.display_text),
         )
+        return "".join([item for condition, item in chunks if condition])
