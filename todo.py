@@ -712,6 +712,39 @@ def get_possible_todos(
     return func(*params)
 
 
+def get_main_input(
+    stdscr: Any,
+    todos: list[Todo],
+    keys_esckeys: tuple[dict[int, tuple[str, Callable[..., Any], str]], ...],
+    possible_args: dict[str, Any],
+) -> int | list[Todo]:
+    try:
+        key = stdscr.getch()
+    except KeyboardInterrupt:  # exit on ^C
+        return todos
+    if key == 113:  # q
+        return todos
+    if key in keys_esckeys[0]:
+        _, func, args = keys_esckeys[0][key]
+        if key == 27:
+            stdscr.nodelay(True)
+            key = stdscr.getch()
+            stdscr.nodelay(False)
+            if key == -1:  # escape, otherwise skip `[`
+                return todos
+            if key not in keys_esckeys[1]:
+                return key
+            _, func, args = keys_esckeys[1][key]
+        possible_todos = get_possible_todos(
+            func,
+            args,
+            possible_args,
+        )
+        if possible_todos is not None:
+            todos = possible_todos
+    return key
+
+
 def init() -> None:
     curses.use_default_colors()
     curses.curs_set(0)
@@ -822,44 +855,26 @@ def main(stdscr: Any, header: str) -> int:
         if mode.is_not_on():
             todos = handle_new_todo_next(stdscr, todos, selected, mode)
             continue
-        try:
-            key = stdscr.getch()
-        except KeyboardInterrupt:  # exit on ^C
-            return quit_program(todos, edits)
-        if key == 113:  # q
-            return quit_program(todos, edits)
-        if key in keys:
-            _, func, args = keys[key]
-            if key == 27:
-                stdscr.nodelay(True)
-                key = stdscr.getch()
-                stdscr.nodelay(False)
-                if key == -1:  # escape, otherwise skip `[`
-                    return quit_program(todos, edits)
-                if key not in esc_keys:
-                    continue
-                _, func, args = esc_keys[key]
-            possible_todos = get_possible_todos(
-                func,
-                args,
-                {
-                    "copied_todo": copied_todo,
-                    "int(selected)": int(selected),
-                    "history": history,
-                    "len(todos)": len(todos),
-                    "mode": mode,
-                    "selected": selected,
-                    "stdscr": stdscr,
-                    "todos": todos,
-                },
-            )
-            if possible_todos is not None:
-                todos = possible_todos
-            del possible_todos
-            if key not in (18, 117):  # redo/undo
-                history.add(todos, int(selected))
-            print_history(history)
-            continue
+        next_step = get_main_input(
+            stdscr,
+            todos,
+            (keys, esc_keys),
+            {
+                "copied_todo": copied_todo,
+                "int(selected)": int(selected),
+                "history": history,
+                "len(todos)": len(todos),
+                "mode": mode,
+                "selected": selected,
+                "stdscr": stdscr,
+                "todos": todos,
+            },
+        )
+        if isinstance(next_step, list):
+            return quit_program(next_step, edits)
+        if isinstance(next_step, int) and next_step not in (18, 117):  # redo/undo
+            history.add(todos, int(selected))
+        print_history(history)
         edits -= 1
 
 
