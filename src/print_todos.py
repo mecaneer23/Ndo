@@ -89,20 +89,18 @@ def get_display_string(
     _, width = height_width
     if i in highlight and todo.is_empty():
         return "⎯" * 8
-    output = []
-    output.append(todo.indent_level * " ")
-    if not todo.is_empty() and not SIMPLE_BOXES:
-        output.append(todo.get_box())
-    if not todo.is_empty() and SIMPLE_BOXES:
-        output.append(todo.get_simple_box())
-    if not todo.has_box() and BULLETS:
-        output.append(f"{get_bullet(todo.indent_level)} ")
-    if ENUMERATE and not RELATIVE_ENUMERATE:
-        output.append(f"{todos.index(todo) + 1}. ")
-    if RELATIVE_ENUMERATE:
-        output.append(f"{relative + 1}. ")
-    output.append(todo.display_text)
-    return "".join(output)[: width - 1].ljust(width - 1, " ")
+    chunks: tuple[tuple[bool, str], ...] = (
+        (True, todo.indent_level * " "),
+        (not todo.is_empty() and not SIMPLE_BOXES, todo.get_box()),
+        (not todo.is_empty() and SIMPLE_BOXES, todo.get_simple_box()),
+        (not todo.has_box() and BULLETS, f"{get_bullet(todo.indent_level)} "),
+        (ENUMERATE and not RELATIVE_ENUMERATE, f"{todos.index(todo) + 1}. "),
+        (RELATIVE_ENUMERATE, f"{relative + 1}. "),
+        (True, todo.display_text),
+    )
+    return "".join([item for condition, item in chunks if condition])[
+        : width - 1
+    ].ljust(width - 1, " ")
 
 
 def print_todos(
