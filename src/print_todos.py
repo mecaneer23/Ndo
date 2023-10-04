@@ -103,6 +103,39 @@ def get_display_string(
     ].ljust(width - 1, " ")
 
 
+def print_todo(
+    win: Any, todo: Todo, display_string: str, i: int, highlight: range
+) -> None:
+    counter = 0
+    while counter < len(display_string) - 1:
+        if (
+            STRIKETHROUGH
+            and todo.is_toggled()
+            and todo.indent_level + 2
+            < counter - 1
+            < len(display_string.strip()) + todo.indent_level
+        ):
+            win.addch(i + 1, counter, "\u0336")
+        try:
+            win.addch(
+                i + 1,
+                counter,
+                display_string[counter],
+                curses.color_pair(todo.color or 7)
+                | (curses.A_STANDOUT if i in highlight else 0),
+            )
+        except OverflowError:
+            # This function call will throw an OverflowError if
+            # the terminal doesn't support the box character as it
+            # is technically a wide character. By `continue`-ing,
+            # we don't print the box character and indirectly
+            # prompt the user to use the -x option and use simple
+            # boxes when printing.
+            counter += 1
+            continue
+        counter += 1
+
+
 def print_todos(
     win: Any, todos: list[Todo], selected: Cursor, prev_start: int = 0
 ) -> int:
@@ -121,7 +154,6 @@ def print_todos(
         display_string = get_display_string(
             todos, (i, todo), relative, highlight, (height, width)
         )
-        counter = 0
         if win is None:
             print(
                 "\u001b["
@@ -141,33 +173,7 @@ def print_todos(
                 + "\u001b[0m"
             )
             continue
-        while counter < len(display_string) - 1:
-            try:
-                if (
-                    STRIKETHROUGH
-                    and todo.is_toggled()
-                    and todo.indent_level + 2
-                    < counter - 1
-                    < len(display_string.strip()) + todo.indent_level
-                ):
-                    win.addch(i + 1, counter, "\u0336")
-                win.addch(
-                    i + 1,
-                    counter,
-                    display_string[counter],
-                    curses.color_pair(todo.color or 7)
-                    | (curses.A_STANDOUT if i in highlight else 0),
-                )
-            except OverflowError:
-                # This function call will throw an OverflowError if
-                # the terminal doesn't support the box character as it
-                # is technically a wide character. By `continue`-ing,
-                # we don't print the box character and indirectly
-                # prompt the user to use the -x option and use simple
-                # boxes when printing.
-                counter += 1
-                continue
-            counter += 1
+        print_todo(win, todo, display_string, i, highlight)
     if win is None:
         return 0
     for i in range(height - len(new_todos) - 1):
