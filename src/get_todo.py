@@ -227,12 +227,11 @@ def toggle_note_todo(todo: Todo) -> None:
 def get_chars_position(
     input_char: int,
     stdscr_win: tuple[Any, Any],
-    chars: list[str],
-    position: int,
+    chars_position_todo: tuple[list[str], int, Todo],
     mode: Mode | None,
-    todo: Todo,
     backspace_table: dict[int, Callable[..., tuple[list[str], int]]],
 ) -> tuple[list[str], int] | None:
+    chars, position, todo = chars_position_todo
     if input_char == 27:  # any escape sequence `^[`
         return handle_escape(stdscr_win, chars, position, mode, todo)
     if input_char == 9:  # tab
@@ -321,7 +320,7 @@ def wgetnstr(
             toggle_mode(mode)
             break
         next_step = get_chars_position(
-            input_char, (stdscr, win), chars, position, mode, todo, backspace_table
+            input_char, (stdscr, win), (chars, position, todo), mode, backspace_table
         )
         if next_step is None:
             return original
