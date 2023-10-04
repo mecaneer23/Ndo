@@ -224,6 +224,24 @@ def toggle_note_todo(todo: Todo) -> None:
     todo.box_char = None
 
 
+def get_chars_position(
+    input_char: int,
+    stdscr_win: tuple[Any, Any],
+    chars: list[str],
+    position: int,
+    mode: Mode | None,
+    todo: Todo,
+    backspace_table: dict[int, Callable[..., tuple[list[str], int]]],
+) -> tuple[list[str], int] | None:
+    if input_char == 27:  # any escape sequence `^[`
+        return handle_escape(stdscr_win, chars, position, mode, todo)
+    if input_char == 9:  # tab
+        return handle_indent_dedent(stdscr_win[0], todo, "indent", chars, position)
+    if input_char in backspace_table:
+        return backspace_table[input_char](chars, position)
+    return handle_ascii(chars, position, input_char)
+
+
 def wgetnstr(
     stdscr: Any,
     win: Any,
@@ -299,22 +317,15 @@ def wgetnstr(
             return original
         if input_char in (10, 13):  # enter
             break
-        if input_char == 27:  # any escape sequence `^[`
-            next_step = handle_escape((stdscr, win), chars, position, mode, todo)
-            if next_step is None:
-                return original
-            chars, position = next_step
-            continue
         if input_char in (24, 11):  # ctrl + x/k
             toggle_mode(mode)
             break
-        if input_char == 9:  # tab
-            handle_indent_dedent(stdscr, todo, "indent", chars, position)
-            continue
-        if input_char in backspace_table:
-            chars, position = backspace_table[input_char](chars, position)
-            continue
-        chars, position = handle_ascii(chars, position, input_char)
+        next_step = get_chars_position(
+            input_char, (stdscr, win), chars, position, mode, todo, backspace_table
+        )
+        if next_step is None:
+            return original
+        chars, position = next_step
 
     todo.set_display_text("".join(chars))
     return todo
