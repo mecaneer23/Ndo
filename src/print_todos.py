@@ -25,7 +25,7 @@ def get_bullet(indentation_level: int) -> str:
         "•",
         "◦",
         "▪",
-        # "▫",
+        "▫",
     ]
     return symbols[indentation_level // INDENT % len(symbols)]
 
