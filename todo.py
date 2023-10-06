@@ -775,6 +775,7 @@ def main(stdscr: Any, header: str) -> int:
     # if adding a new feature that updates `todos`,
     # make sure it also calls update_file()
     keys: dict[int, tuple[str, Callable[..., Any], str]] = {
+        1: ("ctrl + a", selected.multiselect_all, "len(todos)"),
         9: ("tab", handle_indent, "todos, selected"),
         10: ("enter", handle_enter, "stdscr, todos, selected, mode"),
         11: ("ctrl + k", mode.toggle, "None"),

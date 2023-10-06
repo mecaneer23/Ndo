@@ -119,3 +119,6 @@ class Cursor:
                 total += str(subch - 48)
                 continue
             return
+
+    def multiselect_all(self, max_len: int) -> None:
+        self.positions = list(range(0, max_len))
