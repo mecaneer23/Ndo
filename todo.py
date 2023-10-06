@@ -794,10 +794,10 @@ def main(stdscr: Any, header: str) -> int:
         55: ("7", handle_digits, "stdscr, todos, selected, 55"),
         56: ("8", handle_digits, "stdscr, todos, selected, 56"),
         57: ("9", handle_digits, "stdscr, todos, selected, 57"),
-        71: ("G", handle_to_bottom, "todos, selected"),
-        74: ("J", selected.multiselect_down, "len(todos)"),
-        75: ("K", selected.multiselect_up, "None"),
-        79: ("O", new_todo_current, "stdscr, todos, int(selected)"),
+        71: ("shift + g", handle_to_bottom, "todos, selected"),
+        74: ("shift + j", selected.multiselect_down, "len(todos)"),
+        75: ("shift + k", selected.multiselect_up, "None"),
+        79: ("shift + o", new_todo_current, "stdscr, todos, int(selected)"),
         98: ("b", magnify, "stdscr, todos, selected"),
         99: ("c", color_todo, "stdscr, todos, selected"),
         100: ("d", handle_delete_todo, "stdscr, todos, selected, copied_todo"),
@@ -814,7 +814,7 @@ def main(stdscr: Any, header: str) -> int:
         258: ("down", handle_cursor_down, "todos, selected"),
         259: ("up", handle_cursor_up, "todos, selected"),
         330: ("delete", toggle_todo_note, "todos, selected"),
-        351: ("shift + tab", handle_dedent, "todos, selected"),
+        351: ("shift + tab (on windows)", handle_dedent, "todos, selected"),
         353: ("shift + tab", handle_dedent, "todos, selected"),
         426: (
             "alt + j (on windows)",
@@ -828,7 +828,7 @@ def main(stdscr: Any, header: str) -> int:
         ),
     }
     esc_keys: dict[int, tuple[str, Callable[..., Any], str]] = {
-        71: ("alt + G", selected.multiselect_bottom, "len(todos)"),
+        71: ("alt + shift + g", selected.multiselect_bottom, "len(todos)"),
         103: ("alt + g", selected.multiselect_top, "None"),
         106: ("alt + j", handle_todo_down, "todos, selected"),
         107: ("alt + k", handle_todo_up, "todos, selected"),
