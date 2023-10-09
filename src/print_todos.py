@@ -54,7 +54,7 @@ def make_printable_sublist(
     return lst[start:end], cursor - start, start
 
 
-def info_message(win: Any, height: int, width: int) -> None:
+def info_message(stdscr: Any, height: int, width: int) -> None:
     text = [
         "Ndo - an ncurses todo application",
         "",
@@ -64,16 +64,16 @@ def info_message(win: Any, height: int, width: int) -> None:
     ]
     maxlen = len(max(text, key=len))
     for i, line in enumerate(text):
-        win.addstr(height // 3 + i, (width - maxlen) // 2, line.center(maxlen))
+        stdscr.addstr(height // 3 + i, (width - maxlen) // 2, line.center(maxlen))
 
 
-def get_height_width(win: Any | None, length: int) -> tuple[int, int]:
-    if win is None:
+def get_height_width(stdscr: Any | None, length: int) -> tuple[int, int]:
+    if stdscr is None:
         width, height = get_terminal_size()
         return height, width
-    height, width = win.getmaxyx()
+    height, width = stdscr.getmaxyx()
     if length == 0:
-        info_message(win, height, width)
+        info_message(stdscr, height, width)
         raise RuntimeError("No todos to display")
     return height, width
 
@@ -104,7 +104,7 @@ def get_display_string(
 
 
 def print_todo(
-    win: Any, todo: Todo, display_string: str, i: int, highlight: range
+    stdscr: Any, todo: Todo, display_string: str, i: int, highlight: range
 ) -> None:
     counter = 0
     while counter < len(display_string) - 1:
@@ -115,9 +115,9 @@ def print_todo(
             < counter - 1
             < len(display_string.strip()) + todo.indent_level
         ):
-            win.addch(i + 1, counter, "\u0336")
+            stdscr.addch(i + 1, counter, "\u0336")
         try:
-            win.addch(
+            stdscr.addch(
                 i + 1,
                 counter,
                 display_string[counter],
@@ -137,10 +137,10 @@ def print_todo(
 
 
 def print_todos(
-    win: Any, todos: list[Todo], selected: Cursor, prev_start: int = 0
+    stdscr: Any, todos: list[Todo], selected: Cursor, prev_start: int = 0
 ) -> int:
     try:
-        height, width = get_height_width(win, len(todos))
+        height, width = get_height_width(stdscr, len(todos))
     except RuntimeError:
         return 0
     new_todos, temp_selected, prev_start = make_printable_sublist(
@@ -154,7 +154,7 @@ def print_todos(
         display_string = get_display_string(
             todos, (i, todo), relative, highlight, (height, width)
         )
-        if win is None:
+        if stdscr is None:
             print(
                 "\u001b["
                 + str(
@@ -173,9 +173,9 @@ def print_todos(
                 + "\u001b[0m"
             )
             continue
-        print_todo(win, todo, display_string, i, highlight)
-    if win is None:
+        print_todo(stdscr, todo, display_string, i, highlight)
+    if stdscr is None:
         return 0
     for i in range(height - len(new_todos) - 1):
-        win.addstr(i + len(new_todos) + 1, 0, " " * (width - 1))
+        stdscr.addstr(i + len(new_todos) + 1, 0, " " * (width - 1))
     return prev_start
