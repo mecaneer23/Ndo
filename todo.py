@@ -211,6 +211,19 @@ def color_menu(parent_win: Any, original: int) -> int:
         (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2,
     )
     win.box()
+    move_options = {
+        107: ("k", lambda cursor: cursor - 1),
+        106: ("j", lambda cursor: cursor + 1),
+        103: ("g", lambda _: 0),
+        71: ("G", lambda _: len(lines)),
+        49: ("1", lambda _: 0),
+        50: ("2", lambda _: 1),
+        51: ("3", lambda _: 2),
+        52: ("4", lambda _: 3),
+        53: ("5", lambda _: 4),
+        54: ("6", lambda _: 5),
+        55: ("7", lambda _: 6),
+    }
     cursor = original - 1
     while True:
         parent_win.refresh()
@@ -226,26 +239,17 @@ def color_menu(parent_win: Any, original: int) -> int:
             key = win.getch()
         except KeyboardInterrupt:
             return original
-        move_options = {
-            107: ("k", lambda cursor: cursor - 1),
-            106: ("j", lambda cursor: cursor + 1),
-            103: ("g", lambda _: 0),
-            71: ("G", lambda _: len(lines)),
-            49: ("1", lambda _: 0),
-            50: ("2", lambda _: 1),
-            51: ("3", lambda _: 2),
-            52: ("4", lambda _: 3),
-            53: ("5", lambda _: 4),
-            54: ("6", lambda _: 5),
-            55: ("7", lambda _: 6),
+        return_options: dict[int, tuple[str, Callable[[], int]]] = {
+            113: ("q", lambda: original),
+            27: ("esc", lambda: original),
+            10: ("enter", lambda: get_color(lines[cursor].strip())),
         }
         if key in move_options:
             _, func = move_options[key]
             cursor = func(cursor)
-        elif key in (113, 27):  # q | esc
-            return original
-        elif key == 10:  # enter
-            return get_color(lines[cursor].strip())
+        elif key in return_options:
+            _, func = return_options[key]
+            return func()
         else:
             continue
         cursor = clamp(cursor, 0, len(lines))
