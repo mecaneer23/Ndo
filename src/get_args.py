@@ -11,7 +11,7 @@ from src.md_to_py import md_table_to_lines
 BULLETS = False
 CHECKBOX = ""
 CONTROLS_BEGIN_INDEX = 67
-CONTROLS_END_INDEX = 91
+CONTROLS_END_INDEX = 95
 DEFAULT_TODO = "todo.txt"
 ENUMERATE = False
 FILENAME = Path(DEFAULT_TODO)
