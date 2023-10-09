@@ -763,7 +763,7 @@ def init() -> None:
         curses.init_pair(i, color, -1)
 
 
-def main(stdscr: Any, header: str) -> int:
+def main(stdscr: Any) -> int:
     init()
     todos = validate_file(read_file(FILENAME))
     selected = Cursor(0)
@@ -850,7 +850,7 @@ def main(stdscr: Any, header: str) -> int:
         edits += 1
         if is_file_externally_updated(FILENAME, todos):
             todos = validate_file(read_file(FILENAME))
-        set_header(stdscr, f"{header}:")
+        set_header(stdscr, f"{HEADER}:")
         sublist_top = print_todos(stdscr, todos, selected, sublist_top)
         stdscr.refresh()
         if mode.is_not_on():
@@ -884,4 +884,4 @@ if __name__ == "__main__":
         print(f"{HEADER}:")
         print_todos(None, validate_file(read_file(FILENAME)), Cursor(0))
         sys_exit()
-    curses.wrapper(main, header=HEADER)
+    curses.wrapper(main)
