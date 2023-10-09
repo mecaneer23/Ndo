@@ -211,7 +211,7 @@ def color_menu(parent_win: Any, original: int) -> int:
         (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2,
     )
     win.box()
-    selected = original - 1
+    cursor = original - 1
     while True:
         parent_win.refresh()
         for i, line in enumerate(lines):
@@ -220,15 +220,15 @@ def color_menu(parent_win: Any, original: int) -> int:
                 1,
                 line,
                 curses.color_pair(get_color(line.strip()))
-                | (curses.A_STANDOUT if i == selected else 0),
+                | (curses.A_STANDOUT if i == cursor else 0),
             )
         try:
             key = win.getch()
         except KeyboardInterrupt:
             return original
         move_options = {
-            107: ("k", lambda selected: selected - 1),
-            106: ("j", lambda selected: selected + 1),
+            107: ("k", lambda cursor: cursor - 1),
+            106: ("j", lambda cursor: cursor + 1),
             103: ("g", lambda _: 0),
             71: ("G", lambda _: len(lines)),
             49: ("1", lambda _: 0),
@@ -241,14 +241,14 @@ def color_menu(parent_win: Any, original: int) -> int:
         }
         if key in move_options:
             _, func = move_options[key]
-            selected = func(selected)
+            cursor = func(cursor)
         elif key in (113, 27):  # q | esc
             return original
         elif key == 10:  # enter
-            return get_color(lines[selected].strip())
+            return get_color(lines[cursor].strip())
         else:
             continue
-        selected = clamp(selected, 0, len(lines))
+        cursor = clamp(cursor, 0, len(lines))
         parent_win.refresh()
         win.refresh()
 
@@ -320,7 +320,7 @@ def sort_menu(
         try:
             key = win.getch()
         except KeyboardInterrupt:
-            return todos, cursor
+            return todos, int(selected)
         return_options: dict[int, tuple[str, Callable[..., tuple[list[Todo], int]]]] = {
             113: ("q", lambda: (todos, int(selected))),
             27: ("esc", lambda: (todos, int(selected))),
@@ -329,7 +329,7 @@ def sort_menu(
         if key in move_options:
             _, func = move_options[key]
             cursor = func(cursor)
-        elif key in return_options:  # q, esc, enter
+        elif key in return_options:
             _, func = return_options[key]
             return func()
         else:
