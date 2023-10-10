@@ -211,7 +211,7 @@ def color_menu(parent_win: Any, original: int) -> int:
         (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2,
     )
     win.box()
-    move_options = {
+    move_options: dict[int, tuple[str, Callable[[int], int]]] = {
         107: ("k", lambda cursor: cursor - 1),
         106: ("j", lambda cursor: cursor + 1),
         103: ("g", lambda _: 0),
@@ -245,11 +245,11 @@ def color_menu(parent_win: Any, original: int) -> int:
             10: ("enter", lambda: get_color(lines[cursor].strip())),
         }
         if key in move_options:
-            _, func = move_options[key]
-            cursor = func(cursor)
+            _, move_func = move_options[key]
+            cursor = move_func(cursor)
         elif key in return_options:
-            _, func = return_options[key]
-            return func()
+            _, return_func = return_options[key]
+            return return_func()
         else:
             continue
         cursor = clamp(cursor, 0, len(lines))
