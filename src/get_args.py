@@ -10,8 +10,8 @@ from src.md_to_py import md_table_to_lines
 
 BULLETS = False
 CHECKBOX = ""
-CONTROLS_BEGIN_INDEX = 67
-CONTROLS_END_INDEX = 95
+CONTROLS_BEGIN_INDEX = 68
+CONTROLS_END_INDEX = 96
 DEFAULT_TODO = "todo.txt"
 ENUMERATE = False
 FILENAME = Path(DEFAULT_TODO)
@@ -22,6 +22,7 @@ NO_GUI = False
 RELATIVE_ENUMERATE = False
 SIMPLE_BOXES = False
 STRIKETHROUGH = False
+TKINTER_GUI = False
 
 CHECKBOX_OPTIONS = ("🗹", "☑")
 
@@ -74,6 +75,14 @@ def get_args() -> Namespace:
         default=ENUMERATE,
         help=f"Boolean: determines if todos are numbered when\
             printed or not. Default is `{ENUMERATE}`.",
+    )
+    parser.add_argument(
+        "--tk-gui",
+        "-g",
+        action="store_true",
+        default=TKINTER_GUI,
+        help=f"Boolean: determine if curses (False) or tkinter gui\
+            (True) should be used. Default is `{TKINTER_GUI}`.",
     )
     parser.add_argument(
         "--help",
@@ -167,4 +176,5 @@ NO_GUI = command_line_args.no_gui
 RELATIVE_ENUMERATE = command_line_args.relative_enumeration
 SIMPLE_BOXES = command_line_args.simple_boxes
 STRIKETHROUGH = command_line_args.strikethrough
+TKINTER_GUI = command_line_args.tk_gui
 del command_line_args

@@ -1,12 +1,16 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
-import curses
 from typing import Any, Callable
 
 from src.class_mode import Mode
 from src.class_todo import Todo
-from src.get_args import INDENT
+from src.get_args import INDENT, TKINTER_GUI
+
+if TKINTER_GUI:
+    from src.wrap_tkinter import curses
+else:
+    import curses  # type: ignore
 
 
 def set_header(stdscr: Any, message: str) -> None:

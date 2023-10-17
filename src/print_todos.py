@@ -3,7 +3,6 @@
 
 from typing import Any, TypeVar
 from os import get_terminal_size
-import curses
 
 from src.class_todo import Todo
 from src.class_cursor import Cursor
@@ -14,7 +13,13 @@ from src.get_args import (
     BULLETS,
     ENUMERATE,
     RELATIVE_ENUMERATE,
+    TKINTER_GUI,
 )
+
+if TKINTER_GUI:
+    from src.wrap_tkinter import curses
+else:
+    import curses  # type: ignore
 
 
 T = TypeVar("T")

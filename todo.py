@@ -3,10 +3,15 @@
 # pylint: disable=no-name-in-module, missing-class-docstring
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
-import curses
 from pathlib import Path
 from sys import exit as sys_exit
 from typing import Any, Callable
+
+try:
+    import curses
+    from curses import wrapper
+except ImportError:
+    sys_exit("Try running again with -g option")
 
 from pyfiglet import figlet_format as big
 from pyperclip import copy, paste
@@ -22,6 +27,7 @@ from src.get_args import (
     HEADER,
     HELP_FILE,
     NO_GUI,
+    TKINTER_GUI,
 )
 from src.get_todo import hline, set_header, wgetnstr
 from src.md_to_py import md_table_to_lines
@@ -888,4 +894,7 @@ if __name__ == "__main__":
         print(f"{HEADER}:")
         print_todos(None, validate_file(read_file(FILENAME)), Cursor(0))
         sys_exit()
-    curses.wrapper(main)
+    if TKINTER_GUI:
+        from src.wrap_tkinter import curses  # type: ignore
+        from src.wrap_tkinter import wrapper  # type: ignore
+    wrapper(main)
