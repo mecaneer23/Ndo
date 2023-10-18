@@ -153,7 +153,6 @@ class Screen:
         special_keys: dict[int, _Key] = {
             22: _Key("Backspace", 8, ctrl=23),
             23: _Key("Tab", 9, shift=353),
-            # TODO: Maybe shift tab should be 2 shift escapes + 90?
             36: _Key("Return", 10),
             110: _Key("Home", 72, escape="none" * 2),
             111: _Key("Up", 259),
@@ -162,7 +161,6 @@ class Screen:
             115: _Key("End", 72, escape="none" * 2),
             116: _Key("Down", 258),
             119: _Key("Delete", 330, ctrl=100, escape="ctrl"),
-            # TODO: Maybe delete should be 3 none escapes + 51?
         }
         if event.keycode in special_keys:
             if shift:
