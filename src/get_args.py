@@ -2,9 +2,16 @@
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
 from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
-from curses import wrapper
 from pathlib import Path
 from typing import Any
+
+try:
+    from curses import wrapper  # type: ignore
+    TKINTER_GUI = False
+except ImportError:
+    def wrapper(_) -> str:
+        return CHECKBOX_OPTIONS[1]
+    TKINTER_GUI = True
 
 from src.md_to_py import md_table_to_lines
 
@@ -22,7 +29,6 @@ NO_GUI = False
 RELATIVE_ENUMERATE = False
 SIMPLE_BOXES = False
 STRIKETHROUGH = False
-TKINTER_GUI = False
 
 CHECKBOX_OPTIONS = ("🗹", "☑")
 

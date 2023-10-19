@@ -1,4 +1,4 @@
-# pylint: disable=missing-class-docstring
+# pylint: disable=missing-class-docstring, import-error
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
 from typing import Any, TypeVar
@@ -17,9 +17,9 @@ from src.get_args import (
 )
 
 if TKINTER_GUI:
-    from src.wrap_tkinter import curses
+    from tcurses import curses
 else:
-    import curses  # type: ignore
+    import curses
 
 
 T = TypeVar("T")
