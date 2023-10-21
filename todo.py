@@ -29,10 +29,8 @@ from src.print_todos import make_printable_sublist, print_todos
 
 if TKINTER_GUI:
     from tcurses import curses
-    from tcurses import wrapper
 else:
     import curses
-    from curses import wrapper
 
 PRINT_HISTORY = False
 HISTORY_FILE = "debugging/log.txt"
@@ -895,4 +893,4 @@ if __name__ == "__main__":
         print(f"{HEADER}:")
         print_todos(None, validate_file(read_file(FILENAME)), Cursor(0))
         sys_exit()
-    wrapper(main)
+    curses.wrapper(main)
