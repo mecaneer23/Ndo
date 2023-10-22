@@ -1,4 +1,4 @@
-# pylint: disable=missing-class-docstring
+# pylint: disable=missing-class-docstring, import-error
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
 from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
@@ -13,7 +13,7 @@ except ImportError:
         return CHECKBOX_OPTIONS[1]
     TKINTER_GUI = True
 
-from src.md_to_py import md_table_to_lines
+from md_to_py import md_table_to_lines
 
 BULLETS = False
 CHECKBOX = ""

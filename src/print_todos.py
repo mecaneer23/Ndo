@@ -4,9 +4,9 @@
 from typing import Any, TypeVar
 from os import get_terminal_size
 
-from src.class_todo import Todo
-from src.class_cursor import Cursor
-from src.get_args import (
+from class_todo import Todo
+from class_cursor import Cursor
+from get_args import (
     INDENT,
     STRIKETHROUGH,
     SIMPLE_BOXES,

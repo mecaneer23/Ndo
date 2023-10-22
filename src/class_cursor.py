@@ -1,9 +1,9 @@
-# pylint: disable=missing-class-docstring
+# pylint: disable=missing-class-docstring, import-error
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
 from typing import Any
 
-from src.class_todo import Todo
+from class_todo import Todo
 
 
 class Cursor:
@@ -22,6 +22,15 @@ class Cursor:
 
     def __contains__(self, child: int) -> bool:
         return child in self.positions
+
+    def get(self) -> list[int]:
+        return self.positions
+
+    def get_first(self) -> int:
+        return self.positions[0]
+
+    def get_last(self) -> int:
+        return self.positions[-1]
 
     def set_to(self, position: int) -> None:
         self.positions = [position]

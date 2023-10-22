@@ -382,17 +382,17 @@ def cursor_to(position: int, len_todos: int) -> int:
 
 
 def todo_up(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], list[int]]:
-    todos = move_todos(todos, selected.positions[-1], selected.positions[0] - 1)
+    todos = move_todos(todos, selected.get_last(), selected.get_first() - 1)
     update_file(FILENAME, todos)
     selected.slide_up()
-    return todos, selected.positions
+    return todos, selected.get()
 
 
 def todo_down(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], list[int]]:
-    todos = move_todos(todos, selected.positions[0], selected.positions[-1] + 1)
+    todos = move_todos(todos, selected.get_first(), selected.get_last() + 1)
     update_file(FILENAME, todos)
     selected.slide_down(len(todos))
-    return todos, selected.positions
+    return todos, selected.get()
 
 
 def new_todo_next(
@@ -449,7 +449,7 @@ def delete_todo(
 
 def color_todo(stdscr: Any, todos: list[Todo], selected: Cursor) -> list[Todo]:
     new_color = color_menu(stdscr, todos[int(selected)].color)
-    for pos in selected.positions:
+    for pos in selected.get():
         todos[pos].set_color(new_color)
     stdscr.clear()
     update_file(FILENAME, todos)
@@ -502,7 +502,7 @@ def blank_todo(todos: list[Todo], selected: int) -> tuple[list[Todo], int]:
 
 
 def toggle(todos: list[Todo], selected: Cursor) -> list[Todo]:
-    for pos in selected.positions:
+    for pos in selected.get():
         todos[pos].toggle()
     update_file(FILENAME, todos)
     return todos
@@ -549,21 +549,21 @@ def relative_cursor_to(
 
 
 def indent(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
-    for pos in selected.positions:
+    for pos in selected.get():
         todos[pos].indent()
     update_file(FILENAME, todos)
-    return todos, selected.positions[0]
+    return todos, selected.get_first()
 
 
 def dedent(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
-    for pos in selected.positions:
+    for pos in selected.get():
         todos[pos].dedent()
     update_file(FILENAME, todos)
-    return todos, selected.positions[0]
+    return todos, selected.get_first()
 
 
 def toggle_todo_note(todos: list[Todo], selected: Cursor) -> None:
-    for pos in selected.positions:
+    for pos in selected.get():
         todo = todos[pos]
         todo.box_char = None if todo.has_box() else "-"
     update_file(FILENAME, todos)

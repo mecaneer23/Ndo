@@ -1,7 +1,7 @@
-# pylint: disable=missing-class-docstring
+# pylint: disable=missing-class-docstring, import-error
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
-from src.get_args import CHECKBOX, INDENT
+from get_args import CHECKBOX, INDENT
 
 
 class Todo:
