@@ -13,7 +13,7 @@ except ImportError:
         return CHECKBOX_OPTIONS[1]
     TKINTER_GUI = True
 
-from md_to_py import md_table_to_lines
+from src.md_to_py import md_table_to_lines
 
 BULLETS = False
 CHECKBOX = ""

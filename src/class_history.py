@@ -1,7 +1,7 @@
 # pylint: disable=missing-class-docstring, import-error
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
-from class_todo import Todo
+from src.class_todo import Todo
 
 
 class Restorable:

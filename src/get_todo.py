@@ -3,9 +3,9 @@
 
 from typing import Any, Callable
 
-from class_mode import Mode
-from class_todo import Todo
-from get_args import INDENT, TKINTER_GUI
+from src.class_mode import Mode
+from src.class_todo import Todo
+from src.get_args import INDENT, TKINTER_GUI
 
 if TKINTER_GUI:
     from tcurses import curses
