@@ -55,6 +55,8 @@ def read_file(filename: Path) -> str:
 
 
 def validate_file(raw_data: str) -> list[Todo]:
+    if len(raw_data) == 0:
+        return []
     return [Todo(line) for line in raw_data.split("\n")]
 
 
