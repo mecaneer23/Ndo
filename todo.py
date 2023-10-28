@@ -3,6 +3,7 @@
 # pylint: disable=no-name-in-module, import-error, missing-class-docstring
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
+from os import stat
 from pathlib import Path
 from sys import exit as sys_exit
 from typing import Any, Callable
@@ -60,9 +61,8 @@ def validate_file(raw_data: str) -> list[Todo]:
     return [Todo(line) for line in raw_data.split("\n")]
 
 
-def is_file_updated(filename: Path, todos: list[Todo]) -> bool:
-    with filename.open() as file_obj:
-        return not validate_file(file_obj.read()) == todos
+def get_file_modified_time(filename: Path) -> float:
+    return stat(filename).st_ctime
 
 
 def clamp(counter: int, minimum: int, maximum: int) -> int:
@@ -515,10 +515,9 @@ def remove_file(filename: Path) -> int:
     return 0
 
 
-def quit_program(todos: list[Todo], edits: int) -> int:
-    if is_file_updated(FILENAME, todos):
-        todos = validate_file(read_file(FILENAME))
-    if edits < 2:
+def quit_program(todos: list[Todo], edits: int, prev_time: float) -> int:
+    todos, _ = update_modified_time(prev_time, todos)
+    if edits < 1:
         return remove_file(FILENAME)
     return update_file(FILENAME, todos)
 
@@ -774,6 +773,13 @@ def init() -> None:
         curses.init_pair(i, color, -1)
 
 
+def update_modified_time(prev_time: float, todos: list[Todo]) -> tuple[list[Todo], float]:
+    current_time = get_file_modified_time(FILENAME)
+    if prev_time != current_time:
+        todos = validate_file(read_file(FILENAME))
+    return todos, current_time
+
+
 def main(stdscr: Any) -> int:
     init()
     todos = validate_file(read_file(FILENAME))
@@ -783,6 +789,7 @@ def main(stdscr: Any) -> int:
     mode = Mode(True)
     copied_todo = Todo()
     edits = len(todos)
+    file_modified_time = get_file_modified_time(FILENAME)
     # if adding a new feature that updates `todos`,
     # make sure it also calls update_file()
     keys: dict[int, tuple[str, Callable[..., Any], str]] = {
@@ -859,8 +866,7 @@ def main(stdscr: Any) -> int:
 
     while True:
         edits += 1
-        if is_file_updated(FILENAME, todos):
-            todos = validate_file(read_file(FILENAME))
+        todos, file_modified_time = update_modified_time(file_modified_time, todos)
         set_header(stdscr, f"{HEADER}:")
         sublist_top = print_todos(stdscr, todos, selected, sublist_top)
         stdscr.refresh()
@@ -883,7 +889,7 @@ def main(stdscr: Any) -> int:
             },
         )
         if isinstance(next_step, list):
-            return quit_program(next_step, edits)
+            return quit_program(next_step, edits, file_modified_time)
         if isinstance(next_step, int) and next_step not in (18, 117):  # redo/undo
             history.add(todos, int(selected))
         print_history(history)
