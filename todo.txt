@@ -6,5 +6,3 @@
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
 - make startup faster
-- use submodule instead of manually pasted in wrap_tkinter
-  - use different folder - update usages to match
