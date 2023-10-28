@@ -60,7 +60,7 @@ def validate_file(raw_data: str) -> list[Todo]:
     return [Todo(line) for line in raw_data.split("\n")]
 
 
-def is_file_externally_updated(filename: Path, todos: list[Todo]) -> bool:
+def is_file_updated(filename: Path, todos: list[Todo]) -> bool:
     with filename.open() as file_obj:
         return not validate_file(file_obj.read()) == todos
 
@@ -516,7 +516,7 @@ def remove_file(filename: Path) -> int:
 
 
 def quit_program(todos: list[Todo], edits: int) -> int:
-    if is_file_externally_updated(FILENAME, todos):
+    if is_file_updated(FILENAME, todos):
         todos = validate_file(read_file(FILENAME))
     if edits < 2:
         return remove_file(FILENAME)
@@ -859,7 +859,7 @@ def main(stdscr: Any) -> int:
 
     while True:
         edits += 1
-        if is_file_externally_updated(FILENAME, todos):
+        if is_file_updated(FILENAME, todos):
             todos = validate_file(read_file(FILENAME))
         set_header(stdscr, f"{HEADER}:")
         sublist_top = print_todos(stdscr, todos, selected, sublist_top)
