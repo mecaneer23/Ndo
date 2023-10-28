@@ -773,7 +773,9 @@ def init() -> None:
         curses.init_pair(i, color, -1)
 
 
-def update_modified_time(prev_time: float, todos: list[Todo]) -> tuple[list[Todo], float]:
+def update_modified_time(
+    prev_time: float, todos: list[Todo]
+) -> tuple[list[Todo], float]:
     current_time = get_file_modified_time(FILENAME)
     if prev_time != current_time:
         todos = validate_file(read_file(FILENAME))
