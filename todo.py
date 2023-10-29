@@ -69,6 +69,14 @@ def clamp(counter: int, minimum: int, maximum: int) -> int:
     return min(max(counter, minimum), maximum - 1)
 
 
+def overflow(counter: int, minimum: int, maximum: int) -> int:
+    if counter >= maximum:
+        return minimum + (counter - maximum)
+    if counter < minimum:
+        return maximum - (minimum - counter) 
+    return counter
+
+
 def update_file(filename: Path, lst: list[Todo]) -> int:
     with filename.open("w", newline="\n") as file_obj:
         return file_obj.write("\n".join(map(repr, lst)))
@@ -222,7 +230,7 @@ def color_menu(parent_win: Any, original: int) -> int:
         107: ("k", lambda cursor: cursor - 1),
         106: ("j", lambda cursor: cursor + 1),
         103: ("g", lambda _: 0),
-        71: ("G", lambda _: len(lines)),
+        71: ("G", lambda _: len(lines) - 1),
         49: ("1", lambda _: 0),
         50: ("2", lambda _: 1),
         51: ("3", lambda _: 2),
@@ -259,7 +267,7 @@ def color_menu(parent_win: Any, original: int) -> int:
             return return_func()
         else:
             continue
-        cursor = clamp(cursor, 0, len(lines))
+        cursor = overflow(cursor, 0, len(lines))
         parent_win.refresh()
         win.refresh()
 
