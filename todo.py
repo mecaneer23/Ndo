@@ -73,7 +73,7 @@ def overflow(counter: int, minimum: int, maximum: int) -> int:
     if counter >= maximum:
         return minimum + (counter - maximum)
     if counter < minimum:
-        return maximum - (minimum - counter) 
+        return maximum - (minimum - counter)
     return counter
 
 
