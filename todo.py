@@ -8,8 +8,19 @@ from pathlib import Path
 from sys import exit as sys_exit
 from typing import Any, Callable
 
-from pyfiglet import figlet_format as big
-from pyperclip import copy, paste
+try:
+    from pyfiglet import figlet_format as big
+
+    FIGLET_FORMAT_EXISTS = True
+except ImportError:
+    FIGLET_FORMAT_EXISTS = False
+
+try:
+    from pyperclip import copy, paste
+
+    CLIPBOARD_EXISTS = True
+except ImportError:
+    CLIPBOARD_EXISTS = False
 
 from src.class_cursor import Cursor
 from src.class_history import UndoRedo
@@ -189,11 +200,14 @@ def help_menu(parent_win: Any) -> None:
 
 
 def magnify(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
+    if not FIGLET_FORMAT_EXISTS:
+        set_header(stdscr, "Magnify dependency not available")
+        return
     stdscr.clear()
     set_header(stdscr, "Magnifying...")
-    lines = big(todos[int(selected)].display_text, width=stdscr.getmaxyx()[1]).split(
-        "\n"
-    )
+    lines = big(  # pyright: ignore
+        todos[int(selected)].display_text, width=stdscr.getmaxyx()[1]
+    ).split("\n")
     lines.append("")
     lines = [line.ljust(stdscr.getmaxyx()[1] - 2) for line in lines]
     cursor = 0
@@ -359,9 +373,12 @@ def sort_menu(
 
 
 def todo_from_clipboard(
-    todos: list[Todo], selected: int, copied_todo: Todo
+    stdscr: Any, todos: list[Todo], selected: int, copied_todo: Todo
 ) -> list[Todo]:
-    todo = paste()
+    if not CLIPBOARD_EXISTS:
+        set_header(stdscr, "Clipboard functionality not available")
+        return todos
+    todo = paste()  # pyright: ignore
     if copied_todo.display_text == todo:
         todos.insert(selected + 1, Todo(copied_todo.text))
         return todos
@@ -487,8 +504,13 @@ def edit_todo(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo]:
     return todos
 
 
-def copy_todo(todos: list[Todo], selected: Cursor, copied_todo: Todo) -> None:
-    copy(todos[int(selected)].display_text)
+def copy_todo(
+    stdscr: Any, todos: list[Todo], selected: Cursor, copied_todo: Todo
+) -> None:
+    if not CLIPBOARD_EXISTS:
+        set_header(stdscr, "Clipboard functionality not available")
+        return
+    copy(todos[int(selected)].display_text)  # pyright: ignore
     copied_todo.call_init(todos[int(selected)].text)
 
 
@@ -496,7 +518,7 @@ def paste_todo(
     stdscr: Any, todos: list[Todo], selected: int, copied_todo: Todo
 ) -> tuple[list[Todo], int]:
     temp = todos.copy()
-    todos = todo_from_clipboard(todos, selected, copied_todo)
+    todos = todo_from_clipboard(stdscr, todos, selected, copied_todo)
     stdscr.clear()
     if temp != todos:
         selected = cursor_down(selected, len(todos))
@@ -602,8 +624,8 @@ def handle_new_todo_next(
 def handle_delete_todo(
     stdscr: Any, todos: list[Todo], selected: Cursor, copied_todo: Todo
 ) -> list[Todo]:
-    if len(todos) > 0:
-        copy_todo(todos, selected, copied_todo)
+    if len(todos) > 0 and CLIPBOARD_EXISTS:
+        copy_todo(stdscr, todos, selected, copied_todo)
     return selected.todo_set_to(delete_todo(stdscr, todos, selected))
 
 
@@ -838,7 +860,7 @@ def main(stdscr: Any) -> int:
         112: ("p", handle_paste, "stdscr, todos, selected, copied_todo"),
         115: ("s", handle_sort_menu, "stdscr, todos, selected"),
         117: ("u", handle_undo, "selected, history"),
-        121: ("y", copy_todo, "todos, selected, copied_todo"),
+        121: ("y", copy_todo, "stdscr, todos, selected, copied_todo"),
         258: ("down", handle_cursor_down, "todos, selected"),
         259: ("up", handle_cursor_up, "todos, selected"),
         330: ("delete", toggle_todo_note, "todos, selected"),
