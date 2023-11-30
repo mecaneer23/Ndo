@@ -7,4 +7,3 @@
   -4 allow wgetnstr to use multiline editing
 - make startup faster
 - fix silence if dependencies are not installed
-- allow switching between notes and todos in insert mode
