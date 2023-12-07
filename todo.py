@@ -157,7 +157,7 @@ def simple_scroll_keybinds(
 ) -> int:
     try:
         key = win.getch()
-    except KeyboardInterrupt:  # exit on ^C
+    except Key.ctrl_c:
         return -1
     if key in (Key.up, Key.k):
         cursor = clamp(cursor - 1, 0, len_lines - 2)
@@ -768,7 +768,7 @@ def get_main_input(
 ) -> int | list[Todo]:
     try:
         key = stdscr.getch()
-    except KeyboardInterrupt:  # exit on ^C
+    except Key.ctrl_c:
         return todos
     if key == Key.q:
         return todos
