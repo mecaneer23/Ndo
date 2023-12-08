@@ -13,10 +13,13 @@ class Key:
     """
 
     ctrl_a = 1
+    backspace = 8
     tab = 9
     enter = 10
     ctrl_k = 11
+    enter_ = 13
     ctrl_r = 18
+    ctrl_backspace = 23
     ctrl_x = 24
     escape = 27
     minus = 45
@@ -26,19 +29,30 @@ class Key:
     forward_slash = 47
     zero = 48
     one = 49
+    ctrl_arrow = 49
     two = 50
+    modifier_shift = 50
     three = 51
+    modifier_delete = 51
+    modifier_alt = 51
     four = 52
     five = 53
+    modifier_ctrl = 53
     six = 54
     seven = 55
     eight = 56
     nine = 57
+    semi_colon = 59
+    right_arrow = 67
+    left_arrow = 68
+    end = 70
     G = 71
     alt_G = 71
+    home = 72
     J = 74
     K = 75
     O = 79
+    indent_dedent = 90
     b = 98
     c = 99
     d = 100
@@ -56,8 +70,11 @@ class Key:
     s = 115
     u = 117
     y = 121
+    tilde = 126
+    backspace_ = 127
     down = 258
     up = 259
+    backspace__ = 263
     delete = 330
     shift_tab_windows = 351
     shift_tab = 353

@@ -6,6 +6,7 @@ from typing import Any, Callable
 from src.class_mode import Mode
 from src.class_todo import Todo
 from src.get_args import INDENT, TKINTER_GUI
+from src.keys import Key
 
 if TKINTER_GUI:
     from tcurses import curses
@@ -107,13 +108,13 @@ def handle_ctrl_arrow(
 ) -> tuple[list[str], int]:
     for _ in ";5":
         win.getch()
-    options = {
-        67: ("right arrow", handle_ctrl_right_arrow),
-        68: ("left arrow", handle_ctrl_left_arrow),
+    options: dict[int, Callable[[list[str], int], tuple[list[str], int]]] = {
+        Key.right_arrow: handle_ctrl_right_arrow,
+        Key.left_arrow: handle_ctrl_left_arrow,
     }
     direction = win.getch()
     if direction in options:
-        chars, position = options[direction][1](chars, position)
+        chars, position = options[direction](chars, position)
     return chars, position
 
 
@@ -124,17 +125,17 @@ def handle_delete_modifiers(
         input_char = stdscr_win[1].getch()
     except KeyboardInterrupt:
         return chars, position
-    if input_char == 126:  # ~
+    if input_char == Key.tilde:
         return handle_delete(chars, position)
-    if input_char == 59:  # ;
+    if input_char == Key.semi_colon:
         try:
             modifier = stdscr_win[1].getch()
         except KeyboardInterrupt:
             return chars, position
         stdscr_win[1].getch()  # skip `~`
-        if modifier == 53:  # ctrl
+        if modifier == Key.modifier_ctrl:
             return handle_ctrl_delete(chars, position)
-        if modifier in (50, 51):  # shift, alt
+        if modifier in (Key.modifier_shift, Key.modifier_alt):
             handle_toggle_note_todo(stdscr_win[0], todo)
     return chars, position
 
@@ -176,13 +177,19 @@ def handle_escape(
     subch_table: dict[
         int, tuple[Callable[..., tuple[list[str], int]], tuple[Any, ...]]
     ] = {
-        68: (handle_left_arrow, (chars, position)),
-        67: (handle_right_arrow, (chars, position)),
-        51: (handle_delete_modifiers, (stdscr_win, todo, chars, position)),
-        49: (handle_ctrl_arrow, (stdscr_win[1], chars, position)),
-        72: (lambda chars: (chars, 0), (chars,)),  # home
-        70: (lambda chars: (chars, len(chars)), (chars,)),  # end
-        90: (handle_indent_dedent, (stdscr_win[0], todo, "dedent", chars, position)),
+        Key.left_arrow: (handle_left_arrow, (chars, position)),
+        Key.right_arrow: (handle_right_arrow, (chars, position)),
+        Key.modifier_delete: (
+            handle_delete_modifiers,
+            (stdscr_win, todo, chars, position),
+        ),
+        Key.ctrl_arrow: (handle_ctrl_arrow, (stdscr_win[1], chars, position)),
+        Key.home: (lambda chars: (chars, 0), (chars,)),
+        Key.end: (lambda chars: (chars, len(chars)), (chars,)),
+        Key.indent_dedent: (
+            handle_indent_dedent,
+            (stdscr_win[0], todo, "dedent", chars, position),
+        ),
     }
     func, args = subch_table[subch]
     return func(*args)
@@ -236,9 +243,9 @@ def get_chars_position(
     backspace_table: dict[int, Callable[..., tuple[list[str], int]]],
 ) -> tuple[list[str], int] | None:
     chars, position, todo = chars_position_todo
-    if input_char == 27:  # any escape sequence `^[`
+    if input_char == Key.escape:
         return handle_escape(stdscr_win, chars, position, mode, todo)
-    if input_char == 9:  # tab
+    if input_char == Key.tab:
         return handle_indent_dedent(stdscr_win[0], todo, "indent", chars, position)
     if input_char in backspace_table:
         return backspace_table[input_char](chars, position)
@@ -300,10 +307,10 @@ def wgetnstr(
     win.box()
     win.nodelay(False)
     backspace_table = {
-        8: handle_backspace,
-        127: handle_backspace,
-        263: handle_backspace,
-        23: handle_ctrl_backspace,
+        Key.backspace: handle_backspace,
+        Key.backspace_: handle_backspace,
+        Key.backspace__: handle_backspace,
+        Key.ctrl_backspace: handle_ctrl_backspace,
     }
     while True:
         if position == len(chars):
@@ -318,9 +325,9 @@ def wgetnstr(
         except KeyboardInterrupt:  # ctrl+c
             toggle_mode(mode)
             return original
-        if input_char in (10, 13):  # enter
+        if input_char in (Key.enter, Key.enter_):
             break
-        if input_char in (24, 11):  # ctrl + x/k
+        if input_char in (Key.ctrl_k, Key.ctrl_x):
             toggle_mode(mode)
             break
         next_step = get_chars_position(
