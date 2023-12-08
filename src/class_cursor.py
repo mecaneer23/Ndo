@@ -4,6 +4,7 @@
 from typing import Any
 
 from src.class_todo import Todo
+from src.keys import Key
 
 
 class Cursor:
@@ -115,17 +116,17 @@ class Cursor:
                 key = stdscr.getch()
             except KeyboardInterrupt:  # exit on ^C
                 return
-            if key != 27:  # not an escape sequence
+            if key != Key.escape:  # not an escape sequence
                 return
             stdscr.nodelay(True)
             subch = stdscr.getch()  # alt + ...
             stdscr.nodelay(False)
-            if subch == 107:  # k
+            if subch == Key.k:
                 self.multiselect_to(self.positions[0] - int(total), max_len)
-            elif subch == 106:  # j
+            elif subch == Key.j:
                 self.multiselect_to(self.positions[0] + int(total), max_len)
-            elif subch in range(48, 58):  # digits
-                total += str(subch - 48)
+            elif subch in Key.digits():
+                total += str(Key.normalize_ascii_digit_to_digit(subch))
                 continue
             return
 
