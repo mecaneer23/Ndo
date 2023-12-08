@@ -244,18 +244,18 @@ def color_menu(parent_win: Any, original: int) -> int:
         (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2,
     )
     win.box()
-    move_options: dict[int, tuple[str, Callable[[int], int]]] = {
-        Key.k: ("k", lambda cursor: cursor - 1),
-        Key.j: ("j", lambda cursor: cursor + 1),
-        Key.g: ("g", lambda _: 0),
-        Key.G: ("G", lambda _: len(lines) - 1),
-        Key.one: ("1", lambda _: 0),
-        Key.two: ("2", lambda _: 1),
-        Key.three: ("3", lambda _: 2),
-        Key.four: ("4", lambda _: 3),
-        Key.five: ("5", lambda _: 4),
-        Key.six: ("6", lambda _: 5),
-        Key.seven: ("7", lambda _: 6),
+    move_options: dict[int, Callable[[int], int]] = {
+        Key.k: lambda cursor: cursor - 1,
+        Key.j: lambda cursor: cursor + 1,
+        Key.g: lambda _: 0,
+        Key.G: lambda _: len(lines) - 1,
+        Key.one: lambda _: 0,
+        Key.two: lambda _: 1,
+        Key.three: lambda _: 2,
+        Key.four: lambda _: 3,
+        Key.five: lambda _: 4,
+        Key.six: lambda _: 5,
+        Key.seven: lambda _: 6,
     }
     cursor = original - 1
     while True:
@@ -272,16 +272,16 @@ def color_menu(parent_win: Any, original: int) -> int:
             key = win.getch()
         except KeyboardInterrupt:
             return original
-        return_options: dict[int, tuple[str, Callable[[], int]]] = {
-            Key.q: ("q", lambda: original),
-            Key.escape: ("esc", lambda: original),
-            Key.enter: ("enter", lambda: get_color(lines[cursor].strip())),
+        return_options: dict[int, Callable[[], int]] = {
+            Key.q: lambda: original,
+            Key.escape: lambda: original,
+            Key.enter: lambda: get_color(lines[cursor].strip()),
         }
         if key in move_options:
-            _, move_func = move_options[key]
+            move_func = move_options[key]
             cursor = move_func(cursor)
         elif key in return_options:
-            _, return_func = return_options[key]
+            return_func = return_options[key]
             return return_func()
         else:
             continue
@@ -338,11 +338,11 @@ def sort_menu(
         (parent_win.getmaxyx()[1] - (len(max(lines, key=len)) + 1)) // 2,
     )
     win.box()
-    move_options = {
-        Key.k: ("k", lambda cursor: cursor - 1),
-        Key.j: ("j", lambda cursor: cursor + 1),
-        Key.g: ("g", lambda _: 0),
-        Key.G: ("G", lambda _: len(lines)),
+    move_options: dict[int, Callable[[int], int]] = {
+        Key.k: lambda cursor: cursor - 1,
+        Key.j: lambda cursor: cursor + 1,
+        Key.g: lambda _: 0,
+        Key.G: lambda _: len(lines),
     }
     cursor = 0
     while True:
@@ -358,16 +358,16 @@ def sort_menu(
             key = win.getch()
         except KeyboardInterrupt:
             return todos, int(selected)
-        return_options: dict[int, tuple[str, Callable[..., tuple[list[Todo], int]]]] = {
-            Key.q: ("q", lambda: (todos, int(selected))),
-            Key.escape: ("esc", lambda: (todos, int(selected))),
-            Key.enter: ("enter", lambda: sort_by(lines[cursor], todos, selected)),
+        return_options: dict[int, Callable[..., tuple[list[Todo], int]]] = {
+            Key.q: lambda: (todos, int(selected)),
+            Key.escape: lambda: (todos, int(selected)),
+            Key.enter: lambda: sort_by(lines[cursor], todos, selected),
         }
         if key in move_options:
-            _, func = move_options[key]
+            func = move_options[key]
             cursor = func(cursor)
         elif key in return_options:
-            _, func = return_options[key]
+            func = return_options[key]
             return func()
         else:
             continue
@@ -763,7 +763,7 @@ def get_possible_todos(
 def get_main_input(
     stdscr: Any,
     todos: list[Todo],
-    keys_esckeys: tuple[dict[int, tuple[str, Callable[..., Any], str]], ...],
+    keys_esckeys: tuple[dict[int, tuple[Callable[..., Any], str]], ...],
     possible_args: dict[str, Any],
 ) -> int | list[Todo]:
     try:
@@ -773,7 +773,7 @@ def get_main_input(
     if key == Key.q:
         return todos
     if key in keys_esckeys[0]:
-        _, func, args = keys_esckeys[0][key]
+        func, args = keys_esckeys[0][key]
         if key == Key.escape:
             stdscr.nodelay(True)
             key = stdscr.getch()
@@ -782,7 +782,7 @@ def get_main_input(
                 return todos
             if key not in keys_esckeys[1]:
                 return key
-            _, func, args = keys_esckeys[1][key]
+            func, args = keys_esckeys[1][key]
         possible_todos = get_possible_todos(
             func,
             args,
@@ -832,74 +832,72 @@ def main(stdscr: Any) -> int:
     file_modified_time = get_file_modified_time(FILENAME)
     # if adding a new feature that updates `todos`,
     # make sure it also calls update_file()
-    keys: dict[int, tuple[str, Callable[..., Any], str]] = {
-        Key.ctrl_a: ("ctrl + a", selected.multiselect_all, "len(todos)"),
-        Key.tab: ("tab", handle_indent, "todos, selected"),
-        Key.enter: ("enter", handle_enter, "stdscr, todos, selected, mode"),
-        Key.ctrl_k: ("ctrl + k", mode.toggle, "None"),
-        Key.ctrl_r: ("ctrl + r", handle_redo, "selected, history"),
-        Key.ctrl_x: ("ctrl + x", mode.toggle, "None"),
-        Key.escape: ("esc sequence", lambda: None, "None"),
-        Key.minus: ("-", handle_insert_blank_todo, "todos, selected"),
-        Key.slash: ("/", search, "stdscr, todos, selected"),
-        Key.zero: ("0", handle_digits, f"stdscr, todos, selected, {Key.zero}"),
-        Key.one: ("1", handle_digits, f"stdscr, todos, selected, {Key.one}"),
-        Key.two: ("2", handle_digits, f"stdscr, todos, selected, {Key.two}"),
-        Key.three: ("3", handle_digits, f"stdscr, todos, selected, {Key.three}"),
-        Key.four: ("4", handle_digits, f"stdscr, todos, selected, {Key.four}"),
-        Key.five: ("5", handle_digits, f"stdscr, todos, selected, {Key.five}"),
-        Key.six: ("6", handle_digits, f"stdscr, todos, selected, {Key.six}"),
-        Key.seven: ("7", handle_digits, f"stdscr, todos, selected, {Key.seven}"),
-        Key.eight: ("8", handle_digits, f"stdscr, todos, selected, {Key.eight}"),
-        Key.nine: ("9", handle_digits, f"stdscr, todos, selected, {Key.nine}"),
-        Key.G: ("shift + g", handle_to_bottom, "todos, selected"),
-        Key.J: ("shift + j", selected.multiselect_down, "len(todos)"),
-        Key.K: ("shift + k", selected.multiselect_up, "None"),
-        Key.O: ("shift + o", new_todo_current, "stdscr, todos, int(selected)"),
-        Key.b: ("b", magnify, "stdscr, todos, selected"),
-        Key.c: ("c", color_todo, "stdscr, todos, selected"),
-        Key.d: ("d", handle_delete_todo, "stdscr, todos, selected, copied_todo"),
-        Key.g: ("g", handle_to_top, "todos, selected"),
-        Key.h: ("h", help_menu, "stdscr"),
-        Key.i: ("i", handle_edit, "stdscr, todos, selected"),
-        Key.j: ("j", handle_cursor_down, "todos, selected"),
-        Key.k: ("k", handle_cursor_up, "todos, selected"),
-        Key.o: ("o", handle_new_todo_next, "stdscr, todos, selected, mode"),
-        Key.p: ("p", handle_paste, "stdscr, todos, selected, copied_todo"),
-        Key.s: ("s", handle_sort_menu, "stdscr, todos, selected"),
-        Key.u: ("u", handle_undo, "selected, history"),
-        Key.y: ("y", copy_todo, "stdscr, todos, selected, copied_todo"),
-        Key.down: ("down", handle_cursor_down, "todos, selected"),
-        Key.up: ("up", handle_cursor_up, "todos, selected"),
-        Key.delete: ("delete", toggle_todo_note, "todos, selected"),
-        Key.shift_tab_windows: ("shift + tab (on windows)", handle_dedent, "todos, selected"),
-        Key.shift_tab: ("shift + tab", handle_dedent, "todos, selected"),
+    keys: dict[int, tuple[Callable[..., Any], str]] = {
+        Key.ctrl_a: (selected.multiselect_all, "len(todos)"),
+        Key.tab: (handle_indent, "todos, selected"),
+        Key.enter: (handle_enter, "stdscr, todos, selected, mode"),
+        Key.ctrl_k: (mode.toggle, "None"),
+        Key.ctrl_r: (handle_redo, "selected, history"),
+        Key.ctrl_x: (mode.toggle, "None"),
+        Key.escape: (lambda: None, "None"),
+        Key.minus: (handle_insert_blank_todo, "todos, selected"),
+        Key.slash: (search, "stdscr, todos, selected"),
+        Key.zero: (handle_digits, f"stdscr, todos, selected, {Key.zero}"),
+        Key.one: (handle_digits, f"stdscr, todos, selected, {Key.one}"),
+        Key.two: (handle_digits, f"stdscr, todos, selected, {Key.two}"),
+        Key.three: (handle_digits, f"stdscr, todos, selected, {Key.three}"),
+        Key.four: (handle_digits, f"stdscr, todos, selected, {Key.four}"),
+        Key.five: (handle_digits, f"stdscr, todos, selected, {Key.five}"),
+        Key.six: (handle_digits, f"stdscr, todos, selected, {Key.six}"),
+        Key.seven: (handle_digits, f"stdscr, todos, selected, {Key.seven}"),
+        Key.eight: (handle_digits, f"stdscr, todos, selected, {Key.eight}"),
+        Key.nine: (handle_digits, f"stdscr, todos, selected, {Key.nine}"),
+        Key.G: (handle_to_bottom, "todos, selected"),
+        Key.J: (selected.multiselect_down, "len(todos)"),
+        Key.K: (selected.multiselect_up, "None"),
+        Key.O: (new_todo_current, "stdscr, todos, int(selected)"),
+        Key.b: (magnify, "stdscr, todos, selected"),
+        Key.c: (color_todo, "stdscr, todos, selected"),
+        Key.d: (handle_delete_todo, "stdscr, todos, selected, copied_todo"),
+        Key.g: (handle_to_top, "todos, selected"),
+        Key.h: (help_menu, "stdscr"),
+        Key.i: (handle_edit, "stdscr, todos, selected"),
+        Key.j: (handle_cursor_down, "todos, selected"),
+        Key.k: (handle_cursor_up, "todos, selected"),
+        Key.o: (handle_new_todo_next, "stdscr, todos, selected, mode"),
+        Key.p: (handle_paste, "stdscr, todos, selected, copied_todo"),
+        Key.s: (handle_sort_menu, "stdscr, todos, selected"),
+        Key.u: (handle_undo, "selected, history"),
+        Key.y: (copy_todo, "stdscr, todos, selected, copied_todo"),
+        Key.down: (handle_cursor_down, "todos, selected"),
+        Key.up: (handle_cursor_up, "todos, selected"),
+        Key.delete: (toggle_todo_note, "todos, selected"),
+        Key.shift_tab_windows: (handle_dedent, "todos, selected"),
+        Key.shift_tab: (handle_dedent, "todos, selected"),
         Key.alt_j_windows: (
-            "alt + j (on windows)",
             handle_todo_down,
             "todos, selected",
         ),
         Key.alt_k_windows: (
-            "alt + k (on windows)",
             handle_todo_up,
             "todos, selected",
         ),
     }
-    esc_keys: dict[int, tuple[str, Callable[..., Any], str]] = {
-        Key.alt_G: ("alt + shift + g", selected.multiselect_bottom, "len(todos)"),
-        Key.alt_g: ("alt + g", selected.multiselect_top, "None"),
-        Key.alt_j: ("alt + j", handle_todo_down, "todos, selected"),
-        Key.alt_k: ("alt + k", handle_todo_up, "todos, selected"),
-        Key.zero: ("0", selected.multiselect_from, "stdscr, 0, len(todos)"),
-        Key.one: ("1", selected.multiselect_from, "stdscr, 1, len(todos)"),
-        Key.two: ("2", selected.multiselect_from, "stdscr, 2, len(todos)"),
-        Key.three: ("3", selected.multiselect_from, "stdscr, 3, len(todos)"),
-        Key.four: ("4", selected.multiselect_from, "stdscr, 4, len(todos)"),
-        Key.five: ("5", selected.multiselect_from, "stdscr, 5, len(todos)"),
-        Key.six: ("6", selected.multiselect_from, "stdscr, 6, len(todos)"),
-        Key.seven: ("7", selected.multiselect_from, "stdscr, 7, len(todos)"),
-        Key.eight: ("8", selected.multiselect_from, "stdscr, 8, len(todos)"),
-        Key.nine: ("9", selected.multiselect_from, "stdscr, 9, len(todos)"),
+    esc_keys: dict[int, tuple[Callable[..., Any], str]] = {
+        Key.alt_G: (selected.multiselect_bottom, "len(todos)"),
+        Key.alt_g: (selected.multiselect_top, "None"),
+        Key.alt_j: (handle_todo_down, "todos, selected"),
+        Key.alt_k: (handle_todo_up, "todos, selected"),
+        Key.zero: (selected.multiselect_from, "stdscr, 0, len(todos)"),
+        Key.one: (selected.multiselect_from, "stdscr, 1, len(todos)"),
+        Key.two: (selected.multiselect_from, "stdscr, 2, len(todos)"),
+        Key.three: (selected.multiselect_from, "stdscr, 3, len(todos)"),
+        Key.four: (selected.multiselect_from, "stdscr, 4, len(todos)"),
+        Key.five: (selected.multiselect_from, "stdscr, 5, len(todos)"),
+        Key.six: (selected.multiselect_from, "stdscr, 6, len(todos)"),
+        Key.seven: (selected.multiselect_from, "stdscr, 7, len(todos)"),
+        Key.eight: (selected.multiselect_from, "stdscr, 8, len(todos)"),
+        Key.nine: (selected.multiselect_from, "stdscr, 9, len(todos)"),
     }
     history.add(todos, int(selected))
     print_history(history)
