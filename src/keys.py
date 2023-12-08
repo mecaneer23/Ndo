@@ -6,10 +6,12 @@ MIT License (c) 2023
 # so the following line tells Ruff to ignore them
 # ruff: noqa: E741
 
+
 class Key:
     """
     A wrapper to access keys as curses refers to them. Mostly ascii.
     """
+
     ctrl_a = 1
     tab = 9
     enter = 10
@@ -81,8 +83,14 @@ class Key:
         )
 
     @staticmethod
-    def normalize_ascii_digit_to_digit(ascii_digit) -> int:
-        return ascii_digit - 48
+    def normalize_ascii_digit_to_digit(ascii_digit: int) -> int:
+        """
+        Take in a Key which represents a digit and
+        return the digit it represents.
+        """
+        if 48 <= ascii_digit <= 57:
+            return ascii_digit - 48
+        raise ValueError(f"Ascii digit `{ascii_digit}` must represent a digit.")
 
     class ctrl_c(KeyboardInterrupt):  # pylint: disable=invalid-name
         """
