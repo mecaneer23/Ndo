@@ -7,17 +7,18 @@ from pathlib import Path
 from sys import exit as sys_exit
 from typing import Any, Callable
 
-try:
-    from pyperclip import copy, paste
-
-    CLIPBOARD_EXISTS = True
-except ImportError:
-    CLIPBOARD_EXISTS = False
-
 from src.class_cursor import Cursor
 from src.class_history import UndoRedo
 from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import Todo
+from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
+from src.cursor_movement import (
+    cursor_bottom,
+    cursor_down,
+    cursor_top,
+    cursor_up,
+    relative_cursor_to,
+)
 from src.get_args import (
     FILENAME,
     HEADER,
@@ -80,42 +81,6 @@ def move_todos(todos: list[Todo], selected: int, destination: int) -> list[Todo]
     if min(selected, destination) >= 0 and max(selected, destination) < len(todos):
         todos.insert(selected, todos.pop(destination))
     return todos
-
-
-def todo_from_clipboard(
-    stdscr: Any, todos: list[Todo], selected: int, copied_todo: Todo
-) -> list[Todo]:
-    if not CLIPBOARD_EXISTS:
-        set_header(stdscr, "Clipboard functionality not available")
-        return todos
-    todo = paste()  # pyright: ignore
-    if copied_todo.display_text == todo:
-        todos.insert(selected + 1, Todo(copied_todo.text))
-        return todos
-    if "\n" in todo:
-        return todos
-    todos.insert(selected + 1, Todo(f"- {todo}"))
-    return todos
-
-
-def cursor_up(selected: int, len_todos: int) -> int:
-    return clamp(selected - 1, 0, len_todos)
-
-
-def cursor_down(selected: int, len_todos: int) -> int:
-    return clamp(selected + 1, 0, len_todos)
-
-
-def cursor_top(len_todos: int) -> int:
-    return clamp(0, 0, len_todos)
-
-
-def cursor_bottom(len_todos: int) -> int:
-    return clamp(len_todos, 0, len_todos)
-
-
-def cursor_to(position: int, len_todos: int) -> int:
-    return clamp(position, 0, len_todos)
 
 
 def todo_up(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], list[int]]:
@@ -216,28 +181,6 @@ def edit_todo(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo]:
     return todos
 
 
-def copy_todo(
-    stdscr: Any, todos: list[Todo], selected: Cursor, copied_todo: Todo
-) -> None:
-    if not CLIPBOARD_EXISTS:
-        set_header(stdscr, "Clipboard functionality not available")
-        return
-    copy(todos[int(selected)].display_text)  # pyright: ignore
-    copied_todo.call_init(todos[int(selected)].text)
-
-
-def paste_todo(
-    stdscr: Any, todos: list[Todo], selected: int, copied_todo: Todo
-) -> tuple[list[Todo], int]:
-    temp = todos.copy()
-    todos = todo_from_clipboard(stdscr, todos, selected, copied_todo)
-    stdscr.clear()
-    if temp != todos:
-        selected = cursor_down(selected, len(todos))
-    update_file(FILENAME, todos)
-    return todos, selected
-
-
 def blank_todo(todos: list[Todo], selected: int) -> tuple[list[Todo], int]:
     insert_empty_todo(todos, selected + 1)
     selected = cursor_down(selected, len(todos))
@@ -262,33 +205,6 @@ def quit_program(todos: list[Todo], edits: int, prev_time: float) -> int:
     if edits < 1:
         return remove_file(FILENAME)
     return update_file(FILENAME, todos)
-
-
-def relative_cursor_to(
-    win: Any, todos: list[Todo], selected: int, first_digit: int
-) -> int:
-    total = str(first_digit)
-    while True:
-        try:
-            key = win.getch()
-        except Key.ctrl_c:
-            return selected
-        if key in (Key.up, Key.k):
-            return cursor_to(
-                selected - int(total),
-                len(todos),
-            )
-        if key in (Key.down, Key.j):
-            return cursor_to(
-                selected + int(total),
-                len(todos),
-            )
-        if key in (Key.g, Key.G):
-            return cursor_to(int(total) - 1, len(todos))
-        if key in Key.digits():
-            total += str(Key.normalize_ascii_digit_to_digit(key))
-            continue
-        return selected
 
 
 def indent(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
