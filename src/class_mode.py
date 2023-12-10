@@ -1,13 +1,37 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
+from enum import Enum
 
-class Mode:
-    def __init__(self, toggle_mode: bool) -> None:
-        self.toggle_mode = toggle_mode
+
+class SingleLineMode(Enum):
+    OFF = 0
+    ON = 1
+    NONE = 2
+    ONLY_ONCE = 3
+
+
+class SingleLineModeImpl:
+    def __init__(self, mode: "SingleLineMode") -> None:
+        self.mode = mode
 
     def toggle(self) -> None:
-        self.toggle_mode = not self.toggle_mode
+        if self.mode == SingleLineMode.ON:
+            self.mode = SingleLineMode.OFF
+        elif self.mode == SingleLineMode.OFF:
+            self.mode = SingleLineMode.ON
 
-    def is_not_on(self) -> bool:
-        return not self.toggle_mode
+    def is_off(self) -> bool:
+        return self.mode == SingleLineMode.OFF
+
+    def is_not_none(self) -> bool:
+        return self.mode != SingleLineMode.NONE
+
+    def set_on(self) -> None:
+        self.mode = SingleLineMode.ON
+
+    def set_off(self) -> None:
+        self.mode = SingleLineMode.OFF
+
+    def set_once(self) -> None:
+        self.mode = SingleLineMode.ONLY_ONCE

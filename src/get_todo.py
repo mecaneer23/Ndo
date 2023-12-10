@@ -3,7 +3,7 @@
 
 from typing import Any, Callable
 
-from src.class_mode import Mode
+from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import Todo
 from src.get_args import INDENT, TKINTER_GUI
 from src.keys import Key
@@ -92,11 +92,6 @@ def handle_ctrl_delete(chars: list[str], position: int) -> tuple[list[str], int]
     return chars, position
 
 
-def set_mode_true(mode: Mode | None) -> None:
-    if mode is not None:
-        mode.toggle_mode = True
-
-
 def handle_delete(chars: list[str], position: int) -> tuple[list[str], int]:
     if position < len(chars):
         chars.pop(position)
@@ -162,12 +157,12 @@ def handle_escape(
     stdscr_win: tuple[Any, Any],
     chars: list[str],
     position: int,
-    mode: Mode | None,
+    mode: SingleLineModeImpl,
     todo: Todo,
 ) -> tuple[list[str], int] | None:
     stdscr_win[1].nodelay(True)
-    if stdscr_win[1].getch() == -1:  # skip `[` and check for escape
-        set_mode_true(mode)
+    if stdscr_win[1].getch() == -1:  # check for escape
+        mode.set_on()
         return None
     stdscr_win[1].nodelay(False)
     try:
@@ -214,11 +209,6 @@ def handle_ctrl_backspace(chars: list[str], position: int) -> tuple[list[str], i
     return chars, position
 
 
-def toggle_mode(mode: Mode | None) -> None:
-    if mode is not None:
-        mode.toggle()
-
-
 def handle_ascii(
     chars: list[str], position: int, input_char: int
 ) -> tuple[list[str], int]:
@@ -239,7 +229,7 @@ def get_chars_position(
     input_char: int,
     stdscr_win: tuple[Any, Any],
     chars_position_todo: tuple[list[str], int, Todo],
-    mode: Mode | None,
+    mode: SingleLineModeImpl,
     backspace_table: dict[int, Callable[..., tuple[list[str], int]]],
 ) -> tuple[list[str], int] | None:
     chars, position, todo = chars_position_todo
@@ -257,7 +247,7 @@ def wgetnstr(
     win: Any,
     todo: Todo,
     prev_todo: Todo,
-    mode: Mode | None = None,
+    mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
 ) -> Todo:
     """
     Reads a string from the given window. Returns a todo from the user.
@@ -281,7 +271,7 @@ def wgetnstr(
             Pass a Todo object to copy the color, indentation
             level, box character, etc from. This is only used
             if `todo` is empty.
-        mode (Mode, optional):
+        mode SingleLineMode:
             If adding todos in entry mode (used for rapid
             repetition), allow toggling of that mode by
             passing a Mode object.
@@ -315,6 +305,7 @@ def wgetnstr(
     while True:
         if position == len(chars):
             if len(chars) + 1 >= win.getmaxyx()[1] - 1:
+                mode.set_once()
                 break
             win.addstr(1, len(chars) + 1, "█")
         for i, char in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
@@ -323,12 +314,12 @@ def wgetnstr(
         try:
             input_char = win.getch()
         except KeyboardInterrupt:  # ctrl+c
-            toggle_mode(mode)
+            mode.set_on()
             return original
         if input_char in (Key.enter, Key.enter_):
             break
         if input_char in (Key.ctrl_k, Key.ctrl_x):
-            toggle_mode(mode)
+            mode.toggle()
             break
         next_step = get_chars_position(
             input_char, (stdscr, win), (chars, position, todo), mode, backspace_table

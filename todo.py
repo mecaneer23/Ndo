@@ -24,7 +24,7 @@ except ImportError:
 
 from src.class_cursor import Cursor
 from src.class_history import UndoRedo
-from src.class_mode import Mode
+from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import Todo
 from src.get_args import (
     CONTROLS_BEGIN_INDEX,
@@ -100,7 +100,10 @@ def get_newwin(stdscr: Any) -> Any:
 
 
 def insert_todo(
-    stdscr: Any, todos: list[Todo], index: int, mode: Mode | None = None
+    stdscr: Any,
+    todos: list[Todo],
+    index: int,
+    mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
 ) -> list[Todo]:
     todo = wgetnstr(
         stdscr,
@@ -367,8 +370,7 @@ def sort_menu(
             func = move_options[key]
             cursor = func(cursor)
         elif key in return_options:
-            func = return_options[key]
-            return func()
+            return return_options[key]()
         else:
             continue
         cursor = clamp(cursor, 0, len(lines))
@@ -430,7 +432,7 @@ def new_todo_next(
     stdscr: Any,
     todos: list[Todo],
     selected: int,
-    mode: Mode | None = None,
+    mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
 ) -> tuple[list[Todo], int]:
     """
     Insert a new todo item below the current cursor position and update the todo list.
@@ -439,7 +441,7 @@ def new_todo_next(
         stdscr (Any): The standard screen object for terminal UI.
         todos (list[Todo]): The list of todos.
         selected (int): The current cursor position.
-        mode (Mode | None): The editing mode (optional).
+        mode (SingleLineMode | None): The editing mode (optional).
 
     Returns:
         tuple[list[Todo], int]: A tuple containing the updated list of todos and the
@@ -613,7 +615,7 @@ def handle_cursor_down(todos: list[Todo], selected: Cursor) -> None:
 
 
 def handle_new_todo_next(
-    stdscr: Any, todos: list[Todo], selected: Cursor, mode: Mode
+    stdscr: Any, todos: list[Todo], selected: Cursor, mode: SingleLineModeImpl
 ) -> list[Todo]:
     return selected.todo_set_to(
         new_todo_next(
@@ -731,7 +733,7 @@ def handle_digits(stdscr: Any, todos: list[Todo], selected: Cursor, digit: int) 
 
 
 def handle_enter(
-    stdscr: Any, todos: list[Todo], selected: Cursor, mode: Mode
+    stdscr: Any, todos: list[Todo], selected: Cursor, mode: SingleLineModeImpl
 ) -> list[Todo]:
     prev_todo = todos[int(selected)] if len(todos) > 0 else Todo()
     if prev_todo.has_box():
@@ -826,7 +828,7 @@ def main(stdscr: Any) -> int:
     selected = Cursor(0)
     sublist_top = 0
     history = UndoRedo()
-    mode = Mode(True)
+    single_line_state = SingleLineModeImpl(SingleLineMode.ON)
     copied_todo = Todo()
     edits = len(todos)
     file_modified_time = get_file_modified_time(FILENAME)
@@ -835,10 +837,10 @@ def main(stdscr: Any) -> int:
     keys: dict[int, tuple[Callable[..., Any], str]] = {
         Key.ctrl_a: (selected.multiselect_all, "len(todos)"),
         Key.tab: (handle_indent, "todos, selected"),
-        Key.enter: (handle_enter, "stdscr, todos, selected, mode"),
-        Key.ctrl_k: (mode.toggle, "None"),
+        Key.enter: (handle_enter, "stdscr, todos, selected, single_line_mode"),
+        Key.ctrl_k: (single_line_state.toggle, "None"),
         Key.ctrl_r: (handle_redo, "selected, history"),
-        Key.ctrl_x: (mode.toggle, "None"),
+        Key.ctrl_x: (single_line_state.toggle, "None"),
         Key.escape: (lambda: None, "None"),
         Key.minus: (handle_insert_blank_todo, "todos, selected"),
         Key.slash: (search, "stdscr, todos, selected"),
@@ -864,7 +866,7 @@ def main(stdscr: Any) -> int:
         Key.i: (handle_edit, "stdscr, todos, selected"),
         Key.j: (handle_cursor_down, "todos, selected"),
         Key.k: (handle_cursor_up, "todos, selected"),
-        Key.o: (handle_new_todo_next, "stdscr, todos, selected, mode"),
+        Key.o: (handle_new_todo_next, "stdscr, todos, selected, single_line_mode"),
         Key.p: (handle_paste, "stdscr, todos, selected, copied_todo"),
         Key.s: (handle_sort_menu, "stdscr, todos, selected"),
         Key.u: (handle_undo, "selected, history"),
@@ -908,8 +910,8 @@ def main(stdscr: Any) -> int:
         set_header(stdscr, f"{HEADER}:")
         sublist_top = print_todos(stdscr, todos, selected, sublist_top)
         stdscr.refresh()
-        if mode.is_not_on():
-            todos = handle_new_todo_next(stdscr, todos, selected, mode)
+        if single_line_state.is_off():
+            todos = handle_new_todo_next(stdscr, todos, selected, single_line_state)
             continue
         next_step = get_main_input(
             stdscr,
@@ -920,7 +922,7 @@ def main(stdscr: Any) -> int:
                 "int(selected)": int(selected),
                 "history": history,
                 "len(todos)": len(todos),
-                "mode": mode,
+                "single_line_mode": single_line_state,
                 "selected": selected,
                 "stdscr": stdscr,
                 "todos": todos,
@@ -928,7 +930,10 @@ def main(stdscr: Any) -> int:
         )
         if isinstance(next_step, list):
             return quit_program(next_step, edits, file_modified_time)
-        if isinstance(next_step, int) and next_step not in (Key.ctrl_r, Key.u):  # redo/undo
+        if isinstance(next_step, int) and next_step not in (
+            Key.ctrl_r,
+            Key.u,
+        ):  # redo/undo
             history.add(todos, int(selected))
         print_history(history)
         edits -= 1
