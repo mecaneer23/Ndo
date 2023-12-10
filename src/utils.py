@@ -26,3 +26,16 @@ def set_header(stdscr: Any, message: str) -> None:
     stdscr.addstr(
         0, 0, message.ljust(stdscr.getmaxyx()[1]), curses.A_BOLD | curses.color_pair(2)
     )
+
+
+def overflow(counter: int, minimum: int, maximum: int) -> int:
+    """
+    Similar to clamp(), but instead of keeping a counter between
+    two values, by leaving it at the min or max end, it wraps over
+    the top or bottom.
+    """
+    if counter >= maximum:
+        return minimum + (counter - maximum)
+    if counter < minimum:
+        return maximum - (minimum - counter)
+    return counter
