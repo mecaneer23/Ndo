@@ -18,10 +18,12 @@ from src.class_todo import Todo
 from src.get_args import (
     CONTROLS_BEGIN_INDEX,
     CONTROLS_END_INDEX,
+    FILENAME,
     HELP_FILE,
     TKINTER_GUI,
 )
 from src.get_todo import hline
+from src.io import update_file
 from src.keys import Key
 from src.md_to_py import md_table_to_lines
 from src.print_todos import make_printable_sublist
@@ -178,5 +180,90 @@ def color_menu(parent_win: Any, original: int) -> int:
         else:
             continue
         cursor = overflow(cursor, 0, len(lines))
+        parent_win.refresh()
+        win.refresh()
+
+
+def get_sorting_methods() -> dict[str, Callable[..., str]]:
+    return {
+        "Alphabetical": lambda top_level_todo: top_level_todo[0].display_text,
+        "Completed": lambda top_level_todo: "1"
+        if top_level_todo[0].is_toggled()
+        else "0",
+        "Color": lambda top_level_todo: str(top_level_todo[0].color),
+    }
+
+
+def get_indented_sections(todos: list[Todo]) -> list[list[Todo]]:
+    indented_sections = []
+    section = []
+    for todo in todos:
+        if todo.indent_level > 0:
+            section.append(todo)
+            continue
+        if len(section) > 0:
+            indented_sections.append(section)
+        section = [todo]
+    indented_sections.append(section)
+    return indented_sections
+
+
+def sort_by(method: str, todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
+    key = get_sorting_methods()[method]
+    selected_todo = todos[int(selected)]
+    sorted_todos = []
+    for section in sorted(get_indented_sections(todos), key=key):
+        for todo in section:
+            sorted_todos.append(todo)
+    update_file(FILENAME, sorted_todos)
+    return sorted_todos, sorted_todos.index(selected_todo)
+
+
+def sort_menu(
+    parent_win: Any, todos: list[Todo], selected: Cursor
+) -> tuple[list[Todo], int]:
+    parent_win.clear()
+    set_header(parent_win, "Sort by:")
+    lines = list(get_sorting_methods().keys())
+    win = curses.newwin(
+        len(lines) + 2,
+        len(lines[0]) + 2,
+        1,
+        (parent_win.getmaxyx()[1] - (len(max(lines, key=len)) + 1)) // 2,
+    )
+    win.box()
+    move_options: dict[int, Callable[[int], int]] = {
+        Key.k: lambda cursor: cursor - 1,
+        Key.j: lambda cursor: cursor + 1,
+        Key.g: lambda _: 0,
+        Key.G: lambda _: len(lines),
+    }
+    cursor = 0
+    while True:
+        parent_win.refresh()
+        for i, line in enumerate(lines):
+            win.addstr(
+                i + 1,
+                1,
+                line,
+                curses.A_STANDOUT if i == cursor else 0,
+            )
+        try:
+            key = win.getch()
+        except KeyboardInterrupt:
+            return todos, int(selected)
+        return_options: dict[int, Callable[..., tuple[list[Todo], int]]] = {
+            Key.q: lambda: (todos, int(selected)),
+            Key.escape: lambda: (todos, int(selected)),
+            Key.enter: lambda: sort_by(lines[cursor], todos, selected),
+        }
+        if key in move_options:
+            func = move_options[key]
+            cursor = func(cursor)
+        elif key in return_options:
+            return return_options[key]()
+        else:
+            continue
+        cursor = clamp(cursor, 0, len(lines))
         parent_win.refresh()
         win.refresh()

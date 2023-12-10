@@ -25,8 +25,9 @@ from src.get_args import (
     TKINTER_GUI,
 )
 from src.get_todo import set_header, wgetnstr
+from src.io import read_file, update_file, file_string_to_todos
 from src.keys import Key
-from src.menus import color_menu, help_menu, magnify
+from src.menus import color_menu, help_menu, magnify, sort_menu
 from src.print_todos import print_todos
 from src.utils import clamp
 
@@ -39,27 +40,8 @@ PRINT_HISTORY = False
 HISTORY_FILE = "debugging/log.txt"
 
 
-def read_file(filename: Path) -> str:
-    if not filename.exists():
-        with filename.open("w"):
-            return ""
-    with filename.open() as file_obj:
-        return file_obj.read()
-
-
-def validate_file(raw_data: str) -> list[Todo]:
-    if len(raw_data) == 0:
-        return []
-    return [Todo(line) for line in raw_data.split("\n")]
-
-
 def get_file_modified_time(filename: Path) -> float:
     return stat(filename).st_ctime
-
-
-def update_file(filename: Path, lst: list[Todo]) -> int:
-    with filename.open("w", newline="\n") as file_obj:
-        return file_obj.write("\n".join(map(repr, lst)))
 
 
 def get_newwin(stdscr: Any) -> Any:
@@ -122,91 +104,6 @@ def move_todos(todos: list[Todo], selected: int, destination: int) -> list[Todo]
     if min(selected, destination) >= 0 and max(selected, destination) < len(todos):
         todos.insert(selected, todos.pop(destination))
     return todos
-
-
-def get_indented_sections(todos: list[Todo]) -> list[list[Todo]]:
-    indented_sections = []
-    section = []
-    for todo in todos:
-        if todo.indent_level > 0:
-            section.append(todo)
-            continue
-        if len(section) > 0:
-            indented_sections.append(section)
-        section = [todo]
-    indented_sections.append(section)
-    return indented_sections
-
-
-def get_sorting_methods() -> dict[str, Callable[..., str]]:
-    return {
-        "Alphabetical": lambda top_level_todo: top_level_todo[0].display_text,
-        "Completed": lambda top_level_todo: "1"
-        if top_level_todo[0].is_toggled()
-        else "0",
-        "Color": lambda top_level_todo: str(top_level_todo[0].color),
-    }
-
-
-def sort_by(method: str, todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
-    key = get_sorting_methods()[method]
-    selected_todo = todos[int(selected)]
-    sorted_todos = []
-    for section in sorted(get_indented_sections(todos), key=key):
-        for todo in section:
-            sorted_todos.append(todo)
-    update_file(FILENAME, sorted_todos)
-    return sorted_todos, sorted_todos.index(selected_todo)
-
-
-def sort_menu(
-    parent_win: Any, todos: list[Todo], selected: Cursor
-) -> tuple[list[Todo], int]:
-    parent_win.clear()
-    set_header(parent_win, "Sort by:")
-    lines = list(get_sorting_methods().keys())
-    win = curses.newwin(
-        len(lines) + 2,
-        len(lines[0]) + 2,
-        1,
-        (parent_win.getmaxyx()[1] - (len(max(lines, key=len)) + 1)) // 2,
-    )
-    win.box()
-    move_options: dict[int, Callable[[int], int]] = {
-        Key.k: lambda cursor: cursor - 1,
-        Key.j: lambda cursor: cursor + 1,
-        Key.g: lambda _: 0,
-        Key.G: lambda _: len(lines),
-    }
-    cursor = 0
-    while True:
-        parent_win.refresh()
-        for i, line in enumerate(lines):
-            win.addstr(
-                i + 1,
-                1,
-                line,
-                curses.A_STANDOUT if i == cursor else 0,
-            )
-        try:
-            key = win.getch()
-        except KeyboardInterrupt:
-            return todos, int(selected)
-        return_options: dict[int, Callable[..., tuple[list[Todo], int]]] = {
-            Key.q: lambda: (todos, int(selected)),
-            Key.escape: lambda: (todos, int(selected)),
-            Key.enter: lambda: sort_by(lines[cursor], todos, selected),
-        }
-        if key in move_options:
-            func = move_options[key]
-            cursor = func(cursor)
-        elif key in return_options:
-            return return_options[key]()
-        else:
-            continue
-        cursor = clamp(cursor, 0, len(lines))
-        parent_win.refresh()
-        win.refresh()
 
 
 def todo_from_clipboard(
@@ -656,13 +553,13 @@ def update_modified_time(
 ) -> tuple[list[Todo], float]:
     current_time = get_file_modified_time(FILENAME)
     if prev_time != current_time:
-        todos = validate_file(read_file(FILENAME))
+        todos = file_string_to_todos(read_file(FILENAME))
     return todos, current_time
 
 
 def main(stdscr: Any) -> int:
     init()
-    todos = validate_file(read_file(FILENAME))
+    todos = file_string_to_todos(read_file(FILENAME))
     selected = Cursor(0)
     sublist_top = 0
     history = UndoRedo()
@@ -790,6 +687,6 @@ def main(stdscr: Any) -> int:
 if __name__ == "__main__":
     if NO_GUI:
         print(f"{HEADER}:")
-        print_todos(None, validate_file(read_file(FILENAME)), Cursor(0))
+        print_todos(None, file_string_to_todos(read_file(FILENAME)), Cursor(0))
         sys_exit()
     curses.wrapper(main)
