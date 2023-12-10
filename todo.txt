@@ -7,3 +7,6 @@
   -4 allow wgetnstr to use multiline editing
 - make startup faster
 - fix silence if dependencies are not installed
+- make multitodo insert use notes rather than todos by
+default
+- fix lines longer than textbox during editing
