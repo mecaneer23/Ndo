@@ -7,17 +7,12 @@ from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import Todo
 from src.get_args import INDENT, TKINTER_GUI
 from src.keys import Key
+from src.utils import set_header
 
 if TKINTER_GUI:
     from tcurses import curses
 else:
     import curses
-
-
-def set_header(stdscr: Any, message: str) -> None:
-    stdscr.addstr(
-        0, 0, message.ljust(stdscr.getmaxyx()[1]), curses.A_BOLD | curses.color_pair(2)
-    )
 
 
 def hline(win: Any, y_loc: int, x_loc: int, char: str | int, width: int) -> None:

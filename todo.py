@@ -1,19 +1,11 @@
 #!/usr/bin/env python3
 # pyright: reportMissingModuleSource=false
-# pylint: disable=no-name-in-module, import-error, missing-class-docstring
-# pylint: disable=missing-function-docstring, missing-module-docstring
+# pylint: disable=no-name-in-module, import-error, missing-docstring
 
 from os import stat
 from pathlib import Path
 from sys import exit as sys_exit
 from typing import Any, Callable
-
-try:
-    from pyfiglet import figlet_format as big
-
-    FIGLET_FORMAT_EXISTS = True
-except ImportError:
-    FIGLET_FORMAT_EXISTS = False
 
 try:
     from pyperclip import copy, paste
@@ -27,18 +19,16 @@ from src.class_history import UndoRedo
 from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import Todo
 from src.get_args import (
-    CONTROLS_BEGIN_INDEX,
-    CONTROLS_END_INDEX,
     FILENAME,
     HEADER,
-    HELP_FILE,
     NO_GUI,
     TKINTER_GUI,
 )
-from src.get_todo import hline, set_header, wgetnstr
-from src.md_to_py import md_table_to_lines
-from src.print_todos import make_printable_sublist, print_todos
+from src.get_todo import set_header, wgetnstr
 from src.keys import Key
+from src.menus import help_menu, magnify
+from src.print_todos import print_todos
+from src.utils import clamp
 
 if TKINTER_GUI:
     from tcurses import curses
@@ -75,10 +65,6 @@ def validate_file(raw_data: str) -> list[Todo]:
 
 def get_file_modified_time(filename: Path) -> float:
     return stat(filename).st_ctime
-
-
-def clamp(counter: int, minimum: int, maximum: int) -> int:
-    return min(max(counter, minimum), maximum - 1)
 
 
 def overflow(counter: int, minimum: int, maximum: int) -> int:
@@ -154,83 +140,6 @@ def move_todos(todos: list[Todo], selected: int, destination: int) -> list[Todo]
     if min(selected, destination) >= 0 and max(selected, destination) < len(todos):
         todos.insert(selected, todos.pop(destination))
     return todos
-
-
-def simple_scroll_keybinds(
-    win: Any, cursor: int, len_lines: int, len_new_lines: int
-) -> int:
-    try:
-        key = win.getch()
-    except Key.ctrl_c:
-        return -1
-    if key in (Key.up, Key.k):
-        cursor = clamp(cursor - 1, 0, len_lines - 2)
-    elif key in (Key.down, Key.j, Key.enter):
-        cursor = clamp(cursor + 1, 0, len_lines - len_new_lines - 1)
-    else:
-        return -1
-    return cursor
-
-
-def help_menu(parent_win: Any) -> None:
-    parent_win.clear()
-    set_header(parent_win, "Help (k/j to scroll):")
-    lines = []
-    for line in md_table_to_lines(
-        CONTROLS_BEGIN_INDEX,
-        CONTROLS_END_INDEX,
-        str(HELP_FILE),
-        ("<kbd>", "</kbd>", "(arranged alphabetically)"),
-    ):
-        lines.append(line[:-2])
-    win = curses.newwin(
-        min(parent_win.getmaxyx()[0] - 1, len(lines) + 2),
-        len(lines[0]) + 2,
-        1,
-        (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2,
-    )
-    win.box()
-    parent_win.refresh()
-    cursor = 0
-    win.addstr(1, 1, lines[0])
-    hline(win, 2, 0, curses.ACS_HLINE, win.getmaxyx()[1])
-    while True:
-        new_lines, _, _ = make_printable_sublist(
-            win.getmaxyx()[0] - 4, lines[2:], cursor, 0
-        )
-        for i, line in enumerate(new_lines):
-            win.addstr(i + 3, 1, line)
-        win.refresh()
-        cursor = simple_scroll_keybinds(win, cursor, len(lines), len(new_lines))
-        if cursor < 0:
-            break
-    parent_win.clear()
-
-
-def magnify(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
-    if not FIGLET_FORMAT_EXISTS:
-        set_header(stdscr, "Magnify dependency not available")
-        return
-    stdscr.clear()
-    set_header(stdscr, "Magnifying...")
-    lines = big(  # pyright: ignore
-        todos[int(selected)].display_text, width=stdscr.getmaxyx()[1]
-    ).split("\n")
-    lines.append("")
-    lines = [line.ljust(stdscr.getmaxyx()[1] - 2) for line in lines]
-    cursor = 0
-    while True:
-        new_lines, _, _ = make_printable_sublist(
-            stdscr.getmaxyx()[0] - 2, lines, cursor, 0
-        )
-        for i, line in enumerate(new_lines):
-            stdscr.addstr(i + 1, 1, line)
-        stdscr.refresh()
-        cursor = simple_scroll_keybinds(stdscr, cursor, len(lines), len(new_lines))
-        if cursor < 0:
-            break
-    stdscr.refresh()
-    stdscr.clear()
 
 
 def get_color(color: str) -> int:
