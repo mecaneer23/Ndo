@@ -53,9 +53,10 @@ class Todo:
     def __len__(self) -> int:
         return len(self.display_text)
 
-    def set_display_text(self, display_text: str) -> None:
+    def set_display_text(self, display_text: str) -> "Todo":
         self.display_text = display_text
         self.text = repr(self)
+        return self
 
     def is_toggled(self) -> bool:
         if self.box_char is None:

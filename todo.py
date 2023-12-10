@@ -103,12 +103,13 @@ def insert_todo(
     stdscr: Any,
     todos: list[Todo],
     index: int,
+    default_todo: Todo = Todo(),
     mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
 ) -> list[Todo]:
     todo = wgetnstr(
         stdscr,
         get_newwin(stdscr),
-        todo=Todo(),
+        todo=default_todo,
         prev_todo=todos[index - 1] if len(todos) > 0 else Todo(),
         mode=mode,
     )
@@ -432,6 +433,7 @@ def new_todo_next(
     stdscr: Any,
     todos: list[Todo],
     selected: int,
+    default_todo: Todo = Todo(),
     mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
 ) -> tuple[list[Todo], int]:
     """
@@ -452,7 +454,8 @@ def new_todo_next(
         stdscr,
         todos,
         selected + 1,
-        mode,
+        default_todo=default_todo,
+        mode=mode,
     )
     stdscr.clear()
     if temp != todos:
@@ -615,13 +618,18 @@ def handle_cursor_down(todos: list[Todo], selected: Cursor) -> None:
 
 
 def handle_new_todo_next(
-    stdscr: Any, todos: list[Todo], selected: Cursor, mode: SingleLineModeImpl
+    stdscr: Any,
+    todos: list[Todo],
+    selected: Cursor,
+    mode: SingleLineModeImpl,
+    default_todo: Todo = Todo(),
 ) -> list[Todo]:
     return selected.todo_set_to(
         new_todo_next(
             stdscr,
             todos,
             int(selected),
+            default_todo,
             mode,
         )
     )
@@ -738,7 +746,7 @@ def handle_enter(
     prev_todo = todos[int(selected)] if len(todos) > 0 else Todo()
     if prev_todo.has_box():
         return toggle(todos, selected)
-    return selected.todo_set_to(new_todo_next(stdscr, todos, int(selected), mode))
+    return selected.todo_set_to(new_todo_next(stdscr, todos, int(selected), mode=mode))
 
 
 def print_history(history: UndoRedo) -> None:
@@ -914,7 +922,13 @@ def main(stdscr: Any) -> int:
             todos = handle_new_todo_next(stdscr, todos, selected, single_line_state)
             continue
         if single_line_state.is_once():
-            todos = handle_new_todo_next(stdscr, todos, selected, single_line_state)
+            todos = handle_new_todo_next(
+                stdscr,
+                todos,
+                selected,
+                single_line_state,
+                Todo().set_display_text(single_line_state.get_extra_data()),
+            )
             single_line_state.set_on()
             continue
         next_step = get_main_input(

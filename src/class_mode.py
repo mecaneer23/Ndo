@@ -14,6 +14,7 @@ class SingleLineMode(Enum):
 class SingleLineModeImpl:
     def __init__(self, mode: "SingleLineMode") -> None:
         self.mode = mode
+        self.extra_data: str = ""
 
     def toggle(self) -> None:
         if self.mode == SingleLineMode.ON:
@@ -38,3 +39,9 @@ class SingleLineModeImpl:
 
     def set_once(self) -> None:
         self.mode = SingleLineMode.ONLY_ONCE
+
+    def get_extra_data(self) -> str:
+        return self.extra_data
+
+    def set_extra_data(self, extra_data: str) -> None:
+        self.extra_data = extra_data

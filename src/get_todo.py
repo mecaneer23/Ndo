@@ -306,7 +306,9 @@ def wgetnstr(
         if position == len(chars):
             if len(chars) + 1 >= win.getmaxyx()[1] - 1:
                 mode.set_once()
-                break
+                display_text, next_line = "".join(chars).rsplit(" ", 1)
+                mode.set_extra_data(next_line)
+                return todo.set_display_text(display_text)
             win.addstr(1, len(chars) + 1, "█")
         for i, char in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
             win.addstr(1, i + 1, char, curses.A_STANDOUT if i == position else 0)
@@ -328,5 +330,4 @@ def wgetnstr(
             return original
         chars, position = next_step
 
-    todo.set_display_text("".join(chars))
-    return todo
+    return todo.set_display_text("".join(chars))
