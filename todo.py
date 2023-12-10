@@ -25,9 +25,9 @@ from src.get_args import (
     TKINTER_GUI,
 )
 from src.get_todo import set_header, wgetnstr
-from src.io import read_file, update_file, file_string_to_todos
+from src.io import file_string_to_todos, read_file, update_file
 from src.keys import Key
-from src.menus import color_menu, help_menu, magnify, sort_menu
+from src.menus import color_menu, get_newwin, help_menu, magnify, search, sort_menu
 from src.print_todos import print_todos
 from src.utils import clamp
 
@@ -42,11 +42,6 @@ HISTORY_FILE = "debugging/log.txt"
 
 def get_file_modified_time(filename: Path) -> float:
     return stat(filename).st_ctime
-
-
-def get_newwin(stdscr: Any) -> Any:
-    max_y, max_x = stdscr.getmaxyx()
-    return curses.newwin(3, max_x * 3 // 4, max_y // 2 - 3, max_x // 8)
 
 
 def insert_todo(
@@ -72,25 +67,6 @@ def insert_todo(
 def insert_empty_todo(todos: list[Todo], index: int) -> list[Todo]:
     todos.insert(index, Todo())
     return todos
-
-
-def search(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
-    set_header(stdscr, "Searching...")
-    stdscr.refresh()
-    sequence = wgetnstr(
-        stdscr,
-        get_newwin(stdscr),
-        Todo(),
-        Todo(),
-    ).display_text
-    stdscr.clear()
-    for i, todo in enumerate(todos[int(selected) :], start=int(selected)):
-        if sequence in todo.display_text:
-            break
-    else:
-        selected.set_to(0)
-        return
-    selected.set_to(i)
 
 
 def remove_todo(todos: list[Todo], index: int) -> list[Todo]:

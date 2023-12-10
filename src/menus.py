@@ -22,7 +22,7 @@ from src.get_args import (
     HELP_FILE,
     TKINTER_GUI,
 )
-from src.get_todo import hline
+from src.get_todo import hline, wgetnstr
 from src.io import update_file
 from src.keys import Key
 from src.md_to_py import md_table_to_lines
@@ -267,3 +267,27 @@ def sort_menu(
         cursor = clamp(cursor, 0, len(lines))
         parent_win.refresh()
         win.refresh()
+
+
+def get_newwin(stdscr: Any) -> Any:
+    max_y, max_x = stdscr.getmaxyx()
+    return curses.newwin(3, max_x * 3 // 4, max_y // 2 - 3, max_x // 8)
+
+
+def search(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
+    set_header(stdscr, "Searching...")
+    stdscr.refresh()
+    sequence = wgetnstr(
+        stdscr,
+        get_newwin(stdscr),
+        Todo(),
+        Todo(),
+    ).display_text
+    stdscr.clear()
+    for i, todo in enumerate(todos[int(selected) :], start=int(selected)):
+        if sequence in todo.display_text:
+            break
+    else:
+        selected.set_to(0)
+        return
+    selected.set_to(i)
