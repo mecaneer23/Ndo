@@ -913,6 +913,10 @@ def main(stdscr: Any) -> int:
         if single_line_state.is_off():
             todos = handle_new_todo_next(stdscr, todos, selected, single_line_state)
             continue
+        if single_line_state.is_once():
+            todos = handle_new_todo_next(stdscr, todos, selected, single_line_state)
+            single_line_state.set_on()
+            continue
         next_step = get_main_input(
             stdscr,
             todos,

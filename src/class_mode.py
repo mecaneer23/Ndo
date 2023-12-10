@@ -27,6 +27,9 @@ class SingleLineModeImpl:
     def is_not_none(self) -> bool:
         return self.mode != SingleLineMode.NONE
 
+    def is_once(self) -> bool:
+        return self.mode == SingleLineMode.ONLY_ONCE
+
     def set_on(self) -> None:
         self.mode = SingleLineMode.ON
 
