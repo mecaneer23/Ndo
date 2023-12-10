@@ -258,7 +258,7 @@ def handle_delete_todo(
     stdscr: Any, todos: list[Todo], selected: Cursor, copied_todo: Todo
 ) -> list[Todo]:
     if len(todos) > 0 and CLIPBOARD_EXISTS:
-        copy_todo(stdscr, todos, selected, copied_todo)
+        copy_todo(todos, selected, copied_todo)
     return selected.todo_set_to(delete_todo(stdscr, todos, selected))
 
 
@@ -450,6 +450,47 @@ def update_modified_time(
 
 
 def main(stdscr: Any) -> int:
+    """
+    The main function for Ndo. Mainly provides keybindings
+    for the various functions.
+
+    -------
+
+    Directory of main() variables:
+
+    todos:
+    main list of Todo objects - initialized with
+    contents of `FILENAME`
+
+    selected:
+    main Cursor object for tracking position
+    within the list of Todo objects. Initialized at 0
+
+    sublist_top:
+    Only used in print_todos() to keep track of relative
+    position and ensure the list renders correctly
+
+    history:
+    UndoRedo object, stores history for calls to undo/redo
+
+    single_line_state:
+    Used to insert multiple Todos simultaneously whenever
+    necessary. This is a "global" object that stores state.
+
+    copied_todo:
+    A Todo which stores metadata about a todo, such as
+    color and indentation level. Used for copy/paste
+    operations.
+
+    edits:
+    int, used to indicate whether the file was newly
+    created and modified or not, determines whether
+    to delete file in quit_program()
+
+    file_modified_time:
+    Last time of file modification. Used to determine
+    when to overwrite the save file.
+    """
     init()
     todos = file_string_to_todos(read_file(FILENAME))
     selected = Cursor(0)
@@ -497,7 +538,7 @@ def main(stdscr: Any) -> int:
         Key.p: (handle_paste, "stdscr, todos, selected, copied_todo"),
         Key.s: (handle_sort_menu, "stdscr, todos, selected"),
         Key.u: (handle_undo, "selected, history"),
-        Key.y: (copy_todo, "stdscr, todos, selected, copied_todo"),
+        Key.y: (copy_todo, "todos, selected, copied_todo"),
         Key.down: (handle_cursor_down, "todos, selected"),
         Key.up: (handle_cursor_up, "todos, selected"),
         Key.delete: (toggle_todo_note, "todos, selected"),
