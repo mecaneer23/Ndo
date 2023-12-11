@@ -248,7 +248,7 @@ def handle_new_todo_next(
             stdscr,
             todos,
             int(selected),
-            default_todo,
+            default_todo.copy(),
             mode,
         )
     )
@@ -579,7 +579,7 @@ def main(stdscr: Any) -> int:
         sublist_top = print_todos(stdscr, todos, selected, sublist_top)
         stdscr.refresh()
         if single_line_state.is_off():
-            todos = handle_new_todo_next(stdscr, todos, selected, single_line_state)
+            todos = handle_new_todo_next(stdscr, todos, selected, single_line_state, Todo())
             continue
         if single_line_state.is_once():
             todos = handle_new_todo_next(

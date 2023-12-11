@@ -114,6 +114,9 @@ class Todo:
             self.indent_level -= INDENT
             self.text = repr(self)
 
+    def copy(self) -> "Todo":
+        return Todo(repr(self))
+
     def __repr__(self) -> str:
         chunks: tuple[tuple[bool, str], ...] = (
             (True, self.indent_level * " "),
