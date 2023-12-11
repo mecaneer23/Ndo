@@ -587,7 +587,7 @@ def main(stdscr: Any) -> int:
                 todos,
                 selected,
                 single_line_state,
-                Todo().set_display_text(single_line_state.get_extra_data()),
+                Todo(single_line_state.get_extra_data()),
             )
             single_line_state.set_on()
             continue
