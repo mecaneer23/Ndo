@@ -5,8 +5,8 @@
   -4 allow multiline paste
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
+-2 make multitodo insert use notes rather than todos by
+2 default
+-2 fix lines longer than textbox during editing
 - make startup faster
 - fix silence if dependencies are not installed
-- make multitodo insert use notes rather than todos by
-default
-- fix lines longer than textbox during editing
