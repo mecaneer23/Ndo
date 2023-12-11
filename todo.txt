@@ -1,12 +1,14 @@
 -1 fix strikethrough
   -1 fix long lines (longer than width // 2 - 1)
   -1 fix moving down onto a toggled line
+-2 make multitodo insert use notes rather than todos by
+2 default
+-2 fix lines longer than textbox during editing
+-3 make it work on windows
+  -3 appears to be a compatibility problem with python3.12
 -4 implement multiline todos
   -4 allow multiline paste
   -4 allow multiline print
   -4 allow wgetnstr to use multiline editing
--2 make multitodo insert use notes rather than todos by
-2 default
--2 fix lines longer than textbox during editing
 - make startup faster
 - fix silence if dependencies are not installed
