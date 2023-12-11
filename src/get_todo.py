@@ -237,6 +237,17 @@ def get_chars_position(
     return handle_ascii(chars, position, input_char)
 
 
+def set_once(mode: SingleLineModeImpl, chars: list[str]) -> str:
+    mode.set_once()
+    two_lines = "".join(chars).rsplit(" ", 1)
+    if len(two_lines) == 1:
+        line = two_lines[0]
+        mode.set_extra_data(line[-1])
+        return line[:-1]
+    mode.set_extra_data(two_lines[1])
+    return two_lines[0]
+
+
 def wgetnstr(
     stdscr: Any,
     win: Any,
@@ -300,10 +311,7 @@ def wgetnstr(
     while True:
         if position == len(chars):
             if len(chars) + 1 >= win.getmaxyx()[1] - 1:
-                mode.set_once()
-                display_text, next_line = "".join(chars).rsplit(" ", 1)
-                mode.set_extra_data(next_line)
-                return todo.set_display_text(display_text)
+                return todo.set_display_text(set_once(mode, chars))
             win.addstr(1, len(chars) + 1, "█")
         for i, char in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
             win.addstr(1, i + 1, char, curses.A_STANDOUT if i == position else 0)
