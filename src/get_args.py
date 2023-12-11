@@ -39,12 +39,10 @@ CHECKBOX_OPTIONS = ("🗹", "☑")
 def _get_checkbox(win: Any) -> str:
     try:
         win.addch(0, 0, CHECKBOX_OPTIONS[0])
-        checkbox = CHECKBOX_OPTIONS[0]
+        win.clear()
+        return CHECKBOX_OPTIONS[0]
     except TypeError:
-        checkbox = CHECKBOX_OPTIONS[1]
-    win.clear()
-    return checkbox
-
+        return CHECKBOX_OPTIONS[1]
 
 def get_args() -> Namespace:
     parser = ArgumentParser(
