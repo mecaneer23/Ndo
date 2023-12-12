@@ -1,13 +1,11 @@
 -1 fix strikethrough
   -1 fix long lines (longer than width // 2 - 1)
   -1 fix moving down onto a toggled line
-+2 fix lines longer than textbox during editing
--2 fix really long lines (longer than textbox width * 2)
 -3 make it work on windows
   -3 appears to be a compatibility problem with python3.12
 -4 implement multiline todos
   -4 allow multiline paste
   -4 allow multiline print
-  -4 allow get_todo to use multiline editing
+  +4 allow get_todo to use multiline editing
 - make startup faster
 - fix silence if dependencies are not installed
