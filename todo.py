@@ -160,7 +160,9 @@ def color_todo(stdscr: Any, todos: list[Todo], selected: Cursor) -> list[Todo]:
     return todos
 
 
-def edit_todo(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo]:
+def edit_todo(
+    stdscr: Any, todos: list[Todo], selected: int, mode: SingleLineModeImpl
+) -> list[Todo]:
     max_y, max_x = stdscr.getmaxyx()
     todo = todos[selected].display_text
     ncols = (
@@ -172,6 +174,7 @@ def edit_todo(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo]:
         curses.newwin(3, ncols, max_y // 2 - 3, begin_x),
         todo=todos[selected],
         prev_todo=Todo(),
+        mode=mode,
     )
     if edited_todo.is_empty():
         return todos
@@ -278,10 +281,11 @@ def handle_edit(
     stdscr: Any,
     todos: list[Todo],
     selected: Cursor,
+    mode: SingleLineModeImpl,
 ):
     if len(todos) <= 0:
         return todos
-    return edit_todo(stdscr, todos, int(selected))
+    return edit_todo(stdscr, todos, int(selected), mode)
 
 
 def handle_to_top(todos: list[Todo], selected: Cursor) -> None:
@@ -531,7 +535,7 @@ def main(stdscr: Any) -> int:
         Key.d: (handle_delete_todo, "stdscr, todos, selected, copied_todo"),
         Key.g: (handle_to_top, "todos, selected"),
         Key.h: (help_menu, "stdscr"),
-        Key.i: (handle_edit, "stdscr, todos, selected"),
+        Key.i: (handle_edit, "stdscr, todos, selected, single_line_mode"),
         Key.j: (handle_cursor_down, "todos, selected"),
         Key.k: (handle_cursor_up, "todos, selected"),
         Key.o: (handle_new_todo_next, "stdscr, todos, selected, single_line_mode"),
@@ -579,7 +583,9 @@ def main(stdscr: Any) -> int:
         sublist_top = print_todos(stdscr, todos, selected, sublist_top)
         stdscr.refresh()
         if single_line_state.is_off():
-            todos = handle_new_todo_next(stdscr, todos, selected, single_line_state, Todo())
+            todos = handle_new_todo_next(
+                stdscr, todos, selected, single_line_state, Todo()
+            )
             continue
         if single_line_state.is_once():
             todos = handle_new_todo_next(

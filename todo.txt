@@ -1,7 +1,7 @@
 -1 fix strikethrough
   -1 fix long lines (longer than width // 2 - 1)
   -1 fix moving down onto a toggled line
--2 fix lines longer than textbox during editing
++2 fix lines longer than textbox during editing
 -2 fix really long lines (longer than textbox width * 2)
 -3 make it work on windows
   -3 appears to be a compatibility problem with python3.12
