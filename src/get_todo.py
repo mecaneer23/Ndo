@@ -239,7 +239,7 @@ def get_chars_position(
 
 def set_once(mode: SingleLineModeImpl, chars: list[str]) -> str:
     mode.set_once()
-    two_lines = "".join(chars).rsplit(" ", 1)
+    two_lines = "".join(chars).rsplit(None, 1)
     if len(two_lines) == 1:
         line = two_lines[0]
         mode.set_extra_data(line[-1])
