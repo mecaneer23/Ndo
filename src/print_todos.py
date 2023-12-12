@@ -1,18 +1,18 @@
 # pylint: disable=missing-class-docstring, import-error
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
-from typing import Any, TypeVar
 from os import get_terminal_size
+from typing import Any, NamedTuple, TypeVar
 
-from src.class_todo import Todo
 from src.class_cursor import Cursor
+from src.class_todo import Todo
 from src.get_args import (
-    INDENT,
-    STRIKETHROUGH,
-    SIMPLE_BOXES,
     BULLETS,
     ENUMERATE,
+    INDENT,
     RELATIVE_ENUMERATE,
+    SIMPLE_BOXES,
+    STRIKETHROUGH,
     TKINTER_GUI,
 )
 
@@ -23,6 +23,11 @@ else:
 
 
 T = TypeVar("T")
+
+
+class Chunk(NamedTuple):
+    condition: bool
+    item: str
 
 
 def get_bullet(indentation_level: int) -> str:
@@ -94,14 +99,14 @@ def get_display_string(
     _, width = height_width
     if i in highlight and todo.is_empty():
         return "⎯" * 8
-    chunks: tuple[tuple[bool, str], ...] = (
-        (True, todo.indent_level * " "),
-        (not todo.is_empty() and not SIMPLE_BOXES, todo.get_box()),
-        (not todo.is_empty() and SIMPLE_BOXES, todo.get_simple_box()),
-        (not todo.has_box() and BULLETS, f"{get_bullet(todo.indent_level)} "),
-        (ENUMERATE and not RELATIVE_ENUMERATE, f"{todos.index(todo) + 1}. "),
-        (RELATIVE_ENUMERATE, f"{relative + 1}. "),
-        (True, todo.display_text),
+    chunks: tuple[Chunk, ...] = (
+        Chunk(True, todo.indent_level * " "),
+        Chunk(not todo.is_empty() and not SIMPLE_BOXES, todo.get_box()),
+        Chunk(not todo.is_empty() and SIMPLE_BOXES, todo.get_simple_box()),
+        Chunk(not todo.has_box() and BULLETS, f"{get_bullet(todo.indent_level)} "),
+        Chunk(ENUMERATE and not RELATIVE_ENUMERATE, f"{todos.index(todo) + 1}. "),
+        Chunk(RELATIVE_ENUMERATE, f"{relative + 1}. "),
+        Chunk(True, todo.display_text),
     )
     return "".join([item for condition, item in chunks if condition])[
         : width - 1
