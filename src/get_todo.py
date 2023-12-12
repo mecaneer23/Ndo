@@ -31,12 +31,14 @@ def ensure_valid(win: Any) -> None:
         raise NotImplementedError("Multiline text editing is not supported")
 
 
-def init_todo(todo: Todo, prev_todo: Todo) -> Todo:
+def init_todo(todo: Todo, prev_todo: Todo, mode: SingleLineModeImpl) -> Todo:
     if todo.is_empty():
         todo.set_indent_level(prev_todo.indent_level)
         todo.set_color(prev_todo.color)
         if not prev_todo.has_box():
             todo.box_char = None
+    if mode.is_off():
+        todo.box_char = None
     return todo
 
 
@@ -296,7 +298,7 @@ def get_todo(
     """
 
     ensure_valid(win)
-    todo = init_todo(todo, prev_todo)
+    todo = init_todo(todo, prev_todo, mode)
     original = todo
     chars = list(todo.display_text)
     position = len(chars)
