@@ -2,7 +2,7 @@
 General utilities, useful across multiple other files
 """
 
-from typing import Any
+from typing import Any, NamedTuple
 
 from src.get_args import TKINTER_GUI
 
@@ -10,6 +10,14 @@ if TKINTER_GUI:
     from tcurses import curses
 else:
     import curses
+
+
+class Chunk(NamedTuple):
+    """
+    A chunk of text that can be toggled on or off based on a condition
+    """
+    condition: bool
+    text: str
 
 
 def clamp(number: int, minimum: int, maximum: int) -> int:

@@ -10,7 +10,7 @@ from typing import Any, Callable
 from src.class_cursor import Cursor
 from src.class_history import UndoRedo
 from src.class_mode import SingleLineMode, SingleLineModeImpl
-from src.class_todo import Todo
+from src.class_todo import Todo, BoxChar
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
 from src.cursor_movement import (
     cursor_bottom,
@@ -227,7 +227,7 @@ def dedent(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
 def toggle_todo_note(todos: list[Todo], selected: Cursor) -> None:
     for pos in selected.get():
         todo = todos[pos]
-        todo.box_char = None if todo.has_box() else "-"
+        todo.box_char = BoxChar.NONE if todo.has_box() else BoxChar.MINUS
     update_file(FILENAME, todos)
 
 

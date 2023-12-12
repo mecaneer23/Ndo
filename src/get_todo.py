@@ -4,7 +4,7 @@
 from typing import Any, Callable
 
 from src.class_mode import SingleLineMode, SingleLineModeImpl
-from src.class_todo import Todo
+from src.class_todo import Todo, BoxChar
 from src.get_args import INDENT, TKINTER_GUI
 from src.keys import Key
 from src.utils import set_header
@@ -36,9 +36,9 @@ def init_todo(todo: Todo, prev_todo: Todo, mode: SingleLineModeImpl) -> Todo:
         todo.set_indent_level(prev_todo.indent_level)
         todo.set_color(prev_todo.color)
         if not prev_todo.has_box():
-            todo.box_char = None
+            todo.box_char = BoxChar.NONE
     if mode.is_off():
-        todo.box_char = None
+        todo.box_char = BoxChar.NONE
     return todo
 
 
@@ -134,7 +134,7 @@ def handle_delete_modifiers(
 
 def handle_toggle_note_todo(stdscr: Any, todo: Todo) -> None:
     toggle_note_todo(todo)
-    set_header(stdscr, "Note" if todo.box_char is None else "Todo")
+    set_header(stdscr, "Note" if todo.box_char == BoxChar.NONE else "Todo")
     stdscr.refresh()
 
 
@@ -216,10 +216,10 @@ def handle_ascii(
 
 
 def toggle_note_todo(todo: Todo) -> None:
-    if todo.box_char is None:
-        todo.box_char = "-"
+    if todo.box_char == BoxChar.NONE:
+        todo.box_char = BoxChar.MINUS
         return
-    todo.box_char = None
+    todo.box_char = BoxChar.NONE
 
 
 def get_chars_position(

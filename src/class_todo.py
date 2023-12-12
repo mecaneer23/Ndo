@@ -1,22 +1,48 @@
 # pylint: disable=missing-class-docstring, import-error
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
+from enum import Enum
+
 from src.get_args import CHECKBOX, INDENT
+from src.utils import Chunk
+
+
+class BoxChar(Enum):
+    MINUS = 0
+    PLUS = 1
+    NONE = 2
+
+    @staticmethod
+    def from_str(string: str) -> "BoxChar":
+        return {
+            "-": BoxChar.MINUS,
+            "+": BoxChar.PLUS,
+        }[string]
+
+    def __str__(self) -> str:
+        return repr(self)
+
+    def __repr__(self) -> str:
+        return {
+            BoxChar.PLUS: "+",
+            BoxChar.MINUS: "-",
+            BoxChar.NONE: "",
+        }[self]
 
 
 class Todo:
     def __init__(self, text: str = "") -> None:
-        self.box_char: str | None = None
+        self.box_char: BoxChar = BoxChar.NONE
         self.color: int = 7
         self.display_text: str = ""
         self.text: str = ""
         self.indent_level: int = 0
         self.call_init(text)
 
-    def _init_box_char(self, pointer: int) -> tuple[str | None, int]:
+    def _init_box_char(self, pointer: int) -> tuple[BoxChar, int]:
         if len(self.text) > pointer and self.text[pointer] in "-+":
-            return self.text[pointer], pointer + 1
-        return None, pointer
+            return BoxChar.from_str(self.text[pointer]), pointer + 1
+        return BoxChar.NONE, pointer
 
     def _init_color(self, pointer: int) -> tuple[int, int]:
         if (
@@ -27,7 +53,7 @@ class Todo:
             return int(self.text[pointer]), pointer + 2
         return 7, pointer
 
-    def _init_attrs(self) -> tuple[str | None, int, str]:
+    def _init_attrs(self) -> tuple[BoxChar, int, str]:
         pointer = self.indent_level
         box_char, pointer = self._init_box_char(pointer)
         color, pointer = self._init_color(pointer)
@@ -41,7 +67,7 @@ class Todo:
         self.text = text
         self.indent_level = len(text) - len(text.lstrip())
         if not self.text:
-            self.box_char = "-"
+            self.box_char = BoxChar.MINUS
             self.color = 7
             self.display_text = ""
             return
@@ -59,9 +85,9 @@ class Todo:
         return self
 
     def is_toggled(self) -> bool:
-        if self.box_char is None:
+        if self.box_char == BoxChar.NONE:
             return False
-        return self.box_char == "+"
+        return self.box_char == BoxChar.PLUS
 
     def set_indent_level(self, indent_level: int) -> None:
         self.indent_level = indent_level
@@ -70,39 +96,31 @@ class Todo:
         self.color = color
 
     def get_box(self) -> str:
-        table = {
-            "+": f"{CHECKBOX}  ",
-            "-": "☐  ",
-            None: "",
-        }
-
-        if self.box_char in table:
-            return table[self.box_char]
-        raise KeyError(
-            f"The completion indicator of `{self.text}` is not one of (+, -)"
-        )
+        return {
+            BoxChar.PLUS: f"{CHECKBOX}  ",
+            BoxChar.MINUS: "☐  ",
+            BoxChar.NONE: "",
+        }[self.box_char]
 
     def get_simple_box(self) -> str:
-        table = {
-            "+": "[x] ",
-            "-": "[ ] ",
-            None: "",
-        }
-
-        if self.box_char in table:
-            return table[self.box_char]
-        raise KeyError(
-            f"The completion indicator of `{self.text}` is not one of (+, -)"
-        )
+        return {
+            BoxChar.PLUS: "[x] ",
+            BoxChar.MINUS: "[ ] ",
+            BoxChar.NONE: "",
+        }[self.box_char]
 
     def has_box(self) -> bool:
-        return self.box_char is not None
+        return self.box_char != BoxChar.NONE
 
     def is_empty(self) -> bool:
         return self.display_text == ""
 
     def toggle(self) -> None:
-        self.box_char = {"+": "-", "-": "+", None: ""}[self.box_char]
+        self.box_char = {
+            BoxChar.PLUS: BoxChar.MINUS,
+            BoxChar.MINUS: BoxChar.PLUS,
+            BoxChar.NONE: BoxChar.NONE,
+        }[self.box_char]
         self.text = repr(self)
 
     def indent(self) -> None:
@@ -118,14 +136,14 @@ class Todo:
         return Todo(repr(self))
 
     def __repr__(self) -> str:
-        chunks: tuple[tuple[bool, str], ...] = (
-            (True, self.indent_level * " "),
-            (self.box_char is not None and not self.is_empty(), str(self.box_char)),
-            (self.color != 7, str(self.color)),
-            (
-                (self.box_char is not None and not self.is_empty()) or self.color != 7,
+        chunks: tuple[Chunk, ...] = (
+            Chunk(True, self.indent_level * " "),
+            Chunk(self.box_char != BoxChar.NONE and not self.is_empty(), str(self.box_char)),
+            Chunk(self.color != 7, str(self.color)),
+            Chunk(
+                (self.box_char != BoxChar.NONE and not self.is_empty()) or self.color != 7,
                 " ",
             ),
-            (True, self.display_text),
+            Chunk(True, self.display_text),
         )
         return "".join([item for condition, item in chunks if condition])

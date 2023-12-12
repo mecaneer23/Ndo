@@ -2,7 +2,7 @@
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
 from os import get_terminal_size
-from typing import Any, NamedTuple, TypeVar
+from typing import Any, TypeVar
 
 from src.class_cursor import Cursor
 from src.class_todo import Todo
@@ -15,6 +15,7 @@ from src.get_args import (
     STRIKETHROUGH,
     TKINTER_GUI,
 )
+from src.utils import Chunk
 
 if TKINTER_GUI:
     from tcurses import curses
@@ -23,11 +24,6 @@ else:
 
 
 T = TypeVar("T")
-
-
-class Chunk(NamedTuple):
-    condition: bool
-    item: str
 
 
 def get_bullet(indentation_level: int) -> str:
