@@ -22,7 +22,7 @@ from src.get_args import (
     HELP_FILE,
     TKINTER_GUI,
 )
-from src.get_todo import hline, wgetnstr
+from src.get_todo import hline, get_todo
 from src.io import update_file
 from src.keys import Key
 from src.md_to_py import md_table_to_lines
@@ -277,7 +277,7 @@ def get_newwin(stdscr: Any) -> Any:
 def search(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
     set_header(stdscr, "Searching...")
     stdscr.refresh()
-    sequence = wgetnstr(
+    sequence = get_todo(
         stdscr,
         get_newwin(stdscr),
         Todo(),

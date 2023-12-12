@@ -8,7 +8,6 @@
 -4 implement multiline todos
   -4 allow multiline paste
   -4 allow multiline print
-  -4 allow wgetnstr to use multiline editing
+  -4 allow get_todo to use multiline editing
 - make startup faster
 - fix silence if dependencies are not installed
-- rename wgetnstr to get_todo

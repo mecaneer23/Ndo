@@ -25,7 +25,7 @@ from src.get_args import (
     NO_GUI,
     TKINTER_GUI,
 )
-from src.get_todo import set_header, wgetnstr
+from src.get_todo import set_header, get_todo
 from src.io import file_string_to_todos, read_file, update_file
 from src.keys import Key
 from src.menus import color_menu, get_newwin, help_menu, magnify, search, sort_menu
@@ -52,7 +52,7 @@ def insert_todo(
     default_todo: Todo = Todo(),
     mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
 ) -> list[Todo]:
-    todo = wgetnstr(
+    todo = get_todo(
         stdscr,
         get_newwin(stdscr),
         todo=default_todo,
@@ -167,7 +167,7 @@ def edit_todo(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo]:
         max(max_x * 3 // 4, len(todo) + 3) if len(todo) < max_x - 1 else max_x * 3 // 4
     )
     begin_x = max_x // 8 if len(todo) < max_x - 1 - ncols else (max_x - ncols) // 2
-    edited_todo = wgetnstr(
+    edited_todo = get_todo(
         stdscr,
         curses.newwin(3, ncols, max_y // 2 - 3, begin_x),
         todo=todos[selected],

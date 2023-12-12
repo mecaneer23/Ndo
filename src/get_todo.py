@@ -248,7 +248,7 @@ def set_once(mode: SingleLineModeImpl, chars: list[str]) -> str:
     return two_lines[0]
 
 
-def wgetnstr(
+def get_todo(
     stdscr: Any,
     win: Any,
     todo: Todo,
