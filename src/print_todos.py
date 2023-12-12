@@ -15,7 +15,7 @@ from src.get_args import (
     STRIKETHROUGH,
     TKINTER_GUI,
 )
-from src.utils import Chunk
+from src.utils import Chunk, Color
 
 if TKINTER_GUI:
     from tcurses import curses
@@ -127,7 +127,7 @@ def print_todo(
                 i + 1,
                 counter,
                 display_string[counter],
-                curses.color_pair(todo.color or 7)
+                curses.color_pair(todo.color.as_int() or Color.WHITE.as_int())
                 | (curses.A_STANDOUT if i in highlight else 0),
             )
         except OverflowError:
@@ -172,7 +172,7 @@ def print_todos(
                         5: 35,
                         6: 36,
                         7: 37,
-                    }[todo.color]
+                    }[todo.color.as_int()]
                 )
                 + "m"
                 + display_string

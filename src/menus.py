@@ -112,7 +112,7 @@ def magnify(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
     stdscr.clear()
 
 
-def color_menu(parent_win: Any, original: int) -> int:
+def color_menu(parent_win: Any, original: Color) -> Color:
     parent_win.clear()
     set_header(parent_win, "Colors:")
     lines = [i.ljust(len(max(Color.as_dict(), key=len))) for i in Color.as_dict()]
@@ -136,7 +136,7 @@ def color_menu(parent_win: Any, original: int) -> int:
         Key.six: lambda _: 5,
         Key.seven: lambda _: 6,
     }
-    cursor = original - 1
+    cursor = original.as_int() - 1
     while True:
         parent_win.refresh()
         for i, line in enumerate(lines):
@@ -151,17 +151,16 @@ def color_menu(parent_win: Any, original: int) -> int:
             key = win.getch()
         except KeyboardInterrupt:
             return original
-        return_options: dict[int, Callable[[], int]] = {
+        return_options: dict[int, Callable[[], Color]] = {
             Key.q: lambda: original,
             Key.escape: lambda: original,
-            Key.enter: lambda: Color.as_dict()[lines[cursor].strip()],
+            Key.enter: lambda: Color(Color.as_dict()[lines[cursor].strip()]),
         }
         if key in move_options:
             move_func = move_options[key]
             cursor = move_func(cursor)
         elif key in return_options:
-            return_func = return_options[key]
-            return return_func()
+            return return_options[key]()
         else:
             continue
         cursor = overflow(cursor, 0, len(lines))

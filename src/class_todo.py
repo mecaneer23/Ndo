@@ -4,7 +4,7 @@
 from enum import Enum
 
 from src.get_args import CHECKBOX, INDENT
-from src.utils import Chunk
+from src.utils import Chunk, Color
 
 
 class BoxChar(Enum):
@@ -33,7 +33,7 @@ class BoxChar(Enum):
 class Todo:
     def __init__(self, text: str = "") -> None:
         self.box_char: BoxChar = BoxChar.NONE
-        self.color: int = 7
+        self.color: Color = Color.WHITE
         self.display_text: str = ""
         self.text: str = ""
         self.indent_level: int = 0
@@ -44,16 +44,16 @@ class Todo:
             return BoxChar.from_str(self.text[pointer]), pointer + 1
         return BoxChar.NONE, pointer
 
-    def _init_color(self, pointer: int) -> tuple[int, int]:
+    def _init_color(self, pointer: int) -> tuple[Color, int]:
         if (
             len(self.text) > pointer + 1
             and self.text[pointer].isdigit()
             and self.text[pointer + 1] == " "
         ):
-            return int(self.text[pointer]), pointer + 2
-        return 7, pointer
+            return Color(int(self.text[pointer])), pointer + 2
+        return Color.WHITE, pointer
 
-    def _init_attrs(self) -> tuple[BoxChar, int, str]:
+    def _init_attrs(self) -> tuple[BoxChar, Color, str]:
         pointer = self.indent_level
         box_char, pointer = self._init_box_char(pointer)
         color, pointer = self._init_color(pointer)
@@ -68,7 +68,7 @@ class Todo:
         self.indent_level = len(text) - len(text.lstrip())
         if not self.text:
             self.box_char = BoxChar.MINUS
-            self.color = 7
+            self.color = Color.WHITE
             self.display_text = ""
             return
         self.box_char, self.color, self.display_text = self._init_attrs()
@@ -92,7 +92,7 @@ class Todo:
     def set_indent_level(self, indent_level: int) -> None:
         self.indent_level = indent_level
 
-    def set_color(self, color: int) -> None:
+    def set_color(self, color: Color) -> None:
         self.color = color
 
     def get_box(self) -> str:
@@ -138,10 +138,14 @@ class Todo:
     def __repr__(self) -> str:
         chunks: tuple[Chunk, ...] = (
             Chunk(True, self.indent_level * " "),
-            Chunk(self.box_char != BoxChar.NONE and not self.is_empty(), str(self.box_char)),
-            Chunk(self.color != 7, str(self.color)),
             Chunk(
-                (self.box_char != BoxChar.NONE and not self.is_empty()) or self.color != 7,
+                self.box_char != BoxChar.NONE and not self.is_empty(),
+                str(self.box_char),
+            ),
+            Chunk(self.color != Color.WHITE, str(self.color.as_int())),
+            Chunk(
+                (self.box_char != BoxChar.NONE and not self.is_empty())
+                or self.color != Color.WHITE,
                 " ",
             ),
             Chunk(True, self.display_text),
