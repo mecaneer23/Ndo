@@ -1,16 +1,23 @@
 # pylint: disable=missing-class-docstring, import-error
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
+from enum import Enum
 from typing import Any
 
 from src.class_todo import Todo
 from src.keys import Key
 
 
+class Direction(Enum):
+    UP = 0
+    DOWN = 1
+    NONE = 2
+
+
 class Cursor:
     def __init__(self, position: int, *positions: int) -> None:
         self.positions: list[int] = [position, *positions]
-        self.direction: str | None = None
+        self.direction: Direction = Direction.NONE
 
     def __len__(self) -> int:
         return len(self.positions)
@@ -78,18 +85,18 @@ class Cursor:
     def multiselect_down(self, max_len: int) -> None:
         if max(self.positions) >= max_len - 1:
             return
-        if len(self.positions) == 1 or self.direction == "down":
+        if len(self.positions) == 1 or self.direction == Direction.DOWN:
             self.select_next()
-            self.direction = "down"
+            self.direction = Direction.DOWN
             return
         self.deselect_prev()
 
     def multiselect_up(self) -> None:
-        if min(self.positions) == 0 and self.direction == "up":
+        if min(self.positions) == 0 and self.direction == Direction.UP:
             return
-        if len(self.positions) == 1 or self.direction == "up":
+        if len(self.positions) == 1 or self.direction == Direction.UP:
             self.select_prev()
-            self.direction = "up"
+            self.direction = Direction.UP
             return
         self.deselect_next()
 

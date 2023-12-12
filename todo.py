@@ -111,7 +111,7 @@ def new_todo_next(
         stdscr (Any): The standard screen object for terminal UI.
         todos (list[Todo]): The list of todos.
         selected (int): The current cursor position.
-        mode (SingleLineMode | None): The editing mode (optional).
+        mode (SingleLineMode): The editing mode (optional).
 
     Returns:
         tuple[list[Todo], int]: A tuple containing the updated list of todos and the
