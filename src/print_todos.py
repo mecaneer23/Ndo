@@ -65,13 +65,13 @@ def make_printable_sublist(
 
 
 def info_message(stdscr: Any, height: int, width: int) -> None:
-    text = [
+    text = (
         "Ndo - an ncurses todo application",
         "",
         "by Gabriel Natenshon",
         "Press `o` to add a new todo",
         "Or press `h` to view a help menu",
-    ]
+    )
     maxlen = len(max(text, key=len))
     for i, line in enumerate(text):
         stdscr.addstr(height // 3 + i, (width - maxlen) // 2, line.center(maxlen))
