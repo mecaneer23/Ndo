@@ -309,9 +309,9 @@ def wgetnstr(
         Key.ctrl_backspace: handle_ctrl_backspace,
     }
     while True:
+        if len(chars) + 1 >= win.getmaxyx()[1] - 1:
+            return todo.set_display_text(set_once(mode, chars))
         if position == len(chars):
-            if len(chars) + 1 >= win.getmaxyx()[1] - 1:
-                return todo.set_display_text(set_once(mode, chars))
             win.addstr(1, len(chars) + 1, "█")
         for i, char in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
             win.addstr(1, i + 1, char, curses.A_STANDOUT if i == position else 0)
