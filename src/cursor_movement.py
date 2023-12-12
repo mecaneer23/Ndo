@@ -10,6 +10,7 @@ from src.class_todo import Todo
 from src.keys import Key
 from src.utils import clamp
 
+
 def relative_cursor_to(
     win: Any, todos: list[Todo], selected: int, first_digit: int
 ) -> int:
@@ -35,6 +36,7 @@ def relative_cursor_to(
             total += str(Key.normalize_ascii_digit_to_digit(key))
             continue
         return selected
+
 
 def cursor_up(selected: int, len_todos: int) -> int:
     return clamp(selected - 1, 0, len_todos)

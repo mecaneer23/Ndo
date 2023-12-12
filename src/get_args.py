@@ -44,6 +44,7 @@ def _get_checkbox(win: Any) -> str:
     except TypeError:
         return CHECKBOX_OPTIONS[1]
 
+
 def get_args() -> Namespace:
     parser = ArgumentParser(
         description="Ndo is a todo list program to help you manage your todo lists",

@@ -23,10 +23,7 @@ class Key:
     ctrl_x = 24
     escape = 27
     minus = 45
-    dash = 45
-    hyphen = 45
     slash = 47
-    forward_slash = 47
     zero = 48
     one = 49
     ctrl_arrow = 49
