@@ -27,27 +27,12 @@ from src.io import update_file
 from src.keys import Key
 from src.md_to_py import md_table_to_lines
 from src.print_todos import make_printable_sublist
-from src.utils import clamp, overflow, set_header
+from src.utils import Color, clamp, overflow, set_header
 
 if TKINTER_GUI:
     from tcurses import curses
 else:
     import curses
-
-
-COLORS = {
-    "Red": 1,
-    "Green": 2,
-    "Yellow": 3,
-    "Blue": 4,
-    "Magenta": 5,
-    "Cyan": 6,
-    "White": 7,
-}
-
-
-def get_color(color: str) -> int:
-    return COLORS[color]
 
 
 def simple_scroll_keybinds(
@@ -130,7 +115,7 @@ def magnify(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
 def color_menu(parent_win: Any, original: int) -> int:
     parent_win.clear()
     set_header(parent_win, "Colors:")
-    lines = [i.ljust(len(max(COLORS.keys(), key=len))) for i in COLORS]
+    lines = [i.ljust(len(max(Color.as_dict(), key=len))) for i in Color.as_dict()]
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
@@ -159,7 +144,7 @@ def color_menu(parent_win: Any, original: int) -> int:
                 i + 1,
                 1,
                 line,
-                curses.color_pair(get_color(line.strip()))
+                curses.color_pair(Color.as_dict()[line.strip()])
                 | (curses.A_STANDOUT if i == cursor else 0),
             )
         try:
@@ -169,7 +154,7 @@ def color_menu(parent_win: Any, original: int) -> int:
         return_options: dict[int, Callable[[], int]] = {
             Key.q: lambda: original,
             Key.escape: lambda: original,
-            Key.enter: lambda: get_color(lines[cursor].strip()),
+            Key.enter: lambda: Color.as_dict()[lines[cursor].strip()],
         }
         if key in move_options:
             move_func = move_options[key]
