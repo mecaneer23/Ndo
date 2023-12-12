@@ -2,7 +2,7 @@
 Various ways to move a cursor represented by an int
 """
 
-# pylint disable=missing-function-docstring
+# pylint: disable=missing-function-docstring
 
 from typing import Any
 
