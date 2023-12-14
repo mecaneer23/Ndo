@@ -22,9 +22,9 @@ BULLETS = False
 CHECKBOX = ""
 CONTROLS_BEGIN_INDEX = 68
 CONTROLS_END_INDEX = 96
-DEFAULT_TODO = "todo.txt"
+DEFAULT_FILENAME = "todo.txt"
 ENUMERATE = False
-FILENAME = Path(DEFAULT_TODO)
+FILENAME = Path(DEFAULT_FILENAME)
 HEADER = ""
 HELP_FILE = Path(__file__).parent.parent.joinpath("README.md").absolute()
 INDENT = 2
@@ -164,15 +164,18 @@ def get_args() -> Namespace:
     return Namespace(**args)
 
 
+def parse_filename(filename: str) -> Path:
+    path = Path(filename)
+    if path.is_dir():
+        return path.joinpath(DEFAULT_FILENAME)
+    return path
+
+
 command_line_args = get_args()
 BULLETS = command_line_args.bullet_display
 CHECKBOX = command_line_args.checkbox
 ENUMERATE = command_line_args.enumerate
-FILENAME = (
-    Path(command_line_args.filename, DEFAULT_TODO)
-    if Path(command_line_args.filename).is_dir()
-    else Path(command_line_args.filename)
-)
+FILENAME = parse_filename(command_line_args.filename)
 HEADER = (
     FILENAME.as_posix()
     if command_line_args.title == HEADER
