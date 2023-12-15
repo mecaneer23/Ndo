@@ -29,6 +29,7 @@ class SingleTypeList(UserList):
             self.base = Todo
 
     """
+
     T = TypeVar("T")
 
     def _validate_number(self, value: T) -> T:
