@@ -2,7 +2,7 @@
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
 from enum import Enum
-from typing import Iterable
+from typing import Iterable, NamedTuple
 
 from src.get_args import CHECKBOX, INDENT
 from src.utils import Chunk, Color, SingleTypeList
@@ -158,3 +158,13 @@ class Todos(SingleTypeList):
     def __init__(self, iterable: Iterable[Todo]) -> None:
         super().__init__(iterable)
         self.base = Todo
+
+
+class TodoList(NamedTuple):
+    """
+    An object representing the todos
+    and a cursor within the list
+    """
+
+    todos: Todos
+    cursor: int

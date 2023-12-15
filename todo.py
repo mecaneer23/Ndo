@@ -10,7 +10,7 @@ from typing import Any, Callable
 from src.class_cursor import Cursor, Positions
 from src.class_history import UndoRedo
 from src.class_mode import SingleLineMode, SingleLineModeImpl
-from src.class_todo import Todo, BoxChar, Todos
+from src.class_todo import BoxChar, Todo, TodoList, Todos
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
 from src.cursor_movement import (
     cursor_bottom,
@@ -25,7 +25,7 @@ from src.get_args import (
     NO_GUI,
     TKINTER_GUI,
 )
-from src.get_todo import set_header, get_todo
+from src.get_todo import get_todo, set_header
 from src.io import file_string_to_todos, read_file, update_file
 from src.keys import Key
 from src.menus import color_menu, get_newwin, help_menu, magnify, search, sort_menu
@@ -103,7 +103,7 @@ def new_todo_next(
     selected: int,
     default_todo: Todo = Todo(),
     mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
-) -> tuple[Todos, int]:
+) -> TodoList:
     """
     Insert a new todo item below the current cursor position and update the todo list.
 
@@ -114,7 +114,7 @@ def new_todo_next(
         mode (SingleLineMode): The editing mode (optional).
 
     Returns:
-        tuple[Todos, int]: A tuple containing the updated list of todos and the
+        TodoList: A tuple containing the updated list of todos and the
         new cursor position.
     """
     temp = todos.copy()
@@ -129,7 +129,7 @@ def new_todo_next(
     if temp != todos:
         selected = cursor_down(selected, len(todos))
     update_file(FILENAME, todos)
-    return todos, selected
+    return TodoList(todos, selected)
 
 
 def new_todo_current(stdscr: Any, todos: Todos, selected: int) -> Todos:
@@ -141,14 +141,14 @@ def new_todo_current(stdscr: Any, todos: Todos, selected: int) -> Todos:
 
 def delete_todo(
     stdscr: Any, todos: Todos, selected: Cursor
-) -> tuple[Todos, int]:
+) -> TodoList:
     positions = selected.get_deletable()
     for pos in positions:
         todos = remove_todo(todos, pos)
     selected.set_to(clamp(int(selected), 0, len(todos)))
     stdscr.clear()
     update_file(FILENAME, todos)
-    return todos, int(selected)
+    return TodoList(todos, int(selected))
 
 
 def color_todo(stdscr: Any, todos: Todos, selected: Cursor) -> Todos:
@@ -184,11 +184,11 @@ def edit_todo(
     return todos
 
 
-def blank_todo(todos: Todos, selected: int) -> tuple[Todos, int]:
+def blank_todo(todos: Todos, selected: int) -> TodoList:
     insert_empty_todo(todos, selected + 1)
     selected = cursor_down(selected, len(todos))
     update_file(FILENAME, todos)
-    return todos, selected
+    return TodoList(todos, selected)
 
 
 def toggle(todos: Todos, selected: Cursor) -> Todos:
@@ -210,18 +210,18 @@ def quit_program(todos: Todos, edits: int, prev_time: float) -> int:
     return update_file(FILENAME, todos)
 
 
-def indent(todos: Todos, selected: Cursor) -> tuple[Todos, int]:
+def indent(todos: Todos, selected: Cursor) -> TodoList:
     for pos in selected.get():
         todos[pos].indent()
     update_file(FILENAME, todos)
-    return todos, selected.get_first()
+    return TodoList(todos, selected.get_first())
 
 
-def dedent(todos: Todos, selected: Cursor) -> tuple[Todos, int]:
+def dedent(todos: Todos, selected: Cursor) -> TodoList:
     for pos in selected.get():
         todos[pos].dedent()
     update_file(FILENAME, todos)
-    return todos, selected.get_first()
+    return TodoList(todos, selected.get_first())
 
 
 def toggle_todo_note(todos: Todos, selected: Cursor) -> None:
