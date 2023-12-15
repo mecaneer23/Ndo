@@ -179,15 +179,15 @@ def get_sorting_methods() -> dict[str, Callable[..., str]]:
 
 
 def get_indented_sections(todos: Todos) -> list[Todos]:
-    indented_sections = []
-    section = []
+    indented_sections: list[Todos] = []
+    section: Todos = Todos([])
     for todo in todos:
         if todo.indent_level > 0:
             section.append(todo)
             continue
         if len(section) > 0:
             indented_sections.append(section)
-        section = [todo]
+        section = Todos([todo])
     indented_sections.append(section)
     return indented_sections
 
