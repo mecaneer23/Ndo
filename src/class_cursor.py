@@ -2,10 +2,11 @@
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
 from enum import Enum
-from typing import Any
+from typing import Any, Iterable
 
 from src.class_todo import Todos
 from src.keys import Key
+from src.utils import SingleTypeList
 
 
 class Direction(Enum):
@@ -14,9 +15,15 @@ class Direction(Enum):
     NONE = 2
 
 
+class Positions(SingleTypeList):
+    def __init__(self, iterable: Iterable[int]):
+        super().__init__(iterable)
+        self.base = int
+
+
 class Cursor:
     def __init__(self, position: int, *positions: int) -> None:
-        self.positions: list[int] = [position, *positions]
+        self.positions: Positions = Positions([position, *positions])
         self.direction: Direction = Direction.NONE
 
     def __len__(self) -> int:
@@ -31,7 +38,7 @@ class Cursor:
     def __contains__(self, child: int) -> bool:
         return child in self.positions
 
-    def get(self) -> list[int]:
+    def get(self) -> Positions:
         return self.positions
 
     def get_first(self) -> int:
@@ -41,13 +48,13 @@ class Cursor:
         return self.positions[-1]
 
     def set_to(self, position: int) -> None:
-        self.positions = [position]
+        self.positions = Positions([position])
 
     def todo_set_to(self, todo_position: tuple[Todos, int]) -> Todos:
         self.positions[0] = todo_position[1]
         return todo_position[0]
 
-    def todos_override(self, todos: Todos, positions: list[int]) -> Todos:
+    def todos_override(self, todos: Todos, positions: Positions) -> Todos:
         self.positions = positions
         return todos
 
@@ -79,8 +86,8 @@ class Cursor:
         self.positions.append(min(self.positions) - 1)
         self.positions.sort()
 
-    def get_deletable(self) -> list[int]:
-        return [min(self.positions) for _ in self.positions]
+    def get_deletable(self) -> Positions:
+        return Positions([min(self.positions) for _ in self.positions])
 
     def multiselect_down(self, max_len: int) -> None:
         if max(self.positions) >= max_len - 1:
@@ -138,4 +145,4 @@ class Cursor:
             return
 
     def multiselect_all(self, max_len: int) -> None:
-        self.positions = list(range(0, max_len))
+        self.positions = Positions(range(0, max_len))

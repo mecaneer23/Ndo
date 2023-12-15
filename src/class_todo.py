@@ -1,11 +1,11 @@
 # pylint: disable=missing-class-docstring, import-error
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
-from collections import UserList
 from enum import Enum
+from typing import Iterable
 
 from src.get_args import CHECKBOX, INDENT
-from src.utils import Chunk, Color
+from src.utils import Chunk, Color, SingleTypeList
 
 
 class BoxChar(Enum):
@@ -154,26 +154,7 @@ class Todo:
         return "".join([item for condition, item in chunks if condition])
 
 
-class Todos(UserList):
-    def _validate_number(self, value):
-        if isinstance(value, Todo):
-            return value
-        raise TypeError(f"Todo expected, got {type(value).__name__}")
-
-    def __init__(self, iterable):
-        super().__init__(self._validate_number(item) for item in iterable)
-
-    def __setitem__(self, index, item):
-        self.data[index] = self._validate_number(item)
-
-    def insert(self, index, item):  # pylint: disable=W0237
-        self.data.insert(index, self._validate_number(item))
-
-    def append(self, item):
-        self.data.append(self._validate_number(item))
-
-    def extend(self, other):
-        if isinstance(other, Todos):
-            self.data.extend(other)
-        else:
-            self.data.extend(self._validate_number(item) for item in other)
+class Todos(SingleTypeList):
+    def __init__(self, iterable: Iterable[Todo]) -> None:
+        super().__init__(iterable)
+        self.base = Todo

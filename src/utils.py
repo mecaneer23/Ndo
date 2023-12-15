@@ -2,8 +2,9 @@
 General utilities, useful across multiple other files
 """
 
+from collections import UserList
 from enum import Enum
-from typing import Any, NamedTuple
+from typing import Any, Iterable, NamedTuple, TypeVar
 
 from src.get_args import TKINTER_GUI
 
@@ -11,6 +12,48 @@ if TKINTER_GUI:
     from tcurses import curses
 else:
     import curses
+
+
+class SingleTypeList(UserList):
+    """
+    Baseclass to inherit from for any list
+    type which can only hold one type.
+
+    Should not be used directly.
+
+    Example:
+
+    class Todos(SingleTypeList):
+        def __init__(self, iterable):
+            super().__init__(iterable)
+            self.base = Todo
+
+    """
+    T = TypeVar("T")
+
+    def _validate_number(self, value: T) -> T:
+        if isinstance(value, self.base):
+            return value
+        raise TypeError(f"{self.base.__name__} expected, got {type(value).__name__}")
+
+    def __init__(self, iterable: Iterable[Any]) -> None:
+        self.base: Any = object
+        super().__init__(self._validate_number(item) for item in iterable)
+
+    def __setitem__(self, index: int, item: Any) -> None:
+        self.data[index] = self._validate_number(item)
+
+    def insert(self, index: int, item: Any) -> None:  # pylint: disable=W0237
+        self.data.insert(index, self._validate_number(item))
+
+    def append(self, item: Any) -> None:
+        self.data.append(self._validate_number(item))
+
+    def extend(self, other: Iterable[Any]) -> None:
+        if isinstance(other, type(self)):
+            self.data.extend(other)
+        else:
+            self.data.extend(self._validate_number(item) for item in other)
 
 
 class Chunk(NamedTuple):

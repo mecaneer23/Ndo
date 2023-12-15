@@ -7,7 +7,7 @@ from pathlib import Path
 from sys import exit as sys_exit
 from typing import Any, Callable
 
-from src.class_cursor import Cursor
+from src.class_cursor import Cursor, Positions
 from src.class_history import UndoRedo
 from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import Todo, BoxChar, Todos
@@ -83,14 +83,14 @@ def move_todos(todos: Todos, selected: int, destination: int) -> Todos:
     return todos
 
 
-def todo_up(todos: Todos, selected: Cursor) -> tuple[Todos, list[int]]:
+def todo_up(todos: Todos, selected: Cursor) -> tuple[Todos, Positions]:
     todos = move_todos(todos, selected.get_last(), selected.get_first() - 1)
     update_file(FILENAME, todos)
     selected.slide_up()
     return todos, selected.get()
 
 
-def todo_down(todos: Todos, selected: Cursor) -> tuple[Todos, list[int]]:
+def todo_down(todos: Todos, selected: Cursor) -> tuple[Todos, Positions]:
     todos = move_todos(todos, selected.get_first(), selected.get_last() + 1)
     update_file(FILENAME, todos)
     selected.slide_down(len(todos))
