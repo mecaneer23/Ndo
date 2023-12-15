@@ -15,7 +15,7 @@ except ImportError:
     CLIPBOARD_EXISTS = False
 
 from src.class_cursor import Cursor
-from src.class_todo import Todo, Todos
+from src.class_todo import Todo, Todos, TodoList
 from src.cursor_movement import cursor_down
 from src.get_args import FILENAME
 from src.io import update_file
@@ -44,11 +44,11 @@ def todo_from_clipboard(
 
 def paste_todo(
     stdscr: Any, todos: Todos, selected: int, copied_todo: Todo
-) -> tuple[Todos, int]:
+) -> TodoList:
     temp = todos.copy()
     todos = todo_from_clipboard(todos, selected, copied_todo)
     stdscr.clear()
     if temp != todos:
         selected = cursor_down(selected, len(todos))
     update_file(FILENAME, todos)
-    return todos, selected
+    return TodoList(todos, selected)

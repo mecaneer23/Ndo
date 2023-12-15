@@ -14,7 +14,7 @@ except ImportError:
     FIGLET_FORMAT_EXISTS = False
 
 from src.class_cursor import Cursor
-from src.class_todo import Todo, Todos
+from src.class_todo import Todo, Todos, TodoList
 from src.get_args import (
     CONTROLS_BEGIN_INDEX,
     CONTROLS_END_INDEX,
@@ -192,7 +192,7 @@ def get_indented_sections(todos: Todos) -> list[Todos]:
     return indented_sections
 
 
-def sort_by(method: str, todos: Todos, selected: Cursor) -> tuple[Todos, int]:
+def sort_by(method: str, todos: Todos, selected: Cursor) -> TodoList:
     key = get_sorting_methods()[method]
     selected_todo = todos[int(selected)]
     sorted_todos = Todos([])
@@ -200,12 +200,12 @@ def sort_by(method: str, todos: Todos, selected: Cursor) -> tuple[Todos, int]:
         for todo in section:
             sorted_todos.append(todo)
     update_file(FILENAME, sorted_todos)
-    return sorted_todos, sorted_todos.index(selected_todo)
+    return TodoList(sorted_todos, sorted_todos.index(selected_todo))
 
 
 def sort_menu(
     parent_win: Any, todos: Todos, selected: Cursor
-) -> tuple[Todos, int]:
+) -> TodoList:
     parent_win.clear()
     set_header(parent_win, "Sort by:")
     lines = list(get_sorting_methods().keys())
@@ -235,10 +235,10 @@ def sort_menu(
         try:
             key = win.getch()
         except KeyboardInterrupt:
-            return todos, int(selected)
-        return_options: dict[int, Callable[..., tuple[Todos, int]]] = {
-            Key.q: lambda: (todos, int(selected)),
-            Key.escape: lambda: (todos, int(selected)),
+            return TodoList(todos, int(selected))
+        return_options: dict[int, Callable[..., TodoList]] = {
+            Key.q: lambda: TodoList(todos, int(selected)),
+            Key.escape: lambda: TodoList(todos, int(selected)),
             Key.enter: lambda: sort_by(lines[cursor], todos, selected),
         }
         if key in move_options:

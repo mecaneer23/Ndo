@@ -4,7 +4,7 @@
 from enum import Enum
 from typing import Any, Iterable
 
-from src.class_todo import Todos
+from src.class_todo import Todos, TodoList
 from src.keys import Key
 from src.utils import SingleTypeList
 
@@ -50,7 +50,7 @@ class Cursor:
     def set_to(self, position: int) -> None:
         self.positions = Positions([position])
 
-    def todo_set_to(self, todo_position: tuple[Todos, int]) -> Todos:
+    def todo_set_to(self, todo_position: TodoList) -> Todos:
         self.positions[0] = todo_position[1]
         return todo_position[0]
 

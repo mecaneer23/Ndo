@@ -1,7 +1,7 @@
 # pylint: disable=missing-class-docstring, import-error
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
-from src.class_todo import Todo, Todos
+from src.class_todo import Todo, Todos, TodoList
 
 
 class Restorable:
@@ -9,9 +9,9 @@ class Restorable:
         self.stored: str = " |SEP|".join([todo.text for todo in todos])
         self.selected: int = selected
 
-    def get(self) -> tuple[Todos, int]:
+    def get(self) -> TodoList:
         stored = self.stored.split(" |SEP|")
-        return Todos([Todo(line) for line in stored]), self.selected
+        return TodoList(Todos([Todo(line) for line in stored]), self.selected)
 
     def __repr__(self) -> str:
         return self.stored.replace(" |SEP|", ", ") + f": {self.selected}"
@@ -26,12 +26,12 @@ class UndoRedo:
         self.history.append(Restorable(todos, selected))
         self.index = len(self.history) - 1
 
-    def undo(self) -> tuple[Todos, int]:
+    def undo(self) -> TodoList:
         if self.index > 0:
             self.index -= 1
         return self.history[self.index].get()
 
-    def redo(self) -> tuple[Todos, int]:
+    def redo(self) -> TodoList:
         if self.index < len(self.history) - 1:
             self.index += 1
         return self.history[self.index].get()
