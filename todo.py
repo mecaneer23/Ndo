@@ -10,7 +10,7 @@ from typing import Any, Callable
 from src.class_cursor import Cursor
 from src.class_history import UndoRedo
 from src.class_mode import SingleLineMode, SingleLineModeImpl
-from src.class_todo import Todo, BoxChar
+from src.class_todo import Todo, BoxChar, Todos
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
 from src.cursor_movement import (
     cursor_bottom,
@@ -47,11 +47,11 @@ def get_file_modified_time(filename: Path) -> float:
 
 def insert_todo(
     stdscr: Any,
-    todos: list[Todo],
+    todos: Todos,
     index: int,
     default_todo: Todo = Todo(),
     mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
-) -> list[Todo]:
+) -> Todos:
     todo = get_todo(
         stdscr,
         get_newwin(stdscr),
@@ -65,32 +65,32 @@ def insert_todo(
     return todos
 
 
-def insert_empty_todo(todos: list[Todo], index: int) -> list[Todo]:
+def insert_empty_todo(todos: Todos, index: int) -> Todos:
     todos.insert(index, Todo())
     return todos
 
 
-def remove_todo(todos: list[Todo], index: int) -> list[Todo]:
+def remove_todo(todos: Todos, index: int) -> Todos:
     if len(todos) < 1:
         return todos
     todos.pop(index)
     return todos
 
 
-def move_todos(todos: list[Todo], selected: int, destination: int) -> list[Todo]:
+def move_todos(todos: Todos, selected: int, destination: int) -> Todos:
     if min(selected, destination) >= 0 and max(selected, destination) < len(todos):
         todos.insert(selected, todos.pop(destination))
     return todos
 
 
-def todo_up(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], list[int]]:
+def todo_up(todos: Todos, selected: Cursor) -> tuple[Todos, list[int]]:
     todos = move_todos(todos, selected.get_last(), selected.get_first() - 1)
     update_file(FILENAME, todos)
     selected.slide_up()
     return todos, selected.get()
 
 
-def todo_down(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], list[int]]:
+def todo_down(todos: Todos, selected: Cursor) -> tuple[Todos, list[int]]:
     todos = move_todos(todos, selected.get_first(), selected.get_last() + 1)
     update_file(FILENAME, todos)
     selected.slide_down(len(todos))
@@ -99,22 +99,22 @@ def todo_down(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], list[int
 
 def new_todo_next(
     stdscr: Any,
-    todos: list[Todo],
+    todos: Todos,
     selected: int,
     default_todo: Todo = Todo(),
     mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
-) -> tuple[list[Todo], int]:
+) -> tuple[Todos, int]:
     """
     Insert a new todo item below the current cursor position and update the todo list.
 
     Args:
         stdscr (Any): The standard screen object for terminal UI.
-        todos (list[Todo]): The list of todos.
+        todos (Todos): The list of todos.
         selected (int): The current cursor position.
         mode (SingleLineMode): The editing mode (optional).
 
     Returns:
-        tuple[list[Todo], int]: A tuple containing the updated list of todos and the
+        tuple[Todos, int]: A tuple containing the updated list of todos and the
         new cursor position.
     """
     temp = todos.copy()
@@ -132,7 +132,7 @@ def new_todo_next(
     return todos, selected
 
 
-def new_todo_current(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo]:
+def new_todo_current(stdscr: Any, todos: Todos, selected: int) -> Todos:
     todos = insert_todo(stdscr, todos, selected)
     stdscr.clear()
     update_file(FILENAME, todos)
@@ -140,8 +140,8 @@ def new_todo_current(stdscr: Any, todos: list[Todo], selected: int) -> list[Todo
 
 
 def delete_todo(
-    stdscr: Any, todos: list[Todo], selected: Cursor
-) -> tuple[list[Todo], int]:
+    stdscr: Any, todos: Todos, selected: Cursor
+) -> tuple[Todos, int]:
     positions = selected.get_deletable()
     for pos in positions:
         todos = remove_todo(todos, pos)
@@ -151,7 +151,7 @@ def delete_todo(
     return todos, int(selected)
 
 
-def color_todo(stdscr: Any, todos: list[Todo], selected: Cursor) -> list[Todo]:
+def color_todo(stdscr: Any, todos: Todos, selected: Cursor) -> Todos:
     new_color = color_menu(stdscr, todos[int(selected)].color)
     for pos in selected.get():
         todos[pos].set_color(new_color)
@@ -161,8 +161,8 @@ def color_todo(stdscr: Any, todos: list[Todo], selected: Cursor) -> list[Todo]:
 
 
 def edit_todo(
-    stdscr: Any, todos: list[Todo], selected: int, mode: SingleLineModeImpl
-) -> list[Todo]:
+    stdscr: Any, todos: Todos, selected: int, mode: SingleLineModeImpl
+) -> Todos:
     max_y, max_x = stdscr.getmaxyx()
     todo = todos[selected].display_text
     ncols = (
@@ -184,14 +184,14 @@ def edit_todo(
     return todos
 
 
-def blank_todo(todos: list[Todo], selected: int) -> tuple[list[Todo], int]:
+def blank_todo(todos: Todos, selected: int) -> tuple[Todos, int]:
     insert_empty_todo(todos, selected + 1)
     selected = cursor_down(selected, len(todos))
     update_file(FILENAME, todos)
     return todos, selected
 
 
-def toggle(todos: list[Todo], selected: Cursor) -> list[Todo]:
+def toggle(todos: Todos, selected: Cursor) -> Todos:
     for pos in selected.get():
         todos[pos].toggle()
     update_file(FILENAME, todos)
@@ -203,49 +203,49 @@ def remove_file(filename: Path) -> int:
     return 0
 
 
-def quit_program(todos: list[Todo], edits: int, prev_time: float) -> int:
+def quit_program(todos: Todos, edits: int, prev_time: float) -> int:
     todos, _ = update_modified_time(prev_time, todos)
     if edits < 1:
         return remove_file(FILENAME)
     return update_file(FILENAME, todos)
 
 
-def indent(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
+def indent(todos: Todos, selected: Cursor) -> tuple[Todos, int]:
     for pos in selected.get():
         todos[pos].indent()
     update_file(FILENAME, todos)
     return todos, selected.get_first()
 
 
-def dedent(todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
+def dedent(todos: Todos, selected: Cursor) -> tuple[Todos, int]:
     for pos in selected.get():
         todos[pos].dedent()
     update_file(FILENAME, todos)
     return todos, selected.get_first()
 
 
-def toggle_todo_note(todos: list[Todo], selected: Cursor) -> None:
+def toggle_todo_note(todos: Todos, selected: Cursor) -> None:
     for pos in selected.get():
         todo = todos[pos]
         todo.box_char = BoxChar.NONE if todo.has_box() else BoxChar.MINUS
     update_file(FILENAME, todos)
 
 
-def handle_cursor_up(todos: list[Todo], selected: Cursor) -> None:
+def handle_cursor_up(todos: Todos, selected: Cursor) -> None:
     selected.set_to(cursor_up(int(selected), len(todos)))
 
 
-def handle_cursor_down(todos: list[Todo], selected: Cursor) -> None:
+def handle_cursor_down(todos: Todos, selected: Cursor) -> None:
     selected.set_to(cursor_down(int(selected), len(todos)))
 
 
 def handle_new_todo_next(
     stdscr: Any,
-    todos: list[Todo],
+    todos: Todos,
     selected: Cursor,
     mode: SingleLineModeImpl,
     default_todo: Todo = Todo(),
-) -> list[Todo]:
+) -> Todos:
     return selected.todo_set_to(
         new_todo_next(
             stdscr,
@@ -258,20 +258,20 @@ def handle_new_todo_next(
 
 
 def handle_delete_todo(
-    stdscr: Any, todos: list[Todo], selected: Cursor, copied_todo: Todo
-) -> list[Todo]:
+    stdscr: Any, todos: Todos, selected: Cursor, copied_todo: Todo
+) -> Todos:
     if len(todos) > 0 and CLIPBOARD_EXISTS:
         copy_todo(todos, selected, copied_todo)
     return selected.todo_set_to(delete_todo(stdscr, todos, selected))
 
 
-def handle_undo(selected: Cursor, history: UndoRedo) -> list[Todo]:
+def handle_undo(selected: Cursor, history: UndoRedo) -> Todos:
     todos = selected.todo_set_to(history.undo())
     update_file(FILENAME, todos)
     return todos
 
 
-def handle_redo(selected: Cursor, history: UndoRedo) -> list[Todo]:
+def handle_redo(selected: Cursor, history: UndoRedo) -> Todos:
     todos = selected.todo_set_to(history.redo())
     update_file(FILENAME, todos)
     return todos
@@ -279,7 +279,7 @@ def handle_redo(selected: Cursor, history: UndoRedo) -> list[Todo]:
 
 def handle_edit(
     stdscr: Any,
-    todos: list[Todo],
+    todos: Todos,
     selected: Cursor,
     mode: SingleLineModeImpl,
 ):
@@ -288,20 +288,20 @@ def handle_edit(
     return edit_todo(stdscr, todos, int(selected), mode)
 
 
-def handle_to_top(todos: list[Todo], selected: Cursor) -> None:
+def handle_to_top(todos: Todos, selected: Cursor) -> None:
     selected.set_to(cursor_top(len(todos)))
 
 
-def handle_to_bottom(todos: list[Todo], selected: Cursor) -> None:
+def handle_to_bottom(todos: Todos, selected: Cursor) -> None:
     selected.set_to(cursor_bottom(len(todos)))
 
 
 def handle_paste(
     stdscr: Any,
-    todos: list[Todo],
+    todos: Todos,
     selected: Cursor,
     copied_todo: Todo,
-) -> list[Todo]:
+) -> Todos:
     return selected.todo_set_to(
         paste_todo(
             stdscr,
@@ -313,49 +313,49 @@ def handle_paste(
 
 
 def handle_insert_blank_todo(
-    todos: list[Todo],
+    todos: Todos,
     selected: Cursor,
-) -> list[Todo]:
+) -> Todos:
     return selected.todo_set_to(blank_todo(todos, int(selected)))
 
 
 def handle_todo_down(
-    todos: list[Todo],
+    todos: Todos,
     selected: Cursor,
-) -> list[Todo]:
+) -> Todos:
     return selected.todos_override(*todo_down(todos, selected))
 
 
 def handle_todo_up(
-    todos: list[Todo],
+    todos: Todos,
     selected: Cursor,
 ):
     return selected.todos_override(*todo_up(todos, selected))
 
 
 def handle_indent(
-    todos: list[Todo],
+    todos: Todos,
     selected: Cursor,
-) -> list[Todo]:
+) -> Todos:
     return selected.todo_set_to(indent(todos, selected))
 
 
 def handle_dedent(
-    todos: list[Todo],
+    todos: Todos,
     selected: Cursor,
-) -> list[Todo]:
+) -> Todos:
     return selected.todo_set_to(dedent(todos, selected))
 
 
 def handle_sort_menu(
     stdscr: Any,
-    todos: list[Todo],
+    todos: Todos,
     selected: Cursor,
-) -> list[Todo]:
+) -> Todos:
     return selected.todo_set_to(sort_menu(stdscr, todos, selected))
 
 
-def handle_digits(stdscr: Any, todos: list[Todo], selected: Cursor, digit: int) -> None:
+def handle_digits(stdscr: Any, todos: Todos, selected: Cursor, digit: int) -> None:
     selected.set_to(
         relative_cursor_to(
             stdscr, todos, int(selected), Key.normalize_ascii_digit_to_digit(digit)
@@ -364,8 +364,8 @@ def handle_digits(stdscr: Any, todos: list[Todo], selected: Cursor, digit: int) 
 
 
 def handle_enter(
-    stdscr: Any, todos: list[Todo], selected: Cursor, mode: SingleLineModeImpl
-) -> list[Todo]:
+    stdscr: Any, todos: Todos, selected: Cursor, mode: SingleLineModeImpl
+) -> Todos:
     prev_todo = todos[int(selected)] if len(todos) > 0 else Todo()
     if prev_todo.has_box():
         return toggle(todos, selected)
@@ -379,10 +379,10 @@ def print_history(history: UndoRedo) -> None:
 
 
 def get_possible_todos(
-    func: Callable[..., list[Todo] | None],
+    func: Callable[..., Todos | None],
     args: str,
     possible_args: dict[str, Any],
-) -> list[Todo] | None:
+) -> Todos | None:
     params = []
     for arg in args.split(", "):
         if arg.isdigit():
@@ -395,10 +395,10 @@ def get_possible_todos(
 
 def get_main_input(
     stdscr: Any,
-    todos: list[Todo],
+    todos: Todos,
     keys_esckeys: tuple[dict[int, tuple[Callable[..., Any], str]], ...],
     possible_args: dict[str, Any],
-) -> int | list[Todo]:
+) -> int | Todos:
     try:
         key = stdscr.getch()
     except Key.ctrl_c:
@@ -445,8 +445,8 @@ def init() -> None:
 
 
 def update_modified_time(
-    prev_time: float, todos: list[Todo]
-) -> tuple[list[Todo], float]:
+    prev_time: float, todos: Todos
+) -> tuple[Todos, float]:
     current_time = get_file_modified_time(FILENAME)
     if prev_time != current_time:
         todos = file_string_to_todos(read_file(FILENAME))
@@ -612,7 +612,7 @@ def main(stdscr: Any) -> int:
                 "todos": todos,
             },
         )
-        if isinstance(next_step, list):
+        if isinstance(next_step, Todos):
             return quit_program(next_step, edits, file_modified_time)
         if isinstance(next_step, int) and next_step not in (
             Key.ctrl_r,

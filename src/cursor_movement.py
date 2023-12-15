@@ -6,13 +6,13 @@ Various ways to move a cursor represented by an int
 
 from typing import Any
 
-from src.class_todo import Todo
+from src.class_todo import Todos
 from src.keys import Key
 from src.utils import clamp
 
 
 def relative_cursor_to(
-    win: Any, todos: list[Todo], selected: int, first_digit: int
+    win: Any, todos: Todos, selected: int, first_digit: int
 ) -> int:
     total = str(first_digit)
     while True:

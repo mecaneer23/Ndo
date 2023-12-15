@@ -5,7 +5,7 @@ from os import get_terminal_size
 from typing import Any, TypeVar
 
 from src.class_cursor import Cursor
-from src.class_todo import Todo
+from src.class_todo import Todo, Todos
 from src.get_args import (
     BULLETS,
     ENUMERATE,
@@ -85,7 +85,7 @@ def get_height_width(stdscr: Any | None, length: int) -> tuple[int, int]:
 
 
 def get_display_string(
-    todos: list[Todo],
+    todos: Todos,
     i_todo: tuple[int, Todo],
     relative: int,
     highlight: range,
@@ -143,14 +143,14 @@ def print_todo(
 
 
 def print_todos(
-    stdscr: Any, todos: list[Todo], selected: Cursor, prev_start: int = 0
+    stdscr: Any, todos: Todos, selected: Cursor, prev_start: int = 0
 ) -> int:
     try:
         height, width = get_height_width(stdscr, len(todos))
     except RuntimeError:
         return 0
     new_todos, temp_selected, prev_start = make_printable_sublist(
-        height - 1, todos, int(selected), prev_start=prev_start
+        height - 1, list(todos), int(selected), prev_start=prev_start
     )
     highlight = range(temp_selected, len(selected) + temp_selected)
     for relative, (i, todo) in zip(

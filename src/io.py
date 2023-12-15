@@ -6,7 +6,7 @@ File Input/Output handlers for Ndo
 
 from pathlib import Path
 
-from src.class_todo import Todo
+from src.class_todo import Todo, Todos
 
 
 def read_file(filename: Path) -> str:
@@ -17,12 +17,12 @@ def read_file(filename: Path) -> str:
         return file_obj.read()
 
 
-def file_string_to_todos(raw_data: str) -> list[Todo]:
+def file_string_to_todos(raw_data: str) -> Todos:
     if len(raw_data) == 0:
-        return []
-    return [Todo(line) for line in raw_data.split("\n")]
+        return Todos([])
+    return Todos([Todo(line) for line in raw_data.split("\n")])
 
 
-def update_file(filename: Path, lst: list[Todo]) -> int:
+def update_file(filename: Path, lst: Todos) -> int:
     with filename.open("w", newline="\n") as file_obj:
         return file_obj.write("\n".join(map(repr, lst)))

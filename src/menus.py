@@ -14,7 +14,7 @@ except ImportError:
     FIGLET_FORMAT_EXISTS = False
 
 from src.class_cursor import Cursor
-from src.class_todo import Todo
+from src.class_todo import Todo, Todos
 from src.get_args import (
     CONTROLS_BEGIN_INDEX,
     CONTROLS_END_INDEX,
@@ -86,7 +86,7 @@ def help_menu(parent_win: Any) -> None:
     parent_win.clear()
 
 
-def magnify(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
+def magnify(stdscr: Any, todos: Todos, selected: Cursor) -> None:
     if not FIGLET_FORMAT_EXISTS:
         set_header(stdscr, "Magnify dependency not available")
         return
@@ -178,7 +178,7 @@ def get_sorting_methods() -> dict[str, Callable[..., str]]:
     }
 
 
-def get_indented_sections(todos: list[Todo]) -> list[list[Todo]]:
+def get_indented_sections(todos: Todos) -> list[Todos]:
     indented_sections = []
     section = []
     for todo in todos:
@@ -192,10 +192,10 @@ def get_indented_sections(todos: list[Todo]) -> list[list[Todo]]:
     return indented_sections
 
 
-def sort_by(method: str, todos: list[Todo], selected: Cursor) -> tuple[list[Todo], int]:
+def sort_by(method: str, todos: Todos, selected: Cursor) -> tuple[Todos, int]:
     key = get_sorting_methods()[method]
     selected_todo = todos[int(selected)]
-    sorted_todos = []
+    sorted_todos = Todos([])
     for section in sorted(get_indented_sections(todos), key=key):
         for todo in section:
             sorted_todos.append(todo)
@@ -204,8 +204,8 @@ def sort_by(method: str, todos: list[Todo], selected: Cursor) -> tuple[list[Todo
 
 
 def sort_menu(
-    parent_win: Any, todos: list[Todo], selected: Cursor
-) -> tuple[list[Todo], int]:
+    parent_win: Any, todos: Todos, selected: Cursor
+) -> tuple[Todos, int]:
     parent_win.clear()
     set_header(parent_win, "Sort by:")
     lines = list(get_sorting_methods().keys())
@@ -236,7 +236,7 @@ def sort_menu(
             key = win.getch()
         except KeyboardInterrupt:
             return todos, int(selected)
-        return_options: dict[int, Callable[..., tuple[list[Todo], int]]] = {
+        return_options: dict[int, Callable[..., tuple[Todos, int]]] = {
             Key.q: lambda: (todos, int(selected)),
             Key.escape: lambda: (todos, int(selected)),
             Key.enter: lambda: sort_by(lines[cursor], todos, selected),
@@ -258,7 +258,7 @@ def get_newwin(stdscr: Any) -> Any:
     return curses.newwin(3, max_x * 3 // 4, max_y // 2 - 3, max_x // 8)
 
 
-def search(stdscr: Any, todos: list[Todo], selected: Cursor) -> None:
+def search(stdscr: Any, todos: Todos, selected: Cursor) -> None:
     set_header(stdscr, "Searching...")
     stdscr.refresh()
     sequence = get_todo(

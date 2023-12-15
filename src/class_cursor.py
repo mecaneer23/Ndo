@@ -4,7 +4,7 @@
 from enum import Enum
 from typing import Any
 
-from src.class_todo import Todo
+from src.class_todo import Todos
 from src.keys import Key
 
 
@@ -43,11 +43,11 @@ class Cursor:
     def set_to(self, position: int) -> None:
         self.positions = [position]
 
-    def todo_set_to(self, todo_position: tuple[list[Todo], int]) -> list[Todo]:
+    def todo_set_to(self, todo_position: tuple[Todos, int]) -> Todos:
         self.positions[0] = todo_position[1]
         return todo_position[0]
 
-    def todos_override(self, todos: list[Todo], positions: list[int]) -> list[Todo]:
+    def todos_override(self, todos: Todos, positions: list[int]) -> Todos:
         self.positions = positions
         return todos
 
