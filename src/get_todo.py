@@ -1,18 +1,24 @@
 # pylint: disable=missing-class-docstring, import-error
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
-from typing import Any, Callable
+from typing import Any, Callable, Iterable
 
 from src.class_mode import SingleLineMode, SingleLineModeImpl
-from src.class_todo import Todo, BoxChar
+from src.class_todo import BoxChar, Todo
 from src.get_args import INDENT, TKINTER_GUI
 from src.keys import Key
-from src.utils import set_header
+from src.utils import SingleTypeList, set_header
 
 if TKINTER_GUI:
     from tcurses import curses
 else:
     import curses
+
+
+class Chars(SingleTypeList):
+    def __init__(self, iterable: Iterable[str]):
+        super().__init__(iterable)
+        self.base = str
 
 
 def hline(win: Any, y_loc: int, x_loc: int, char: str | int, width: int) -> None:
@@ -42,13 +48,13 @@ def init_todo(todo: Todo, prev_todo: Todo, mode: SingleLineModeImpl) -> Todo:
     return todo
 
 
-def handle_right_arrow(chars: list[str], position: int) -> tuple[list[str], int]:
+def handle_right_arrow(chars: Chars, position: int) -> tuple[Chars, int]:
     if position < len(chars):
         position += 1
     return chars, position
 
 
-def handle_ctrl_right_arrow(chars: list[str], position: int) -> tuple[list[str], int]:
+def handle_ctrl_right_arrow(chars: Chars, position: int) -> tuple[Chars, int]:
     while True:
         if position >= len(chars) - 1:
             break
@@ -58,13 +64,13 @@ def handle_ctrl_right_arrow(chars: list[str], position: int) -> tuple[list[str],
     return chars, position
 
 
-def handle_left_arrow(chars: list[str], position: int) -> tuple[list[str], int]:
+def handle_left_arrow(chars: Chars, position: int) -> tuple[Chars, int]:
     if position > 0:
         position -= 1
     return chars, position
 
 
-def handle_ctrl_left_arrow(chars: list[str], position: int) -> tuple[list[str], int]:
+def handle_ctrl_left_arrow(chars: Chars, position: int) -> tuple[Chars, int]:
     while True:
         if position <= 0:
             break
@@ -74,7 +80,7 @@ def handle_ctrl_left_arrow(chars: list[str], position: int) -> tuple[list[str], 
     return chars, position
 
 
-def handle_ctrl_delete(chars: list[str], position: int) -> tuple[list[str], int]:
+def handle_ctrl_delete(chars: Chars, position: int) -> tuple[Chars, int]:
     if position < len(chars) - 1:
         chars.pop(position)
         position -= 1
@@ -89,18 +95,16 @@ def handle_ctrl_delete(chars: list[str], position: int) -> tuple[list[str], int]
     return chars, position
 
 
-def handle_delete(chars: list[str], position: int) -> tuple[list[str], int]:
+def handle_delete(chars: Chars, position: int) -> tuple[Chars, int]:
     if position < len(chars):
         chars.pop(position)
     return chars, position
 
 
-def handle_ctrl_arrow(
-    win: Any, chars: list[str], position: int
-) -> tuple[list[str], int]:
+def handle_ctrl_arrow(win: Any, chars: Chars, position: int) -> tuple[Chars, int]:
     for _ in ";5":
         win.getch()
-    options: dict[int, Callable[[list[str], int], tuple[list[str], int]]] = {
+    options: dict[int, Callable[[Chars, int], tuple[Chars, int]]] = {
         Key.right_arrow: handle_ctrl_right_arrow,
         Key.left_arrow: handle_ctrl_left_arrow,
     }
@@ -111,8 +115,8 @@ def handle_ctrl_arrow(
 
 
 def handle_delete_modifiers(
-    stdscr_win: tuple[Any, Any], todo: Todo, chars: list[str], position: int
-) -> tuple[list[str], int]:
+    stdscr_win: tuple[Any, Any], todo: Todo, chars: Chars, position: int
+) -> tuple[Chars, int]:
     try:
         input_char = stdscr_win[1].getch()
     except KeyboardInterrupt:
@@ -139,8 +143,8 @@ def handle_toggle_note_todo(stdscr: Any, todo: Todo) -> None:
 
 
 def handle_indent_dedent(
-    stdscr: Any, todo: Todo, action: str, chars: list[str], position: int
-) -> tuple[list[str], int]:
+    stdscr: Any, todo: Todo, action: str, chars: Chars, position: int
+) -> tuple[Chars, int]:
     if action == "indent":
         todo.indent()
     elif action == "dedent":
@@ -152,11 +156,11 @@ def handle_indent_dedent(
 
 def handle_escape(
     stdscr_win: tuple[Any, Any],
-    chars: list[str],
+    chars: Chars,
     position: int,
     mode: SingleLineModeImpl,
     todo: Todo,
-) -> tuple[list[str], int] | None:
+) -> tuple[Chars, int] | None:
     stdscr_win[1].nodelay(True)
     if stdscr_win[1].getch() == -1:  # check for escape
         mode.set_on()
@@ -166,9 +170,7 @@ def handle_escape(
         subch = stdscr_win[1].getch()
     except KeyboardInterrupt:
         return None
-    subch_table: dict[
-        int, tuple[Callable[..., tuple[list[str], int]], tuple[Any, ...]]
-    ] = {
+    subch_table: dict[int, tuple[Callable[..., tuple[Chars, int]], tuple[Any, ...]]] = {
         Key.left_arrow: (handle_left_arrow, (chars, position)),
         Key.right_arrow: (handle_right_arrow, (chars, position)),
         Key.modifier_delete: (
@@ -187,14 +189,14 @@ def handle_escape(
     return func(*args)
 
 
-def handle_backspace(chars: list[str], position: int) -> tuple[list[str], int]:
+def handle_backspace(chars: Chars, position: int) -> tuple[Chars, int]:
     if position > 0:
         position -= 1
         chars.pop(position)
     return chars, position
 
 
-def handle_ctrl_backspace(chars: list[str], position: int) -> tuple[list[str], int]:
+def handle_ctrl_backspace(chars: Chars, position: int) -> tuple[Chars, int]:
     while True:
         if position <= 0:
             break
@@ -206,9 +208,7 @@ def handle_ctrl_backspace(chars: list[str], position: int) -> tuple[list[str], i
     return chars, position
 
 
-def handle_ascii(
-    chars: list[str], position: int, input_char: int
-) -> tuple[list[str], int]:
+def handle_ascii(chars: Chars, position: int, input_char: int) -> tuple[Chars, int]:
     chars.insert(position, chr(input_char))
     if position < len(chars):
         position += 1
@@ -225,10 +225,10 @@ def toggle_note_todo(todo: Todo) -> None:
 def get_chars_position(
     input_char: int,
     stdscr_win: tuple[Any, Any],
-    chars_position_todo: tuple[list[str], int, Todo],
+    chars_position_todo: tuple[Chars, int, Todo],
     mode: SingleLineModeImpl,
-    backspace_table: dict[int, Callable[..., tuple[list[str], int]]],
-) -> tuple[list[str], int] | None:
+    backspace_table: dict[int, Callable[..., tuple[Chars, int]]],
+) -> tuple[Chars, int] | None:
     chars, position, todo = chars_position_todo
     if input_char == Key.escape:
         return handle_escape(stdscr_win, chars, position, mode, todo)
@@ -239,7 +239,7 @@ def get_chars_position(
     return handle_ascii(chars, position, input_char)
 
 
-def set_once(mode: SingleLineModeImpl, chars: list[str]) -> str:
+def set_once(mode: SingleLineModeImpl, chars: Chars) -> str:
     mode.set_once()
     two_lines = "".join(chars).rsplit(None, 1)
     if len(two_lines) == 1:
@@ -299,8 +299,8 @@ def get_todo(
 
     ensure_valid(win)
     todo = init_todo(todo, prev_todo, mode)
-    original = todo
-    chars = list(todo.display_text)
+    original = todo.copy()
+    chars = Chars(todo.display_text)
     position = len(chars)
     win.box()
     win.nodelay(False)
