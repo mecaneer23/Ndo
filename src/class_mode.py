@@ -13,7 +13,7 @@ class SingleLineMode(Enum):
 
 class SingleLineModeImpl:
     def __init__(self, mode: "SingleLineMode") -> None:
-        self.mode = mode
+        self.mode: SingleLineMode = mode
         self.extra_data: str = ""
 
     def toggle(self) -> None:

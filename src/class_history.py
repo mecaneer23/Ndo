@@ -6,8 +6,8 @@ from src.class_todo import Todo
 
 class Restorable:
     def __init__(self, todos: list[Todo], selected: int) -> None:
-        self.stored = " |SEP|".join([todo.text for todo in todos])
-        self.selected = selected
+        self.stored: str = " |SEP|".join([todo.text for todo in todos])
+        self.selected: int = selected
 
     def get(self) -> tuple[list[Todo], int]:
         stored = self.stored.split(" |SEP|")
@@ -20,7 +20,7 @@ class Restorable:
 class UndoRedo:
     def __init__(self) -> None:
         self.history: list[Restorable] = []
-        self.index = -1
+        self.index: int = -1
 
     def add(self, todos: list[Todo], selected: int) -> None:
         self.history.append(Restorable(todos, selected))
