@@ -27,12 +27,12 @@ T = TypeVar("T")
 
 
 def get_bullet(indentation_level: int) -> str:
-    symbols = [
+    symbols = (
         "•",
         "◦",
         "▪",
         "▫",
-    ]
+    )
     return symbols[indentation_level // INDENT % len(symbols)]
 
 

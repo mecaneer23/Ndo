@@ -430,7 +430,7 @@ def init() -> None:
     curses.use_default_colors()
     curses.curs_set(0)
     for i, color in enumerate(
-        [
+        (
             curses.COLOR_RED,
             curses.COLOR_GREEN,
             curses.COLOR_YELLOW,
@@ -438,7 +438,7 @@ def init() -> None:
             curses.COLOR_MAGENTA,
             curses.COLOR_CYAN,
             curses.COLOR_WHITE,
-        ],
+        ),
         start=1,
     ):
         curses.init_pair(i, color, -1)
