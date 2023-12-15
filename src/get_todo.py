@@ -1,7 +1,7 @@
 # pylint: disable=missing-class-docstring, import-error
 # pylint: disable=missing-function-docstring, missing-module-docstring
 
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, NamedTuple
 
 from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, Todo
@@ -19,6 +19,15 @@ class Chars(SingleTypeList):
     def __init__(self, iterable: Iterable[str]):
         super().__init__(iterable)
         self.base = str
+
+
+class EditString(NamedTuple):
+    """
+    An Editable string. Takes in parameters `string` and `position`.
+    These should be represented as `Chars` and `int` respectively.
+    """
+    string: Chars
+    position: int
 
 
 def hline(win: Any, y_loc: int, x_loc: int, char: str | int, width: int) -> None:
@@ -48,39 +57,39 @@ def init_todo(todo: Todo, prev_todo: Todo, mode: SingleLineModeImpl) -> Todo:
     return todo
 
 
-def handle_right_arrow(chars: Chars, position: int) -> tuple[Chars, int]:
+def handle_right_arrow(chars: Chars, position: int) -> EditString:
     if position < len(chars):
         position += 1
-    return chars, position
+    return EditString(chars, position)
 
 
-def handle_ctrl_right_arrow(chars: Chars, position: int) -> tuple[Chars, int]:
+def handle_ctrl_right_arrow(chars: Chars, position: int) -> EditString:
     while True:
         if position >= len(chars) - 1:
             break
         position += 1
         if chars[position] == " ":
             break
-    return chars, position
+    return EditString(chars, position)
 
 
-def handle_left_arrow(chars: Chars, position: int) -> tuple[Chars, int]:
+def handle_left_arrow(chars: Chars, position: int) -> EditString:
     if position > 0:
         position -= 1
-    return chars, position
+    return EditString(chars, position)
 
 
-def handle_ctrl_left_arrow(chars: Chars, position: int) -> tuple[Chars, int]:
+def handle_ctrl_left_arrow(chars: Chars, position: int) -> EditString:
     while True:
         if position <= 0:
             break
         position -= 1
         if chars[position] == " ":
             break
-    return chars, position
+    return EditString(chars, position)
 
 
-def handle_ctrl_delete(chars: Chars, position: int) -> tuple[Chars, int]:
+def handle_ctrl_delete(chars: Chars, position: int) -> EditString:
     if position < len(chars) - 1:
         chars.pop(position)
         position -= 1
@@ -92,48 +101,48 @@ def handle_ctrl_delete(chars: Chars, position: int) -> tuple[Chars, int]:
             break
         chars.pop(position)
         position -= 1
-    return chars, position
+    return EditString(chars, position)
 
 
-def handle_delete(chars: Chars, position: int) -> tuple[Chars, int]:
+def handle_delete(chars: Chars, position: int) -> EditString:
     if position < len(chars):
         chars.pop(position)
-    return chars, position
+    return EditString(chars, position)
 
 
-def handle_ctrl_arrow(win: Any, chars: Chars, position: int) -> tuple[Chars, int]:
+def handle_ctrl_arrow(win: Any, chars: Chars, position: int) -> EditString:
     for _ in ";5":
         win.getch()
-    options: dict[int, Callable[[Chars, int], tuple[Chars, int]]] = {
+    options: dict[int, Callable[[Chars, int], EditString]] = {
         Key.right_arrow: handle_ctrl_right_arrow,
         Key.left_arrow: handle_ctrl_left_arrow,
     }
     direction = win.getch()
     if direction in options:
         chars, position = options[direction](chars, position)
-    return chars, position
+    return EditString(chars, position)
 
 
 def handle_delete_modifiers(
     stdscr_win: tuple[Any, Any], todo: Todo, chars: Chars, position: int
-) -> tuple[Chars, int]:
+) -> EditString:
     try:
         input_char = stdscr_win[1].getch()
     except KeyboardInterrupt:
-        return chars, position
+        return EditString(chars, position)
     if input_char == Key.tilde:
         return handle_delete(chars, position)
     if input_char == Key.semi_colon:
         try:
             modifier = stdscr_win[1].getch()
         except KeyboardInterrupt:
-            return chars, position
+            return EditString(chars, position)
         stdscr_win[1].getch()  # skip `~`
         if modifier == Key.modifier_ctrl:
             return handle_ctrl_delete(chars, position)
         if modifier in (Key.modifier_shift, Key.modifier_alt):
             handle_toggle_note_todo(stdscr_win[0], todo)
-    return chars, position
+    return EditString(chars, position)
 
 
 def handle_toggle_note_todo(stdscr: Any, todo: Todo) -> None:
@@ -144,14 +153,14 @@ def handle_toggle_note_todo(stdscr: Any, todo: Todo) -> None:
 
 def handle_indent_dedent(
     stdscr: Any, todo: Todo, action: str, chars: Chars, position: int
-) -> tuple[Chars, int]:
+) -> EditString:
     if action == "indent":
         todo.indent()
     elif action == "dedent":
         todo.dedent()
     set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
     stdscr.refresh()
-    return chars, position
+    return EditString(chars, position)
 
 
 def handle_escape(
@@ -160,7 +169,7 @@ def handle_escape(
     position: int,
     mode: SingleLineModeImpl,
     todo: Todo,
-) -> tuple[Chars, int] | None:
+) -> EditString | None:
     stdscr_win[1].nodelay(True)
     if stdscr_win[1].getch() == -1:  # check for escape
         mode.set_on()
@@ -170,7 +179,7 @@ def handle_escape(
         subch = stdscr_win[1].getch()
     except KeyboardInterrupt:
         return None
-    subch_table: dict[int, tuple[Callable[..., tuple[Chars, int]], tuple[Any, ...]]] = {
+    subch_table: dict[int, tuple[Callable[..., EditString], tuple[Any, ...]]] = {
         Key.left_arrow: (handle_left_arrow, (chars, position)),
         Key.right_arrow: (handle_right_arrow, (chars, position)),
         Key.modifier_delete: (
@@ -178,8 +187,8 @@ def handle_escape(
             (stdscr_win, todo, chars, position),
         ),
         Key.ctrl_arrow: (handle_ctrl_arrow, (stdscr_win[1], chars, position)),
-        Key.home: (lambda chars: (chars, 0), (chars,)),
-        Key.end: (lambda chars: (chars, len(chars)), (chars,)),
+        Key.home: (lambda chars: EditString(chars, 0), (chars,)),
+        Key.end: (lambda chars: EditString(chars, len(chars)), (chars,)),
         Key.indent_dedent: (
             handle_indent_dedent,
             (stdscr_win[0], todo, "dedent", chars, position),
@@ -189,14 +198,14 @@ def handle_escape(
     return func(*args)
 
 
-def handle_backspace(chars: Chars, position: int) -> tuple[Chars, int]:
+def handle_backspace(chars: Chars, position: int) -> EditString:
     if position > 0:
         position -= 1
         chars.pop(position)
-    return chars, position
+    return EditString(chars, position)
 
 
-def handle_ctrl_backspace(chars: Chars, position: int) -> tuple[Chars, int]:
+def handle_ctrl_backspace(chars: Chars, position: int) -> EditString:
     while True:
         if position <= 0:
             break
@@ -205,14 +214,14 @@ def handle_ctrl_backspace(chars: Chars, position: int) -> tuple[Chars, int]:
             chars.pop(position)
             break
         chars.pop(position)
-    return chars, position
+    return EditString(chars, position)
 
 
-def handle_ascii(chars: Chars, position: int, input_char: int) -> tuple[Chars, int]:
+def handle_ascii(chars: Chars, position: int, input_char: int) -> EditString:
     chars.insert(position, chr(input_char))
     if position < len(chars):
         position += 1
-    return chars, position
+    return EditString(chars, position)
 
 
 def toggle_note_todo(todo: Todo) -> None:
@@ -227,8 +236,8 @@ def get_chars_position(
     stdscr_win: tuple[Any, Any],
     chars_position_todo: tuple[Chars, int, Todo],
     mode: SingleLineModeImpl,
-    backspace_table: dict[int, Callable[..., tuple[Chars, int]]],
-) -> tuple[Chars, int] | None:
+    backspace_table: dict[int, Callable[..., EditString]],
+) -> EditString | None:
     chars, position, todo = chars_position_todo
     if input_char == Key.escape:
         return handle_escape(stdscr_win, chars, position, mode, todo)
