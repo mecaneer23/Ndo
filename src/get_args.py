@@ -1,6 +1,5 @@
 # pylint: disable=missing-class-docstring, import-error
 # pylint: disable=missing-function-docstring, missing-module-docstring
-# pyright: reportConstantRedefinition=false
 
 from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from pathlib import Path
@@ -9,30 +8,29 @@ from typing import Any
 try:
     from curses import wrapper  # type: ignore
 
-    TKINTER_GUI = False
+    DEFAULT_TKINTER_GUI = False
 except ImportError:
 
     def wrapper(_) -> str:
         return CHECKBOX_OPTIONS[1]
 
-    TKINTER_GUI = True
+    DEFAULT_TKINTER_GUI = True  # pyright: ignore[reportConstantRedefinition]
 
 from src.md_to_py import md_table_to_lines
 
-BULLETS = False
-CHECKBOX = ""
-CONTROLS_BEGIN_INDEX = 68
-CONTROLS_END_INDEX = 96
-DEFAULT_FILENAME = "todo.txt"
-ENUMERATE = False
-FILENAME = Path(DEFAULT_FILENAME)
-HEADER = ""
-HELP_FILE = Path(__file__).parent.parent.joinpath("README.md").absolute()
-INDENT = 2
-NO_GUI = False
-RELATIVE_ENUMERATE = False
-SIMPLE_BOXES = False
-STRIKETHROUGH = False
+DEFAULT_BULLETS: bool = False
+DEFAULT_CHECKBOX: str = ""
+CONTROLS_BEGIN_INDEX: int = 68
+CONTROLS_END_INDEX: int = 96
+DEFAULT_ENUMERATE: bool = False
+DEFAULT_FILENAME: Path = Path("todo.txt")
+DEFAULT_HEADER: str = ""
+DEFAULT_HELP_FILE: Path = Path(__file__).parent.parent.joinpath("README.md").absolute()
+DEFAULT_INDENT: int = 2
+DEFAULT_NO_GUI: bool = False
+DEFAULT_RELATIVE_ENUMERATE: bool = False
+DEFAULT_SIMPLE_BOXES: bool = False
+DEFAULT_STRIKETHROUGH: bool = False
 
 CHECKBOX_OPTIONS = ("🗹", "☑")
 
@@ -56,7 +54,7 @@ def get_args() -> Namespace:
             md_table_to_lines(
                 CONTROLS_BEGIN_INDEX,
                 CONTROLS_END_INDEX,
-                str(HELP_FILE),
+                str(DEFAULT_HELP_FILE),
                 ("<kbd>", "</kbd>"),
             )
         ),
@@ -65,33 +63,33 @@ def get_args() -> Namespace:
         "filename",
         type=str,
         nargs="?",
-        default=FILENAME,
+        default=DEFAULT_FILENAME,
         help=f"Provide a filename to store the todo list in.\
-            Default is `{FILENAME}`.",
+            Default is `{DEFAULT_FILENAME}`.",
     )
     parser.add_argument(
         "--bullet-display",
         "-b",
         action="store_true",
-        default=BULLETS,
+        default=DEFAULT_BULLETS,
         help=f"Boolean: determine if Notes are displayed with\
-            a bullet point in front or not. Default is `{BULLETS}`.",
+            a bullet point in front or not. Default is `{DEFAULT_BULLETS}`.",
     )
     parser.add_argument(
         "--enumerate",
         "-e",
         action="store_true",
-        default=ENUMERATE,
+        default=DEFAULT_ENUMERATE,
         help=f"Boolean: determines if todos are numbered when\
-            printed or not. Default is `{ENUMERATE}`.",
+            printed or not. Default is `{DEFAULT_ENUMERATE}`.",
     )
     parser.add_argument(
         "--tk-gui",
         "-g",
         action="store_true",
-        default=TKINTER_GUI,
+        default=DEFAULT_TKINTER_GUI,
         help=f"Boolean: determine if curses (False) or tkinter gui\
-            (True) should be used. Default is `{TKINTER_GUI}`.",
+            (True) should be used. Default is `{DEFAULT_TKINTER_GUI}`.",
     )
     parser.add_argument(
         "--help",
@@ -102,61 +100,61 @@ def get_args() -> Namespace:
     parser.add_argument(
         "--help-file",
         type=str,
-        default=HELP_FILE,
+        default=DEFAULT_HELP_FILE,
         help=f"Allows passing alternate file to\
-        specify help menu. Default is `{HELP_FILE}`.",
+        specify help menu. Default is `{DEFAULT_HELP_FILE}`.",
     )
     parser.add_argument(
         "--indentation-level",
         "-i",
         type=int,
-        default=INDENT,
+        default=DEFAULT_INDENT,
         help=f"Allows specification of indentation level. \
-            Default is `{INDENT}`.",
+            Default is `{DEFAULT_INDENT}`.",
     )
     parser.add_argument(
         "--no-gui",
         "-n",
         action="store_true",
-        default=NO_GUI,
+        default=DEFAULT_NO_GUI,
         help=f"Boolean: If true, do not start a curses gui,\
             rather, just print out the todo list. Default is\
-            `{NO_GUI}`.",
+            `{DEFAULT_NO_GUI}`.",
     )
     parser.add_argument(
         "--relative-enumeration",
         "-r",
         action="store_true",
-        default=RELATIVE_ENUMERATE,
+        default=DEFAULT_RELATIVE_ENUMERATE,
         help=f"Boolean: determines if todos are numbered\
             when printed. Numbers relatively rather than\
-            absolutely. Default is `{RELATIVE_ENUMERATE}`.",
+            absolutely. Default is `{DEFAULT_RELATIVE_ENUMERATE}`.",
     )
     parser.add_argument(
         "--simple-boxes",
         "-x",
         action="store_true",
-        default=SIMPLE_BOXES,
+        default=DEFAULT_SIMPLE_BOXES,
         help=f"Boolean: allow rendering simpler checkboxes if\
             terminal doesn't support default ascii checkboxes.\
-            Default is `{SIMPLE_BOXES}`.",
+            Default is `{DEFAULT_SIMPLE_BOXES}`.",
     )
     parser.add_argument(
         "--strikethrough",
         "-s",
         action="store_true",
-        default=STRIKETHROUGH,
+        default=DEFAULT_STRIKETHROUGH,
         help=f"Boolean: strikethrough completed todos\
             - option to disable because some terminals\
             don't support strikethroughs. Default is\
-            `{STRIKETHROUGH}`.",
+            `{DEFAULT_STRIKETHROUGH}`.",
     )
     parser.add_argument(
         "--title",
         "-t",
         type=str,
         nargs="+",
-        default=HEADER,
+        default=DEFAULT_HEADER,
         help="Allows passing alternate header.\
             Default is filename.",
     )
@@ -173,20 +171,20 @@ def parse_filename(filename: str) -> Path:
 
 
 command_line_args = get_args()
-BULLETS = command_line_args.bullet_display
-CHECKBOX = command_line_args.checkbox
-ENUMERATE = command_line_args.enumerate
-FILENAME = parse_filename(command_line_args.filename)
-HEADER = (
+BULLETS: bool = command_line_args.bullet_display
+CHECKBOX: str = command_line_args.checkbox
+ENUMERATE: bool = command_line_args.enumerate
+FILENAME: Path = parse_filename(command_line_args.filename)
+HEADER: str = (
     FILENAME.as_posix()
-    if command_line_args.title == HEADER
+    if command_line_args.title == DEFAULT_HEADER
     else " ".join(command_line_args.title)
 )
-HELP_FILE = Path(command_line_args.help_file)
-INDENT = command_line_args.indentation_level
-NO_GUI = command_line_args.no_gui
-RELATIVE_ENUMERATE = command_line_args.relative_enumeration
-SIMPLE_BOXES = command_line_args.simple_boxes
-STRIKETHROUGH = command_line_args.strikethrough
-TKINTER_GUI = command_line_args.tk_gui
+HELP_FILE: Path = Path(command_line_args.help_file)
+INDENT: int = command_line_args.indentation_level
+NO_GUI: bool = command_line_args.no_gui
+RELATIVE_ENUMERATE: bool = command_line_args.relative_enumeration
+SIMPLE_BOXES: bool = command_line_args.simple_boxes
+STRIKETHROUGH: bool = command_line_args.strikethrough
+TKINTER_GUI: bool = command_line_args.tk_gui
 del command_line_args
