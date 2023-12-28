@@ -7,7 +7,7 @@ from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, Todo
 from src.get_args import INDENT, TKINTER_GUI
 from src.keys import Key
-from src.utils import SingleTypeList, set_header
+from src.utils import set_header
 
 if TKINTER_GUI:
     from tcurses import curses
@@ -15,10 +15,9 @@ else:
     import curses
 
 
-class Chars(SingleTypeList):
+class Chars(list[str]):
     def __init__(self, iterable: Iterable[str]):
         super().__init__(iterable)
-        self.base = str
 
 
 class EditString(NamedTuple):
@@ -26,6 +25,7 @@ class EditString(NamedTuple):
     An Editable string. Takes in parameters `string` and `position`.
     These should be represented as `Chars` and `int` respectively.
     """
+
     string: Chars
     position: int
 
@@ -163,6 +163,14 @@ def handle_indent_dedent(
     return EditString(chars, position)
 
 
+def handle_home(chars: Chars) -> EditString:
+    return EditString(chars, 0)
+
+
+def handle_end(chars: Chars) -> EditString:
+    return EditString(chars, len(chars))
+
+
 def handle_escape(
     stdscr_win: tuple[Any, Any],
     chars: Chars,
@@ -187,8 +195,14 @@ def handle_escape(
             (stdscr_win, todo, chars, position),
         ),
         Key.ctrl_arrow: (handle_ctrl_arrow, (stdscr_win[1], chars, position)),
-        Key.home: (lambda chars: EditString(chars, 0), (chars,)),
-        Key.end: (lambda chars: EditString(chars, len(chars)), (chars,)),
+        Key.home: (
+            handle_home,
+            (chars,),
+        ),
+        Key.end: (
+            handle_end,
+            (chars,),
+        ),
         Key.indent_dedent: (
             handle_indent_dedent,
             (stdscr_win[0], todo, "dedent", chars, position),

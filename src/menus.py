@@ -11,7 +11,7 @@ try:
 
     FIGLET_FORMAT_EXISTS = True
 except ImportError:
-    FIGLET_FORMAT_EXISTS = False
+    FIGLET_FORMAT_EXISTS = False  # pyright: ignore[reportConstantRedefinition]
 
 from src.class_cursor import Cursor
 from src.class_todo import Todo, Todos, TodoList
@@ -30,7 +30,7 @@ from src.print_todos import make_printable_sublist
 from src.utils import Color, clamp, overflow, set_header
 
 if TKINTER_GUI:
-    from tcurses import curses
+    from tcurses import curses  # pylint: disable=import-error
 else:
     import curses
 
@@ -54,7 +54,7 @@ def simple_scroll_keybinds(
 def help_menu(parent_win: Any) -> None:
     parent_win.clear()
     set_header(parent_win, "Help (k/j to scroll):")
-    lines = []
+    lines: list[str] = []
     for line in md_table_to_lines(
         CONTROLS_BEGIN_INDEX,
         CONTROLS_END_INDEX,
@@ -168,7 +168,7 @@ def color_menu(parent_win: Any, original: Color) -> Color:
         win.refresh()
 
 
-def get_sorting_methods() -> dict[str, Callable[..., str]]:
+def get_sorting_methods() -> dict[str, Callable[[Todos], str]]:
     return {
         "Alphabetical": lambda top_level_todo: top_level_todo[0].display_text,
         "Completed": lambda top_level_todo: "1"
@@ -203,9 +203,7 @@ def sort_by(method: str, todos: Todos, selected: Cursor) -> TodoList:
     return TodoList(sorted_todos, sorted_todos.index(selected_todo))
 
 
-def sort_menu(
-    parent_win: Any, todos: Todos, selected: Cursor
-) -> TodoList:
+def sort_menu(parent_win: Any, todos: Todos, selected: Cursor) -> TodoList:
     parent_win.clear()
     set_header(parent_win, "Sort by:")
     lines = list(get_sorting_methods().keys())

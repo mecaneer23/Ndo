@@ -139,9 +139,7 @@ def new_todo_current(stdscr: Any, todos: Todos, selected: int) -> Todos:
     return todos
 
 
-def delete_todo(
-    stdscr: Any, todos: Todos, selected: Cursor
-) -> TodoList:
+def delete_todo(stdscr: Any, todos: Todos, selected: Cursor) -> TodoList:
     positions = selected.get_deletable()
     for pos in positions:
         todos = remove_todo(todos, pos)
@@ -383,7 +381,7 @@ def get_possible_todos(
     args: str,
     possible_args: dict[str, Any],
 ) -> Todos | None:
-    params = []
+    params: list[Any] = []
     for arg in args.split(", "):
         if arg.isdigit():
             params.append(int(arg))
@@ -396,7 +394,10 @@ def get_possible_todos(
 def get_main_input(
     stdscr: Any,
     todos: Todos,
-    keys_esckeys: tuple[dict[int, tuple[Callable[..., Any], str]], ...],
+    keys_esckeys: tuple[
+        dict[int, tuple[Callable[..., Any], str]],
+        dict[int, tuple[Callable[..., Any], str]],
+    ],
     possible_args: dict[str, Any],
 ) -> int | Todos:
     try:
@@ -444,9 +445,7 @@ def init() -> None:
         curses.init_pair(i, color, -1)
 
 
-def update_modified_time(
-    prev_time: float, todos: Todos
-) -> tuple[Todos, float]:
+def update_modified_time(prev_time: float, todos: Todos) -> tuple[Todos, float]:
     current_time = get_file_modified_time(FILENAME)
     if prev_time != current_time:
         todos = file_string_to_todos(read_file(FILENAME))
@@ -614,7 +613,7 @@ def main(stdscr: Any) -> int:
         )
         if isinstance(next_step, Todos):
             return quit_program(next_step, edits, file_modified_time)
-        if isinstance(next_step, int) and next_step not in (
+        if next_step not in (
             Key.ctrl_r,
             Key.u,
         ):  # redo/undo

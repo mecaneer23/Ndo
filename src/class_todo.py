@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Iterable, NamedTuple
 
 from src.get_args import CHECKBOX, INDENT
-from src.utils import Chunk, Color, SingleTypeList
+from src.utils import Chunk, Color
 
 
 class BoxChar(Enum):
@@ -154,10 +154,9 @@ class Todo:
         return "".join([item for condition, item in chunks if condition])
 
 
-class Todos(SingleTypeList):
+class Todos(list[Todo]):
     def __init__(self, iterable: Iterable[Todo]) -> None:
         super().__init__(iterable)
-        self.base = Todo
 
 
 class TodoList(NamedTuple):

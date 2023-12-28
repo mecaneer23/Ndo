@@ -6,7 +6,6 @@ from typing import Any, Iterable
 
 from src.class_todo import Todos, TodoList
 from src.keys import Key
-from src.utils import SingleTypeList
 
 
 class Direction(Enum):
@@ -15,10 +14,9 @@ class Direction(Enum):
     NONE = 2
 
 
-class Positions(SingleTypeList):
+class Positions(list[int]):
     def __init__(self, iterable: Iterable[int]):
         super().__init__(iterable)
-        self.base = int
 
 
 class Cursor:

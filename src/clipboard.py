@@ -12,7 +12,7 @@ try:
 
     CLIPBOARD_EXISTS = True
 except ImportError:
-    CLIPBOARD_EXISTS = False
+    CLIPBOARD_EXISTS = False  # pyright: ignore[reportConstantRedefinition]
 
 from src.class_cursor import Cursor
 from src.class_todo import Todo, Todos, TodoList
@@ -27,9 +27,7 @@ def copy_todo(todos: Todos, selected: Cursor, copied_todo: Todo) -> None:
         copy(todos[int(selected)].display_text)  # pyright: ignore
 
 
-def todo_from_clipboard(
-    todos: Todos, selected: int, copied_todo: Todo
-) -> Todos:
+def todo_from_clipboard(todos: Todos, selected: int, copied_todo: Todo) -> Todos:
     if not CLIPBOARD_EXISTS:
         return todos
     todo = paste()  # pyright: ignore
@@ -42,9 +40,7 @@ def todo_from_clipboard(
     return todos
 
 
-def paste_todo(
-    stdscr: Any, todos: Todos, selected: int, copied_todo: Todo
-) -> TodoList:
+def paste_todo(stdscr: Any, todos: Todos, selected: int, copied_todo: Todo) -> TodoList:
     temp = todos.copy()
     todos = todo_from_clipboard(todos, selected, copied_todo)
     stdscr.clear()
