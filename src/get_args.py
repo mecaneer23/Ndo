@@ -18,7 +18,6 @@ except ImportError:
 from src.md_to_py import md_table_to_lines
 
 DEFAULT_BULLETS: bool = False
-DEFAULT_CHECKBOX: str = ""
 CONTROLS_BEGIN_INDEX: int = 68
 CONTROLS_END_INDEX: int = 96
 DEFAULT_ENUMERATE: bool = False
