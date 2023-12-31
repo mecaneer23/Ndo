@@ -6,7 +6,6 @@
 -4 implement multiline todos
   -4 allow multiline paste
   -4 allow multiline print
-  +4 allow get_todo to use multiline editing
 - make startup faster
 - fix silence if dependencies are not installed
 - add unit tests?
