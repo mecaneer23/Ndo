@@ -24,7 +24,7 @@ else:
 T = TypeVar("T")
 
 
-def get_bullet(indentation_level: int) -> str:
+def _get_bullet(indentation_level: int) -> str:
     symbols = (
         "•",
         "◦",
@@ -58,7 +58,7 @@ def make_printable_sublist(
     return lst[start:end], cursor - start, start
 
 
-def info_message(stdscr: Any, height: int, width: int) -> None:
+def _info_message(stdscr: Any, height: int, width: int) -> None:
     text = (
         "Ndo - an ncurses todo application",
         "",
@@ -71,17 +71,17 @@ def info_message(stdscr: Any, height: int, width: int) -> None:
         stdscr.addstr(height // 3 + i, (width - maxlen) // 2, line.center(maxlen))
 
 
-def get_height_width(stdscr: Any | None, length: int) -> tuple[int, int]:
+def _get_height_width(stdscr: Any | None, length: int) -> tuple[int, int]:
     if stdscr is None:
         return 0, 0
     height, width = stdscr.getmaxyx()
     if length == 0:
-        info_message(stdscr, height, width)
+        _info_message(stdscr, height, width)
         raise RuntimeError("No todos to display")
     return height, width
 
 
-def get_display_string(
+def _get_display_string(
     todos: Todos,
     position: int,
     relative: int,
@@ -96,7 +96,7 @@ def get_display_string(
         Chunk(True, todo.indent_level * " "),
         Chunk(not todo.is_empty() and not SIMPLE_BOXES, todo.get_box()),
         Chunk(not todo.is_empty() and SIMPLE_BOXES, todo.get_simple_box()),
-        Chunk(not todo.has_box() and BULLETS, f"{get_bullet(todo.indent_level)} "),
+        Chunk(not todo.has_box() and BULLETS, f"{_get_bullet(todo.indent_level)} "),
         Chunk(ENUMERATE and not RELATIVE_ENUMERATE, f"{todos.index(todo) + 1}. "),
         Chunk(RELATIVE_ENUMERATE, f"{relative + 1}. "),
         Chunk(True, todo.display_text),
@@ -107,7 +107,7 @@ def get_display_string(
     ].ljust(width - 1, " ")
 
 
-def print_todo(
+def _print_todo(
     stdscr: Any, todo: Todo, display_string: str, position: int, highlight: range
 ) -> None:
     counter = 0
@@ -144,7 +144,7 @@ def print_todos(
     stdscr: Any, todos: Todos, selected: Cursor, prev_start: int = 0
 ) -> int:
     try:
-        height, width = get_height_width(stdscr, len(todos))
+        height, width = _get_height_width(stdscr, len(todos))
     except RuntimeError:
         return 0
     new_todos, temp_selected, prev_start = make_printable_sublist(
@@ -155,7 +155,7 @@ def print_todos(
         [*range(temp_selected - 1, -1, -1), int(selected), *range(0, len(new_todos))],
         enumerate(new_todos),
     ):
-        display_string = get_display_string(
+        display_string = _get_display_string(
             todos, position, relative, highlight, (height, width)
         )
         if stdscr is None:
@@ -177,7 +177,7 @@ def print_todos(
                 + "\u001b[0m"
             )
             continue
-        print_todo(stdscr, todo, display_string, position, highlight)
+        _print_todo(stdscr, todo, display_string, position, highlight)
     if stdscr is None:
         return 0
     for position in range(height - len(new_todos) - 1):

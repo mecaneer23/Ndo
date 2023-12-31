@@ -3,7 +3,7 @@
 from typing import Any
 
 
-def to_lines_split(
+def _to_lines_split(
     lines: list[str], remove: tuple[str, ...]
 ) -> tuple[int, list[list[str]]]:
     split: list[list[str]] = [[]] * len(lines)
@@ -16,7 +16,7 @@ def to_lines_split(
     return column_count, split
 
 
-def to_lines_join(split_lines: list[list[str]], columns: list[list[int]]) -> list[str]:
+def _to_lines_join(split_lines: list[list[str]], columns: list[list[int]]) -> list[str]:
     joined_lines: list[str] = [""] * len(split_lines)
     for i, line in enumerate(split_lines):
         for j, char in enumerate(line):
@@ -68,7 +68,7 @@ def md_table_to_lines(
         raise FileNotFoundError("Markdown file not found.") from err
 
     # Remove unwanted characters and split each line into a list of values
-    column_count, split_lines = to_lines_split(lines, remove)
+    column_count, split_lines = _to_lines_split(lines, remove)
 
     # Create lists of columns
     columns: list[list[Any]] = [[0, []] for _ in range(column_count)]
@@ -82,4 +82,4 @@ def md_table_to_lines(
     split_lines[1] = ["-" * (length + 1) for length, _ in columns]
 
     # Join the lines together into a list of formatted strings
-    return to_lines_join(split_lines, columns)
+    return _to_lines_join(split_lines, columns)
