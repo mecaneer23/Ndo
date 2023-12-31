@@ -11,6 +11,10 @@ from src.keys import Key
 from src.utils import clamp
 
 
+def _cursor_to(position: int, len_todos: int) -> int:
+    return clamp(position, 0, len_todos)
+
+
 def relative_cursor_to(win: Any, todos: Todos, selected: int, first_digit: int) -> int:
     total = str(first_digit)
     while True:
@@ -19,17 +23,17 @@ def relative_cursor_to(win: Any, todos: Todos, selected: int, first_digit: int) 
         except Key.ctrl_c:
             return selected
         if key in (Key.up, Key.k):
-            return cursor_to(
+            return _cursor_to(
                 selected - int(total),
                 len(todos),
             )
         if key in (Key.down, Key.j):
-            return cursor_to(
+            return _cursor_to(
                 selected + int(total),
                 len(todos),
             )
         if key in (Key.g, Key.G):
-            return cursor_to(int(total) - 1, len(todos))
+            return _cursor_to(int(total) - 1, len(todos))
         if key in Key.digits():
             total += str(Key.normalize_ascii_digit_to_digit(key))
             continue
@@ -50,7 +54,3 @@ def cursor_top(len_todos: int) -> int:
 
 def cursor_bottom(len_todos: int) -> int:
     return clamp(len_todos, 0, len_todos)
-
-
-def cursor_to(position: int, len_todos: int) -> int:
-    return clamp(position, 0, len_todos)

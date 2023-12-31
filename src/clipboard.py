@@ -27,7 +27,7 @@ def copy_todo(todos: Todos, selected: Cursor, copied_todo: Todo) -> None:
         copy(todos[int(selected)].display_text)  # pyright: ignore
 
 
-def todo_from_clipboard(todos: Todos, selected: int, copied_todo: Todo) -> Todos:
+def _todo_from_clipboard(todos: Todos, selected: int, copied_todo: Todo) -> Todos:
     if not CLIPBOARD_EXISTS:
         return todos
     todo = paste()  # pyright: ignore
@@ -42,7 +42,7 @@ def todo_from_clipboard(todos: Todos, selected: int, copied_todo: Todo) -> Todos
 
 def paste_todo(stdscr: Any, todos: Todos, selected: int, copied_todo: Todo) -> TodoList:
     temp = todos.copy()
-    todos = todo_from_clipboard(todos, selected, copied_todo)
+    todos = _todo_from_clipboard(todos, selected, copied_todo)
     stdscr.clear()
     if temp != todos:
         selected = cursor_down(selected, len(todos))
