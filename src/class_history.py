@@ -1,5 +1,4 @@
-# pylint: disable=missing-class-docstring, import-error
-# pylint: disable=missing-function-docstring, missing-module-docstring
+# pylint: disable=missing-docstring
 
 from src.class_todo import Todo, Todos, TodoList
 

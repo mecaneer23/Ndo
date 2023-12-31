@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # pyright: reportMissingModuleSource=false
-# pylint: disable=no-name-in-module, import-error, missing-docstring
+# pylint: disable=missing-docstring
 
 from os import stat
 from pathlib import Path
