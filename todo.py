@@ -2,7 +2,6 @@
 # pyright: reportMissingModuleSource=false
 # pylint: disable=missing-docstring
 
-from os import stat
 from pathlib import Path
 from sys import exit as sys_exit
 from typing import Any, Callable
@@ -42,7 +41,7 @@ HISTORY_FILE = "debugging/log.txt"
 
 
 def get_file_modified_time(filename: Path) -> float:
-    return stat(filename).st_ctime
+    return filename.stat().st_ctime
 
 
 def insert_todo(
