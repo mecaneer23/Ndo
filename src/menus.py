@@ -51,13 +51,16 @@ def simple_scroll_keybinds(
     return cursor
 
 
-def get_default_move_options(len_list: int) -> dict[int, Callable[[int], int]]:
-    return {
+def get_move_options(
+    len_list: int, additional_options: dict[int, Callable[[int], int]]
+) -> dict[int, Callable[[int], int]]:
+    defaults: dict[int, Callable[[int], int]] = {
         Key.k: lambda cursor: cursor - 1,
         Key.j: lambda cursor: cursor + 1,
         Key.g: lambda _: 0,
         Key.G: lambda _: len_list - 1,
     }
+    return defaults | additional_options
 
 
 def help_menu(parent_win: Any) -> None:
@@ -132,8 +135,8 @@ def color_menu(parent_win: Any, original: Color) -> Color:
         (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2,
     )
     win.box()
-    move_options = get_default_move_options(len(lines))
-    move_options.update(
+    move_options = get_move_options(
+        len(lines),
         {
             Key.one: lambda _: 0,
             Key.two: lambda _: 1,
@@ -142,7 +145,7 @@ def color_menu(parent_win: Any, original: Color) -> Color:
             Key.five: lambda _: 4,
             Key.six: lambda _: 5,
             Key.seven: lambda _: 6,
-        }
+        },
     )
     cursor = original.as_int() - 1
     while True:
@@ -222,7 +225,7 @@ def sort_menu(parent_win: Any, todos: Todos, selected: Cursor) -> TodoList:
         (parent_win.getmaxyx()[1] - (len(max(lines, key=len)) + 1)) // 2,
     )
     win.box()
-    move_options = get_default_move_options(len(lines))
+    move_options = get_move_options(len(lines), {})
     cursor = 0
     while True:
         parent_win.refresh()
