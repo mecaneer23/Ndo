@@ -39,5 +39,5 @@ class SingleLineModeImpl:
     def set_extra_data(self, extra_data: str) -> None:
         self.extra_data = extra_data
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.mode} {self.extra_data}"

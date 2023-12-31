@@ -25,12 +25,12 @@ from src.get_args import (
     NO_GUI,
     TKINTER_GUI,
 )
-from src.get_todo import get_todo, set_header
+from src.get_todo import get_todo
 from src.io import file_string_to_todos, read_file, update_file
 from src.keys import Key
 from src.menus import color_menu, get_newwin, help_menu, magnify, search, sort_menu
 from src.print_todos import print_todos
-from src.utils import clamp
+from src.utils import clamp, set_header
 
 if TKINTER_GUI:
     from tcurses import curses
@@ -280,7 +280,7 @@ def handle_edit(
     todos: Todos,
     selected: Cursor,
     mode: SingleLineModeImpl,
-):
+) -> Todos:
     if len(todos) <= 0:
         return todos
     return edit_todo(stdscr, todos, int(selected), mode)
@@ -327,7 +327,7 @@ def handle_todo_down(
 def handle_todo_up(
     todos: Todos,
     selected: Cursor,
-):
+) -> Todos:
     return selected.todos_override(*todo_up(todos, selected))
 
 
@@ -401,7 +401,7 @@ def get_main_input(
     possible_args: dict[str, Any],
 ) -> int | Todos:
     try:
-        key = stdscr.getch()
+        key: int = stdscr.getch()
     except Key.ctrl_c:
         return todos
     if key == Key.q:
