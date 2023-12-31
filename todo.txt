@@ -6,6 +6,8 @@
 -4 implement multiline todos
   -4 allow multiline paste
   -4 allow multiline print
-- make startup faster
-- fix silence if dependencies are not installed
-- add unit tests?
+-5 make startup faster
+-1 fix silence if dependencies are not installed
+-2 add unit tests?
+-3 add leading underscore to `private` functions
+-3 add docstrings to `public` functions
