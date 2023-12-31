@@ -35,7 +35,7 @@ else:
     import curses
 
 
-def simple_scroll_keybinds(
+def _simple_scroll_keybinds(
     win: Any, cursor: int, len_lines: int, len_new_lines: int
 ) -> int:
     try:
@@ -51,7 +51,7 @@ def simple_scroll_keybinds(
     return cursor
 
 
-def get_move_options(
+def _get_move_options(
     len_list: int, additional_options: dict[int, Callable[[int], int]]
 ) -> dict[int, Callable[[int], int]]:
     defaults: dict[int, Callable[[int], int]] = {
@@ -92,7 +92,7 @@ def help_menu(parent_win: Any) -> None:
         for i, line in enumerate(new_lines):
             win.addstr(i + 3, 1, line)
         win.refresh()
-        cursor = simple_scroll_keybinds(win, cursor, len(lines), len(new_lines))
+        cursor = _simple_scroll_keybinds(win, cursor, len(lines), len(new_lines))
         if cursor < 0:
             break
     parent_win.clear()
@@ -117,7 +117,7 @@ def magnify(stdscr: Any, todos: Todos, selected: Cursor) -> None:
         for i, line in enumerate(new_lines):
             stdscr.addstr(i + 1, 1, line)
         stdscr.refresh()
-        cursor = simple_scroll_keybinds(stdscr, cursor, len(lines), len(new_lines))
+        cursor = _simple_scroll_keybinds(stdscr, cursor, len(lines), len(new_lines))
         if cursor < 0:
             break
     stdscr.refresh()
@@ -135,7 +135,7 @@ def color_menu(parent_win: Any, original: Color) -> Color:
         (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2,
     )
     win.box()
-    move_options = get_move_options(
+    move_options = _get_move_options(
         len(lines),
         {
             Key.one: lambda _: 0,
@@ -179,7 +179,7 @@ def color_menu(parent_win: Any, original: Color) -> Color:
         win.refresh()
 
 
-def get_sorting_methods() -> dict[str, Callable[[Todos], str]]:
+def _get_sorting_methods() -> dict[str, Callable[[Todos], str]]:
     return {
         "Alphabetical": lambda top_level_todo: top_level_todo[0].display_text,
         "Completed": lambda top_level_todo: "1"
@@ -189,7 +189,7 @@ def get_sorting_methods() -> dict[str, Callable[[Todos], str]]:
     }
 
 
-def get_indented_sections(todos: Todos) -> list[Todos]:
+def _get_indented_sections(todos: Todos) -> list[Todos]:
     indented_sections: list[Todos] = []
     section: Todos = Todos([])
     for todo in todos:
@@ -203,11 +203,11 @@ def get_indented_sections(todos: Todos) -> list[Todos]:
     return indented_sections
 
 
-def sort_by(method: str, todos: Todos, selected: Cursor) -> TodoList:
-    key = get_sorting_methods()[method]
+def _sort_by(method: str, todos: Todos, selected: Cursor) -> TodoList:
+    key = _get_sorting_methods()[method]
     selected_todo = todos[int(selected)]
     sorted_todos = Todos([])
-    for section in sorted(get_indented_sections(todos), key=key):
+    for section in sorted(_get_indented_sections(todos), key=key):
         for todo in section:
             sorted_todos.append(todo)
     update_file(FILENAME, sorted_todos)
@@ -217,7 +217,7 @@ def sort_by(method: str, todos: Todos, selected: Cursor) -> TodoList:
 def sort_menu(parent_win: Any, todos: Todos, selected: Cursor) -> TodoList:
     parent_win.clear()
     set_header(parent_win, "Sort by:")
-    lines = list(get_sorting_methods().keys())
+    lines = list(_get_sorting_methods().keys())
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
@@ -225,7 +225,7 @@ def sort_menu(parent_win: Any, todos: Todos, selected: Cursor) -> TodoList:
         (parent_win.getmaxyx()[1] - (len(max(lines, key=len)) + 1)) // 2,
     )
     win.box()
-    move_options = get_move_options(len(lines), {})
+    move_options = _get_move_options(len(lines), {})
     cursor = 0
     while True:
         parent_win.refresh()
@@ -243,7 +243,7 @@ def sort_menu(parent_win: Any, todos: Todos, selected: Cursor) -> TodoList:
         return_options: dict[int, Callable[..., TodoList]] = {
             Key.q: lambda: TodoList(todos, int(selected)),
             Key.escape: lambda: TodoList(todos, int(selected)),
-            Key.enter: lambda: sort_by(lines[cursor], todos, selected),
+            Key.enter: lambda: _sort_by(lines[cursor], todos, selected),
         }
         if key in move_options:
             func = move_options[key]
