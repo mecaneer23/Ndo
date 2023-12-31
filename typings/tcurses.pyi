@@ -1,5 +1,5 @@
-# pylint: disable=missing-class-docstring, too-many-ancestors, unused-argument
-# pylint: disable=missing-function-docstring, missing-module-docstring, multiple-statements
+# pylint: disable=missing-docstring, too-many-ancestors
+# pylint: disable=unused-argument, multiple-statements
 
 from tkinter import Text
 from typing import Any, Callable, TypeVar
@@ -39,7 +39,9 @@ class curses:  # pylint: disable=invalid-name
     @staticmethod
     def color_pair(pair_number: int) -> int: ...
     @staticmethod
-    def newwin(nlines: int, ncols: int, begin_y: int = 0, begin_x: int = 0) -> Screen: ...  # pylint: disable=used-before-assignment
+    def newwin(
+        nlines: int, ncols: int, begin_y: int = 0, begin_x: int = 0
+    ) -> Screen: ...  # pylint: disable=used-before-assignment
     @staticmethod
     def wrapper(
         func: Callable[..., T], *args: list[Any], **kwargs: dict[str, Any]
@@ -52,7 +54,6 @@ class curses:  # pylint: disable=invalid-name
     def endwin() -> None: ...
     @staticmethod
     def initscr() -> Screen: ...  # pylint: disable=used-before-assignment
-
 
     class error(Exception): ...
 
