@@ -11,9 +11,7 @@ from src.keys import Key
 from src.utils import clamp
 
 
-def relative_cursor_to(
-    win: Any, todos: Todos, selected: int, first_digit: int
-) -> int:
+def relative_cursor_to(win: Any, todos: Todos, selected: int, first_digit: int) -> int:
     total = str(first_digit)
     while True:
         try:
