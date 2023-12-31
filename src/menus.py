@@ -14,7 +14,7 @@ except ImportError:
     FIGLET_FORMAT_EXISTS = False  # pyright: ignore[reportConstantRedefinition]
 
 from src.class_cursor import Cursor
-from src.class_todo import Todo, Todos, TodoList
+from src.class_todo import Todo, TodoList, Todos
 from src.get_args import (
     CONTROLS_BEGIN_INDEX,
     CONTROLS_END_INDEX,
@@ -22,7 +22,7 @@ from src.get_args import (
     HELP_FILE,
     TKINTER_GUI,
 )
-from src.get_todo import hline, get_todo
+from src.get_todo import get_todo, hline
 from src.io import update_file
 from src.keys import Key
 from src.md_to_py import md_table_to_lines
@@ -49,6 +49,15 @@ def simple_scroll_keybinds(
     else:
         return -1
     return cursor
+
+
+def get_default_move_options(len_list: int) -> dict[int, Callable[[int], int]]:
+    return {
+        Key.k: lambda cursor: cursor - 1,
+        Key.j: lambda cursor: cursor + 1,
+        Key.g: lambda _: 0,
+        Key.G: lambda _: len_list - 1,
+    }
 
 
 def help_menu(parent_win: Any) -> None:
@@ -123,19 +132,18 @@ def color_menu(parent_win: Any, original: Color) -> Color:
         (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2,
     )
     win.box()
-    move_options: dict[int, Callable[[int], int]] = {
-        Key.k: lambda cursor: cursor - 1,
-        Key.j: lambda cursor: cursor + 1,
-        Key.g: lambda _: 0,
-        Key.G: lambda _: len(lines) - 1,
-        Key.one: lambda _: 0,
-        Key.two: lambda _: 1,
-        Key.three: lambda _: 2,
-        Key.four: lambda _: 3,
-        Key.five: lambda _: 4,
-        Key.six: lambda _: 5,
-        Key.seven: lambda _: 6,
-    }
+    move_options = get_default_move_options(len(lines))
+    move_options.update(
+        {
+            Key.one: lambda _: 0,
+            Key.two: lambda _: 1,
+            Key.three: lambda _: 2,
+            Key.four: lambda _: 3,
+            Key.five: lambda _: 4,
+            Key.six: lambda _: 5,
+            Key.seven: lambda _: 6,
+        }
+    )
     cursor = original.as_int() - 1
     while True:
         parent_win.refresh()
@@ -214,12 +222,7 @@ def sort_menu(parent_win: Any, todos: Todos, selected: Cursor) -> TodoList:
         (parent_win.getmaxyx()[1] - (len(max(lines, key=len)) + 1)) // 2,
     )
     win.box()
-    move_options: dict[int, Callable[[int], int]] = {
-        Key.k: lambda cursor: cursor - 1,
-        Key.j: lambda cursor: cursor + 1,
-        Key.g: lambda _: 0,
-        Key.G: lambda _: len(lines),
-    }
+    move_options = get_default_move_options(len(lines))
     cursor = 0
     while True:
         parent_win.refresh()
