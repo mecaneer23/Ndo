@@ -7,7 +7,7 @@ from src.class_todo import Todos, TodoList
 from src.keys import Key
 
 
-class Direction(Enum):
+class _Direction(Enum):
     UP = 0
     DOWN = 1
     NONE = 2
@@ -21,7 +21,7 @@ class Positions(list[int]):
 class Cursor:
     def __init__(self, position: int, *positions: int) -> None:
         self.positions: Positions = Positions([position, *positions])
-        self.direction: Direction = Direction.NONE
+        self.direction: _Direction = _Direction.NONE
 
     def __len__(self) -> int:
         return len(self.positions)
@@ -67,19 +67,19 @@ class Cursor:
         self.positions.append(max(self.positions) + 1)
         self.positions.pop(0)
 
-    def select_next(self) -> None:
+    def _select_next(self) -> None:
         self.positions.append(max(self.positions) + 1)
         self.positions.sort()
 
-    def deselect_next(self) -> None:
+    def _deselect_next(self) -> None:
         if len(self.positions) > 1:
             self.positions.remove(max(self.positions))
 
-    def deselect_prev(self) -> None:
+    def _deselect_prev(self) -> None:
         if len(self.positions) > 1:
             self.positions.remove(min(self.positions))
 
-    def select_prev(self) -> None:
+    def _select_prev(self) -> None:
         self.positions.append(min(self.positions) - 1)
         self.positions.sort()
 
@@ -89,20 +89,20 @@ class Cursor:
     def multiselect_down(self, max_len: int) -> None:
         if max(self.positions) >= max_len - 1:
             return
-        if len(self.positions) == 1 or self.direction == Direction.DOWN:
-            self.select_next()
-            self.direction = Direction.DOWN
+        if len(self.positions) == 1 or self.direction == _Direction.DOWN:
+            self._select_next()
+            self.direction = _Direction.DOWN
             return
-        self.deselect_prev()
+        self._deselect_prev()
 
     def multiselect_up(self) -> None:
-        if min(self.positions) == 0 and self.direction == Direction.UP:
+        if min(self.positions) == 0 and self.direction == _Direction.UP:
             return
-        if len(self.positions) == 1 or self.direction == Direction.UP:
-            self.select_prev()
-            self.direction = Direction.UP
+        if len(self.positions) == 1 or self.direction == _Direction.UP:
+            self._select_prev()
+            self.direction = _Direction.UP
             return
-        self.deselect_next()
+        self._deselect_next()
 
     def multiselect_top(self) -> None:
         for _ in range(self.positions[0], 0, -1):
@@ -112,7 +112,7 @@ class Cursor:
         for _ in range(self.positions[0], max_len):
             self.multiselect_down(max_len)
 
-    def multiselect_to(self, position: int, max_len: int) -> None:
+    def _multiselect_to(self, position: int, max_len: int) -> None:
         direction = -1 if position < self.positions[0] else 1
         for _ in range(self.positions[0], position, direction):
             if direction == 1:
@@ -133,9 +133,9 @@ class Cursor:
             subch = stdscr.getch()  # alt + ...
             stdscr.nodelay(False)
             if subch == Key.k:
-                self.multiselect_to(self.positions[0] - int(total), max_len)
+                self._multiselect_to(self.positions[0] - int(total), max_len)
             elif subch == Key.j:
-                self.multiselect_to(self.positions[0] + int(total), max_len)
+                self._multiselect_to(self.positions[0] + int(total), max_len)
             elif subch in Key.digits():
                 total += str(Key.normalize_ascii_digit_to_digit(subch))
                 continue
