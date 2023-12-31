@@ -268,8 +268,7 @@ def search(stdscr: Any, todos: Todos, selected: Cursor) -> None:
     stdscr.clear()
     for i, todo in enumerate(todos[int(selected) :], start=int(selected)):
         if sequence in todo.display_text:
-            break
-    else:
-        selected.set_to(0)
-        return
-    selected.set_to(i)
+            selected.set_to(i)
+            return
+    selected.set_to(0)
+    return
