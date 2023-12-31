@@ -1,6 +1,5 @@
 # pylint: disable=missing-docstring
 
-from os import get_terminal_size
 from typing import Any, TypeVar
 
 from src.class_cursor import Cursor
@@ -43,7 +42,7 @@ def make_printable_sublist(
     prev_start: int = -1,
 ) -> tuple[list[T], int, int]:
     start = prev_start if prev_start > 0 else 0
-    if len(lst) < height:
+    if len(lst) < height or height < 0:
         return lst, cursor, start
     if distance == 0:
         return lst[cursor : min(cursor + height, len(lst))], 0, 0
@@ -74,8 +73,7 @@ def info_message(stdscr: Any, height: int, width: int) -> None:
 
 def get_height_width(stdscr: Any | None, length: int) -> tuple[int, int]:
     if stdscr is None:
-        width, height = get_terminal_size()
-        return height, width
+        return 0, 0
     height, width = stdscr.getmaxyx()
     if length == 0:
         info_message(stdscr, height, width)
@@ -85,14 +83,14 @@ def get_height_width(stdscr: Any | None, length: int) -> tuple[int, int]:
 
 def get_display_string(
     todos: Todos,
-    i_todo: tuple[int, Todo],
+    position: int,
     relative: int,
     highlight: range,
     height_width: tuple[int, int],
 ) -> str:
-    i, todo = i_todo
     _, width = height_width
-    if i in highlight and todo.is_empty():
+    todo = todos[position]
+    if position in highlight and todo.is_empty():
         return "⎯" * 8
     chunks: tuple[Chunk, ...] = (
         Chunk(True, todo.indent_level * " "),
@@ -102,6 +100,7 @@ def get_display_string(
         Chunk(ENUMERATE and not RELATIVE_ENUMERATE, f"{todos.index(todo) + 1}. "),
         Chunk(RELATIVE_ENUMERATE, f"{relative + 1}. "),
         Chunk(True, todo.display_text),
+        Chunk(width == 0, " "),
     )
     return "".join([item for condition, item in chunks if condition])[
         : width - 1
@@ -109,7 +108,7 @@ def get_display_string(
 
 
 def print_todo(
-    stdscr: Any, todo: Todo, display_string: str, i: int, highlight: range
+    stdscr: Any, todo: Todo, display_string: str, position: int, highlight: range
 ) -> None:
     counter = 0
     while counter < len(display_string) - 1:
@@ -120,14 +119,14 @@ def print_todo(
             < counter - 1
             < len(display_string.strip()) + todo.indent_level
         ):
-            stdscr.addch(i + 1, counter, "\u0336")
+            stdscr.addch(position + 1, counter, "\u0336")
         try:
             stdscr.addch(
-                i + 1,
+                position + 1,
                 counter,
                 display_string[counter],
                 curses.color_pair(todo.color.as_int() or Color.WHITE.as_int())
-                | (curses.A_STANDOUT if i in highlight else 0),
+                | (curses.A_STANDOUT if position in highlight else 0),
             )
         except OverflowError:
             # This function call will throw an OverflowError if
@@ -152,12 +151,12 @@ def print_todos(
         height - 1, list(todos), int(selected), prev_start=prev_start
     )
     highlight = range(temp_selected, len(selected) + temp_selected)
-    for relative, (i, todo) in zip(
+    for relative, (position, todo) in zip(
         [*range(temp_selected - 1, -1, -1), int(selected), *range(0, len(new_todos))],
         enumerate(new_todos),
     ):
         display_string = get_display_string(
-            todos, (i, todo), relative, highlight, (height, width)
+            todos, position, relative, highlight, (height, width)
         )
         if stdscr is None:
             print(
@@ -178,9 +177,9 @@ def print_todos(
                 + "\u001b[0m"
             )
             continue
-        print_todo(stdscr, todo, display_string, i, highlight)
+        print_todo(stdscr, todo, display_string, position, highlight)
     if stdscr is None:
         return 0
-    for i in range(height - len(new_todos) - 1):
-        stdscr.addstr(i + len(new_todos) + 1, 0, " " * (width - 1))
+    for position in range(height - len(new_todos) - 1):
+        stdscr.addstr(position + len(new_todos) + 1, 0, " " * (width - 1))
     return prev_start
