@@ -3,7 +3,7 @@
 from src.class_todo import Todo, Todos, TodoList
 
 
-class Restorable:
+class _Restorable:
     def __init__(self, todos: Todos, selected: int) -> None:
         self.stored: str = " |SEP|".join([todo.text for todo in todos])
         self.selected: int = selected
@@ -18,11 +18,11 @@ class Restorable:
 
 class UndoRedo:
     def __init__(self) -> None:
-        self.history: list[Restorable] = []
+        self.history: list[_Restorable] = []
         self.index: int = -1
 
     def add(self, todos: Todos, selected: int) -> None:
-        self.history.append(Restorable(todos, selected))
+        self.history.append(_Restorable(todos, selected))
         self.index = len(self.history) - 1
 
     def undo(self) -> TodoList:
