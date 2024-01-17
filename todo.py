@@ -27,7 +27,7 @@ from src.get_args import (
 from src.get_todo import get_todo
 from src.io import file_string_to_todos, read_file, update_file
 from src.keys import Key
-from src.menus import color_menu, get_newwin, help_menu, magnify, search, sort_menu
+from src.menus import color_menu, get_newwin, help_menu, magnify_menu, search_menu, sort_menu
 from src.print_todos import print_todos
 from src.utils import clamp, set_header
 
@@ -513,7 +513,7 @@ def main(stdscr: Any) -> int:
         Key.ctrl_x: (single_line_state.toggle, "None"),
         Key.escape: (lambda: None, "None"),
         Key.minus: (handle_insert_blank_todo, "todos, selected"),
-        Key.slash: (search, "stdscr, todos, selected"),
+        Key.slash: (search_menu, "stdscr, todos, selected"),
         Key.zero: (handle_digits, f"stdscr, todos, selected, {Key.zero}"),
         Key.one: (handle_digits, f"stdscr, todos, selected, {Key.one}"),
         Key.two: (handle_digits, f"stdscr, todos, selected, {Key.two}"),
@@ -528,7 +528,7 @@ def main(stdscr: Any) -> int:
         Key.J: (selected.multiselect_down, "len(todos)"),
         Key.K: (selected.multiselect_up, "None"),
         Key.O: (new_todo_current, "stdscr, todos, int(selected)"),
-        Key.b: (magnify, "stdscr, todos, selected"),
+        Key.b: (magnify_menu, "stdscr, todos, selected"),
         Key.c: (color_todo, "stdscr, todos, selected"),
         Key.d: (handle_delete_todo, "stdscr, todos, selected, copied_todo"),
         Key.g: (handle_to_top, "todos, selected"),

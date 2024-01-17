@@ -98,7 +98,7 @@ def help_menu(parent_win: Any) -> None:
     parent_win.clear()
 
 
-def magnify(stdscr: Any, todos: Todos, selected: Cursor) -> None:
+def magnify_menu(stdscr: Any, todos: Todos, selected: Cursor) -> None:
     if not FIGLET_FORMAT_EXISTS:
         set_header(stdscr, "Magnify dependency not available")
         return
@@ -267,7 +267,7 @@ def get_newwin(stdscr: Any) -> Any:
     return curses.newwin(3, max_x * 3 // 4, max_y // 2 - 3, max_x // 8)
 
 
-def search(stdscr: Any, todos: Todos, selected: Cursor) -> None:
+def search_menu(stdscr: Any, todos: Todos, selected: Cursor) -> None:
     set_header(stdscr, "Searching...")
     stdscr.refresh()
     sequence = get_todo(
