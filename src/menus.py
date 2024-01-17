@@ -258,6 +258,11 @@ def sort_menu(parent_win: Any, todos: Todos, selected: Cursor) -> TodoList:
 
 
 def get_newwin(stdscr: Any) -> Any:
+    """
+    Create a curses.newwin in the center of the
+    screen based on the width and height of the
+    window passed in.
+    """
     max_y, max_x = stdscr.getmaxyx()
     return curses.newwin(3, max_x * 3 // 4, max_y // 2 - 3, max_x // 8)
 
