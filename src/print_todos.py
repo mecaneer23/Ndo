@@ -1,6 +1,8 @@
-# pylint: disable=missing-docstring
+"""
+Helper module to handle printing a list of Todo objects
+"""
 
-from typing import Any, TypeVar
+from typing import Any, NamedTuple, TypeVar
 
 from src.class_cursor import Cursor
 from src.class_todo import Todo, Todos
@@ -24,6 +26,25 @@ else:
 T = TypeVar("T")
 
 
+class SublistItems[T](NamedTuple):
+    """
+    NamedTuple representing a slice of a
+    list of T, an index within that list,
+    and a start value to be passed into
+    make_printable_sublist.
+
+    slice: list[T]
+    cursor: int
+    start: int
+
+    if `int` values aren't provided, they are initialized to 0
+    """
+
+    slice: list[T]
+    cursor: int = 0
+    start: int = 0
+
+
 def _get_bullet(indentation_level: int) -> str:
     symbols = (
         "•",
@@ -40,12 +61,37 @@ def make_printable_sublist(
     cursor: int,
     distance: int = -1,
     prev_start: int = -1,
-) -> tuple[list[T], int, int]:
+) -> SublistItems[T]:
+    """
+    Return a tuple including:
+        - a slice of a list with length <= height
+        focused around the cursor
+        - Index of the cursor pointing to the same
+        element as before, but adjusted for the slice
+        - prev_start value, to be passed back into
+        this function
+
+    Args:
+        height:
+            window height or max length of returned list
+        lst:
+            list of objects to be sliced
+        cursor:
+            an index of the original list corresponding to a cursor
+        distance:
+            default distance from the top or bottom of the list to clamp
+            the cursor. If the length of the list is 20 and distance is 5,
+            make_printable_sublist will try to clamp the cursor between
+            index 5 and 15.
+        prev_start:
+            enter the previous cursor position. If this is the first
+            time you are calling this function, pass in a value < 1.
+    """
     start = prev_start if prev_start > 0 else 0
     if len(lst) < height or height < 0:
-        return lst, cursor, start
+        return SublistItems(lst, cursor, start)
     if distance == 0:
-        return lst[cursor : min(cursor + height, len(lst))], 0, 0
+        return SublistItems(lst[cursor : min(cursor + height, len(lst))])
     distance = height // 4 if distance < 0 else distance
     if cursor <= distance + start - 1:
         start = max(0, cursor - distance + 1)
@@ -55,7 +101,7 @@ def make_printable_sublist(
     if end > len(lst):
         end = len(lst)
         start = end - height
-    return lst[start:end], cursor - start, start
+    return SublistItems(lst[start:end], cursor - start, start)
 
 
 def _info_message(stdscr: Any, height: int, width: int) -> None:
@@ -143,6 +189,13 @@ def _print_todo(
 def print_todos(
     stdscr: Any, todos: Todos, selected: Cursor, prev_start: int = 0
 ) -> int:
+    """
+    Output list of Todo objects to a curses stdscr.
+
+    Returns a prev_start to be used in the next call to print_todos.
+    (Interally calls make_printable_sublist with that value).
+    """
+
     try:
         height, width = _get_height_width(stdscr, len(todos))
     except RuntimeError:
