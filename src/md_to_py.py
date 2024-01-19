@@ -1,4 +1,6 @@
-# pylint: disable=missing-docstring
+"""
+Methods to convert a MarkDown table to a formatted python list.
+"""
 
 from typing import Any
 
