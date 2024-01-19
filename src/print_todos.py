@@ -2,7 +2,7 @@
 Helper module to handle printing a list of Todo objects
 """
 
-from typing import Any, NamedTuple, TypeVar
+from typing import Any, Generic, NamedTuple, TypeVar
 
 from src.class_cursor import Cursor
 from src.class_todo import Todo, Todos
@@ -26,7 +26,7 @@ else:
 T = TypeVar("T")
 
 
-class SublistItems[T](NamedTuple):
+class SublistItems(Generic[T], NamedTuple):
     """
     NamedTuple representing a slice of a
     list of T, an index within that list,
