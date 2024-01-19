@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# pyright: reportMissingModuleSource=false
 # pylint: disable=missing-docstring
 
 from pathlib import Path
@@ -27,7 +26,14 @@ from src.get_args import (
 from src.get_todo import get_todo
 from src.io import file_string_to_todos, read_file, update_file
 from src.keys import Key
-from src.menus import color_menu, get_newwin, help_menu, magnify_menu, search_menu, sort_menu
+from src.menus import (
+    color_menu,
+    get_newwin,
+    help_menu,
+    magnify_menu,
+    search_menu,
+    sort_menu,
+)
 from src.print_todos import print_todos
 from src.utils import clamp, set_header
 
