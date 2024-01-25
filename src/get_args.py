@@ -1,4 +1,4 @@
-# pylint: disable=missing-docstring
+"""Command line argument parser for Ndo"""
 
 from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from pathlib import Path
@@ -10,7 +10,7 @@ try:
     _DEFAULT_TKINTER_GUI = False
 except ImportError:
 
-    def wrapper(_: Any) -> str:
+    def wrapper(_: Any) -> str:  # pylint: disable=missing-function-docstring
         return _CHECKBOX_OPTIONS[1]
 
     _DEFAULT_TKINTER_GUI = True  # pyright: ignore[reportConstantRedefinition]
