@@ -2,8 +2,6 @@
 Various ways to move a cursor represented by an int
 """
 
-# pylint: disable=missing-function-docstring
-
 from typing import Any
 
 from src.class_todo import Todos
@@ -16,6 +14,13 @@ def _cursor_to(position: int, len_todos: int) -> int:
 
 
 def relative_cursor_to(win: Any, todos: Todos, selected: int, first_digit: int) -> int:
+    """
+    Move the cursor to the specified position relative to the current position.
+
+    Because the trigger can only be a single keypress, this function also uses a
+    window object to getch until the user presses g or shift + g. This allows
+    for relative movement greater than 9 lines away.
+    """
     total = str(first_digit)
     while True:
         try:
@@ -41,16 +46,20 @@ def relative_cursor_to(win: Any, todos: Todos, selected: int, first_digit: int) 
 
 
 def cursor_up(selected: int, len_todos: int) -> int:
+    """Move the cursor up one position if possible"""
     return clamp(selected - 1, 0, len_todos)
 
 
 def cursor_down(selected: int, len_todos: int) -> int:
+    """Move the cursor down one position if possible"""
     return clamp(selected + 1, 0, len_todos)
 
 
 def cursor_top(len_todos: int) -> int:
+    """Move the cursor to the top of the list"""
     return clamp(0, 0, len_todos)
 
 
 def cursor_bottom(len_todos: int) -> int:
+    """Move the cursor to the bottom of the list"""
     return clamp(len_todos, 0, len_todos)
