@@ -2,6 +2,11 @@
 Convert a MarkDown table to a formatted Python list.
 """
 
+from typing import Callable, Iterable, Iterator, TypeVar
+
+T = TypeVar("T")
+S = TypeVar("S")
+
 
 def _get_column_widths(
     row: str, delimiter: str = "|", strip_spaces: bool = True
@@ -49,6 +54,23 @@ def _get_column_widths(
         count += 1
 
     return output[:-1]
+
+
+def map_with_exclusion(
+    func: Callable[[T], S],
+    *sequences: Iterable[T],
+    exclusion: frozenset[int] = frozenset(),
+) -> Iterator[S]:
+    """
+    Similar to the built-in `map` function, but allows for
+    exclusion of certain elements of `seq`.
+
+    `exclusion` should be a set of indices to exclude.
+    """
+
+    for i, arguments in enumerate(zip(*sequences)):
+        if i not in exclusion:
+            yield func(*arguments)
 
 
 def md_table_to_lines(
@@ -136,7 +158,8 @@ def md_table_to_lines(
     except FileNotFoundError as err:
         raise FileNotFoundError("Markdown file not found.") from err
 
-    max_column_lengths = list(map(_get_column_widths, lines))
+    max_column_lengths = list(zip(*map_with_exclusion(_get_column_widths, lines, exclusion=frozenset((1,)))))
+
 
     for i, _ in enumerate(lines):
         lines[i] = lines[i].replace("- | -", "----").replace(" | ", " " * +2)
@@ -147,8 +170,7 @@ def md_table_to_lines(
 
 
 if __name__ == "__main__":
-    print(_get_column_widths("| Flag            | Description                     |"))
-    for line in md_table_to_lines(130, 137, "md_to_py.py", ("*",)):
+    for line in md_table_to_lines(176, 183, "md_to_py.py", ("*",)):
         pass
     _ = """
 | Flag            | Description                     |
