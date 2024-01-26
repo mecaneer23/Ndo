@@ -2,30 +2,30 @@
 Convert a MarkDown table to a formatted Python list.
 """
 
-from typing import Any
 
+def _get_column_widths(row: str, delimiter: str = "|") -> list[int]:
+    """
+    Return a list of column widths. Columns are determined by a delimiter
+    character.
 
-def _to_lines_split(
-    lines: list[str], remove: tuple[str, ...]
-) -> tuple[int, list[list[str]]]:
-    split: list[list[str]] = [[]] * len(lines)
-    for i, _ in enumerate(lines):
-        for item in remove:
-            lines[i] = lines[i].replace(item, "")
-        split[i] = lines[i].split("|")[1:-1]
-    column_count = len(split[0])
-    split[1] = ["-" for _ in range(column_count)]
-    return column_count, split
+    The length of the returned list should be equal to row.count(delimiter) - 1
+    """
+    if len(delimiter) > 1:
+        raise TypeError(f"`delimiter` must be one character, is {len(delimiter)} characters")
 
+    counter = 0
+    column = -1
+    output: list[int] = []
 
-def _to_lines_join(split_lines: list[list[str]], columns: list[list[int]]) -> list[str]:
-    joined_lines: list[str] = [""] * len(split_lines)
-    for i, line in enumerate(split_lines):
-        for j, char in enumerate(line):
-            line[j] = char.strip().ljust(columns[j][0] + 2)
-        joined_lines[i] = "".join(split_lines[i])
-    joined_lines[1] = "-" * (sum(list(zip(*columns))[0]) + 2 * (len(columns) - 1))
-    return joined_lines
+    while counter < len(row):
+        if row[counter] == delimiter:
+            column += 1
+            output.append(-1)
+        if column > -1:
+            output[column] += 1
+        counter += 1
+
+    return output[:-1]
 
 
 def md_table_to_lines(
