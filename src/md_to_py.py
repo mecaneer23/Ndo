@@ -106,30 +106,29 @@ def md_table_to_lines(
     ```
     """
 
-    # Check for valid line indices
     if last_line_idx <= first_line_idx:
         raise ValueError("Last line index must be greater than first line index.")
 
-    # Get raw lines from the markdown file
+    if not isinstance(remove, tuple):  # pyright: ignore
+        raise TypeError(f"`remove` must be a tuple, is `{type(remove).__name__}`")
+
     try:
         with open(filename, encoding="utf-8") as markdown_file:
-            lines = markdown_file.readlines()[first_line_idx - 1 : last_line_idx - 1]
+            lines = markdown_file.read().splitlines()[first_line_idx - 1 : last_line_idx - 1]
     except FileNotFoundError as err:
         raise FileNotFoundError("Markdown file not found.") from err
 
-    # Remove unwanted characters and split each line into a list of values
-    column_count, split_lines = _to_lines_split(lines, remove)
+    max_column_lengths = list(map(_get_column_widths, lines))
+    print(lines)
+    print(max_column_lengths)
 
-    # Create lists of columns
-    columns: list[list[Any]] = [[0, []] for _ in range(column_count)]
-    for i in range(column_count):
-        for line in split_lines:
-            columns[i][1].append(line[i])
+    for i, _ in enumerate(lines):
+        lines[i] = lines[i].replace("- | -", "----").replace(" | ", " " *  + 2)
+        for item in remove + ("| ", " |"):
+            lines[i] = lines[i].replace(item, "")
 
-    # Find the maximum length of each column
-    for i, (_, column) in enumerate(columns):
-        columns[i][0] = len(max(map(str.strip, column), key=len))
-    split_lines[1] = ["-" * (length + 1) for length, _ in columns]
+    return lines
+
 
     # Join the lines together into a list of formatted strings
     return _to_lines_join(split_lines, columns)
