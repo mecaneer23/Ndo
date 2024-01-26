@@ -130,5 +130,16 @@ def md_table_to_lines(
     return lines
 
 
-    # Join the lines together into a list of formatted strings
-    return _to_lines_join(split_lines, columns)
+if __name__ == "__main__":
+    print(_get_column_widths("| Flag            | Description                     |"))
+    for line in md_table_to_lines(130, 137, "md_to_py.py", ("*",)):
+        pass
+    _ = """
+| Flag            | Description                     |
+| --------------- | ------------------------------- |
+| **-h**          | Display help message            |
+| **-v**          | Enable verbose output           |
+| **-f** FILENAME | Specify input file              |
+| **-o** FILENAME | Specify output file             |
+| **-n**          | Do not overwrite existing files |
+"""
