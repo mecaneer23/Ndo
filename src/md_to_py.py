@@ -3,7 +3,9 @@ Convert a MarkDown table to a formatted Python list.
 """
 
 
-def _get_column_widths(row: str, delimiter: str = "|", strip_spaces: bool = True) -> list[int]:
+def _get_column_widths(
+    row: str, delimiter: str = "|", strip_spaces: bool = True
+) -> list[int]:
     """
     Return a list of column widths. Columns are determined by a delimiter
     character.
