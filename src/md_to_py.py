@@ -56,20 +56,20 @@ def _get_column_widths(
     return output[:-1]
 
 
-def map_with_exclusion(
+def exclusive_map(
     func: Callable[[T], S],
     *sequences: Iterable[T],
-    exclusion: frozenset[int] = frozenset(),
+    exclude: frozenset[int] = frozenset(),
 ) -> Iterator[S]:
     """
     Similar to the built-in `map` function, but allows for
     exclusion of certain elements of `seq`.
 
-    `exclusion` should be a set of indices to exclude.
+    `exclude` should be a set of indices to exclude.
     """
 
     for i, arguments in enumerate(zip(*sequences)):
-        if i not in exclusion:
+        if i not in exclude:
             yield func(*arguments)
 
 
@@ -158,7 +158,7 @@ def md_table_to_lines(
     except FileNotFoundError as err:
         raise FileNotFoundError("Markdown file not found.") from err
 
-    max_column_lengths = list(zip(*map_with_exclusion(_get_column_widths, lines, exclusion=frozenset((1,)))))
+    max_column_lengths = list(zip(*exclusive_map(_get_column_widths, lines, exclude=frozenset((1,)))))
 
 
     for i, _ in enumerate(lines):
