@@ -3,29 +3,48 @@ Convert a MarkDown table to a formatted Python list.
 """
 
 
-def _get_column_widths(row: str, delimiter: str = "|") -> list[int]:
+def _get_column_widths(row: str, delimiter: str = "|", strip_spaces: bool = True) -> list[int]:
     """
     Return a list of column widths. Columns are determined by a delimiter
     character.
 
+    `strip_spaces` provides a toggle between counting all characters
+    in each column, versus counting characters excluding leading and
+    trailing spaces
+
     The length of the returned list should be equal to row.count(delimiter) - 1
     """
-    if len(delimiter) > 1:
-        raise TypeError(
+
+    if len(delimiter) != 1:
+        raise ValueError(
             f"`delimiter` must be one character, is {len(delimiter)} characters"
         )
+    if delimiter == " ":
+        raise ValueError("`delimiter` cannot be a space")
 
-    counter = 0
+    count = 0
+    backward_count = 1
     column = -1
     output: list[int] = []
+    starts_with_space = strip_spaces
 
-    while counter < len(row):
-        if row[counter] == delimiter:
+    while count < len(row):
+        if row[count] != " ":
+            starts_with_space = False
+        if row[count] == delimiter:
+            if strip_spaces:
+                while row[count - backward_count] == " ":
+                    backward_count += 1
+                    output[column] -= 1
+                backward_count = 1
             column += 1
             output.append(-1)
-        if column > -1:
+            if strip_spaces:
+                output[column] += 1
+                starts_with_space = True
+        if column > -1 and not starts_with_space:
             output[column] += 1
-        counter += 1
+        count += 1
 
     return output[:-1]
 
