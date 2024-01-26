@@ -11,7 +11,9 @@ def _get_column_widths(row: str, delimiter: str = "|") -> list[int]:
     The length of the returned list should be equal to row.count(delimiter) - 1
     """
     if len(delimiter) > 1:
-        raise TypeError(f"`delimiter` must be one character, is {len(delimiter)} characters")
+        raise TypeError(
+            f"`delimiter` must be one character, is {len(delimiter)} characters"
+        )
 
     counter = 0
     column = -1
@@ -107,16 +109,16 @@ def md_table_to_lines(
 
     try:
         with open(filename, encoding="utf-8") as markdown_file:
-            lines = markdown_file.read().splitlines()[first_line_idx - 1 : last_line_idx - 1]
+            lines = markdown_file.read().splitlines()[
+                first_line_idx - 1 : last_line_idx - 1
+            ]
     except FileNotFoundError as err:
         raise FileNotFoundError("Markdown file not found.") from err
 
     max_column_lengths = list(map(_get_column_widths, lines))
-    print(lines)
-    print(max_column_lengths)
 
     for i, _ in enumerate(lines):
-        lines[i] = lines[i].replace("- | -", "----").replace(" | ", " " *  + 2)
+        lines[i] = lines[i].replace("- | -", "----").replace(" | ", " " * +2)
         for item in remove + ("| ", " |"):
             lines[i] = lines[i].replace(item, "")
 
