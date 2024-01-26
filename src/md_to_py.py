@@ -94,7 +94,7 @@ def md_table_to_lines(
     | **-n**          | Do not overwrite existing files |
 
     ```python
-    >>> print("\n".join(md_table_to_lines(41, 48, remove=("**"))))
+    >>> print("\n".join(md_table_to_lines(41, 48, remove=("**",))))
     Flag         Description
     --------------------------------------------
     -h           Display help message
