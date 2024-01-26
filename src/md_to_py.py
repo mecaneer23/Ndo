@@ -1,5 +1,5 @@
 """
-Methods to convert a MarkDown table to a formatted python list.
+Convert a MarkDown table to a formatted Python list.
 """
 
 from typing import Any
