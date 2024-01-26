@@ -45,7 +45,7 @@ def md_table_to_lines(
     - `last_line_idx` (int): The index of the last line of the markdown
     table to be converted.
     - `filename` (str, optional): The name of the markdown file
-    containing the table. Default is “README.md”.
+    containing the table. Default is "README.md".
     - `remove` (tuple[str], optional): The list of characters to be
     removed from each line. Default is an empty list.
 
@@ -55,13 +55,6 @@ def md_table_to_lines(
     -  `list[str]`: A list of formatted strings representing the converted
     Markdown table.
 
-    Raises
-    ------
-
-    -  `ValueError`: If the last line index is less than or equal to the
-    first line index.
-    -  `FileNotFoundError`: If the specified markdown file cannot be
-    found.
     """
 
     _ = """
