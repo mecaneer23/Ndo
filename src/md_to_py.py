@@ -173,17 +173,3 @@ def md_table_to_lines(
     lines[1] = "-" * (sum(max_column_lengths) + 2 * (len(max_column_lengths) - 1))
 
     return lines
-
-
-if __name__ == "__main__":
-    for line in md_table_to_lines(182, 189, "md_to_py.py", frozenset({"**"})):
-        print(line)
-    _ = """
-| Flag            | Description                     | what stuff goes here? |
-| --------------- | ------------------------------- | --------------------- |
-| **-h**          | Display help message            | what stuff goes here? |
-| **-v**          | Enable verbose output           | what stuff goes here? |
-| **-f** FILENAME | Specify input file              | what stuff goes here? |
-| **-o** FILENAME | Specify output file             | what stuff goes here? |
-| **-n**          | Do not overwrite existing files | what stuff goes here? |
-"""
