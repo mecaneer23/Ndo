@@ -77,7 +77,7 @@ def md_table_to_lines(
     first_line_idx: int,
     last_line_idx: int,
     filename: str = "README.md",
-    remove: tuple[str, ...] = (),
+    remove: frozenset[str] = frozenset(),
 ) -> list[str]:
     """
     Convert a Markdown table to a list of formatted strings.
@@ -91,8 +91,8 @@ def md_table_to_lines(
     table to be converted.
     - `filename` (str, optional): The name of the file
     containing the table. Default is "README.md".
-    - `remove` (tuple[str], optional): The list of characters to be
-    removed from each line. Default is an empty list.
+    - `remove` (frozenset[str], optional): The set of strings to be
+    removed from each line. Default is an empty set.
 
     Returns
     -------
@@ -158,24 +158,26 @@ def md_table_to_lines(
     except FileNotFoundError as err:
         raise FileNotFoundError("File not found.") from err
 
+    for i, _ in enumerate(lines):
+        for item in remove:
+            lines[i] = lines[i].replace(item, "")
+
     max_column_lengths = list(
         map(
             max,
-            zip(*_exclusive_map(_get_column_widths, lines)),
+            zip(*_exclusive_map(_get_column_widths, lines, exclude=frozenset({1}))),
         )
     )
-    print(max_column_lengths)
 
     for i, _ in enumerate(lines):
-        lines[i] = lines[i].replace("- | -", "----").replace(" | ", " " * +2)
-        for item in remove + ("| ", " |"):
-            lines[i] = lines[i].replace(item, "")
+        for old, new in {"- | -": "----", " | ": " " * +2, "| ": "", " |": ""}.items():
+            lines[i] = lines[i].replace(old, new)
 
     return lines
 
 
 if __name__ == "__main__":
-    for line in md_table_to_lines(181, 188, "md_to_py.py", ("*",)):
+    for line in md_table_to_lines(183, 190, "md_to_py.py", frozenset({"**"})):
         print(line)
     _ = """
 | Flag            | Description                     |

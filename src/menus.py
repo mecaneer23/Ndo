@@ -71,7 +71,7 @@ def help_menu(parent_win: Any) -> None:
         CONTROLS_BEGIN_INDEX,
         CONTROLS_END_INDEX,
         str(HELP_FILE),
-        ("<kbd>", "</kbd>", "(arranged alphabetically)"),
+        frozenset({"<kbd>", "</kbd>", "(arranged alphabetically)"}),
     ):
         lines.append(line[:-2])
     win = curses.newwin(

@@ -53,7 +53,7 @@ def _get_args() -> Namespace:
                 CONTROLS_BEGIN_INDEX,
                 CONTROLS_END_INDEX,
                 str(_DEFAULT_HELP_FILE),
-                ("<kbd>", "</kbd>"),
+                frozenset({"<kbd>", "</kbd>"}),
             )
         ),
     )
