@@ -158,8 +158,13 @@ def md_table_to_lines(
     except FileNotFoundError as err:
         raise FileNotFoundError("File not found.") from err
 
-    max_column_lengths = list(zip(*_exclusive_map(_get_column_widths, lines, exclude=frozenset((1,)))))
-
+    max_column_lengths = list(
+        map(
+            max,
+            zip(*_exclusive_map(_get_column_widths, lines)),
+        )
+    )
+    print(max_column_lengths)
 
     for i, _ in enumerate(lines):
         lines[i] = lines[i].replace("- | -", "----").replace(" | ", " " * +2)
@@ -170,7 +175,7 @@ def md_table_to_lines(
 
 
 if __name__ == "__main__":
-    for line in md_table_to_lines(176, 183, "md_to_py.py", ("*",)):
+    for line in md_table_to_lines(181, 188, "md_to_py.py", ("*",)):
         print(line)
     _ = """
 | Flag            | Description                     |
