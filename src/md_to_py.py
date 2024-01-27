@@ -147,9 +147,6 @@ def md_table_to_lines(
     if last_line_idx <= first_line_idx:
         raise ValueError("Last line index must be greater than first line index.")
 
-    if not isinstance(remove, tuple):  # pyright: ignore
-        raise TypeError(f"`remove` must be a tuple, is `{type(remove).__name__}`")
-
     try:
         with open(filename, encoding="utf-8") as markdown_file:
             lines = markdown_file.read().splitlines()[
