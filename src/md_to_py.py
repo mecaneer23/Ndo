@@ -56,7 +56,7 @@ def _get_column_widths(
     return output[:-1]
 
 
-def exclusive_map(
+def _exclusive_map(
     func: Callable[[T], S],
     *sequences: Iterable[T],
     exclude: frozenset[int] = frozenset(),
@@ -158,7 +158,7 @@ def md_table_to_lines(
     except FileNotFoundError as err:
         raise FileNotFoundError("Markdown file not found.") from err
 
-    max_column_lengths = list(zip(*exclusive_map(_get_column_widths, lines, exclude=frozenset((1,)))))
+    max_column_lengths = list(zip(*_exclusive_map(_get_column_widths, lines, exclude=frozenset((1,)))))
 
 
     for i, _ in enumerate(lines):
@@ -171,7 +171,7 @@ def md_table_to_lines(
 
 if __name__ == "__main__":
     for line in md_table_to_lines(176, 183, "md_to_py.py", ("*",)):
-        pass
+        print(line)
     _ = """
 | Flag            | Description                     |
 | --------------- | ------------------------------- |
