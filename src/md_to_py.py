@@ -89,7 +89,7 @@ def md_table_to_lines(
     table to be converted.
     - `last_line_idx` (int): The index of the last line of the markdown
     table to be converted.
-    - `filename` (str, optional): The name of the markdown file
+    - `filename` (str, optional): The name of the file
     containing the table. Default is "README.md".
     - `remove` (tuple[str], optional): The list of characters to be
     removed from each line. Default is an empty list.
@@ -156,7 +156,7 @@ def md_table_to_lines(
                 first_line_idx - 1 : last_line_idx - 1
             ]
     except FileNotFoundError as err:
-        raise FileNotFoundError("Markdown file not found.") from err
+        raise FileNotFoundError("File not found.") from err
 
     max_column_lengths = list(zip(*_exclusive_map(_get_column_widths, lines, exclude=frozenset((1,)))))
 
