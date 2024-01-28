@@ -84,13 +84,19 @@ def _pad_columns(row: str, widths: tuple[int, ...] | int, delimiter: str = "|") 
         widths = tuple(repeat(widths, column_count))
 
     count = 0
-    column = 0
+    column = -1
+    backward_count = 1
+    trailing_space_start = 0
     new_row = ""
 
     while count < len(row):
-        raise NotImplementedError("_pad_columns")
-        # - iterate backward to get index of first trailing
-        # space in this column
+        if row[count] == delimiter and count != 0:
+            while row[count - backward_count] == " ":
+                backward_count += 1
+            trailing_space_start = count - backward_count + 1
+            print(trailing_space_start)
+            backward_count = 1
+        count += 1
         # - add or remove trailing spaces based on that value
         # (and the value of widths for that column)
         # - because we shouldn't modify the arguments, add
