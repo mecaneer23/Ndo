@@ -2,6 +2,7 @@
 Convert a MarkDown table to a formatted Python list.
 """
 
+from itertools import repeat
 from typing import Callable, Iterable, Iterator, TypeVar
 
 T = TypeVar("T")
@@ -54,6 +55,49 @@ def _get_column_widths(
         count += 1
 
     return output[:-1]
+
+
+def _pad_columns(row: str, widths: tuple[int, ...] | int, delimiter: str = "|") -> str:
+    """
+    Pad each column (determined by `delimiter`), to a given width.
+
+    `widths` can be a single int, which will be used for every column,
+    or can be a tuple with length row.count(delimiter) - 1, with each
+    index corresponding to a different column.
+
+    Returns padded version of `row`.
+    """
+
+    if len(delimiter) != 1:
+        raise ValueError(
+            f"`delimiter` must be one character, is {len(delimiter)} characters"
+        )
+    if delimiter == " ":
+        raise ValueError("`delimiter` cannot be a space")
+
+    column_count = row.count(delimiter) - 1
+
+    if isinstance(widths, tuple) and len(widths) != column_count:
+        raise ValueError("`widths` cannot be a tuple of arbitrary length")
+
+    if isinstance(widths, int):
+        widths = tuple(repeat(widths, column_count))
+
+    count = 0
+    column = 0
+    new_row = ""
+
+    while count < len(row):
+        raise NotImplementedError("_pad_columns")
+        # - iterate backward to get index of first trailing
+        # space in this column
+        # - add or remove trailing spaces based on that value
+        # (and the value of widths for that column)
+        # - because we shouldn't modify the arguments, add
+        # each non-space character to `new_row` too
+        # - Make sure to assert the non-space portions of
+        # each column are less than the width specified by
+        # widths
 
 
 def _exclusive_map(
@@ -165,7 +209,8 @@ def md_table_to_lines(
             zip(*_exclusive_map(_get_column_widths, lines, exclude=frozenset({1}))),
         )
     )
-    print(max_column_lengths)
+    for line in lines:
+        print(line)
     for i, _ in enumerate(lines):
         for old, new in {" | ": "  ", "| ": "", " |": ""}.items():
             lines[i] = lines[i].replace(old, new)
