@@ -99,6 +99,8 @@ def _pad_columns(row: str, widths: tuple[int, ...] | int, delimiter: str = "|") 
         # each column are less than the width specified by
         # widths
 
+    return new_row
+
 
 def _exclusive_map(
     func: Callable[[T], S],
