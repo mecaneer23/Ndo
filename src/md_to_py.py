@@ -101,11 +101,11 @@ def _pad_columns(row: str, widths: tuple[int, ...] | int, delimiter: str = "|") 
             trailing_space_start = count - backward_count + 1
             non_space_len = trailing_space_start - prev_delimiter_index - 1
             if (
-                widths[column] < non_space_len
-            ):  # maybe off by 1 error, as doesn't account for one trailing space
+                widths[column] < non_space_len + 1
+            ):
                 raise ValueError(
                     f"Width of column `{column}` cannot be less than "\
-                    f"{non_space_len}, is {widths[column]}"
+                    f"{non_space_len + 1}, is {widths[column]}"
                 )
             prev_delimiter_index = count
             if widths[column] == non_space_len:
