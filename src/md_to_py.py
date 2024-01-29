@@ -79,14 +79,13 @@ def _pad_columns(row: str, widths: tuple[int, ...] | int, delimiter: str = "|") 
 
     if isinstance(widths, tuple) and len(widths) != column_count:
         raise ValueError(
-            "`widths` cannot be a tuple of arbitrary length. "\
+            "`widths` cannot be a tuple of arbitrary length. "
             f"Is {len(widths)}, should be {column_count}."
         )
 
     if isinstance(widths, int):
         widths = tuple(repeat(widths, column_count))
 
-    count = 0
     column = 0
     backward_count = 1
     trailing_space_start = 0
@@ -94,30 +93,26 @@ def _pad_columns(row: str, widths: tuple[int, ...] | int, delimiter: str = "|") 
     change_amount = 0
     new_row = ""
 
-    while count < len(row):
-        if row[count] == delimiter and count != 0:
-            while row[count - backward_count] == " ":
+    for i, char in enumerate(row):
+        if char == delimiter and i != 0:
+            while row[i - backward_count] == " ":
                 backward_count += 1
-            trailing_space_start = count - backward_count + 1
+            trailing_space_start = i - backward_count + 1
             non_space_len = trailing_space_start - prev_delimiter_index - 1
-            if (
-                widths[column] < non_space_len + 1
-            ):
+            if widths[column] < non_space_len + 1:
                 raise ValueError(
-                    f"Width of column `{column}` cannot be less than "\
+                    f"Width of column `{column}` cannot be less than "
                     f"{non_space_len + 1}, is {widths[column]}"
                 )
-            prev_delimiter_index = count
+            prev_delimiter_index = i
             if widths[column] == non_space_len:
                 backward_count = 1
-                count += 1
                 column += 1
                 continue
             change_amount = widths[column] - non_space_len - backward_count + 1
             print(f"change the amount of spaces by {change_amount}")
             backward_count = 1
             column += 1
-        count += 1
         # - add or remove trailing spaces based on that value
         # (and the value of widths for that column)
         # - because we shouldn't modify the arguments, add
