@@ -84,9 +84,10 @@ def _pad_columns(row: str, widths: tuple[int, ...] | int, delimiter: str = "|") 
         widths = tuple(repeat(widths, column_count))
 
     count = 0
-    column = -1
+    column = 0
     backward_count = 1
     trailing_space_start = 0
+    prev_delimiter_index = 0
     new_row = ""
 
     while count < len(row):
@@ -94,16 +95,30 @@ def _pad_columns(row: str, widths: tuple[int, ...] | int, delimiter: str = "|") 
             while row[count - backward_count] == " ":
                 backward_count += 1
             trailing_space_start = count - backward_count + 1
-            print(trailing_space_start)
+            non_space_len = trailing_space_start - prev_delimiter_index - 1
+            if (
+                widths[column] < non_space_len
+            ):  # maybe off by 1 error, as doesn't account for one trailing space
+                raise ValueError(
+                    f"Width of column `{column}` cannot be less than\
+                    {non_space_len}, is {widths[column]}"
+                )
+            prev_delimiter_index = count
+            if widths[column] == non_space_len:
+                backward_count = 1
+                count += 1
+                continue
+            if non_space_len + backward_count > widths[column]:
+                raise NotImplementedError("Make the amount of spaces smaller")
+                backward_count = 1
+                continue
+            raise NotImplementedError("Make the amount of spaces larger")
             backward_count = 1
         count += 1
         # - add or remove trailing spaces based on that value
         # (and the value of widths for that column)
         # - because we shouldn't modify the arguments, add
         # each non-space character to `new_row` too
-        # - Make sure to assert the non-space portions of
-        # each column are less than the width specified by
-        # widths
 
     return new_row
 
