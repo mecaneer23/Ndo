@@ -93,31 +93,28 @@ def _pad_columns(row: str, widths: tuple[int, ...] | int, delimiter: str = "|") 
     change_amount = 0
     new_row = ""
 
-    for i, char in enumerate(row):
-        if char == delimiter and i != 0:
-            while row[i - backward_count] == " ":
-                backward_count += 1
-            trailing_space_start = i - backward_count + 1
-            non_space_len = trailing_space_start - prev_delimiter_index - 1
-            if widths[column] < non_space_len + 1:
-                raise ValueError(
-                    f"Width of column `{column}` cannot be less than "
-                    f"{non_space_len + 1}, is {widths[column]}"
-                )
-            prev_delimiter_index = i
-            if widths[column] == non_space_len:
-                backward_count = 1
-                column += 1
-                continue
-            change_amount = widths[column] - non_space_len - backward_count + 1
-            print(f"change the amount of spaces by {change_amount}")
-            backward_count = 1
-            column += 1
-        # - add or remove trailing spaces based on that value
-        # (and the value of widths for that column)
-        # - because we shouldn't modify the arguments, add
-        # each non-space character to `new_row` too
+    for delim_loc, char in enumerate(row):
+        if char != delimiter or delim_loc == 0:
+            continue
+        while row[delim_loc - backward_count] == " ":
+            backward_count += 1
+        trailing_space_start = delim_loc - backward_count + 1
+        non_space_len = trailing_space_start - prev_delimiter_index
+        if widths[column] < non_space_len:
+            raise ValueError(
+                f"Width of column `{column}` cannot be less than "
+                f"{non_space_len}, is {widths[column]}"
+            )
+        change_amount = widths[column] - non_space_len - backward_count + 2
+        for index in range(prev_delimiter_index, prev_delimiter_index + non_space_len + 1):
+            new_row += row[index]
+        if change_amount > 0:
+            new_row += " " * change_amount
+        prev_delimiter_index = delim_loc
+        backward_count = 1
+        column += 1
 
+    new_row += delimiter
     return new_row
 
 
