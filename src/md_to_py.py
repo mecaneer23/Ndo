@@ -106,7 +106,9 @@ def _pad_columns(row: str, widths: tuple[int, ...] | int, delimiter: str = "|") 
                 f"{non_space_len}, is {widths[column]}"
             )
         change_amount = widths[column] - non_space_len - backward_count + 2
-        for index in range(prev_delimiter_index, prev_delimiter_index + non_space_len + 1):
+        for index in range(
+            prev_delimiter_index, prev_delimiter_index + non_space_len + 1
+        ):
             new_row += row[index]
         if change_amount > 0:
             new_row += " " * change_amount
