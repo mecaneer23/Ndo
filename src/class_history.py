@@ -4,16 +4,18 @@ from src.class_todo import Todo, Todos, TodoList
 
 
 class _Restorable:
+    SEPARATOR = " |SEP|"
+
     def __init__(self, todos: Todos, selected: int) -> None:
-        self.stored: str = " |SEP|".join([todo.text for todo in todos])
+        self.stored: str = self.SEPARATOR.join([todo.text for todo in todos])
         self.selected: int = selected
 
     def get(self) -> TodoList:
-        stored = self.stored.split(" |SEP|")
+        stored = self.stored.split(self.SEPARATOR)
         return TodoList(Todos([Todo(line) for line in stored]), self.selected)
 
     def __repr__(self) -> str:
-        return self.stored.replace(" |SEP|", ", ") + f": {self.selected}"
+        return self.stored.replace(self.SEPARATOR, ", ") + f": {self.selected}"
 
 
 class UndoRedo:
