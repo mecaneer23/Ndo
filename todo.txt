@@ -9,5 +9,5 @@
 -5 make startup faster
 -1 fix silence if dependencies are not installed
 -2 add unit tests?
-+3 add leading underscore to `private` functions
 -3 add docstrings to `public` functions
+- migrate from sometimes using `int` as cursor, to always using `Cursor`s
