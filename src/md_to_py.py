@@ -105,13 +105,12 @@ def _pad_columns(row: str, widths: tuple[int, ...] | int, delimiter: str = "|") 
                 f"Width of column `{column}` cannot be less than "
                 f"{non_space_len}, is {widths[column]}"
             )
-        change_amount = widths[column] - non_space_len - backward_count + 2
+        change_amount = widths[column] - non_space_len
         for index in range(
             prev_delimiter_index, prev_delimiter_index + non_space_len + 1
         ):
             new_row += row[index]
-        if change_amount > 0:
-            new_row += " " * change_amount
+        new_row += " " * change_amount
         prev_delimiter_index = delim_loc
         backward_count = 1
         column += 1
@@ -223,18 +222,19 @@ def md_table_to_lines(
         for item in remove:
             lines[i] = lines[i].replace(item, "")
 
-    max_column_lengths = list(
+    max_column_lengths: tuple[int, ...] = tuple(
         map(
-            max,
+            lambda iterable: max(iterable) + 2,
             zip(*_exclusive_map(_get_column_widths, lines, exclude=frozenset({1}))),
         )
     )
-    for line in lines:
-        print(line)
+
     for i, _ in enumerate(lines):
+        if i == 1:
+            lines[1] = "-" * (sum(max_column_lengths) - 2)
+            continue
+        lines[i] = _pad_columns(lines[i], max_column_lengths)
         for old, new in {" | ": "  ", "| ": "", " |": ""}.items():
             lines[i] = lines[i].replace(old, new)
-
-    lines[1] = "-" * (sum(max_column_lengths) + 2 * (len(max_column_lengths) - 1))
 
     return lines
