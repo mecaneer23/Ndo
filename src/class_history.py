@@ -4,6 +4,10 @@ from src.class_todo import Todo, Todos, TodoList
 
 
 class _Restorable:
+    """
+    Back up and save a TodoList object, one snippet in time.
+    """
+
     SEPARATOR = " |SEP|"
 
     def __init__(self, todos: Todos, selected: int) -> None:
@@ -11,6 +15,12 @@ class _Restorable:
         self.selected: int = selected
 
     def get(self) -> TodoList:
+        """
+        Convert stored TodoList object out of internal format.
+
+        Return the stored TodoList object.
+        """
+
         stored = self.stored.split(self.SEPARATOR)
         return TodoList(Todos([Todo(line) for line in stored]), self.selected)
 
