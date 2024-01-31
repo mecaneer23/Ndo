@@ -1,4 +1,6 @@
-# pylint: disable=missing-docstring
+"""
+Helpers for storing and retrieving TodoList object records.
+"""
 
 from src.class_todo import Todo, Todos, TodoList
 
@@ -29,20 +31,35 @@ class _Restorable:
 
 
 class UndoRedo:
+    """
+    Store and retrieve TodoList objects.
+    """
+
     def __init__(self) -> None:
         self.history: list[_Restorable] = []
         self.index: int = -1
 
     def add(self, todos: Todos, selected: int) -> None:
+        """
+        Add a TodoList to the history.
+        Backs up current state for potential retrieval later.
+        """
+
         self.history.append(_Restorable(todos, selected))
         self.index = len(self.history) - 1
 
     def undo(self) -> TodoList:
+        """
+        Return the previous TodoList state.
+        """
         if self.index > 0:
             self.index -= 1
         return self.history[self.index].get()
 
     def redo(self) -> TodoList:
+        """
+        Return the next TodoList state, if it exists
+        """
         if self.index < len(self.history) - 1:
             self.index += 1
         return self.history[self.index].get()
