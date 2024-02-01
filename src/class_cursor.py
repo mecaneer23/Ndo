@@ -22,6 +22,7 @@ class Positions(list[int]):
     """
     Wrapper for a list of indices of positions
     """
+
     def __init__(self, iterable: Iterable[int]):
         super().__init__(iterable)
 
