@@ -209,7 +209,7 @@ def print_todos(
         enumerate(new_todos),
     ):
         display_string = _get_display_string(
-            todos, position, relative, highlight, (height, width)
+            Todos(new_todos), position, relative, highlight, (height, width)
         )
         if stdscr is None:
             print(
