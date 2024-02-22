@@ -5,12 +5,14 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from curses import wrapper  # pyright: ignore
+    # from curses import wrapper  # pyright: ignore
+    from src.working_initscr import wrapper  # pyright: ignore
 
     _DEFAULT_TKINTER_GUI = False
 except ImportError:
 
-    def wrapper(_: Any) -> str:  # pylint: disable=missing-function-docstring
+    def wrapper(_: Any, *args: Any, **kwargs: Any) -> Any:  # pylint: disable=missing-function-docstring
+        _ = (args, kwargs)
         return _CHECKBOX_OPTIONS[1]
 
     _DEFAULT_TKINTER_GUI = True  # pyright: ignore[reportConstantRedefinition]
