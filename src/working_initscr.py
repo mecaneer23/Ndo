@@ -13,16 +13,16 @@ from typing import Any, Callable
 import _curses
 
 
-def initscr() -> Any:
+def initscr() -> curses.window:
     """Return a stdscr that should be properly initialized"""
-    stdscr = _curses.initscr()  # pyright: ignore
+    stdscr = _curses.initscr()
     for key, value in _curses.__dict__.items():
         if key[0:4] == "ACS_" or key in ("LINES", "COLS"):
             setattr(curses, key, value)
-    return stdscr  # pyright: ignore
+    return stdscr
 
 
-def wrapper(func: Callable[..., Any], /, *args: Any, **kwds: Any) -> Any:
+def wrapper(func: Callable[[curses.window], Any], /, *args: Any, **kwds: Any) -> Any:
     """
     Wrapper function that initializes curses and calls another function,
     restoring normal keyboard/screen behavior on error.
@@ -37,9 +37,9 @@ def wrapper(func: Callable[..., Any], /, *args: Any, **kwds: Any) -> Any:
         curses.noecho()
         curses.cbreak()
 
-        stdscr.keypad(1)
+        stdscr.keypad(True)
 
-        _curses.start_color()  # pyright: ignore
+        _curses.start_color()
         if hasattr(_curses, 'COLORS'):
             curses.COLORS = _curses.COLORS  # pyright: ignore
         if hasattr(_curses, 'COLOR_PAIRS'):
@@ -48,7 +48,7 @@ def wrapper(func: Callable[..., Any], /, *args: Any, **kwds: Any) -> Any:
         return func(stdscr, *args, **kwds)
     finally:
         if 'stdscr' in locals():
-            stdscr.keypad(0)  # pyright: ignore
+            stdscr.keypad(False)  # pyright: ignore
             curses.echo()
             curses.nocbreak()
             curses.endwin()
