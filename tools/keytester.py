@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
+# pylint: disable=missing-docstring
 
 import curses
-from _curses import window
 
 
-def main(stdscr: window) -> None:
+def main(stdscr: curses.window) -> None:
     curses.curs_set(0)
     y, x = (i // 2 for i in stdscr.getmaxyx())
     stdscr.addstr(0, 0, "Ctrl+C to exit\n")
