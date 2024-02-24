@@ -22,6 +22,12 @@ def initscr() -> curses.window:
     return stdscr
 
 
+# def wrapper(
+#     func: Callable[Concatenate[curses.window, P], R],
+#     /,
+#     *args: P.args,
+#     **kwargs: P.kwargs
+# ) -> R:
 def wrapper(func: Callable[..., Any], /, *args: Any, **kwds: Any) -> Any:
     """
     Wrapper function that initializes curses and calls another function,
