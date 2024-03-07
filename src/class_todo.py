@@ -154,6 +154,7 @@ class Todo:
 
 
 class Todos(list[Todo]):
+    """Wrapper around list of Todo objects"""
     def __init__(self, iterable: Iterable[Todo]) -> None:
         super().__init__(iterable)
 

@@ -457,6 +457,22 @@ def update_modified_time(prev_time: float, todos: Todos) -> tuple[Todos, float]:
     return todos, current_time
 
 
+def join_lines(todos: Todos, selected: Cursor) -> None:
+    """Combine current line with previous line by concatenation."""
+    if len(selected) > 1:
+        return
+
+    prev_todo = int(selected) - 1
+    current_todo = int(selected)
+
+    todos[prev_todo].set_display_text(
+        f"{todos[prev_todo].display_text} {todos[current_todo].display_text}"
+    )
+    selected.slide_up()
+    todos.pop(current_todo)
+    update_file(FILENAME, todos)
+
+
 def main(stdscr: Any) -> int:
     """
     The main function for Ndo. Mainly provides keybindings
@@ -512,6 +528,9 @@ def main(stdscr: Any) -> int:
     # make sure it also calls update_file()
     keys: dict[int, tuple[Callable[..., Any], str]] = {
         Key.ctrl_a: (selected.multiselect_all, "len(todos)"),
+        Key.backspace: (join_lines, "todos, selected"),
+        Key.backspace_: (join_lines, "todos, selected"),
+        Key.backspace__: (join_lines, "todos, selected"),
         Key.tab: (handle_indent, "todos, selected"),
         Key.enter: (handle_enter, "stdscr, todos, selected, single_line_mode"),
         Key.ctrl_k: (single_line_state.toggle, "None"),
@@ -634,4 +653,5 @@ if __name__ == "__main__":
         sys_exit()
 
     from src.working_initscr import wrapper  # pylint: disable=ungrouped-imports
+
     wrapper(main)
