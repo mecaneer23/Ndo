@@ -10,4 +10,3 @@
 -3 add docstrings to `public` functions
 - migrate from sometimes using `int` as cursor, to always using `Cursor`s
 - migrate from `win: Any` to `win: curses.window`
-- backspace key joins current line with previous line
