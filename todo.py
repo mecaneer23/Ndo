@@ -47,6 +47,7 @@ HISTORY_FILE = "debugging/log.txt"
 
 
 def get_file_modified_time(filename: Path) -> float:
+    """Return the most recent modification time for a given file"""
     return filename.stat().st_ctime
 
 
@@ -57,6 +58,11 @@ def insert_todo(
     default_todo: Todo = Todo(),
     mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
 ) -> Todos:
+    """
+    Using the get_todo menu, prompt the user for a new Todo.
+    Add the new Todo to the list of Todos (`todos`) at the
+    specified `index`.
+    """
     todo = get_todo(
         stdscr,
         get_newwin(stdscr),
@@ -71,32 +77,37 @@ def insert_todo(
 
 
 def insert_empty_todo(todos: Todos, index: int) -> Todos:
+    """Add an empty Todo to `todos` at `index`"""
     todos.insert(index, Todo())
     return todos
 
 
 def remove_todo(todos: Todos, index: int) -> Todos:
+    """Remove the Todo at `index"""
     if len(todos) < 1:
         return todos
     todos.pop(index)
     return todos
 
 
-def move_todos(todos: Todos, selected: int, destination: int) -> Todos:
+def move_todo(todos: Todos, selected: int, destination: int) -> Todos:
+    """Move the todo(s) at `selected` to `destination`"""
     if min(selected, destination) >= 0 and max(selected, destination) < len(todos):
         todos.insert(selected, todos.pop(destination))
     return todos
 
 
 def todo_up(todos: Todos, selected: Cursor) -> tuple[Todos, Positions]:
-    todos = move_todos(todos, selected.get_last(), selected.get_first() - 1)
+    """Move the selected todo(s) up"""
+    todos = move_todo(todos, selected.get_last(), selected.get_first() - 1)
     update_file(FILENAME, todos)
     selected.slide_up()
     return todos, selected.get()
 
 
 def todo_down(todos: Todos, selected: Cursor) -> tuple[Todos, Positions]:
-    todos = move_todos(todos, selected.get_first(), selected.get_last() + 1)
+    """Move the selected todo(s) down"""
+    todos = move_todo(todos, selected.get_first(), selected.get_last() + 1)
     update_file(FILENAME, todos)
     selected.slide_down(len(todos))
     return todos, selected.get()
