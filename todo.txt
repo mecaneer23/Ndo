@@ -7,6 +7,7 @@
 -5 make startup faster
 -1 fix silence if dependencies are not installed
 -2 add unit tests?
+-2 use color names first letter rather than number (rgybmcw)
 -3 add docstrings to `public` functions
-- migrate from sometimes using `int` as cursor, to always using `Cursor`s
-- migrate from `win: Any` to `win: curses.window`
+-3 migrate from sometimes using `int` as cursor, to always using `Cursor`s
+-3 migrate from `win: Any` to `win: curses.window`
