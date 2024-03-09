@@ -2,8 +2,6 @@
 Various helpful menus and their helper functions.
 """
 
-# pylint: disable=missing-function-docstring
-
 from typing import Any, Callable
 
 try:
@@ -64,6 +62,7 @@ def _get_move_options(
 
 
 def help_menu(parent_win: Any) -> None:
+    """Show a scrollable help menu, generated from the README"""
     parent_win.clear()
     set_header(parent_win, "Help (k/j to scroll):")
     lines: list[str] = []
@@ -99,6 +98,11 @@ def help_menu(parent_win: Any) -> None:
 
 
 def magnify_menu(stdscr: Any, todos: Todos, selected: Cursor) -> None:
+    """
+    Magnify the first line of the current selection using pyfiglet.
+
+    The magnified content is scrollable if it should be.
+    """
     if not FIGLET_FORMAT_EXISTS:
         set_header(stdscr, "Magnify dependency not available")
         return
@@ -125,6 +129,7 @@ def magnify_menu(stdscr: Any, todos: Todos, selected: Cursor) -> None:
 
 
 def color_menu(parent_win: Any, original: Color) -> Color:
+    """Show a menu to choose a color. Return the chosen Color."""
     parent_win.clear()
     set_header(parent_win, "Colors:")
     lines = [i.ljust(len(max(Color.as_dict(), key=len))) for i in Color.as_dict()]
@@ -182,9 +187,9 @@ def color_menu(parent_win: Any, original: Color) -> Color:
 def _get_sorting_methods() -> dict[str, Callable[[Todos], str]]:
     return {
         "Alphabetical": lambda top_level_todo: top_level_todo[0].display_text,
-        "Completed": lambda top_level_todo: "1"
-        if top_level_todo[0].is_toggled()
-        else "0",
+        "Completed": lambda top_level_todo: (
+            "1" if top_level_todo[0].is_toggled() else "0"
+        ),
         "Color": lambda top_level_todo: str(top_level_todo[0].color),
     }
 
@@ -215,6 +220,10 @@ def _sort_by(method: str, todos: Todos, selected: Cursor) -> TodoList:
 
 
 def sort_menu(parent_win: Any, todos: Todos, selected: Cursor) -> TodoList:
+    """
+    Show a menu to choose a method to sort the `Todos`.
+    Immediately sort the list and return the sorted list.
+    """
     parent_win.clear()
     set_header(parent_win, "Sort by:")
     lines = list(_get_sorting_methods().keys())
@@ -268,6 +277,11 @@ def get_newwin(stdscr: Any) -> Any:
 
 
 def search_menu(stdscr: Any, todos: Todos, selected: Cursor) -> None:
+    """
+    Open a menu to search for a given string.
+    Move the cursor to the first location of
+    that string.
+    """
     set_header(stdscr, "Searching...")
     stdscr.refresh()
     sequence = get_todo(
