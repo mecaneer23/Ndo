@@ -9,5 +9,12 @@
 -2 add unit tests?
 -2 use color names first letter rather than number (rgybmcw)
 -3 add docstrings to `public` functions
+  -3 class_todo
+  -3 clipboard
+  -3 get_todo
+  -3 io
+  -3 menus
+  -3 todo.py
 -3 migrate from sometimes using `int` as cursor, to always using `Cursor`s
 -3 migrate from `win: Any` to `win: curses.window`
+- fix gui support
