@@ -2,8 +2,6 @@
 File Input/Output handlers for Ndo
 """
 
-# pylint: disable=missing-function-docstring
-
 from pathlib import Path
 
 from src.class_todo import Todo, Todos
