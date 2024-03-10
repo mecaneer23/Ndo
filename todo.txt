@@ -12,8 +12,6 @@
   -3 class_todo
   -3 clipboard
   -3 get_todo
-  -3 io
-  -3 menus
   -3 todo.py
 -3 migrate from sometimes using `int` as cursor, to always using `Cursor`s
 -3 migrate from `win: Any` to `win: curses.window`
