@@ -9,7 +9,6 @@
 -2 add unit tests?
 -2 use color names first letter rather than number (rgybmcw)
 -3 add docstrings to `public` functions
-  -3 class_todo
   -3 clipboard
   -3 get_todo
   -3 todo.py
