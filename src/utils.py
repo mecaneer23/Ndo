@@ -41,6 +41,23 @@ class Color(Enum):
         """
         return self.value
 
+    def as_char(self) -> str:
+        """Get lowercase first letter of color"""
+        return self.name[0].lower()
+
+    @staticmethod
+    def from_first_char(char: str) -> "Color":
+        """Return the color corresponding to its first character"""
+        return {
+            "r": Color.RED,
+            "g": Color.GREEN,
+            "y": Color.YELLOW,
+            "b": Color.BLUE,
+            "m": Color.MAGENTA,
+            "c": Color.CYAN,
+            "w": Color.WHITE,
+        }[char]
+
     @staticmethod
     def as_dict() -> dict[str, int]:
         """

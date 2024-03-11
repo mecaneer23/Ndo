@@ -56,10 +56,12 @@ class Todo:
     def _init_color(self, pointer: int) -> tuple[Color, int]:
         if (
             len(self.text) > pointer + 1
-            and self.text[pointer].isdigit()
             and self.text[pointer + 1] == " "
         ):
-            return Color(int(self.text[pointer])), pointer + 2
+            if self.text[pointer].isdigit():
+                return Color(int(self.text[pointer])), pointer + 2
+            if self.text[pointer] in "rgybmcw":
+                return Color.from_first_char(self.text[pointer]), pointer + 2
         return Color.WHITE, pointer
 
     def _init_attrs(self) -> tuple[BoxChar, Color, str]:
@@ -167,7 +169,7 @@ class Todo:
                 self.box_char != BoxChar.NONE and not self.is_empty(),
                 str(self.box_char),
             ),
-            Chunk(self.color != Color.WHITE, str(self.color.as_int())),
+            Chunk(self.color != Color.WHITE, str(self.color.as_char())),
             Chunk(
                 (self.box_char != BoxChar.NONE and not self.is_empty())
                 or self.color != Color.WHITE,

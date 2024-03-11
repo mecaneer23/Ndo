@@ -1,17 +1,16 @@
--1 fix strikethrough
-  -1 fix long lines (longer than width // 2 - 1)
-  -1 fix moving down onto a toggled line
--4 implement multiline todos
-  -4 allow multiline paste
-  -4 allow multiline print
--5 make startup faster
--1 fix silence if dependencies are not installed
--2 add unit tests?
--2 use color names first letter rather than number (rgybmcw)
--3 add docstrings to `public` functions
-  -3 clipboard
-  -3 get_todo
-  -3 todo.py
--3 migrate from sometimes using `int` as cursor, to always using `Cursor`s
--3 migrate from `win: Any` to `win: curses.window`
+-r fix strikethrough
+  -r fix long lines (longer than width // 2 - 1)
+  -r fix moving down onto a toggled line
+-b implement multiline todos
+  -b allow multiline paste
+  -b allow multiline print
+-m make startup faster
+-r fix silence if dependencies are not installed
+-g add unit tests?
+-y add docstrings to `public` functions
+  -y clipboard
+  -y get_todo
+  -y todo.py
+-y migrate from sometimes using `int` as cursor, to always using `Cursor`s
+-y migrate from `win: Any` to `win: curses.window`
 - fix gui support
