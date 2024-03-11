@@ -2,7 +2,7 @@
 Various ways to move a cursor represented by an int
 """
 
-from typing import Any
+from curses import window
 
 from src.class_todo import Todos
 from src.keys import Key
@@ -13,7 +13,9 @@ def _cursor_to(position: int, len_todos: int) -> int:
     return clamp(position, 0, len_todos)
 
 
-def relative_cursor_to(win: Any, todos: Todos, selected: int, first_digit: int) -> int:
+def relative_cursor_to(
+    win: window, todos: Todos, selected: int, first_digit: int
+) -> int:
     """
     Move the cursor to the specified position relative to the current position.
 
