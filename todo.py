@@ -39,8 +39,11 @@ from src.utils import clamp, set_header
 
 if TKINTER_GUI:
     from tcurses import curses
+    wrapper = curses.wrapper
 else:
     import curses
+    from src.working_initscr import wrapper  # pylint: disable=ungrouped-imports
+
 
 PRINT_HISTORY = False
 HISTORY_FILE = "debugging/log.txt"
@@ -662,7 +665,5 @@ if __name__ == "__main__":
         print(f"{HEADER}:")
         print_todos(None, file_string_to_todos(read_file(FILENAME)), Cursor(0))
         sys_exit()
-
-    from src.working_initscr import wrapper  # pylint: disable=ungrouped-imports
 
     wrapper(main)
