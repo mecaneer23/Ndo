@@ -1,6 +1,6 @@
 # pylint: disable=missing-docstring
 
-from typing import Any, Callable, Iterable, NamedTuple
+from typing import Any, Callable, Iterable, NamedTuple, cast
 
 from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, Todo
@@ -9,7 +9,7 @@ from src.keys import Key
 from src.utils import set_header
 
 if TKINTER_GUI:
-    from tcurses import curses
+    from src.tcurses import curses
 else:
     import curses
 
@@ -29,10 +29,10 @@ class _EditString(NamedTuple):
     position: int
 
 
-def hline(win: Any, y_loc: int, x_loc: int, char: str | int, width: int) -> None:
-    win.addch(y_loc, x_loc, curses.ACS_LTEE)
-    win.hline(y_loc, x_loc + 1, char, width - 2)
-    win.addch(y_loc, x_loc + width - 1, curses.ACS_RTEE)
+def hline(win: curses.window, y_loc: int, x_loc: int, char: str | int, width: int) -> None:
+    win.addch(y_loc, x_loc, cast(str, curses.ACS_LTEE))
+    win.hline(y_loc, x_loc + 1, cast(str, char), width - 2)
+    win.addch(y_loc, x_loc + width - 1, cast(str, curses.ACS_RTEE))
 
 
 def _ensure_valid(win: Any) -> None:

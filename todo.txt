@@ -13,4 +13,3 @@
   -y todo.py
 -y migrate from sometimes using `int` as cursor, to always using `Cursor`s
 -y migrate from `win: Any` to `win: curses.window`
-- fix gui support
