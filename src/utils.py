@@ -8,7 +8,7 @@ from typing import Any, NamedTuple
 from src.get_args import TKINTER_GUI
 
 if TKINTER_GUI:
-    from tcurses import curses
+    from src.tcurses import curses
 else:
     import curses
 

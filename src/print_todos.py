@@ -18,7 +18,7 @@ from src.get_args import (
 from src.utils import Chunk, Color
 
 if TKINTER_GUI:
-    from tcurses import curses
+    from src.tcurses import curses
 else:
     import curses
 

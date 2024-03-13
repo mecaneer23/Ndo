@@ -28,7 +28,7 @@ from src.print_todos import make_printable_sublist
 from src.utils import Color, clamp, overflow, set_header
 
 if TKINTER_GUI:
-    from tcurses import curses  # pylint: disable=import-error
+    from src.tcurses import curses
 else:
     import curses
 
