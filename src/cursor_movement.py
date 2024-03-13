@@ -2,11 +2,15 @@
 Various ways to move a cursor represented by an int
 """
 
-from curses import window
-
 from src.class_todo import Todos
+from src.get_args import TKINTER_GUI
 from src.keys import Key
 from src.utils import clamp
+
+if TKINTER_GUI:
+    from src.tcurses import window
+else:
+    from curses import window
 
 
 def _cursor_to(position: int, len_todos: int) -> int:
