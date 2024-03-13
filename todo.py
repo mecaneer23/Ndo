@@ -39,6 +39,7 @@ from src.utils import clamp, set_header
 
 if TKINTER_GUI:
     from src.tcurses import curses
+
     wrapper = curses.wrapper
 else:
     import curses
@@ -362,7 +363,9 @@ def handle_sort_menu(
     return selected.todo_set_to(sort_menu(stdscr, todos, selected))
 
 
-def handle_digits(stdscr: curses.window, todos: Todos, selected: Cursor, digit: int) -> None:
+def handle_digits(
+    stdscr: curses.window, todos: Todos, selected: Cursor, digit: int
+) -> None:
     selected.set_to(
         relative_cursor_to(
             stdscr, todos, int(selected), Key.normalize_ascii_digit_to_digit(digit)
