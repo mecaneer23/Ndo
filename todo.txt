@@ -13,4 +13,6 @@
   -y todo.py
 -y refactor: migrate from sometimes using `int` as cursor, to always using `Cursor`s
 -y refactor: migrate from `win: Any` to `win: curses.window`
-- refactor: remove curses dependency from as many locations as possible.
+- refactor: remove curses dependency from as many locations as possible
+  - eventual end goal is to make multiple `print_todos` output options
+  - potentially redo `tcurses.py`
