@@ -597,5 +597,6 @@ if sys.version_info >= (3, 8):
         major: int
         minor: int
         patch: int
+
     ncurses_version: _ncurses_version
 window = _CursesWindow  # undocumented
