@@ -11,6 +11,10 @@ how do we determine if the buffer is full?
 
 oplist:
 - get length
+len(self.buffer)
 - possible to output as a string
+"".join(self.buffer)
 - resettable
+self.buffer.clear()
 - add/append a character
+self.buffer.append(character)
