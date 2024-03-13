@@ -29,13 +29,15 @@ class _EditString(NamedTuple):
     position: int
 
 
-def hline(win: curses.window, y_loc: int, x_loc: int, char: str | int, width: int) -> None:
+def hline(
+    win: curses.window, y_loc: int, x_loc: int, char: str | int, width: int
+) -> None:
     win.addch(y_loc, x_loc, cast(str, curses.ACS_LTEE))
     win.hline(y_loc, x_loc + 1, cast(str, char), width - 2)
     win.addch(y_loc, x_loc + width - 1, cast(str, curses.ACS_RTEE))
 
 
-def _ensure_valid(win: Any) -> None:
+def _ensure_valid(win: curses.window) -> None:
     if win.getmaxyx()[0] < 3:
         raise ValueError(
             "Window is too short, it won't be able to\
@@ -109,7 +111,7 @@ def _handle_delete(chars: _Chars, position: int) -> _EditString:
     return _EditString(chars, position)
 
 
-def _handle_ctrl_arrow(win: Any, chars: _Chars, position: int) -> _EditString:
+def _handle_ctrl_arrow(win: curses.window, chars: _Chars, position: int) -> _EditString:
     for _ in ";5":
         win.getch()
     options: dict[int, Callable[[_Chars, int], _EditString]] = {
@@ -123,7 +125,10 @@ def _handle_ctrl_arrow(win: Any, chars: _Chars, position: int) -> _EditString:
 
 
 def _handle_delete_modifiers(
-    stdscr_win: tuple[Any, Any], todo: Todo, chars: _Chars, position: int
+    stdscr_win: tuple[curses.window, curses.window],
+    todo: Todo,
+    chars: _Chars,
+    position: int,
 ) -> _EditString:
     try:
         input_char = stdscr_win[1].getch()
@@ -144,14 +149,14 @@ def _handle_delete_modifiers(
     return _EditString(chars, position)
 
 
-def _handle_toggle_note_todo(stdscr: Any, todo: Todo) -> None:
+def _handle_toggle_note_todo(stdscr: curses.window, todo: Todo) -> None:
     _toggle_note_todo(todo)
     set_header(stdscr, "Note" if todo.box_char == BoxChar.NONE else "Todo")
     stdscr.refresh()
 
 
 def _handle_indent_dedent(
-    stdscr: Any, todo: Todo, action: str, chars: _Chars, position: int
+    stdscr: curses.window, todo: Todo, action: str, chars: _Chars, position: int
 ) -> _EditString:
     if action == "indent":
         todo.indent()
@@ -171,7 +176,7 @@ def _handle_end(chars: _Chars) -> _EditString:
 
 
 def _handle_escape(
-    stdscr_win: tuple[Any, Any],
+    stdscr_win: tuple[curses.window, curses.window],
     chars: _Chars,
     position: int,
     mode: SingleLineModeImpl,
@@ -246,7 +251,7 @@ def _toggle_note_todo(todo: Todo) -> None:
 
 def _get_chars_position(
     input_char: int,
-    stdscr_win: tuple[Any, Any],
+    stdscr_win: tuple[curses.window, curses.window],
     chars_position_todo: tuple[_Chars, int, Todo],
     mode: SingleLineModeImpl,
     backspace_table: dict[int, Callable[..., _EditString]],
@@ -273,8 +278,8 @@ def _set_once(mode: SingleLineModeImpl, chars: _Chars) -> str:
 
 
 def get_todo(
-    stdscr: Any,
-    win: Any,
+    stdscr: curses.window,
+    win: curses.window,
     todo: Todo,
     prev_todo: Todo,
     mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
