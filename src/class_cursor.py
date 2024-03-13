@@ -6,10 +6,16 @@ multiple consecutive positions.
 """
 
 from enum import Enum
-from typing import Any, Iterable
+from typing import Iterable
 
 from src.class_todo import Todos, TodoList
+from src.get_args import TKINTER_GUI
 from src.keys import Key
+
+if TKINTER_GUI:
+    from src.tcurses import window
+else:
+    from curses import window
 
 
 class _Direction(Enum):
@@ -172,7 +178,7 @@ class Cursor:
                 continue
             self.multiselect_up()
 
-    def multiselect_from(self, stdscr: Any, first_digit: int, max_len: int) -> None:
+    def multiselect_from(self, stdscr: window, first_digit: int, max_len: int) -> None:
         """
         Move the cursor to the specified position relative to the current position.
 
