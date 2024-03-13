@@ -124,17 +124,7 @@ def new_todo_next(
     mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
 ) -> TodoList:
     """
-    Insert a new todo item below the current cursor position and update the todo list.
-
-    Args:
-        stdscr (Any): The standard screen object for terminal UI.
-        todos (Todos): The list of todos.
-        selected (int): The current cursor position.
-        mode (SingleLineMode): The editing mode (optional).
-
-    Returns:
-        TodoList: A tuple containing the updated list of todos and the
-        new cursor position.
+    Insert a new todo item below the current cursor position and update the todo list
     """
     temp = todos.copy()
     todos = insert_todo(
