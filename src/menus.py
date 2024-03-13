@@ -2,7 +2,7 @@
 Various helpful menus and their helper functions.
 """
 
-from typing import Any, Callable
+from typing import Callable
 
 try:
     from pyfiglet import figlet_format as big
@@ -34,7 +34,7 @@ else:
 
 
 def _simple_scroll_keybinds(
-    win: Any, cursor: int, len_lines: int, len_new_lines: int
+    win: curses.window, cursor: int, len_lines: int, len_new_lines: int
 ) -> int:
     try:
         key = win.getch()
@@ -61,7 +61,7 @@ def _get_move_options(
     return defaults | additional_options
 
 
-def help_menu(parent_win: Any) -> None:
+def help_menu(parent_win: curses.window) -> None:
     """Show a scrollable help menu, generated from the README"""
     parent_win.clear()
     set_header(parent_win, "Help (k/j to scroll):")
@@ -97,7 +97,7 @@ def help_menu(parent_win: Any) -> None:
     parent_win.clear()
 
 
-def magnify_menu(stdscr: Any, todos: Todos, selected: Cursor) -> None:
+def magnify_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
     """
     Magnify the first line of the current selection using pyfiglet.
 
@@ -128,7 +128,7 @@ def magnify_menu(stdscr: Any, todos: Todos, selected: Cursor) -> None:
     stdscr.clear()
 
 
-def color_menu(parent_win: Any, original: Color) -> Color:
+def color_menu(parent_win: curses.window, original: Color) -> Color:
     """Show a menu to choose a color. Return the chosen Color."""
     parent_win.clear()
     set_header(parent_win, "Colors:")
@@ -219,7 +219,7 @@ def _sort_by(method: str, todos: Todos, selected: Cursor) -> TodoList:
     return TodoList(sorted_todos, sorted_todos.index(selected_todo))
 
 
-def sort_menu(parent_win: Any, todos: Todos, selected: Cursor) -> TodoList:
+def sort_menu(parent_win: curses.window, todos: Todos, selected: Cursor) -> TodoList:
     """
     Show a menu to choose a method to sort the `Todos`.
     Immediately sort the list and return the sorted list.
@@ -266,7 +266,7 @@ def sort_menu(parent_win: Any, todos: Todos, selected: Cursor) -> TodoList:
         win.refresh()
 
 
-def get_newwin(stdscr: Any) -> Any:
+def get_newwin(stdscr: curses.window) -> curses.window:
     """
     Create a curses.newwin in the center of the
     screen based on the width and height of the
@@ -276,7 +276,7 @@ def get_newwin(stdscr: Any) -> Any:
     return curses.newwin(3, max_x * 3 // 4, max_y // 2 - 3, max_x // 8)
 
 
-def search_menu(stdscr: Any, todos: Todos, selected: Cursor) -> None:
+def search_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
     """
     Open a menu to search for a given string.
     Move the cursor to the first location of
