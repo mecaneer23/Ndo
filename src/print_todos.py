@@ -2,7 +2,7 @@
 Helper module to handle printing a list of Todo objects
 """
 
-from typing import Any, Generic, NamedTuple, TypeVar
+from typing import Generic, NamedTuple, TypeVar
 
 from src.class_cursor import Cursor
 from src.class_todo import Todo, Todos
@@ -104,7 +104,7 @@ def make_printable_sublist(
     return SublistItems(lst[start:end], cursor - start, start)
 
 
-def _info_message(stdscr: Any, height: int, width: int) -> None:
+def _info_message(stdscr: curses.window, height: int, width: int) -> None:
     text = (
         "Ndo - an ncurses todo application",
         "",
@@ -117,7 +117,7 @@ def _info_message(stdscr: Any, height: int, width: int) -> None:
         stdscr.addstr(height // 3 + i, (width - maxlen) // 2, line.center(maxlen))
 
 
-def _get_height_width(stdscr: Any | None, length: int) -> tuple[int, int]:
+def _get_height_width(stdscr: curses.window | None, length: int) -> tuple[int, int]:
     if stdscr is None:
         return 0, 0
     height, width = stdscr.getmaxyx()
@@ -154,7 +154,7 @@ def _get_display_string(
 
 
 def _print_todo(
-    stdscr: Any, todo: Todo, display_string: str, position: int, highlight: range
+    stdscr: curses.window, todo: Todo, display_string: str, position: int, highlight: range
 ) -> None:
     counter = 0
     while counter < len(display_string) - 1:
@@ -187,7 +187,7 @@ def _print_todo(
 
 
 def print_todos(
-    stdscr: Any, todos: Todos, selected: Cursor, prev_start: int = 0
+    stdscr: curses.window | None, todos: Todos, selected: Cursor, prev_start: int = 0
 ) -> int:
     """
     Output list of Todo objects to a curses stdscr.
