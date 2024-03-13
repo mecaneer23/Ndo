@@ -3,7 +3,7 @@ General utilities, useful across multiple other files
 """
 
 from enum import Enum
-from typing import Any, NamedTuple
+from typing import NamedTuple
 
 from src.get_args import TKINTER_GUI
 
@@ -73,7 +73,7 @@ def clamp(number: int, minimum: int, maximum: int) -> int:
     return min(max(number, minimum), maximum - 1)
 
 
-def set_header(stdscr: Any, message: str) -> None:
+def set_header(stdscr: curses.window, message: str) -> None:
     """
     Set the header to a specific message.
     """
