@@ -154,7 +154,11 @@ def _get_display_string(
 
 
 def _print_todo(
-    stdscr: curses.window, todo: Todo, display_string: str, position: int, highlight: range
+    stdscr: curses.window,
+    todo: Todo,
+    display_string: str,
+    position: int,
+    highlight: range,
 ) -> None:
     counter = 0
     while counter < len(display_string) - 1:
