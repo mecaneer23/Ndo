@@ -38,7 +38,7 @@ from src.print_todos import print_todos
 from src.utils import clamp, set_header
 
 if TKINTER_GUI:
-    from tcurses import curses
+    from src.tcurses import curses
     wrapper = curses.wrapper
 else:
     import curses
@@ -55,7 +55,7 @@ def get_file_modified_time(filename: Path) -> float:
 
 
 def insert_todo(
-    stdscr: Any,
+    stdscr: curses.window,
     todos: Todos,
     index: int,
     default_todo: Todo = Todo(),
@@ -117,7 +117,7 @@ def todo_down(todos: Todos, selected: Cursor) -> tuple[Todos, Positions]:
 
 
 def new_todo_next(
-    stdscr: Any,
+    stdscr: curses.window,
     todos: Todos,
     selected: int,
     default_todo: Todo = Todo(),
@@ -151,14 +151,14 @@ def new_todo_next(
     return TodoList(todos, selected)
 
 
-def new_todo_current(stdscr: Any, todos: Todos, selected: int) -> Todos:
+def new_todo_current(stdscr: curses.window, todos: Todos, selected: int) -> Todos:
     todos = insert_todo(stdscr, todos, selected)
     stdscr.clear()
     update_file(FILENAME, todos)
     return todos
 
 
-def delete_todo(stdscr: Any, todos: Todos, selected: Cursor) -> TodoList:
+def delete_todo(stdscr: curses.window, todos: Todos, selected: Cursor) -> TodoList:
     positions = selected.get_deletable()
     for pos in positions:
         todos = remove_todo(todos, pos)
@@ -168,7 +168,7 @@ def delete_todo(stdscr: Any, todos: Todos, selected: Cursor) -> TodoList:
     return TodoList(todos, int(selected))
 
 
-def color_todo(stdscr: Any, todos: Todos, selected: Cursor) -> Todos:
+def color_todo(stdscr: curses.window, todos: Todos, selected: Cursor) -> Todos:
     new_color = color_menu(stdscr, todos[int(selected)].color)
     for pos in selected.get():
         todos[pos].set_color(new_color)
@@ -178,7 +178,7 @@ def color_todo(stdscr: Any, todos: Todos, selected: Cursor) -> Todos:
 
 
 def edit_todo(
-    stdscr: Any, todos: Todos, selected: int, mode: SingleLineModeImpl
+    stdscr: curses.window, todos: Todos, selected: int, mode: SingleLineModeImpl
 ) -> Todos:
     max_y, max_x = stdscr.getmaxyx()
     todo = todos[selected].display_text
@@ -257,7 +257,7 @@ def handle_cursor_down(todos: Todos, selected: Cursor) -> None:
 
 
 def handle_new_todo_next(
-    stdscr: Any,
+    stdscr: curses.window,
     todos: Todos,
     selected: Cursor,
     mode: SingleLineModeImpl,
@@ -275,7 +275,7 @@ def handle_new_todo_next(
 
 
 def handle_delete_todo(
-    stdscr: Any, todos: Todos, selected: Cursor, copied_todo: Todo
+    stdscr: curses.window, todos: Todos, selected: Cursor, copied_todo: Todo
 ) -> Todos:
     if len(todos) > 0 and CLIPBOARD_EXISTS:
         copy_todo(todos, selected, copied_todo)
@@ -295,7 +295,7 @@ def handle_redo(selected: Cursor, history: UndoRedo) -> Todos:
 
 
 def handle_edit(
-    stdscr: Any,
+    stdscr: curses.window,
     todos: Todos,
     selected: Cursor,
     mode: SingleLineModeImpl,
@@ -314,7 +314,7 @@ def handle_to_bottom(todos: Todos, selected: Cursor) -> None:
 
 
 def handle_paste(
-    stdscr: Any,
+    stdscr: curses.window,
     todos: Todos,
     selected: Cursor,
     copied_todo: Todo,
@@ -365,14 +365,14 @@ def handle_dedent(
 
 
 def handle_sort_menu(
-    stdscr: Any,
+    stdscr: curses.window,
     todos: Todos,
     selected: Cursor,
 ) -> Todos:
     return selected.todo_set_to(sort_menu(stdscr, todos, selected))
 
 
-def handle_digits(stdscr: Any, todos: Todos, selected: Cursor, digit: int) -> None:
+def handle_digits(stdscr: curses.window, todos: Todos, selected: Cursor, digit: int) -> None:
     selected.set_to(
         relative_cursor_to(
             stdscr, todos, int(selected), Key.normalize_ascii_digit_to_digit(digit)
@@ -381,7 +381,7 @@ def handle_digits(stdscr: Any, todos: Todos, selected: Cursor, digit: int) -> No
 
 
 def handle_enter(
-    stdscr: Any, todos: Todos, selected: Cursor, mode: SingleLineModeImpl
+    stdscr: curses.window, todos: Todos, selected: Cursor, mode: SingleLineModeImpl
 ) -> Todos:
     prev_todo = todos[int(selected)] if len(todos) > 0 else Todo()
     if prev_todo.has_box():
@@ -411,7 +411,7 @@ def get_possible_todos(
 
 
 def get_main_input(
-    stdscr: Any,
+    stdscr: curses.window,
     todos: Todos,
     keys_esckeys: tuple[
         dict[int, tuple[Callable[..., Any], str]],
@@ -487,7 +487,7 @@ def join_lines(todos: Todos, selected: Cursor) -> None:
     update_file(FILENAME, todos)
 
 
-def main(stdscr: Any) -> int:
+def main(stdscr: curses.window) -> int:
     """
     The main function for Ndo. Mainly provides keybindings
     for the various functions and contains mainloop.
