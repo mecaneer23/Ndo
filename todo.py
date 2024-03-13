@@ -125,7 +125,8 @@ def new_todo_next(
     mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
 ) -> TodoList:
     """
-    Insert a new todo item below the current cursor position and update the todo list
+    Insert a new todo item below the current
+    cursor position and update the todo list
     """
     temp = todos.copy()
     todos = insert_todo(
@@ -143,6 +144,10 @@ def new_todo_next(
 
 
 def new_todo_current(stdscr: curses.window, todos: Todos, selected: int) -> Todos:
+    """
+    Insert a new todo item at the current cursor
+    position, moving the rest of the list down
+    """
     todos = insert_todo(stdscr, todos, selected)
     stdscr.clear()
     update_file(FILENAME, todos)
@@ -150,6 +155,7 @@ def new_todo_current(stdscr: curses.window, todos: Todos, selected: int) -> Todo
 
 
 def delete_todo(stdscr: curses.window, todos: Todos, selected: Cursor) -> TodoList:
+    """Remove each Todo in `selected` from the list"""
     positions = selected.get_deletable()
     for pos in positions:
         todos = remove_todo(todos, pos)
@@ -160,6 +166,10 @@ def delete_todo(stdscr: curses.window, todos: Todos, selected: Cursor) -> TodoLi
 
 
 def color_todo(stdscr: curses.window, todos: Todos, selected: Cursor) -> Todos:
+    """
+    Open a color menu. Set each Todo in `selected`
+    to the returned color.
+    """
     new_color = color_menu(stdscr, todos[int(selected)].color)
     for pos in selected.get():
         todos[pos].set_color(new_color)
@@ -171,6 +181,10 @@ def color_todo(stdscr: curses.window, todos: Todos, selected: Cursor) -> Todos:
 def edit_todo(
     stdscr: curses.window, todos: Todos, selected: int, mode: SingleLineModeImpl
 ) -> Todos:
+    """
+    Open a get_todo input box with the current todo contents. Set
+    the todo to the edited contents.
+    """
     max_y, max_x = stdscr.getmaxyx()
     todo = todos[selected].display_text
     ncols = (
@@ -193,6 +207,7 @@ def edit_todo(
 
 
 def blank_todo(todos: Todos, selected: int) -> TodoList:
+    """Create an empty Todo object"""
     insert_empty_todo(todos, selected + 1)
     selected = cursor_down(selected, len(todos))
     update_file(FILENAME, todos)
@@ -200,6 +215,7 @@ def blank_todo(todos: Todos, selected: int) -> TodoList:
 
 
 def toggle(todos: Todos, selected: Cursor) -> Todos:
+    """Toggle the completion of each todo in the selected region"""
     for pos in selected.get():
         todos[pos].toggle()
     update_file(FILENAME, todos)
@@ -207,11 +223,13 @@ def toggle(todos: Todos, selected: Cursor) -> Todos:
 
 
 def remove_file(filename: Path) -> int:
+    """Delete a file from the file system. NOT UNDOABLE"""
     filename.unlink()
     return 0
 
 
 def quit_program(todos: Todos, edits: int, prev_time: float) -> int:
+    """Exit the program, writing to disk first"""
     todos, _ = update_modified_time(prev_time, todos)
     if edits < 1:
         return remove_file(FILENAME)
@@ -219,6 +237,7 @@ def quit_program(todos: Todos, edits: int, prev_time: float) -> int:
 
 
 def indent(todos: Todos, selected: Cursor) -> TodoList:
+    """Indent selected todos"""
     for pos in selected.get():
         todos[pos].indent()
     update_file(FILENAME, todos)
@@ -226,6 +245,7 @@ def indent(todos: Todos, selected: Cursor) -> TodoList:
 
 
 def dedent(todos: Todos, selected: Cursor) -> TodoList:
+    """Un-indent selected todos"""
     for pos in selected.get():
         todos[pos].dedent()
     update_file(FILENAME, todos)
