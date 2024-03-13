@@ -373,3 +373,5 @@ screen.tag_configure("white*", background="black", foreground="white")
 screen.configure(state="disabled")
 
 stdscr = Screen(screen, (WIDTH, HEIGHT), (0, 0))
+wrapper = curses.wrapper
+window = Screen  # pylint: disable=invalid-name
