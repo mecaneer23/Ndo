@@ -5,6 +5,9 @@ module provides a functional workaround.
 
 Thanks to https://github.com/zephyrproject-rtos/windows-curses/issues/50
 for the inspiration.
+
+This file also serves as a partial replacement for curses, so it is
+unnecessary to import tcurses.
 """
 
 import curses
