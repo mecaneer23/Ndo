@@ -1,0 +1,10 @@
+How to implement a buffer:
+- store buffer as a string/(maybe list) (to be filled up with characters)
+- buffer is nonlocal
+- when function is called, add to buffer
+- if buffer.is_full() or char == "\n": output buffer and empty buffer 
+
+how do we determine if the buffer is full?
+- it can have an arbitrary length
+- it can have a set length based on a percentage of the width of the window
+- we can store a counter and check how many calls the function has recieved and use an arbitrary amount of calls
