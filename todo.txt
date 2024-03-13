@@ -11,6 +11,7 @@
   -y clipboard
   -y get_todo
   -y todo.py
+- refactor: only return objects (mostly `TodoList`s) when necessary
 - refactor: remove curses dependency from as many locations as possible
   - eventual end goal is to make multiple `print_todos` output options
   - potentially redo `tcurses.py`
