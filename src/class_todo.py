@@ -189,7 +189,7 @@ class Todos(list[Todo]):
 class TodoList(NamedTuple):
     """
     An object representing the todos
-    and a cursor within the list
+    and a cursor (int) within the list
     """
 
     todos: Todos
