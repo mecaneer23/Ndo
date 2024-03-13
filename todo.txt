@@ -1,15 +1,16 @@
--r fix strikethrough
+-r fix: strikethrough
   -r fix long lines (longer than width // 2 - 1)
   -r fix moving down onto a toggled line
--b implement multiline todos
+-b feat: implement multiline todos
   -b allow multiline paste
   -b allow multiline print
--m make startup faster
--r fix silence if dependencies are not installed
--g add unit tests?
--y add docstrings to `public` functions
+-m fix: make startup faster
+-r fix: remove silence if dependencies are not installed
+-g feat: add unit tests?
+-y refactor: add docstrings to `public` functions
   -y clipboard
   -y get_todo
   -y todo.py
--y migrate from sometimes using `int` as cursor, to always using `Cursor`s
--y migrate from `win: Any` to `win: curses.window`
+-y refactor: migrate from sometimes using `int` as cursor, to always using `Cursor`s
+-y refactor: migrate from `win: Any` to `win: curses.window`
+- refactor: remove curses dependency from as many locations as possible.
