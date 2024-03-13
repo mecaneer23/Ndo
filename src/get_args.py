@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 try:
+    from curses import window
     # from curses import wrapper  # pyright: ignore
     from src.working_initscr import wrapper  # pyright: ignore
 
@@ -14,6 +15,8 @@ except ImportError:
     def wrapper(_: Any, *args: Any, **kwargs: Any) -> Any:  # pylint: disable=missing-function-docstring
         _ = (args, kwargs)
         return _CHECKBOX_OPTIONS[1]
+
+    from src.tcurses import window
 
     _DEFAULT_TKINTER_GUI = True  # pyright: ignore[reportConstantRedefinition]
 
@@ -35,7 +38,7 @@ _DEFAULT_STRIKETHROUGH: bool = False
 _CHECKBOX_OPTIONS = ("🗹", "☑")
 
 
-def _get_checkbox(win: Any) -> str:
+def _get_checkbox(win: window) -> str:
     try:
         win.addch(0, 0, _CHECKBOX_OPTIONS[0])
         win.clear()
