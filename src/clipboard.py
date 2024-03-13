@@ -5,8 +5,6 @@ otherwise support copy/paste functionality only within Ndo.
 
 # pylint: disable=missing-function-docstring
 
-from typing import Any
-
 try:
     from pyperclip import copy, paste
 
@@ -15,10 +13,15 @@ except ImportError:
     CLIPBOARD_EXISTS = False  # pyright: ignore[reportConstantRedefinition]
 
 from src.class_cursor import Cursor
-from src.class_todo import Todo, Todos, TodoList
+from src.class_todo import Todo, TodoList, Todos
 from src.cursor_movement import cursor_down
-from src.get_args import FILENAME
+from src.get_args import FILENAME, TKINTER_GUI
 from src.io import update_file
+
+if TKINTER_GUI:
+    from src.tcurses import window
+else:
+    from curses import window
 
 
 def copy_todo(todos: Todos, selected: Cursor, copied_todo: Todo) -> None:
@@ -40,7 +43,9 @@ def _todo_from_clipboard(todos: Todos, selected: int, copied_todo: Todo) -> Todo
     return todos
 
 
-def paste_todo(stdscr: Any, todos: Todos, selected: int, copied_todo: Todo) -> TodoList:
+def paste_todo(
+    stdscr: window, todos: Todos, selected: int, copied_todo: Todo
+) -> TodoList:
     temp = todos.copy()
     todos = _todo_from_clipboard(todos, selected, copied_todo)
     stdscr.clear()
