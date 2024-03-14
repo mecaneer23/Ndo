@@ -8,7 +8,6 @@
 -r fix: remove silence if dependencies are not installed
 -g feat: add unit tests?
 -y refactor: add docstrings to `public` functions
-  -y clipboard
   -y get_todo
   -y todo.py
 - refactor: only return objects (mostly `TodoList`s) when necessary
