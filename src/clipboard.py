@@ -3,8 +3,6 @@ Clipboard functionality. If pyperclip is available, use it,
 otherwise support copy/paste functionality only within Ndo.
 """
 
-# pylint: disable=missing-function-docstring
-
 try:
     from pyperclip import copy, paste
 
@@ -25,12 +23,17 @@ else:
 
 
 def copy_todo(todos: Todos, selected: Cursor, copied_todo: Todo) -> None:
+    """
+    Set `copied_todo` to be a duplicate of the first selected Todo.
+    If possible, also copy to the clipboard.
+    """
     copied_todo.call_init(todos[int(selected)].text)
     if CLIPBOARD_EXISTS:
         copy(todos[int(selected)].display_text)  # pyright: ignore
 
 
 def _todo_from_clipboard(todos: Todos, selected: int, copied_todo: Todo) -> Todos:
+    """Retrieve copied_todo and insert into todo list"""
     if not CLIPBOARD_EXISTS:
         return todos
     todo = paste()  # pyright: ignore
@@ -46,6 +49,7 @@ def _todo_from_clipboard(todos: Todos, selected: int, copied_todo: Todo) -> Todo
 def paste_todo(
     stdscr: window, todos: Todos, selected: int, copied_todo: Todo
 ) -> TodoList:
+    """Paste a todo from copied_todo or clipboard if available"""
     temp = todos.copy()
     todos = _todo_from_clipboard(todos, selected, copied_todo)
     stdscr.clear()
