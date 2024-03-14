@@ -180,9 +180,9 @@ class Screen:  # pylint: disable=too-many-instance-attributes
             + curses.ACS_URCORNER,
         )
         for i in range(self.height - 2):
-            self.addstr(i + 1, 0, curses.ACS_VLINE)
+            self.addch(i + 1, 0, curses.ACS_VLINE)
         for i in range(self.height - 2):
-            self.addstr(i + 1, self.width - 1, curses.ACS_VLINE)
+            self.addch(i + 1, self.width - 1, curses.ACS_VLINE)
         self.addstr(
             self.height - 1,
             0,
