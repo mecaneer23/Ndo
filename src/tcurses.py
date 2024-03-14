@@ -10,7 +10,7 @@ from typing import Any, Callable, TypeVar
 T = TypeVar("T")
 
 
-class Screen:
+class Screen:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _updates_screen(func: Callable[..., None]) -> Callable[..., None]:
         @wraps(func)
@@ -36,6 +36,10 @@ class Screen:
         self.has_key = BooleanVar()
         self.has_key.set(False)
         root.bind("<Key>", self._handle_key)
+        self.buffer: list[str] = []
+        self.stored_attr: int = 0
+        self.stored_x: int = 0
+        self.stored_y: int = 0
 
     def __del__(self):
         root.bind("<Key>", stdscr._handle_key)
@@ -151,7 +155,18 @@ class Screen:
         return self.height, self.width
 
     def addch(self, y: int, x: int, char: str, attr: int = 0) -> None:
-        self.addstr(y, x, char, attr)
+        self.buffer.append(char)
+        if len(self.buffer) == 1:
+            self.stored_x = x
+            self.stored_y = y
+        if (
+            attr not in {self.stored_attr, 0}
+            or char == "\n"
+            or len(self.buffer) + self.stored_x >= self.width
+        ):
+            self.addstr(self.stored_y, self.stored_x, "".join(self.buffer), self.stored_attr)
+            self.stored_attr = attr
+            self.buffer.clear()
 
     def nodelay(self, flag: bool = True) -> None:
         _ = flag
