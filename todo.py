@@ -51,8 +51,12 @@ HISTORY_FILE = "debugging/log.txt"
 
 
 def get_file_modified_time(filename: Path) -> float:
-    """Return the most recent modification time for a given file"""
-    return filename.stat().st_ctime
+    """
+    Return the most recent modification time for a given file
+
+    st_ctime should return the most recent modification time cross platform
+    """
+    return filename.stat().st_ctime  # pyright: ignore
 
 
 def insert_todo(
