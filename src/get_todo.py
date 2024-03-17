@@ -1,4 +1,4 @@
-# pylint: disable=missing-docstring
+"""Open a text input box, implement typing, and return text input"""
 
 from typing import Any, Callable, Iterable, NamedTuple, cast
 
@@ -32,6 +32,10 @@ class _EditString(NamedTuple):
 def hline(
     win: curses.window, y_loc: int, x_loc: int, char: str | int, width: int
 ) -> None:
+    """
+    Display a horizontal line starting at (y_loc, x_loc)
+    with width `width` consisting of the character `char`
+    """
     win.addch(y_loc, x_loc, cast(str, curses.ACS_LTEE))
     win.hline(y_loc, x_loc + 1, cast(str, char), width - 2)
     win.addch(y_loc, x_loc + width - 1, cast(str, curses.ACS_RTEE))
