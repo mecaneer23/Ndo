@@ -7,6 +7,7 @@
 -m fix: make startup faster
 -r fix: remove silence if dependencies are not installed
 -g feat: add unit tests?
+-y refactor: add docstrings to `public` functions in `tcurses.py`
 -y refactor: add docstrings to `public` functions in `todo.py`
 - refactor: only return objects (mostly `TodoList`s) when necessary
 - refactor: remove curses dependency from as many locations as possible
