@@ -17,9 +17,9 @@ from src.get_args import FILENAME, TKINTER_GUI
 from src.io import update_file
 
 if TKINTER_GUI:
-    from src.tcurses import window
+    import src.tcurses as curses
 else:
-    from curses import window
+    import curses  # type: ignore
 
 
 def copy_todo(todos: Todos, selected: Cursor, copied_todo: Todo) -> None:
@@ -47,7 +47,7 @@ def _todo_from_clipboard(todos: Todos, selected: int, copied_todo: Todo) -> Todo
 
 
 def paste_todo(
-    stdscr: window, todos: Todos, selected: int, copied_todo: Todo
+    stdscr: curses.window, todos: Todos, selected: int, copied_todo: Todo
 ) -> TodoList:
     """Paste a todo from copied_todo or clipboard if available"""
     temp = todos.copy()

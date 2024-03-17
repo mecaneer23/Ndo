@@ -13,9 +13,9 @@ from src.get_args import TKINTER_GUI
 from src.keys import Key
 
 if TKINTER_GUI:
-    from src.tcurses import window
+    import src.tcurses as curses
 else:
-    from curses import window
+    import curses  # type: ignore
 
 
 class _Direction(Enum):
@@ -178,7 +178,7 @@ class Cursor:
                 continue
             self.multiselect_up()
 
-    def multiselect_from(self, stdscr: window, first_digit: int, max_len: int) -> None:
+    def multiselect_from(self, stdscr: curses.window, first_digit: int, max_len: int) -> None:
         """
         Move the cursor to the specified position relative to the current position.
 

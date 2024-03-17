@@ -38,12 +38,11 @@ from src.print_todos import print_todos
 from src.utils import clamp, set_header
 
 if TKINTER_GUI:
-    from src.tcurses import curses
-
-    wrapper = curses.wrapper
+    import src.tcurses as curses
+    from src.tcurses import wrapper
 else:
-    import curses
-    from src.working_initscr import wrapper  # pylint: disable=ungrouped-imports
+    import curses  # type: ignore
+    from src.working_initscr import wrapper
 
 
 PRINT_HISTORY = False

@@ -33,7 +33,7 @@ def initscr() -> curses.window:
 #     *args: P.args,
 #     **kwargs: P.kwargs
 # ) -> R:
-def wrapper(func: Callable[..., T], /, *args: Any, **kwds: Any) -> T:
+def wrapper(func: Callable[..., T], /, *args: list[Any], **kwds: dict[str, Any]) -> T:
     """
     Wrapper function that initializes curses and calls another function,
     restoring normal keyboard/screen behavior on error.
@@ -44,18 +44,10 @@ def wrapper(func: Callable[..., T], /, *args: Any, **kwds: Any) -> T:
 
     try:
         stdscr = initscr()
-
         curses.noecho()
         curses.cbreak()
-
         stdscr.keypad(True)
-
         _curses.start_color()
-        if hasattr(_curses, "COLORS"):
-            curses.COLORS = _curses.COLORS  # pyright: ignore
-        if hasattr(_curses, "COLOR_PAIRS"):
-            curses.COLOR_PAIRS = _curses.COLOR_PAIRS  # pyright: ignore
-
         return func(stdscr, *args, **kwds)
     finally:
         if "stdscr" in locals():

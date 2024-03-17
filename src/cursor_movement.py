@@ -8,9 +8,9 @@ from src.keys import Key
 from src.utils import clamp
 
 if TKINTER_GUI:
-    from src.tcurses import window
+    import src.tcurses as curses
 else:
-    from curses import window
+    import curses  # type: ignore
 
 
 def _cursor_to(position: int, len_todos: int) -> int:
@@ -18,7 +18,7 @@ def _cursor_to(position: int, len_todos: int) -> int:
 
 
 def relative_cursor_to(
-    win: window, todos: Todos, selected: int, first_digit: int
+    win: curses.window, todos: Todos, selected: int, first_digit: int
 ) -> int:
     """
     Move the cursor to the specified position relative to the current position.

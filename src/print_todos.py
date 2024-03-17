@@ -18,9 +18,9 @@ from src.get_args import (
 from src.utils import Chunk, Color
 
 if TKINTER_GUI:
-    from src.tcurses import curses
+    import src.tcurses as curses
 else:
-    import curses
+    import curses  # type: ignore
 
 
 T = TypeVar("T")

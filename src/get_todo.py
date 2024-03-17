@@ -9,9 +9,9 @@ from src.keys import Key
 from src.utils import set_header
 
 if TKINTER_GUI:
-    from src.tcurses import curses
+    import src.tcurses as curses
 else:
-    import curses
+    import curses  # type: ignore
 
 
 class _Chars(list[str]):

@@ -28,9 +28,9 @@ from src.print_todos import make_printable_sublist
 from src.utils import Color, clamp, overflow, set_header
 
 if TKINTER_GUI:
-    from src.tcurses import curses
+    import src.tcurses as curses
 else:
-    import curses
+    import curses  # type: ignore
 
 
 def _simple_scroll_keybinds(

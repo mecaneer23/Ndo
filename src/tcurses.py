@@ -118,7 +118,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def _parse_attrs(self, attrs: int) -> list[str]:
         possible_attrs: dict[int, str] = dict(
             (value, name)
-            for name, value in dict(curses.__dict__).items()
+            for name, value in globals().items()
             if isinstance(value, int)
         )
         possible_returns = {
@@ -191,20 +191,16 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         self.addstr(
             0,
             0,
-            curses.ACS_ULCORNER
-            + curses.ACS_HLINE * (self.width - 2)
-            + curses.ACS_URCORNER,
+            ACS_ULCORNER + ACS_HLINE * (self.width - 2) + ACS_URCORNER,
         )
         for i in range(self.height - 2):
-            self.addch(i + 1, 0, curses.ACS_VLINE)
+            self.addch(i + 1, 0, ACS_VLINE)
         for i in range(self.height - 2):
-            self.addch(i + 1, self.width - 1, curses.ACS_VLINE)
+            self.addch(i + 1, self.width - 1, ACS_VLINE)
         self.addstr(
             self.height - 1,
             0,
-            curses.ACS_LLCORNER
-            + curses.ACS_HLINE * (self.width - 2)
-            + curses.ACS_LRCORNER,
+            ACS_LLCORNER + ACS_HLINE * (self.width - 2) + ACS_LRCORNER,
         )
 
     def hline(self, y: int, x: int, ch: str, n: int) -> None:
@@ -229,154 +225,148 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
             )
 
 
-class curses:  # pylint: disable=invalid-name
-    """ "Terminal" handling for character-cell displays"""
+ERR = -1
+OK = 0
+A_NORMAL = 0
+A_STANDOUT = 2**1
+A_BOLD = 2**2
 
-    ERR = -1
-    OK = 0
-    A_NORMAL = 0
-    A_STANDOUT = 2**1
-    A_BOLD = 2**2
+COLOR_BLACK = 2**10
+COLOR_RED = 2**11
+COLOR_GREEN = 2**12
+COLOR_YELLOW = 2**13
+COLOR_BLUE = 2**14
+COLOR_MAGENTA = 2**15
+COLOR_CYAN = 2**16
+COLOR_WHITE = 2**17
 
-    COLOR_BLACK = 2**10
-    COLOR_RED = 2**11
-    COLOR_GREEN = 2**12
-    COLOR_YELLOW = 2**13
-    COLOR_BLUE = 2**14
-    COLOR_MAGENTA = 2**15
-    COLOR_CYAN = 2**16
-    COLOR_WHITE = 2**17
+# https://www.w3.org/TR/xml-entity-names/025.html
+ACS_RTEE = "⊣"
+ACS_LTEE = "⊢"
+ACS_HLINE = "─"
+ACS_VLINE = "│"
+ACS_URCORNER = "┐"
+ACS_ULCORNER = "┌"
+ACS_LRCORNER = "┘"
+ACS_LLCORNER = "└"
 
-    # https://www.w3.org/TR/xml-entity-names/025.html
-    ACS_RTEE = "⊣"
-    ACS_LTEE = "⊢"
-    ACS_HLINE = "─"
-    ACS_VLINE = "│"
-    ACS_URCORNER = "┐"
-    ACS_ULCORNER = "┌"
-    ACS_LRCORNER = "┘"
-    ACS_LLCORNER = "└"
+_color_pairs: list[tuple[int, int]] = [(7, 0)]
 
-    _color_pairs: list[tuple[int, int]] = [(7, 0)]
+window = _CursesWindow
 
-    window = _CursesWindow
 
-    @staticmethod
-    def use_default_colors() -> None:
-        """Allow using default colors. Not yet implemented."""
-        return
+def use_default_colors() -> None:
+    """Allow using default colors. Not yet implemented."""
+    return
 
-    @staticmethod
-    def curs_set(visibility: int) -> None:
-        """Set the cursor state. Not yet implemented."""
-        _ = visibility
 
-    @staticmethod
-    def _get_usable_color(bit_represented: int) -> int:
-        return int(log2(bit_represented) % 10)
+def curs_set(visibility: int) -> None:
+    """Set the cursor state. Not yet implemented."""
+    _ = visibility
 
-    @staticmethod
-    def init_pair(pair_number: int, fg: int, bg: int) -> None:
-        """
-        Change the definition of a color-pair. It takes three arguments:
-        the number of the color-pair to be changed, the foreground color
-        number, and the background color number. The value of pair_number
-        must be between 1 and COLOR_PAIRS - 1 (the 0 color pair is wired
-        to white on black and cannot be changed). The value of fg and bg
-        arguments must be between 0 and COLORS - 1, or, after calling
-        use_default_colors(), -1. If the color-pair was previously
-        initialized, the screen is refreshed and all occurrences of that
-        color-pair are changed to the new definition.
-        """
-        bg = max(bg, 2**10)
-        curses._color_pairs.insert(
-            pair_number, (curses._get_usable_color(fg), curses._get_usable_color(bg))
-        )
 
-    @staticmethod
-    def color_pair(pair_number: int) -> int:
-        """
-        Return the attribute value for displaying text
-        in the specified color pair.
-        """
-        fg, bg = curses._color_pairs[pair_number]
-        return 2 ** (10 + fg) | 2 ** (10 + bg)
+def _get_usable_color(bit_represented: int) -> int:
+    return int(log2(bit_represented) % 10)
 
-    @staticmethod
-    def newwin(
-        nlines: int, ncols: int, begin_y: int = 0, begin_x: int = 0
-    ) -> _CursesWindow:
-        """
-        Return a new window, whose left-upper corner is at (begin_y, begin_x),
-        and whose height/width is nlines/ncols.
-        """
-        return _CursesWindow(screen, (ncols, nlines), (begin_y, begin_x))
 
-    @staticmethod
-    def wrapper(
-        func: Callable[..., T], *args: list[Any], **kwargs: dict[str, Any]
-    ) -> T:
-        """
-        Initialize tcurses and call another callable object, func, which
-        should be the rest of your tcurses-using application. If the
-        application raises an exception, this function will restore the
-        terminal to a sane state before re-raising the exception and
-        generating a traceback. The callable object func is then passed
-        the main window `stdscr` as its first argument, followed by any
-        other arguments passed to wrapper(). Before calling func, wrapper()
-        turns on cbreak mode, turns off echo, enables the terminal keypad,
-        and initializes colors if the terminal has color support. On exit
-        (whether normally or by exception) it restores cooked mode, turns
-        on echo, and disables the terminal keypad.
-        """
+def init_pair(pair_number: int, fg: int, bg: int) -> None:
+    """
+    Change the definition of a color-pair. It takes three arguments:
+    the number of the color-pair to be changed, the foreground color
+    number, and the background color number. The value of pair_number
+    must be between 1 and COLOR_PAIRS - 1 (the 0 color pair is wired
+    to white on black and cannot be changed). The value of fg and bg
+    arguments must be between 0 and COLORS - 1, or, after calling
+    use_default_colors(), -1. If the color-pair was previously
+    initialized, the screen is refreshed and all occurrences of that
+    color-pair are changed to the new definition.
+    """
+    bg = max(bg, 2**10)
+    _color_pairs.insert(pair_number, (_get_usable_color(fg), _get_usable_color(bg)))
 
-        def worker(q: list[T]):
-            q.append(func(stdscr, *args, **kwargs))
 
-        def check_thread():
-            if not func_thread.is_alive():
-                root.quit()
-                return
-            root.after(100, check_thread)
+def color_pair(pair_number: int) -> int:
+    """
+    Return the attribute value for displaying text
+    in the specified color pair.
+    """
+    fg, bg = _color_pairs[pair_number]
+    return 2 ** (10 + fg) | 2 ** (10 + bg)
 
-        result_queue: list[T] = []
-        func_thread = Thread(target=worker, args=(result_queue,))
-        func_thread.start()
+
+def newwin(
+    nlines: int, ncols: int, begin_y: int = 0, begin_x: int = 0
+) -> _CursesWindow:
+    """
+    Return a new window, whose left-upper corner is at (begin_y, begin_x),
+    and whose height/width is nlines/ncols.
+    """
+    return _CursesWindow(screen, (ncols, nlines), (begin_y, begin_x))
+
+
+def wrapper(func: Callable[..., T], /, *args: list[Any], **kwargs: dict[str, Any]) -> T:
+    """
+    Initialize tcurses and call another callable object, func, which
+    should be the rest of your tcurses-using application. If the
+    application raises an exception, this function will restore the
+    terminal to a sane state before re-raising the exception and
+    generating a traceback. The callable object func is then passed
+    the main window `stdscr` as its first argument, followed by any
+    other arguments passed to wrapper(). Before calling func, wrapper()
+    turns on cbreak mode, turns off echo, enables the terminal keypad,
+    and initializes colors if the terminal has color support. On exit
+    (whether normally or by exception) it restores cooked mode, turns
+    on echo, and disables the terminal keypad.
+    """
+
+    def worker(q: list[T]):
+        q.append(func(stdscr, *args, **kwargs))
+
+    def check_thread():
+        if not func_thread.is_alive():
+            root.quit()
+            return
         root.after(100, check_thread)
-        root.mainloop()
-        func_thread.join()
-        if len(result_queue) == 1:
-            return result_queue[0]
-        raise RuntimeError("tcurses quit unexpectedly")
 
-    @staticmethod
-    def nocbreak() -> None:
-        """Leave cbreak mode. Return to normal “cooked” mode with line buffering."""
-        return
+    result_queue: list[T] = []
+    func_thread = Thread(target=worker, args=(result_queue,))
+    func_thread.start()
+    root.after(100, check_thread)
+    root.mainloop()
+    func_thread.join()
+    if len(result_queue) == 1:
+        return result_queue[0]
+    raise RuntimeError("tcurses quit unexpectedly")
 
-    @staticmethod
-    def echo(flag: bool = True) -> None:
-        """
-        Enter echo mode. In echo mode, each character input is
-        echoed to the screen as it is entered.
-        """
-        _ = flag
 
-    @staticmethod
-    def endwin() -> None:
-        """De-initialize the library, and return terminal to normal status."""
-        return
+def nocbreak() -> None:
+    """Leave cbreak mode. Return to normal “cooked” mode with line buffering."""
+    return
 
-    @staticmethod
-    def initscr() -> _CursesWindow:
-        """
-        Initialize the library. Return a window object
-        which represents the whole screen.
-        """
-        raise NotImplementedError("initscr not implemented, use wrapper instead")
 
-    class error(Exception):
-        """Exception raised when a curses library function returns an error."""
+def echo(flag: bool = True) -> None:
+    """
+    Enter echo mode. In echo mode, each character input is
+    echoed to the screen as it is entered.
+    """
+    _ = flag
+
+
+def endwin() -> None:
+    """De-initialize the library, and return terminal to normal status."""
+    return
+
+
+def initscr() -> _CursesWindow:
+    """
+    Initialize the library. Return a window object
+    which represents the whole screen.
+    """
+    raise NotImplementedError("initscr not implemented, use wrapper instead")
+
+
+class error(Exception):
+    """Exception raised when a curses library function returns an error."""
 
 
 class _Key:  # pylint: disable=too-many-instance-attributes
@@ -463,5 +453,3 @@ screen.tag_configure("white*", background="black", foreground="white")
 screen.configure(state="disabled")
 
 stdscr = _CursesWindow(screen, (WIDTH, HEIGHT), (0, 0))
-wrapper = curses.wrapper
-window = _CursesWindow  # pylint: disable=invalid-name

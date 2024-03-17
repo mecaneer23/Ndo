@@ -2,32 +2,15 @@
 
 from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from pathlib import Path
-from typing import Any
-
-try:
-    from curses import window
-
-    # from curses import wrapper  # pyright: ignore
-    from src.working_initscr import wrapper  # pyright: ignore
-
-    _DEFAULT_TKINTER_GUI = False
-except ImportError:
-
-    def wrapper(  # pylint: disable=missing-function-docstring
-        _: Any, *args: Any, **kwargs: Any
-    ) -> Any:
-        _ = (args, kwargs)
-        return _CHECKBOX_OPTIONS[1]
-
-    from src.tcurses import window
-
-    _DEFAULT_TKINTER_GUI = True  # pyright: ignore[reportConstantRedefinition]
 
 from src.md_to_py import md_table_to_lines
+from src.tcurses import window
+from src.working_initscr import wrapper
 
-_DEFAULT_BULLETS: bool = False
 CONTROLS_BEGIN_INDEX: int = 68
 CONTROLS_END_INDEX: int = 96
+
+_DEFAULT_BULLETS: bool = False
 _DEFAULT_ENUMERATE: bool = False
 _DEFAULT_FILENAME: Path = Path("todo.txt")
 _DEFAULT_HEADER: str = ""
@@ -37,6 +20,7 @@ _DEFAULT_NO_GUI: bool = False
 _DEFAULT_RELATIVE_ENUMERATE: bool = False
 _DEFAULT_SIMPLE_BOXES: bool = False
 _DEFAULT_STRIKETHROUGH: bool = False
+_DEFAULT_TKINTER_GUI = False
 
 _CHECKBOX_OPTIONS = ("🗹", "☑")
 
