@@ -11,9 +11,11 @@ unnecessary to import tcurses.
 """
 
 import curses
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar
 
 import _curses
+
+T = TypeVar("T")
 
 
 def initscr() -> curses.window:
@@ -31,7 +33,7 @@ def initscr() -> curses.window:
 #     *args: P.args,
 #     **kwargs: P.kwargs
 # ) -> R:
-def wrapper(func: Callable[..., Any], /, *args: Any, **kwds: Any) -> Any:
+def wrapper(func: Callable[..., T], /, *args: Any, **kwds: Any) -> T:
     """
     Wrapper function that initializes curses and calls another function,
     restoring normal keyboard/screen behavior on error.
