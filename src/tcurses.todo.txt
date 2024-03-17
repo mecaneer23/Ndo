@@ -1,0 +1,2 @@
+- add color support for themes and more than 8 colors in general
+- fix [x] button

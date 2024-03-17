@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-# pylint: disable=missing-docstring
+"""
+A Tkinter interface that feels like programming with curses
+"""
 
 from functools import wraps
 from math import log2
@@ -10,11 +12,13 @@ from typing import Any, Callable, TypeVar
 T = TypeVar("T")
 
 
-class Screen:  # pylint: disable=too-many-instance-attributes
+class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _updates_screen(func: Callable[..., None]) -> Callable[..., None]:
         @wraps(func)
-        def _inner(self: "Screen", *args: list[Any], **kwargs: dict[Any, Any]) -> None:
+        def _inner(
+            self: "_CursesWindow", *args: list[Any], **kwargs: dict[Any, Any]
+        ) -> None:
             screen.configure(state="normal")
             func(self, *args, **kwargs)
             screen.configure(state="disabled")
@@ -93,6 +97,7 @@ class Screen:  # pylint: disable=too-many-instance-attributes
         self.keys.append(event.keysym_num)
 
     def getch(self) -> int:
+        """Get a character from the list of keys pressed"""
         if self.timeout_delay > 0:
             running = BooleanVar()
             root.after(self.timeout_delay, running.set, True)
@@ -107,6 +112,7 @@ class Screen:  # pylint: disable=too-many-instance-attributes
         return self.keys.pop(0)
 
     def timeout(self, delay: int) -> None:
+        """Set timeout delay"""
         self.timeout_delay = delay
 
     def _parse_attrs(self, attrs: int) -> list[str]:
@@ -142,6 +148,7 @@ class Screen:  # pylint: disable=too-many-instance-attributes
 
     @_updates_screen
     def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
+        """Add a string to the screen"""
         y_pos = self.begin_yx[0] + y
         x_pos = self.begin_yx[1] + x
         self.screen.replace(
@@ -152,9 +159,11 @@ class Screen:  # pylint: disable=too-many-instance-attributes
         )
 
     def getmaxyx(self) -> tuple[int, int]:
+        """Get window height and width"""
         return self.height, self.width
 
     def addch(self, y: int, x: int, char: str, attr: int = 0) -> None:
+        """Add a character to the screen"""
         self.buffer.append(char)
         if len(self.buffer) == 1:
             self.stored_x = x
@@ -164,14 +173,21 @@ class Screen:  # pylint: disable=too-many-instance-attributes
             or char == "\n"
             or len(self.buffer) + self.stored_x >= self.width
         ):
-            self.addstr(self.stored_y, self.stored_x, "".join(self.buffer), self.stored_attr)
+            self.addstr(
+                self.stored_y, self.stored_x, "".join(self.buffer), self.stored_attr
+            )
             self.stored_attr = attr
             self.buffer.clear()
 
     def nodelay(self, flag: bool = True) -> None:
+        """
+        If flag is True, getch() will be non-blocking.
+        Cannot be unset in tcurses.
+        """
         _ = flag
 
     def box(self) -> None:
+        """Draw a border around the current window"""
         self.addstr(
             0,
             0,
@@ -192,13 +208,19 @@ class Screen:  # pylint: disable=too-many-instance-attributes
         )
 
     def hline(self, y: int, x: int, ch: str, n: int) -> None:
+        """
+        Display a horizontal line starting at (y, x)
+        with length n consisting of the character ch.
+        """
         self.addstr(y, x, ch * n)
 
     def refresh(self) -> None:
+        """Sync display. Not necessary for tcurses as is non-buffered"""
         return
 
     @_updates_screen
     def clear(self) -> None:
+        """Clear the screen"""
         for row in range(self.begin_yx[0] + 1, self.begin_yx[0] + 1 + self.height):
             self.screen.replace(
                 f"{row}.{self.begin_yx[1]}",
@@ -208,6 +230,8 @@ class Screen:  # pylint: disable=too-many-instance-attributes
 
 
 class curses:  # pylint: disable=invalid-name
+    """ "Terminal" handling for character-cell displays"""
+
     ERR = -1
     OK = 0
     A_NORMAL = 0
@@ -235,14 +259,16 @@ class curses:  # pylint: disable=invalid-name
 
     _color_pairs: list[tuple[int, int]] = [(7, 0)]
 
-    window = Screen
+    window = _CursesWindow
 
     @staticmethod
     def use_default_colors() -> None:
+        """Allow using default colors. Not yet implemented."""
         return
 
     @staticmethod
     def curs_set(visibility: int) -> None:
+        """Set the cursor state. Not yet implemented."""
         _ = visibility
 
     @staticmethod
@@ -251,6 +277,17 @@ class curses:  # pylint: disable=invalid-name
 
     @staticmethod
     def init_pair(pair_number: int, fg: int, bg: int) -> None:
+        """
+        Change the definition of a color-pair. It takes three arguments:
+        the number of the color-pair to be changed, the foreground color
+        number, and the background color number. The value of pair_number
+        must be between 1 and COLOR_PAIRS - 1 (the 0 color pair is wired
+        to white on black and cannot be changed). The value of fg and bg
+        arguments must be between 0 and COLORS - 1, or, after calling
+        use_default_colors(), -1. If the color-pair was previously
+        initialized, the screen is refreshed and all occurrences of that
+        color-pair are changed to the new definition.
+        """
         bg = max(bg, 2**10)
         curses._color_pairs.insert(
             pair_number, (curses._get_usable_color(fg), curses._get_usable_color(bg))
@@ -258,17 +295,41 @@ class curses:  # pylint: disable=invalid-name
 
     @staticmethod
     def color_pair(pair_number: int) -> int:
+        """
+        Return the attribute value for displaying text
+        in the specified color pair.
+        """
         fg, bg = curses._color_pairs[pair_number]
         return 2 ** (10 + fg) | 2 ** (10 + bg)
 
     @staticmethod
-    def newwin(nlines: int, ncols: int, begin_y: int = 0, begin_x: int = 0) -> Screen:
-        return Screen(screen, (ncols, nlines), (begin_y, begin_x))
+    def newwin(
+        nlines: int, ncols: int, begin_y: int = 0, begin_x: int = 0
+    ) -> _CursesWindow:
+        """
+        Return a new window, whose left-upper corner is at (begin_y, begin_x),
+        and whose height/width is nlines/ncols.
+        """
+        return _CursesWindow(screen, (ncols, nlines), (begin_y, begin_x))
 
     @staticmethod
     def wrapper(
         func: Callable[..., T], *args: list[Any], **kwargs: dict[str, Any]
     ) -> T:
+        """
+        Initialize tcurses and call another callable object, func, which
+        should be the rest of your tcurses-using application. If the
+        application raises an exception, this function will restore the
+        terminal to a sane state before re-raising the exception and
+        generating a traceback. The callable object func is then passed
+        the main window `stdscr` as its first argument, followed by any
+        other arguments passed to wrapper(). Before calling func, wrapper()
+        turns on cbreak mode, turns off echo, enables the terminal keypad,
+        and initializes colors if the terminal has color support. On exit
+        (whether normally or by exception) it restores cooked mode, turns
+        on echo, and disables the terminal keypad.
+        """
+
         def worker(q: list[T]):
             q.append(func(stdscr, *args, **kwargs))
 
@@ -290,22 +351,32 @@ class curses:  # pylint: disable=invalid-name
 
     @staticmethod
     def nocbreak() -> None:
+        """Leave cbreak mode. Return to normal “cooked” mode with line buffering."""
         return
 
     @staticmethod
     def echo(flag: bool = True) -> None:
+        """
+        Enter echo mode. In echo mode, each character input is
+        echoed to the screen as it is entered.
+        """
         _ = flag
 
     @staticmethod
     def endwin() -> None:
+        """De-initialize the library, and return terminal to normal status."""
         return
 
     @staticmethod
-    def initscr() -> Screen:
+    def initscr() -> _CursesWindow:
+        """
+        Initialize the library. Return a window object
+        which represents the whole screen.
+        """
         raise NotImplementedError("initscr not implemented, use wrapper instead")
 
     class error(Exception):
-        pass
+        """Exception raised when a curses library function returns an error."""
 
 
 class _Key:  # pylint: disable=too-many-instance-attributes
@@ -330,6 +401,7 @@ class _Key:  # pylint: disable=too-many-instance-attributes
         self.escape_alt = escape.count("alt")
 
     def get(self) -> list[int]:
+        """Return a list of keys"""
         return self._inner_get(self.no_modifiers, self.nones)
 
     def _inner_get(self, value: int, escape_count: int):
@@ -340,12 +412,15 @@ class _Key:  # pylint: disable=too-many-instance-attributes
         return output
 
     def get_shift(self) -> list[int]:
+        """Returns list of keys with shift pressed"""
         return self._inner_get(self.shift, self.escape_shift)
 
     def get_alt(self) -> list[int]:
+        """Returns list of keys with alt pressed"""
         return self._inner_get(self.alt, self.escape_alt)
 
     def get_ctrl(self) -> list[int]:
+        """Returns list of keys with control pressed"""
         return self._inner_get(self.ctrl, self.escape_ctrl)
 
 
@@ -387,6 +462,6 @@ screen.tag_configure("magenta*", background="magenta", foreground="white")
 screen.tag_configure("white*", background="black", foreground="white")
 screen.configure(state="disabled")
 
-stdscr = Screen(screen, (WIDTH, HEIGHT), (0, 0))
+stdscr = _CursesWindow(screen, (WIDTH, HEIGHT), (0, 0))
 wrapper = curses.wrapper
-window = Screen  # pylint: disable=invalid-name
+window = _CursesWindow  # pylint: disable=invalid-name
