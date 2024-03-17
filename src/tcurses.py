@@ -252,7 +252,7 @@ ACS_LLCORNER = "└"
 
 _color_pairs: list[tuple[int, int]] = [(7, 0)]
 
-window = _CursesWindow
+window = _CursesWindow  # pylint: disable=invalid-name
 
 
 def use_default_colors() -> None:
@@ -365,7 +365,7 @@ def initscr() -> _CursesWindow:
     raise NotImplementedError("initscr not implemented, use wrapper instead")
 
 
-class error(Exception):
+class error(Exception):  # pylint: disable=invalid-name
     """Exception raised when a curses library function returns an error."""
 
 
