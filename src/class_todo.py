@@ -87,17 +87,6 @@ class Todo:
             return
         self._box_char, self._color, self._display_text = self._init_attrs()
 
-    def get_text(self) -> str:
-        """
-        Use with caution! Returns internal representation.
-
-        Use repr(todo) for external representation or
-        todo.display_text for display text without
-        additional arguments.
-        """
-
-        return self._text
-
     def get_color(self) -> Color:
         """Getter for color"""
 
