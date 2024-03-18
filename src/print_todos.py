@@ -155,6 +155,17 @@ def _get_display_string(
     ].ljust(width - 1, " ")
 
 
+def _is_within_strikethrough_range(
+    counter: int, todo: Todo, display_string: str
+) -> bool:
+    # make sure to test with -s and -sx
+    return (
+        len(display_string.strip()) - len(todo.get_display_text()) + todo.get_indent_level()
+        < counter
+        < len(display_string.strip()) + todo.get_indent_level() + 1
+    )
+
+
 def _print_todo(
     stdscr: curses.window,
     todo: Todo,
@@ -167,9 +178,7 @@ def _print_todo(
         if (
             STRIKETHROUGH
             and todo.is_toggled()
-            and todo.get_indent_level() + 2  # TODO: what does this 2 refer to?
-            < counter - 1
-            < len(display_string.strip()) + todo.get_indent_level()
+            and _is_within_strikethrough_range(counter, todo, display_string)
         ):
             stdscr.addch(position + 1, counter, "\u0336")
         try:
