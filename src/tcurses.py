@@ -117,9 +117,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
     def _parse_attrs(self, attrs: int) -> list[str]:
         possible_attrs: dict[int, str] = dict(
-            (value, name)
-            for name, value in globals().items()
-            if isinstance(value, int)
+            (value, name) for name, value in globals().items() if isinstance(value, int)
         )
         possible_returns = {
             "A_BOLD": "bold",
