@@ -196,8 +196,7 @@ def _print_todo(
             # we don't print the box character and indirectly
             # prompt the user to use the -x option and use simple
             # boxes when printing.
-            counter += 1
-            continue
+            pass
         counter += 1
 
 
