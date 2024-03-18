@@ -53,12 +53,12 @@ def _ensure_valid(win: curses.window) -> None:
 
 def _init_todo(todo: Todo, prev_todo: Todo, mode: SingleLineModeImpl) -> Todo:
     if todo.is_empty():
-        todo.set_indent_level(prev_todo.indent_level)
-        todo.set_color(prev_todo.color)
+        todo.set_indent_level(prev_todo.get_indent_level())
+        todo.set_color(prev_todo.get_color())
         if not prev_todo.has_box():
-            todo.box_char = BoxChar.NONE
+            todo.set_box_char(BoxChar.NONE)
     if mode.is_off():
-        todo.box_char = BoxChar.NONE
+        todo.set_box_char(BoxChar.NONE)
     return todo
 
 
@@ -155,7 +155,7 @@ def _handle_delete_modifiers(
 
 def _handle_toggle_note_todo(stdscr: curses.window, todo: Todo) -> None:
     _toggle_note_todo(todo)
-    set_header(stdscr, "Note" if todo.box_char == BoxChar.NONE else "Todo")
+    set_header(stdscr, "Todo" if todo.has_box() else "Note")
     stdscr.refresh()
 
 
@@ -166,7 +166,7 @@ def _handle_indent_dedent(
         todo.indent()
     elif action == "dedent":
         todo.dedent()
-    set_header(stdscr, f"Tab level: {todo.indent_level // INDENT} tabs")
+    set_header(stdscr, f"Tab level: {todo.get_indent_level() // INDENT} tabs")
     stdscr.refresh()
     return _EditString(chars, position)
 
@@ -247,10 +247,10 @@ def _handle_ascii(chars: _Chars, position: int, input_char: int) -> _EditString:
 
 
 def _toggle_note_todo(todo: Todo) -> None:
-    if todo.box_char == BoxChar.NONE:
-        todo.box_char = BoxChar.MINUS
+    if not todo.has_box():
+        todo.set_box_char(BoxChar.MINUS)
         return
-    todo.box_char = BoxChar.NONE
+    todo.set_box_char(BoxChar.NONE)
 
 
 def _get_chars_position(
@@ -331,7 +331,7 @@ def get_todo(
     _ensure_valid(win)
     todo = _init_todo(todo, prev_todo, mode)
     original = todo.copy()
-    chars = _Chars(todo.display_text)
+    chars = _Chars(todo.get_display_text())
     position = len(chars)
     win.box()
     win.nodelay(False)

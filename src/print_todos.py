@@ -139,13 +139,15 @@ def _get_display_string(
     if position in highlight and todo.is_empty():
         return "⎯" * 8
     chunks: tuple[Chunk, ...] = (
-        Chunk(True, todo.indent_level * " "),
+        Chunk(True, todo.get_indent_level() * " "),
         Chunk(not todo.is_empty() and not SIMPLE_BOXES, todo.get_box()),
         Chunk(not todo.is_empty() and SIMPLE_BOXES, todo.get_simple_box()),
-        Chunk(not todo.has_box() and BULLETS, f"{_get_bullet(todo.indent_level)} "),
+        Chunk(
+            not todo.has_box() and BULLETS, f"{_get_bullet(todo.get_indent_level())} "
+        ),
         Chunk(ENUMERATE and not RELATIVE_ENUMERATE, f"{todos.index(todo) + 1}. "),
         Chunk(RELATIVE_ENUMERATE, f"{relative + 1}. "),
-        Chunk(True, todo.display_text),
+        Chunk(True, todo.get_display_text()),
         Chunk(width == 0, " "),
     )
     return "".join([item for condition, item in chunks if condition])[
@@ -165,9 +167,9 @@ def _print_todo(
         if (
             STRIKETHROUGH
             and todo.is_toggled()
-            and todo.indent_level + 2
+            and todo.get_indent_level() + 2  # TODO: what does this 2 refer to?
             < counter - 1
-            < len(display_string.strip()) + todo.indent_level
+            < len(display_string.strip()) + todo.get_indent_level()
         ):
             stdscr.addch(position + 1, counter, "\u0336")
         try:
@@ -175,7 +177,7 @@ def _print_todo(
                 position + 1,
                 counter,
                 display_string[counter],
-                curses.color_pair(todo.color.as_int() or Color.WHITE.as_int())
+                curses.color_pair(todo.get_color().as_int() or Color.WHITE.as_int())
                 | (curses.A_STANDOUT if position in highlight else 0),
             )
         except OverflowError:
@@ -227,7 +229,7 @@ def print_todos(
                         5: 35,
                         6: 36,
                         7: 37,
-                    }[todo.color.as_int()]
+                    }[todo.get_color().as_int()]
                 )
                 + "m"
                 + display_string

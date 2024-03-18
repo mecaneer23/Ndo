@@ -178,7 +178,9 @@ class Cursor:
                 continue
             self.multiselect_up()
 
-    def multiselect_from(self, stdscr: curses.window, first_digit: int, max_len: int) -> None:
+    def multiselect_from(
+        self, stdscr: curses.window, first_digit: int, max_len: int
+    ) -> None:
         """
         Move the cursor to the specified position relative to the current position.
 

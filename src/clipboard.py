@@ -27,9 +27,9 @@ def copy_todo(todos: Todos, selected: Cursor, copied_todo: Todo) -> None:
     Set `copied_todo` to be a duplicate of the first selected Todo.
     If possible, also copy to the clipboard.
     """
-    copied_todo.call_init(todos[int(selected)].text)
+    copied_todo.set_text(todos[int(selected)].get_text())
     if CLIPBOARD_EXISTS:
-        copy(todos[int(selected)].display_text)  # pyright: ignore
+        copy(todos[int(selected)].get_display_text())  # pyright: ignore
 
 
 def _todo_from_clipboard(todos: Todos, selected: int, copied_todo: Todo) -> Todos:
@@ -37,8 +37,8 @@ def _todo_from_clipboard(todos: Todos, selected: int, copied_todo: Todo) -> Todo
     if not CLIPBOARD_EXISTS:
         return todos
     todo = paste()  # pyright: ignore
-    if copied_todo.display_text == todo:
-        todos.insert(selected + 1, Todo(copied_todo.text))
+    if copied_todo.get_display_text() == todo:
+        todos.insert(selected + 1, Todo(copied_todo.get_text()))
         return todos
     if "\n" in todo:
         return todos

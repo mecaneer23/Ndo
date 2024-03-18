@@ -109,7 +109,7 @@ def magnify_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
     stdscr.clear()
     set_header(stdscr, "Magnifying...")
     lines = big(  # pyright: ignore
-        todos[int(selected)].display_text, width=stdscr.getmaxyx()[1]
+        todos[int(selected)].get_display_text(), width=stdscr.getmaxyx()[1]
     ).split("\n")
     lines.append("")
     lines = [line.ljust(stdscr.getmaxyx()[1] - 2) for line in lines]
@@ -186,11 +186,11 @@ def color_menu(parent_win: curses.window, original: Color) -> Color:
 
 def _get_sorting_methods() -> dict[str, Callable[[Todos], str]]:
     return {
-        "Alphabetical": lambda top_level_todo: top_level_todo[0].display_text,
+        "Alphabetical": lambda top_level_todo: top_level_todo[0].get_display_text(),
         "Completed": lambda top_level_todo: (
             "1" if top_level_todo[0].is_toggled() else "0"
         ),
-        "Color": lambda top_level_todo: str(top_level_todo[0].color),
+        "Color": lambda top_level_todo: str(top_level_todo[0].get_color()),
     }
 
 
@@ -198,7 +198,7 @@ def _get_indented_sections(todos: Todos) -> list[Todos]:
     indented_sections: list[Todos] = []
     section: Todos = Todos([])
     for todo in todos:
-        if todo.indent_level > 0:
+        if todo.get_indent_level() > 0:
             section.append(todo)
             continue
         if len(section) > 0:
@@ -289,10 +289,10 @@ def search_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
         get_newwin(stdscr),
         Todo(),
         Todo(),
-    ).display_text
+    ).get_display_text()
     stdscr.clear()
     for i, todo in enumerate(todos[int(selected) :], start=int(selected)):
-        if sequence in todo.display_text:
+        if sequence in todo.get_display_text():
             selected.set_to(i)
             return
     selected.set_to(0)

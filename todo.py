@@ -173,7 +173,7 @@ def color_todo(stdscr: curses.window, todos: Todos, selected: Cursor) -> Todos:
     Open a color menu. Set each Todo in `selected`
     to the returned color.
     """
-    new_color = color_menu(stdscr, todos[int(selected)].color)
+    new_color = color_menu(stdscr, todos[int(selected)].get_color())
     for pos in selected.get():
         todos[pos].set_color(new_color)
     stdscr.clear()
@@ -189,7 +189,7 @@ def edit_todo(
     the todo to the edited contents.
     """
     max_y, max_x = stdscr.getmaxyx()
-    todo = todos[selected].display_text
+    todo = todos[selected].get_display_text()
     ncols = (
         max(max_x * 3 // 4, len(todo) + 3) if len(todo) < max_x - 1 else max_x * 3 // 4
     )
@@ -258,7 +258,7 @@ def dedent(todos: Todos, selected: Cursor) -> TodoList:
 def toggle_todo_note(todos: Todos, selected: Cursor) -> None:
     for pos in selected.get():
         todo = todos[pos]
-        todo.box_char = BoxChar.NONE if todo.has_box() else BoxChar.MINUS
+        todo.set_box_char(BoxChar.NONE if todo.has_box() else BoxChar.MINUS)
     update_file(FILENAME, todos)
 
 
@@ -496,7 +496,7 @@ def join_lines(todos: Todos, selected: Cursor) -> None:
     current_todo = int(selected)
 
     todos[prev_todo].set_display_text(
-        f"{todos[prev_todo].display_text} {todos[current_todo].display_text}"
+        f"{todos[prev_todo].get_display_text()} {todos[current_todo].get_display_text()}"
     )
     selected.slide_up()
     todos.pop(current_todo)

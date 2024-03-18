@@ -13,7 +13,7 @@ class _Restorable:
     SEPARATOR = " |SEP|"
 
     def __init__(self, todos: Todos, selected: int) -> None:
-        self.stored: str = self.SEPARATOR.join([todo.text for todo in todos])
+        self.stored: str = self.SEPARATOR.join([todo.get_text() for todo in todos])
         self.selected: int = selected
 
     def get(self) -> TodoList:
