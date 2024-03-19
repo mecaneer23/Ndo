@@ -156,13 +156,16 @@ def _get_display_string(
 
 
 def _is_within_strikethrough_range(
-    counter: int, todo: Todo, display_string: str
+    counter: int, todo: Todo, display_string: str, window_width: int
 ) -> bool:
     # make sure to test with -s and -sx
+    # with open("debugging/log.txt", "w") as f:
+    #     f.write(f"{display_string=}\n{len(display_string.rstrip())=}\n{todo=}\n{todo.get_display_text()=}\n{counter=}")
+    offset = len(display_string.rstrip()) - len(todo.get_display_text())
     return (
-        len(display_string.strip()) - len(todo.get_display_text()) + todo.get_indent_level()
+        offset
         < counter
-        < len(display_string.strip()) + todo.get_indent_level() + 1
+        < window_width - (window_width - len(display_string.rstrip())) + 1
     )
 
 
@@ -175,12 +178,6 @@ def _print_todo(
 ) -> None:
     counter = 0
     while counter < len(display_string) - 1:
-        if (
-            STRIKETHROUGH
-            and todo.is_toggled()
-            and _is_within_strikethrough_range(counter, todo, display_string)
-        ):
-            stdscr.addch(position + 1, counter, "\u0336")
         try:
             stdscr.addch(
                 position + 1,
@@ -196,7 +193,16 @@ def _print_todo(
             # we don't print the box character and indirectly
             # prompt the user to use the -x option and use simple
             # boxes when printing.
-            pass
+            counter += 1
+            continue
+        if (
+            STRIKETHROUGH
+            and todo.is_toggled()
+            and _is_within_strikethrough_range(
+                counter, todo, display_string, stdscr.getmaxyx()[1]
+            )
+        ):
+            stdscr.addch(position + 1, counter, "\u0336")
         counter += 1
 
 
