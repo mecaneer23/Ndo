@@ -159,8 +159,7 @@ def _is_within_strikethrough_range(
     counter: int, todo: Todo, display_string: str, window_width: int
 ) -> bool:
     # make sure to test with -s and -sx
-    # with open("debugging/log.txt", "w") as f:
-    #     f.write(f"{display_string=}\n{len(display_string.rstrip())=}\n{todo=}\n{todo.get_display_text()=}\n{counter=}")
+    # issue lies with Alacritty terminal
     offset = len(display_string.rstrip()) - len(todo.get_display_text())
     return (
         offset
