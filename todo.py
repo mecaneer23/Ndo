@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# pylint: disable=missing-docstring
+"""Entry point for Ndo. This module mostly binds keypresses to various functions"""
 
 from pathlib import Path
 from sys import exit as sys_exit
@@ -255,22 +255,22 @@ def dedent(todos: Todos, selected: Cursor) -> TodoList:
     return TodoList(todos, selected.get_first())
 
 
-def toggle_todo_note(todos: Todos, selected: Cursor) -> None:
+def _toggle_todo_note(todos: Todos, selected: Cursor) -> None:
     for pos in selected.get():
         todo = todos[pos]
         todo.set_box_char(BoxChar.NONE if todo.has_box() else BoxChar.MINUS)
     update_file(FILENAME, todos)
 
 
-def handle_cursor_up(todos: Todos, selected: Cursor) -> None:
+def _handle_cursor_up(todos: Todos, selected: Cursor) -> None:
     selected.set_to(cursor_up(int(selected), len(todos)))
 
 
-def handle_cursor_down(todos: Todos, selected: Cursor) -> None:
+def _handle_cursor_down(todos: Todos, selected: Cursor) -> None:
     selected.set_to(cursor_down(int(selected), len(todos)))
 
 
-def handle_new_todo_next(
+def _handle_new_todo_next(
     stdscr: curses.window,
     todos: Todos,
     selected: Cursor,
@@ -288,7 +288,7 @@ def handle_new_todo_next(
     )
 
 
-def handle_delete_todo(
+def _handle_delete_todo(
     stdscr: curses.window, todos: Todos, selected: Cursor, copied_todo: Todo
 ) -> Todos:
     if len(todos) > 0 and CLIPBOARD_EXISTS:
@@ -296,19 +296,19 @@ def handle_delete_todo(
     return selected.todo_set_to(delete_todo(stdscr, todos, selected))
 
 
-def handle_undo(selected: Cursor, history: UndoRedo) -> Todos:
+def _handle_undo(selected: Cursor, history: UndoRedo) -> Todos:
     todos = selected.todo_set_to(history.undo())
     update_file(FILENAME, todos)
     return todos
 
 
-def handle_redo(selected: Cursor, history: UndoRedo) -> Todos:
+def _handle_redo(selected: Cursor, history: UndoRedo) -> Todos:
     todos = selected.todo_set_to(history.redo())
     update_file(FILENAME, todos)
     return todos
 
 
-def handle_edit(
+def _handle_edit(
     stdscr: curses.window,
     todos: Todos,
     selected: Cursor,
@@ -319,15 +319,15 @@ def handle_edit(
     return edit_todo(stdscr, todos, int(selected), mode)
 
 
-def handle_to_top(todos: Todos, selected: Cursor) -> None:
+def _handle_to_top(todos: Todos, selected: Cursor) -> None:
     selected.set_to(cursor_top(len(todos)))
 
 
-def handle_to_bottom(todos: Todos, selected: Cursor) -> None:
+def _handle_to_bottom(todos: Todos, selected: Cursor) -> None:
     selected.set_to(cursor_bottom(len(todos)))
 
 
-def handle_paste(
+def _handle_paste(
     stdscr: curses.window,
     todos: Todos,
     selected: Cursor,
@@ -343,42 +343,42 @@ def handle_paste(
     )
 
 
-def handle_insert_blank_todo(
+def _handle_insert_blank_todo(
     todos: Todos,
     selected: Cursor,
 ) -> Todos:
     return selected.todo_set_to(blank_todo(todos, int(selected)))
 
 
-def handle_todo_down(
+def _handle_todo_down(
     todos: Todos,
     selected: Cursor,
 ) -> Todos:
     return selected.todos_override(*todo_down(todos, selected))
 
 
-def handle_todo_up(
+def _handle_todo_up(
     todos: Todos,
     selected: Cursor,
 ) -> Todos:
     return selected.todos_override(*todo_up(todos, selected))
 
 
-def handle_indent(
+def _handle_indent(
     todos: Todos,
     selected: Cursor,
 ) -> Todos:
     return selected.todo_set_to(indent(todos, selected))
 
 
-def handle_dedent(
+def _handle_dedent(
     todos: Todos,
     selected: Cursor,
 ) -> Todos:
     return selected.todo_set_to(dedent(todos, selected))
 
 
-def handle_sort_menu(
+def _handle_sort_menu(
     stdscr: curses.window,
     todos: Todos,
     selected: Cursor,
@@ -386,7 +386,7 @@ def handle_sort_menu(
     return selected.todo_set_to(sort_menu(stdscr, todos, selected))
 
 
-def handle_digits(
+def _handle_digits(
     stdscr: curses.window, todos: Todos, selected: Cursor, digit: int
 ) -> None:
     selected.set_to(
@@ -396,7 +396,7 @@ def handle_digits(
     )
 
 
-def handle_enter(
+def _handle_enter(
     stdscr: curses.window, todos: Todos, selected: Cursor, mode: SingleLineModeImpl
 ) -> Todos:
     prev_todo = todos[int(selected)] if len(todos) > 0 else Todo()
@@ -405,13 +405,13 @@ def handle_enter(
     return selected.todo_set_to(new_todo_next(stdscr, todos, int(selected), mode=mode))
 
 
-def print_history(history: UndoRedo) -> None:
+def _print_history(history: UndoRedo) -> None:
     if PRINT_HISTORY:
         with open(HISTORY_FILE, "w", encoding="utf-8") as log_file:
             print(history, file=log_file)
 
 
-def get_possible_todos(
+def _get_possible_todos(
     func: Callable[..., Todos | None],
     args: str,
     possible_args: dict[str, Any],
@@ -426,7 +426,7 @@ def get_possible_todos(
     return func(*params)
 
 
-def get_main_input(
+def _get_main_input(
     stdscr: curses.window,
     todos: Todos,
     keys_esckeys: tuple[
@@ -452,7 +452,7 @@ def get_main_input(
             if key not in keys_esckeys[1]:
                 return key
             func, args = keys_esckeys[1][key]
-        possible_todos = get_possible_todos(
+        possible_todos = _get_possible_todos(
             func,
             args,
             possible_args,
@@ -462,7 +462,7 @@ def get_main_input(
     return key
 
 
-def init() -> None:
+def _init() -> None:
     curses.use_default_colors()
     curses.curs_set(0)
     for i, color in enumerate(
@@ -481,6 +481,7 @@ def init() -> None:
 
 
 def update_modified_time(prev_time: float, todos: Todos) -> tuple[Todos, float]:
+    """Return most recent todos and most recent modification time."""
     current_time = get_file_modified_time(FILENAME)
     if prev_time != current_time:
         todos = file_string_to_todos(read_file(FILENAME))
@@ -545,7 +546,7 @@ def main(stdscr: curses.window) -> int:
     Last time of file modification. Used to determine
     when to overwrite the save file.
     """
-    init()
+    _init()
     todos = file_string_to_todos(read_file(FILENAME))
     selected = Cursor(0)
     sublist_top = 0
@@ -561,60 +562,60 @@ def main(stdscr: curses.window) -> int:
         Key.backspace: (join_lines, "todos, selected"),
         Key.backspace_: (join_lines, "todos, selected"),
         Key.backspace__: (join_lines, "todos, selected"),
-        Key.tab: (handle_indent, "todos, selected"),
-        Key.enter: (handle_enter, "stdscr, todos, selected, single_line_mode"),
+        Key.tab: (_handle_indent, "todos, selected"),
+        Key.enter: (_handle_enter, "stdscr, todos, selected, single_line_mode"),
         Key.ctrl_k: (single_line_state.toggle, "None"),
-        Key.ctrl_r: (handle_redo, "selected, history"),
+        Key.ctrl_r: (_handle_redo, "selected, history"),
         Key.ctrl_x: (single_line_state.toggle, "None"),
         Key.escape: (lambda: None, "None"),
-        Key.minus: (handle_insert_blank_todo, "todos, selected"),
+        Key.minus: (_handle_insert_blank_todo, "todos, selected"),
         Key.slash: (search_menu, "stdscr, todos, selected"),
-        Key.zero: (handle_digits, f"stdscr, todos, selected, {Key.zero}"),
-        Key.one: (handle_digits, f"stdscr, todos, selected, {Key.one}"),
-        Key.two: (handle_digits, f"stdscr, todos, selected, {Key.two}"),
-        Key.three: (handle_digits, f"stdscr, todos, selected, {Key.three}"),
-        Key.four: (handle_digits, f"stdscr, todos, selected, {Key.four}"),
-        Key.five: (handle_digits, f"stdscr, todos, selected, {Key.five}"),
-        Key.six: (handle_digits, f"stdscr, todos, selected, {Key.six}"),
-        Key.seven: (handle_digits, f"stdscr, todos, selected, {Key.seven}"),
-        Key.eight: (handle_digits, f"stdscr, todos, selected, {Key.eight}"),
-        Key.nine: (handle_digits, f"stdscr, todos, selected, {Key.nine}"),
-        Key.G: (handle_to_bottom, "todos, selected"),
+        Key.zero: (_handle_digits, f"stdscr, todos, selected, {Key.zero}"),
+        Key.one: (_handle_digits, f"stdscr, todos, selected, {Key.one}"),
+        Key.two: (_handle_digits, f"stdscr, todos, selected, {Key.two}"),
+        Key.three: (_handle_digits, f"stdscr, todos, selected, {Key.three}"),
+        Key.four: (_handle_digits, f"stdscr, todos, selected, {Key.four}"),
+        Key.five: (_handle_digits, f"stdscr, todos, selected, {Key.five}"),
+        Key.six: (_handle_digits, f"stdscr, todos, selected, {Key.six}"),
+        Key.seven: (_handle_digits, f"stdscr, todos, selected, {Key.seven}"),
+        Key.eight: (_handle_digits, f"stdscr, todos, selected, {Key.eight}"),
+        Key.nine: (_handle_digits, f"stdscr, todos, selected, {Key.nine}"),
+        Key.G: (_handle_to_bottom, "todos, selected"),
         Key.J: (selected.multiselect_down, "len(todos)"),
         Key.K: (selected.multiselect_up, "None"),
         Key.O: (new_todo_current, "stdscr, todos, int(selected)"),
         Key.b: (magnify_menu, "stdscr, todos, selected"),
         Key.c: (color_todo, "stdscr, todos, selected"),
-        Key.d: (handle_delete_todo, "stdscr, todos, selected, copied_todo"),
-        Key.g: (handle_to_top, "todos, selected"),
+        Key.d: (_handle_delete_todo, "stdscr, todos, selected, copied_todo"),
+        Key.g: (_handle_to_top, "todos, selected"),
         Key.h: (help_menu, "stdscr"),
-        Key.i: (handle_edit, "stdscr, todos, selected, single_line_mode"),
-        Key.j: (handle_cursor_down, "todos, selected"),
-        Key.k: (handle_cursor_up, "todos, selected"),
-        Key.o: (handle_new_todo_next, "stdscr, todos, selected, single_line_mode"),
-        Key.p: (handle_paste, "stdscr, todos, selected, copied_todo"),
-        Key.s: (handle_sort_menu, "stdscr, todos, selected"),
-        Key.u: (handle_undo, "selected, history"),
+        Key.i: (_handle_edit, "stdscr, todos, selected, single_line_mode"),
+        Key.j: (_handle_cursor_down, "todos, selected"),
+        Key.k: (_handle_cursor_up, "todos, selected"),
+        Key.o: (_handle_new_todo_next, "stdscr, todos, selected, single_line_mode"),
+        Key.p: (_handle_paste, "stdscr, todos, selected, copied_todo"),
+        Key.s: (_handle_sort_menu, "stdscr, todos, selected"),
+        Key.u: (_handle_undo, "selected, history"),
         Key.y: (copy_todo, "todos, selected, copied_todo"),
-        Key.down: (handle_cursor_down, "todos, selected"),
-        Key.up: (handle_cursor_up, "todos, selected"),
-        Key.delete: (toggle_todo_note, "todos, selected"),
-        Key.shift_tab_windows: (handle_dedent, "todos, selected"),
-        Key.shift_tab: (handle_dedent, "todos, selected"),
+        Key.down: (_handle_cursor_down, "todos, selected"),
+        Key.up: (_handle_cursor_up, "todos, selected"),
+        Key.delete: (_toggle_todo_note, "todos, selected"),
+        Key.shift_tab_windows: (_handle_dedent, "todos, selected"),
+        Key.shift_tab: (_handle_dedent, "todos, selected"),
         Key.alt_j_windows: (
-            handle_todo_down,
+            _handle_todo_down,
             "todos, selected",
         ),
         Key.alt_k_windows: (
-            handle_todo_up,
+            _handle_todo_up,
             "todos, selected",
         ),
     }
     esc_keys: dict[int, tuple[Callable[..., Any], str]] = {
         Key.alt_G: (selected.multiselect_bottom, "len(todos)"),
         Key.alt_g: (selected.multiselect_top, "None"),
-        Key.alt_j: (handle_todo_down, "todos, selected"),
-        Key.alt_k: (handle_todo_up, "todos, selected"),
+        Key.alt_j: (_handle_todo_down, "todos, selected"),
+        Key.alt_k: (_handle_todo_up, "todos, selected"),
         Key.zero: (selected.multiselect_from, "stdscr, 0, len(todos)"),
         Key.one: (selected.multiselect_from, "stdscr, 1, len(todos)"),
         Key.two: (selected.multiselect_from, "stdscr, 2, len(todos)"),
@@ -627,7 +628,7 @@ def main(stdscr: curses.window) -> int:
         Key.nine: (selected.multiselect_from, "stdscr, 9, len(todos)"),
     }
     history.add(todos, int(selected))
-    print_history(history)
+    _print_history(history)
 
     while True:
         edits += 1
@@ -636,12 +637,12 @@ def main(stdscr: curses.window) -> int:
         sublist_top = print_todos(stdscr, todos, selected, sublist_top)
         stdscr.refresh()
         if single_line_state.is_off():
-            todos = handle_new_todo_next(
+            todos = _handle_new_todo_next(
                 stdscr, todos, selected, single_line_state, Todo()
             )
             continue
         if single_line_state.is_once():
-            todos = handle_new_todo_next(
+            todos = _handle_new_todo_next(
                 stdscr,
                 todos,
                 selected,
@@ -650,7 +651,7 @@ def main(stdscr: curses.window) -> int:
             )
             single_line_state.set_on()
             continue
-        next_step = get_main_input(
+        next_step = _get_main_input(
             stdscr,
             todos,
             (keys, esc_keys),
@@ -672,7 +673,7 @@ def main(stdscr: curses.window) -> int:
             Key.u,
         ):  # redo/undo
             history.add(todos, int(selected))
-        print_history(history)
+        _print_history(history)
         edits -= 1
 
 
