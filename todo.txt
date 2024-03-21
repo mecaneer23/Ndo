@@ -6,9 +6,5 @@
   -b allow multiline print
 -m fix: make startup faster
 -r fix: remove silence if dependencies are not installed
--g feat: add unit tests?
-- refactor: only return objects (mostly `TodoList`s) when necessary
-- refactor: remove curses dependency from as many locations as possible
-  - eventual end goal is to make multiple `print_todos` output options
-  - potentially redo `tcurses.py`
-- feat: add buffer to tcurses
+-y feat: add unit tests?
+-g refactor: only return objects (mostly `TodoList`s) when necessary
