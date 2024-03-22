@@ -8,3 +8,4 @@
 -r fix: remove silence if dependencies are not installed
 -y feat: add unit tests?
 -g refactor: only return objects (mostly `TodoList`s) when necessary
+-g feat: use strikethrough ANSI when printing without gui
