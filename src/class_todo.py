@@ -181,7 +181,7 @@ class Todo:
         return Todo(repr(self))
 
     def __repr__(self) -> str:
-        chunks: tuple[Chunk, ...] = (
+        return Chunk.join(
             Chunk(True, self._indent_level * " "),
             Chunk(
                 self._box_char != BoxChar.NONE and not self.is_empty(),
@@ -195,7 +195,6 @@ class Todo:
             ),
             Chunk(True, self._display_text),
         )
-        return "".join([item for condition, item in chunks if condition])
 
 
 class Todos(list[Todo]):

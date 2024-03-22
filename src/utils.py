@@ -21,6 +21,11 @@ class Chunk(NamedTuple):
     condition: bool
     text: str
 
+    @staticmethod
+    def join(*chunks: "Chunk") -> str:
+        """Join chunks into one string"""
+        return "".join([item for condition, item in chunks if condition])
+
 
 class Color(Enum):
     """
@@ -77,7 +82,9 @@ def set_header(stdscr: curses.window, message: str) -> None:
     """
     Set the header to a specific message.
     """
-    stdscr.addstr(0, 0, message.ljust(stdscr.getmaxyx()[1]), curses.A_BOLD | curses.color_pair(2))
+    stdscr.addstr(
+        0, 0, message.ljust(stdscr.getmaxyx()[1]), curses.A_BOLD | curses.color_pair(2)
+    )
 
 
 def overflow(counter: int, minimum: int, maximum: int) -> int:

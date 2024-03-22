@@ -138,21 +138,19 @@ def _get_display_string(
     todo = todos[position]
     if position in highlight and todo.is_empty():
         return "⎯" * 8
-    chunks: tuple[Chunk, ...] = (
+    return Chunk.join(
         Chunk(True, todo.get_indent_level() * " "),
         Chunk(not todo.is_empty() and not SIMPLE_BOXES, todo.get_box()),
         Chunk(not todo.is_empty() and SIMPLE_BOXES, todo.get_simple_box()),
         Chunk(
-            not todo.has_box() and BULLETS, f"{_get_bullet(todo.get_indent_level())} "
+            not todo.has_box() and BULLETS,
+            f"{_get_bullet(todo.get_indent_level())} ",
         ),
         Chunk(ENUMERATE and not RELATIVE_ENUMERATE, f"{todos.index(todo) + 1}. "),
         Chunk(RELATIVE_ENUMERATE, f"{relative + 1}. "),
         Chunk(True, todo.get_display_text()),
         Chunk(width == 0, " "),
-    )
-    return "".join([item for condition, item in chunks if condition])[
-        : width - 1
-    ].ljust(width - 1, " ")
+    )[: width - 1].ljust(width - 1, " ")
 
 
 def _is_within_strikethrough_range(
@@ -209,7 +207,7 @@ def print_todos(
     stdscr: curses.window | None, todos: Todos, selected: Cursor, prev_start: int = 0
 ) -> int:
     """
-    Output list of Todo objects to a curses stdscr.
+    Output list of Todo objects to a curses stdscr or stdout.
 
     Returns a prev_start to be used in the next call to print_todos.
     (Interally calls make_printable_sublist with that value).
