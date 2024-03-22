@@ -24,6 +24,8 @@ else:
 
 
 T = TypeVar("T")
+_ANSI_RESET = "\u001b[0m"
+_ANSI_STRIKETHROUGH = "\033[9m\b"
 
 
 class SublistItems(Generic[T], NamedTuple):
@@ -127,14 +129,14 @@ def _get_height_width(stdscr: curses.window | None, length: int) -> tuple[int, i
     return height, width
 
 
-def _get_display_string(
+def _get_display_string(  # pylint: disable=too-many-arguments
     todos: Todos,
     position: int,
-    relative: int,
+    relative_pos: int,
     highlight: range,
-    height_width: tuple[int, int],
+    width: int,
+    print_to_stdout: bool,
 ) -> str:
-    _, width = height_width
     todo = todos[position]
     if position in highlight and todo.is_empty():
         return "⎯" * 8
@@ -147,8 +149,10 @@ def _get_display_string(
             f"{_get_bullet(todo.get_indent_level())} ",
         ),
         Chunk(ENUMERATE and not RELATIVE_ENUMERATE, f"{todos.index(todo) + 1}. "),
-        Chunk(RELATIVE_ENUMERATE, f"{relative + 1}. "),
+        Chunk(RELATIVE_ENUMERATE, f"{relative_pos + 1}. "),
+        Chunk(print_to_stdout and todo.is_toggled(), _ANSI_STRIKETHROUGH),
         Chunk(True, todo.get_display_text()),
+        Chunk(print_to_stdout, _ANSI_RESET),
         Chunk(width == 0, " "),
     )[: width - 1].ljust(width - 1, " ")
 
@@ -203,6 +207,19 @@ def _print_todo(
         counter += 1
 
 
+def _color_to_ansi(color: int) -> str:
+    ansi_codes: dict[int, int] = {
+        1: 31,
+        2: 32,
+        3: 33,
+        4: 34,
+        5: 35,
+        6: 36,
+        7: 37,
+    }
+    return f"\u001b[{ansi_codes[color]}m"
+
+
 def print_todos(
     stdscr: curses.window | None, todos: Todos, selected: Cursor, prev_start: int = 0
 ) -> int:
@@ -225,29 +242,21 @@ def print_todos(
         [*range(temp_selected - 1, -1, -1), int(selected), *range(0, len(new_todos))],
         enumerate(new_todos),
     ):
-        display_string = _get_display_string(
-            Todos(new_todos), position, relative, highlight, (height, width)
-        )
         if stdscr is None:
             print(
-                "\u001b["
-                + str(
-                    {
-                        1: 31,
-                        2: 32,
-                        3: 33,
-                        4: 34,
-                        5: 35,
-                        6: 36,
-                        7: 37,
-                    }[todo.get_color().as_int()]
-                )
-                + "m"
-                + display_string
-                + "\u001b[0m"
+                _color_to_ansi(todo.get_color().as_int())
+                + _get_display_string(Todos(new_todos), position, relative, range(0), width, True)
             )
             continue
-        _print_todo(stdscr, todo, display_string, position, highlight)
+        _print_todo(
+            stdscr,
+            todo,
+            _get_display_string(
+                Todos(new_todos), position, relative, highlight, width, False
+            ),
+            position,
+            highlight,
+        )
     if stdscr is None:
         return 0
     for position in range(height - len(new_todos) - 1):
