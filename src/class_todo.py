@@ -116,8 +116,6 @@ class Todo:
 
     def is_toggled(self) -> bool:
         """Return True if this Todo is toggled on"""
-        if self._box_char == BoxChar.NONE:
-            return False
         return self._box_char == BoxChar.PLUS
 
     def set_indent_level(self, indent_level: int) -> None:
