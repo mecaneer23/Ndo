@@ -23,7 +23,7 @@ class Chunk(NamedTuple):
 
     @staticmethod
     def join(*chunks: "Chunk") -> str:
-        """Join chunks into one string"""
+        """Join chunks with a True condition into one string"""
         return "".join([item for condition, item in chunks if condition])
 
 
