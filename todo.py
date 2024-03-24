@@ -406,6 +406,7 @@ def _handle_enter(
 
 
 def _print_history(history: UndoRedo) -> None:
+    """Print passed in `history` to `HISTORY_FILE` if `PRINT_HISTORY` is enabled"""
     if PRINT_HISTORY:
         with open(HISTORY_FILE, "w", encoding="utf-8") as log_file:
             print(history, file=log_file)
