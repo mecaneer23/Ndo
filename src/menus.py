@@ -297,7 +297,6 @@ def search_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
             selected.set_to(i)
             return
     selected.set_to(0)
-    return
 
 
 def _chunk_message(message: str, width: int) -> Iterable[str]:
