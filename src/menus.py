@@ -317,7 +317,7 @@ def _chunk_message(message: str, width: int) -> Iterable[str]:
             continue
 
 
-def alert_menu(stdscr: curses.window, message: str) -> int:
+def alert(stdscr: curses.window, message: str) -> int:
     """
     Show a box with a message, similar to a JavaScript alert.
 
