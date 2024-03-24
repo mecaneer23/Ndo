@@ -12,3 +12,5 @@
 +c feat: add alert menu
   -c display one todo at a time as an alternative to magnify
   -c display prompts instead of failing silently if dependencies aren't installed
+  -c update readme to include new commands (backspace, this, etc)
+-b fix: overflow when appending to center of todo
