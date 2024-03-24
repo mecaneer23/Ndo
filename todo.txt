@@ -9,6 +9,6 @@
 -y feat: add unit tests?
 -g refactor: only return objects (mostly `TodoList`s) when necessary
 -r fix: remove silence if dependencies are not installed
--c feat: add alert menu
++c feat: add alert menu
   -c display one todo at a time as an alternative to magnify
   -c display prompts instead of failing silently if dependencies aren't installed

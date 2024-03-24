@@ -2,7 +2,8 @@
 Various helpful menus and their helper functions.
 """
 
-from typing import Callable
+from itertools import tee
+from typing import Callable, Iterable
 
 try:
     from pyfiglet import figlet_format as big
@@ -297,3 +298,44 @@ def search_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
             return
     selected.set_to(0)
     return
+
+
+def _chunk_message(message: str, width: int) -> Iterable[str]:
+    left = 0
+    right = width + 1
+    while True:
+        right -= 1
+        if right >= len(message):
+            yield message[left:]
+            break
+        if message[right] == " ":
+            yield message[left:right]
+            left = right + 1
+            right += width
+            continue
+        if right == left:
+            yield message[left : left + width]
+            continue
+
+
+def alert_menu(stdscr: curses.window, message: str) -> int:
+    """
+    Show a box with a message, similar to a JavaScript alert.
+
+    Press any key to close (pressed key is returned).
+    """
+    set_header(stdscr, "Alert!")
+    stdscr.refresh()
+    border_width = 2
+    max_y, max_x = stdscr.getmaxyx()
+    height_chunk, width_chunk, chunks = tee(
+        _chunk_message(message, max_x * 3 // 4 - border_width), 3
+    )
+    width = len(max(width_chunk, key=len)) + border_width
+    height = sum(1 for _ in height_chunk) + border_width
+    win = curses.newwin(height, width, max_y // 2 - height, max_x // 8)
+    win.box()
+    for index, chunk in enumerate(chunks, start=1):
+        win.addstr(index, border_width // 2, chunk)
+    win.refresh()
+    return stdscr.getch()
