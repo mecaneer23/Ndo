@@ -71,6 +71,7 @@ Options:
 | <kbd>/</kbd>                                                             | Search for a sequence               |
 | <kbd>Alt</kbd>+<kbd>g</kbd>/<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>g</kbd> | Select all todos above/below        |
 | <kbd>Alt</kbd>+<kbd>k</kbd>/<kbd>j</kbd>                                 | Move todo up and down               |
+| <kbd>Backspace</kbd>                                                     | Combine with previous todo          |
 | <kbd>Ctrl</kbd>+<kbd>a</kbd>                                             | Select all todos                    |
 | <kbd>Ctrl</kbd>+<kbd>r</kbd>                                             | Redo change                         |
 | <kbd>Ctrl</kbd>+<kbd>x</kbd>, <kbd>k</kbd>                               | Toggle `toggle` and `entry` modes   |
@@ -80,6 +81,7 @@ Options:
 | <kbd>Shift</kbd>+<kbd>k</kbd>/<kbd>j</kbd>                               | Select/deselect multiple todos      |
 | <kbd>Shift</kbd>+<kbd>o</kbd>                                            | Add a todo on current line          |
 | <kbd>Tab</kbd>/<kbd>Shift</kbd>+<kbd>Tab</kbd>                           | Indent/unindent selected todo       |
+| <kbd>a</kbd>                                                             | Display selected todo as an alert   |
 | <kbd>b</kbd>                                                             | Make selected todo bigger (magnify) |
 | <kbd>c</kbd>                                                             | Change selected todo color          |
 | <kbd>d</kbd>                                                             | Remove selected todo                |

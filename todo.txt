@@ -8,7 +8,7 @@
   -m depends on how the program is run, not a huge issue
 -y feat: add unit tests?
 -g refactor: only return objects (mostly `TodoList`s) when necessary
--c feat: use menus.alert as an alternative to magnify
-  -c update readme to include new commands (backspace, this, etc)
++c feat: use menus.alert as an alternative to magnify
+  +c update readme to include new commands (backspace, this, etc)
 -b fix: overflow when appending to center of todo
 -b fix: keep color on overflow when appending to todo

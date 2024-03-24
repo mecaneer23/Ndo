@@ -326,7 +326,7 @@ def alert(stdscr: curses.window, message: str) -> int:
 
     Press any key to close (pressed key is returned).
     """
-    set_header(stdscr, "Alert!")
+    set_header(stdscr, "Alert! Press any key to close")
     stdscr.refresh()
     border_width = 2
     max_y, max_x = stdscr.getmaxyx()

@@ -27,6 +27,7 @@ from src.get_todo import get_todo
 from src.io import file_string_to_todos, read_file, update_file
 from src.keys import Key
 from src.menus import (
+    alert,
     color_menu,
     get_newwin,
     help_menu,
@@ -405,6 +406,12 @@ def _handle_enter(
     return selected.todo_set_to(new_todo_next(stdscr, todos, int(selected), mode=mode))
 
 
+def _handle_alert(stdscr: curses.window, todos: Todos, selected: int) -> None:
+    """Display the selected todo in an alert window"""
+
+    alert(stdscr, todos[selected].get_display_text())
+
+
 def _print_history(history: UndoRedo) -> None:
     """Print passed in `history` to `HISTORY_FILE` if `PRINT_HISTORY` is enabled"""
     if PRINT_HISTORY:
@@ -431,8 +438,8 @@ def _get_main_input(
     stdscr: curses.window,
     todos: Todos,
     keys_esckeys: tuple[
-        dict[int, tuple[Callable[..., Any], str]],
-        dict[int, tuple[Callable[..., Any], str]],
+        dict[int, tuple[Callable[..., Todos | None], str]],
+        dict[int, tuple[Callable[..., Todos | None], str]],
     ],
     possible_args: dict[str, Any],
 ) -> int | Todos:
@@ -585,6 +592,7 @@ def main(stdscr: curses.window) -> int:
         Key.J: (selected.multiselect_down, "len(todos)"),
         Key.K: (selected.multiselect_up, "None"),
         Key.O: (new_todo_current, "stdscr, todos, int(selected)"),
+        Key.a: (_handle_alert, "stdscr, todos, int(selected)"),
         Key.b: (magnify_menu, "stdscr, todos, selected"),
         Key.c: (color_todo, "stdscr, todos, selected"),
         Key.d: (_handle_delete_todo, "stdscr, todos, selected, copied_todo"),

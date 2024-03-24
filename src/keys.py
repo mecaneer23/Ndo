@@ -50,6 +50,7 @@ class Key:
     K = 75
     O = 79
     indent_dedent = 90
+    a = 97
     b = 98
     c = 99
     d = 100

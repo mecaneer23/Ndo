@@ -8,7 +8,7 @@ from src.tcurses import window
 from src.working_initscr import wrapper
 
 CONTROLS_BEGIN_INDEX: int = 68
-CONTROLS_END_INDEX: int = 96
+CONTROLS_END_INDEX: int = 98
 
 _DEFAULT_BULLETS: bool = False
 _DEFAULT_ENUMERATE: bool = False
