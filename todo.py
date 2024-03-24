@@ -292,7 +292,7 @@ def _handle_delete_todo(
     stdscr: curses.window, todos: Todos, selected: Cursor, copied_todo: Todo
 ) -> Todos:
     if len(todos) > 0 and CLIPBOARD_EXISTS:
-        copy_todo(todos, selected, copied_todo)
+        copy_todo(stdscr, todos, selected, copied_todo)
     return selected.todo_set_to(delete_todo(stdscr, todos, selected))
 
 
@@ -597,7 +597,7 @@ def main(stdscr: curses.window) -> int:
         Key.p: (_handle_paste, "stdscr, todos, selected, copied_todo"),
         Key.s: (_handle_sort_menu, "stdscr, todos, selected"),
         Key.u: (_handle_undo, "selected, history"),
-        Key.y: (copy_todo, "todos, selected, copied_todo"),
+        Key.y: (copy_todo, "stdscr, todos, selected, copied_todo"),
         Key.down: (_handle_cursor_down, "todos, selected"),
         Key.up: (_handle_cursor_up, "todos, selected"),
         Key.delete: (_toggle_todo_note, "todos, selected"),

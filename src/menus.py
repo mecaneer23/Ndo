@@ -105,7 +105,7 @@ def magnify_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
     The magnified content is scrollable if it should be.
     """
     if not FIGLET_FORMAT_EXISTS:
-        alert(stdscr, "Magnify dependency not available")
+        alert(stdscr, "Magnify dependency not available: try running `pip install pyfiglet`")
         return
     stdscr.clear()
     set_header(stdscr, "Magnifying...")
