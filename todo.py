@@ -498,7 +498,7 @@ def update_modified_time(prev_time: float, todos: Todos) -> tuple[Todos, float]:
 
 def join_lines(todos: Todos, selected: Cursor) -> None:
     """Combine current line with previous line by concatenation."""
-    if len(selected) > 1:
+    if len(selected) > 1 or len(todos) < 2:
         return
 
     prev_todo = int(selected) - 1

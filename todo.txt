@@ -10,4 +10,4 @@
 -g refactor: only return objects (mostly `TodoList`s) when necessary
 -b fix: overflow when appending to center of todo
 -b fix: keep color on overflow when appending to todo
--c fix: backspace on first todo
++c fix: backspace on first todo
