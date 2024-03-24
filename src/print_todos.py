@@ -245,7 +245,9 @@ def print_todos(
         if stdscr is None:
             print(
                 _color_to_ansi(todo.get_color().as_int())
-                + _get_display_string(Todos(new_todos), position, relative, range(0), width, True)
+                + _get_display_string(
+                    Todos(new_todos), position, relative, range(0), width, True
+                )
             )
             continue
         _print_todo(
