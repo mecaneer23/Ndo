@@ -11,3 +11,4 @@
 -c feat: use menus.alert as an alternative to magnify
   -c update readme to include new commands (backspace, this, etc)
 -b fix: overflow when appending to center of todo
+-b fix: keep color on overflow when appending to todo
