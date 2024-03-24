@@ -6,7 +6,7 @@ from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, Todo
 from src.get_args import INDENT, TKINTER_GUI
 from src.keys import Key
-from src.utils import set_header
+from src.utils import Color, set_header
 
 if TKINTER_GUI:
     import src.tcurses as curses
@@ -270,14 +270,14 @@ def _get_chars_position(
     return _handle_ascii(chars, position, input_char)
 
 
-def _set_once(mode: SingleLineModeImpl, chars: _Chars) -> str:
+def _set_once(mode: SingleLineModeImpl, chars: _Chars, color: Color) -> str:
     mode.set_once()
     two_lines = "".join(chars).rsplit(None, 1)
     if len(two_lines) == 1:
         line = two_lines[0]
-        mode.set_extra_data(line[-1])
+        mode.set_extra_data(f"{color.as_char()} {line[-1]}")
         return line[:-1]
-    mode.set_extra_data(two_lines[1])
+    mode.set_extra_data(f"{color.as_char()} {two_lines[1]}")
     return two_lines[0]
 
 
@@ -343,7 +343,7 @@ def get_todo(
     }
     while True:
         if len(chars) + 1 >= win.getmaxyx()[1] - 1:
-            return todo.set_display_text(_set_once(mode, chars))
+            return todo.set_display_text(_set_once(mode, chars, todo.get_color()))
         if position == len(chars):
             win.addch(1, len(chars) + 1, "█")
         for i, char in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
