@@ -15,7 +15,7 @@ from src.class_todo import Todo, TodoList, Todos
 from src.cursor_movement import cursor_down
 from src.get_args import FILENAME, TKINTER_GUI
 from src.io import update_file
-from src.menus import alert
+from src.utils import alert
 
 if TKINTER_GUI:
     import src.tcurses as curses

@@ -40,6 +40,8 @@ class Key:
     eight = 56
     nine = 57
     semi_colon = 59
+    up_arrow = 65
+    down_arrow = 66
     right_arrow = 67
     left_arrow = 68
     end = 70

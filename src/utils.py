@@ -3,7 +3,8 @@ General utilities, useful across multiple other files
 """
 
 from enum import Enum
-from typing import NamedTuple
+from itertools import tee
+from typing import Iterable, NamedTuple
 
 from src.get_args import TKINTER_GUI
 
@@ -98,3 +99,44 @@ def overflow(counter: int, minimum: int, maximum: int) -> int:
     if counter < minimum:
         return maximum - (minimum - counter)
     return counter
+
+
+def _chunk_message(message: str, width: int) -> Iterable[str]:
+    left = 0
+    right = width + 1
+    while True:
+        right -= 1
+        if right >= len(message):
+            yield message[left:]
+            break
+        if message[right] == " ":
+            yield message[left:right]
+            left = right + 1
+            right += width
+            continue
+        if right == left:
+            yield message[left : left + width]
+            continue
+
+
+def alert(stdscr: curses.window, message: str) -> int:
+    """
+    Show a box with a message, similar to a JavaScript alert.
+
+    Press any key to close (pressed key is returned).
+    """
+    set_header(stdscr, "Alert! Press any key to close")
+    stdscr.refresh()
+    border_width = 2
+    max_y, max_x = stdscr.getmaxyx()
+    height_chunk, width_chunk, chunks = tee(
+        _chunk_message(message, max_x * 3 // 4 - border_width), 3
+    )
+    width = len(max(width_chunk, key=len)) + border_width
+    height = sum(1 for _ in height_chunk) + border_width
+    win = curses.newwin(height, width, max_y // 2 - height, max_x // 2 - width // 2)
+    win.box()
+    for index, chunk in enumerate(chunks, start=1):
+        win.addstr(index, border_width // 2, chunk)
+    win.refresh()
+    return stdscr.getch()
