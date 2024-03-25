@@ -6,7 +6,7 @@ from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, Todo
 from src.get_args import INDENT, TKINTER_GUI
 from src.keys import Key
-from src.utils import Color, set_header
+from src.utils import Color, alert, set_header
 
 if TKINTER_GUI:
     import src.tcurses as curses
@@ -179,13 +179,26 @@ def _handle_end(chars: _Chars) -> _EditString:
     return _EditString(chars, len(chars))
 
 
+def _passthrough(
+    stdscr: curses.window, edit_string: _EditString, key_name: str
+) -> _EditString:
+    alert(stdscr, f"Key `{key_name}` is not supported")
+    return edit_string
+
+
+def _handle_new_todo(chars: _Chars, position: int, mode: SingleLineModeImpl) -> str:
+    mode.set_once()
+    mode.set_extra_data("".join(chars[position:]))
+    return "".join(chars[:position])
+
+
 def _handle_escape(
     stdscr_win: tuple[curses.window, curses.window],
     chars: _Chars,
     position: int,
     mode: SingleLineModeImpl,
     todo: Todo,
-) -> _EditString | None:
+) -> _EditString | None | str:
     stdscr_win[1].nodelay(True)
     if stdscr_win[1].getch() == -1:  # check for escape
         mode.set_on()
@@ -195,9 +208,16 @@ def _handle_escape(
         subch = stdscr_win[1].getch()
     except KeyboardInterrupt:
         return None
+    if subch == Key.down_arrow:
+        return _handle_new_todo(chars, position, mode)
+
     subch_table: dict[int, tuple[Callable[..., _EditString], tuple[Any, ...]]] = {
         Key.left_arrow: (_handle_left_arrow, (chars, position)),
         Key.right_arrow: (_handle_right_arrow, (chars, position)),
+        Key.up_arrow: (
+            _passthrough,
+            (stdscr_win[0], _EditString(chars, position), "up arrow"),
+        ),
         Key.modifier_delete: (
             _handle_delete_modifiers,
             (stdscr_win, todo, chars, position),
@@ -258,13 +278,18 @@ def _get_chars_position(
     stdscr_win: tuple[curses.window, curses.window],
     chars_position_todo: tuple[_Chars, int, Todo],
     mode: SingleLineModeImpl,
-    backspace_table: dict[int, Callable[..., _EditString]],
-) -> _EditString | None:
+) -> _EditString | None | str:
     chars, position, todo = chars_position_todo
     if input_char == Key.escape:
         return _handle_escape(stdscr_win, chars, position, mode, todo)
     if input_char == Key.tab:
         return _handle_indent_dedent(stdscr_win[0], todo, "indent", chars, position)
+    backspace_table = {
+        Key.backspace: _handle_backspace,
+        Key.backspace_: _handle_backspace,
+        Key.backspace__: _handle_backspace,
+        Key.ctrl_backspace: _handle_ctrl_backspace,
+    }
     if input_char in backspace_table:
         return backspace_table[input_char](chars, position)
     return _handle_ascii(chars, position, input_char)
@@ -335,12 +360,6 @@ def get_todo(
     position = len(chars)
     win.box()
     win.nodelay(False)
-    backspace_table = {
-        Key.backspace: _handle_backspace,
-        Key.backspace_: _handle_backspace,
-        Key.backspace__: _handle_backspace,
-        Key.ctrl_backspace: _handle_ctrl_backspace,
-    }
     while True:
         if len(chars) + 1 >= win.getmaxyx()[1] - 1:
             return todo.set_display_text(_set_once(mode, chars, todo.get_color()))
@@ -360,10 +379,13 @@ def get_todo(
             mode.toggle()
             break
         next_step = _get_chars_position(
-            input_char, (stdscr, win), (chars, position, todo), mode, backspace_table
+            input_char, (stdscr, win), (chars, position, todo), mode
         )
         if next_step is None:
             return original
+        if isinstance(next_step, str):
+            mode.set_extra_data(f"{todo.get_color().as_char()} {mode.get_extra_data()}")
+            return todo.set_display_text(next_step)
         chars, position = next_step
 
     return todo.set_display_text("".join(chars))

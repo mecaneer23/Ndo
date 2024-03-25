@@ -27,7 +27,6 @@ from src.get_todo import get_todo
 from src.io import file_string_to_todos, read_file, update_file
 from src.keys import Key
 from src.menus import (
-    alert,
     color_menu,
     get_newwin,
     help_menu,
@@ -36,7 +35,7 @@ from src.menus import (
     sort_menu,
 )
 from src.print_todos import print_todos
-from src.utils import clamp, set_header
+from src.utils import alert, clamp, set_header
 
 if TKINTER_GUI:
     import src.tcurses as curses

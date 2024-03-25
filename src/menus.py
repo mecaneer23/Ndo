@@ -2,8 +2,7 @@
 Various helpful menus and their helper functions.
 """
 
-from itertools import tee
-from typing import Callable, Iterable
+from typing import Callable
 
 try:
     from pyfiglet import figlet_format as big
@@ -26,7 +25,7 @@ from src.io import update_file
 from src.keys import Key
 from src.md_to_py import md_table_to_lines
 from src.print_todos import make_printable_sublist
-from src.utils import Color, clamp, overflow, set_header
+from src.utils import Color, alert, clamp, overflow, set_header
 
 if TKINTER_GUI:
     import src.tcurses as curses
@@ -300,44 +299,3 @@ def search_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
             selected.set_to(i)
             return
     selected.set_to(0)
-
-
-def _chunk_message(message: str, width: int) -> Iterable[str]:
-    left = 0
-    right = width + 1
-    while True:
-        right -= 1
-        if right >= len(message):
-            yield message[left:]
-            break
-        if message[right] == " ":
-            yield message[left:right]
-            left = right + 1
-            right += width
-            continue
-        if right == left:
-            yield message[left : left + width]
-            continue
-
-
-def alert(stdscr: curses.window, message: str) -> int:
-    """
-    Show a box with a message, similar to a JavaScript alert.
-
-    Press any key to close (pressed key is returned).
-    """
-    set_header(stdscr, "Alert! Press any key to close")
-    stdscr.refresh()
-    border_width = 2
-    max_y, max_x = stdscr.getmaxyx()
-    height_chunk, width_chunk, chunks = tee(
-        _chunk_message(message, max_x * 3 // 4 - border_width), 3
-    )
-    width = len(max(width_chunk, key=len)) + border_width
-    height = sum(1 for _ in height_chunk) + border_width
-    win = curses.newwin(height, width, max_y // 2 - height, max_x // 2 - width // 2)
-    win.box()
-    for index, chunk in enumerate(chunks, start=1):
-        win.addstr(index, border_width // 2, chunk)
-    win.refresh()
-    return stdscr.getch()
