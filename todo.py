@@ -564,7 +564,7 @@ def main(stdscr: curses.window) -> int:
     file_modified_time = get_file_modified_time(FILENAME)
     # if adding a new feature that updates `todos`,
     # make sure it also calls update_file()
-    keys: dict[int, tuple[Callable[..., Any], str]] = {
+    keys: dict[int, tuple[Callable[..., Todos | None], str]] = {
         Key.ctrl_a: (selected.multiselect_all, "len(todos)"),
         Key.backspace: (join_lines, "todos, selected"),
         Key.backspace_: (join_lines, "todos, selected"),
@@ -619,7 +619,7 @@ def main(stdscr: curses.window) -> int:
             "todos, selected",
         ),
     }
-    esc_keys: dict[int, tuple[Callable[..., Any], str]] = {
+    esc_keys: dict[int, tuple[Callable[..., Todos | None], str]] = {
         Key.alt_G: (selected.multiselect_bottom, "len(todos)"),
         Key.alt_g: (selected.multiselect_top, "None"),
         Key.alt_j: (_handle_todo_down, "todos, selected"),
