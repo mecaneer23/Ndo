@@ -3,7 +3,7 @@
 
 from pathlib import Path
 from sys import exit as sys_exit
-from typing import Any, Callable
+from typing import Callable, TypeAlias
 
 from src.class_cursor import Cursor, Positions
 from src.class_history import UndoRedo
@@ -47,6 +47,11 @@ else:
 
 PRINT_HISTORY = False
 HISTORY_FILE = "debugging/log.txt"
+# Migrate the following once Python 3.12 is more common
+# type PossibleArgs = ...
+PossibleArgs: TypeAlias = (
+    Todo | int | UndoRedo | SingleLineModeImpl | Cursor | curses.window | Todos
+)
 
 
 def get_file_modified_time(filename: Path) -> float:
@@ -421,9 +426,9 @@ def _print_history(history: UndoRedo) -> None:
 def _get_possible_todos(
     func: Callable[..., Todos | None],
     args: str,
-    possible_args: dict[str, Any],
+    possible_args: dict[str, PossibleArgs],
 ) -> Todos | None:
-    params: list[Any] = []
+    params: list[PossibleArgs] = []
     for arg in args.split(", "):
         if arg.isdigit():
             params.append(int(arg))
@@ -440,7 +445,7 @@ def _get_main_input(
         dict[int, tuple[Callable[..., Todos | None], str]],
         dict[int, tuple[Callable[..., Todos | None], str]],
     ],
-    possible_args: dict[str, Any],
+    possible_args: dict[str, PossibleArgs],
 ) -> int | Todos:
     try:
         key: int = stdscr.getch()
