@@ -15,6 +15,7 @@ else:
 
 
 class _Chars(list[str]):
+    """A list of characters; an alias for `list[str]`"""
     def __init__(self, iterable: Iterable[str]):
         super().__init__(iterable)
 
