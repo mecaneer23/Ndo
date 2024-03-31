@@ -177,9 +177,13 @@ def _parse_filename(filename: str) -> Path:
 
 
 def _get_header(title: list[str]) -> str:
-    if title == _DEFAULT_HEADER:
-        return FILENAME.as_posix()
-    return " ".join(title)
+    if title != _DEFAULT_HEADER:
+        return " ".join(title)
+    if FILENAME.exists():
+        with FILENAME.open(encoding="utf-8") as file:
+            if file.read(2) == "# ":
+                return file.readline().strip("\n")
+    return FILENAME.as_posix()
 
 
 command_line_args = _get_args()

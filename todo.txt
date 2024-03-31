@@ -8,5 +8,3 @@
   -m depends on how the program is run, not a huge issue
 -y feat: add unit tests?
 -g refactor: only return objects (mostly `TodoList`s) when necessary
--b feat: use first line of file as header if header isn't specified and first line begins with `# `
-  -b make sure entire file is still displayed
