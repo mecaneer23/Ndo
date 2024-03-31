@@ -13,7 +13,7 @@ CONTROLS_END_INDEX: int = 98
 _DEFAULT_BULLETS: bool = False
 _DEFAULT_ENUMERATE: bool = False
 _DEFAULT_FILENAME: Path = Path("todo.txt")
-_DEFAULT_HEADER: str = ""
+_DEFAULT_HEADER: list[str] = [""]
 _DEFAULT_HELP_FILE: Path = Path(__file__).parent.parent.joinpath("README.md").absolute()
 _DEFAULT_INDENT: int = 2
 _DEFAULT_NO_GUI: bool = False
@@ -25,6 +25,25 @@ _DEFAULT_TKINTER_GUI = False
 _CHECKBOX_OPTIONS = ("🗹", "☑")
 
 
+class TypedNamespace(Namespace):  # pylint: disable=too-few-public-methods
+    """
+    Add types to expected Namespace attributes
+    """
+
+    bullet_display: bool
+    checkbox: str
+    enumerate: bool
+    filename: str
+    title: list[str]
+    help_file: Path
+    indentation_level: int
+    no_gui: bool
+    relative_enumeration: bool
+    simple_boxes: bool
+    strikethrough: bool
+    tk_gui: bool
+
+
 def _get_checkbox(win: window) -> str:
     try:
         win.addch(0, 0, _CHECKBOX_OPTIONS[0])
@@ -34,7 +53,7 @@ def _get_checkbox(win: window) -> str:
         return _CHECKBOX_OPTIONS[1]
 
 
-def _get_args() -> Namespace:
+def _get_args() -> TypedNamespace:
     parser = ArgumentParser(
         description="Ndo is a todo list program to help you manage your todo lists",
         add_help=False,
@@ -142,15 +161,12 @@ def _get_args() -> Namespace:
     parser.add_argument(
         "--title",
         "-t",
-        type=str,
         nargs="+",
         default=_DEFAULT_HEADER,
         help="Allows passing alternate header.\
             Default is filename.",
     )
-    args = vars(parser.parse_args())
-    args["checkbox"] = wrapper(_get_checkbox) if not args["simple_boxes"] else ""
-    return Namespace(**args)
+    return parser.parse_args(namespace=TypedNamespace())
 
 
 def _parse_filename(filename: str) -> Path:
@@ -160,16 +176,18 @@ def _parse_filename(filename: str) -> Path:
     return path
 
 
+def _get_header(title: list[str]) -> str:
+    if title == _DEFAULT_HEADER:
+        return FILENAME.as_posix()
+    return " ".join(title)
+
+
 command_line_args = _get_args()
 BULLETS: bool = command_line_args.bullet_display
-CHECKBOX: str = command_line_args.checkbox
+CHECKBOX: str = wrapper(_get_checkbox) if not command_line_args.simple_boxes else ""
 ENUMERATE: bool = command_line_args.enumerate
 FILENAME: Path = _parse_filename(command_line_args.filename)
-HEADER: str = (
-    FILENAME.as_posix()
-    if command_line_args.title == _DEFAULT_HEADER
-    else " ".join(command_line_args.title)
-)
+HEADER: str = _get_header(command_line_args.title)
 HELP_FILE: Path = Path(command_line_args.help_file)
 INDENT: int = command_line_args.indentation_level
 NO_GUI: bool = command_line_args.no_gui
