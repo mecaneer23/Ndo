@@ -152,6 +152,7 @@ def _get_display_string(  # pylint: disable=too-many-arguments
         Chunk(RELATIVE_ENUMERATE, f"{relative_pos + 1}. "),
         Chunk(print_to_stdout and todo.is_toggled(), _ANSI_STRIKETHROUGH),
         Chunk(True, todo.get_display_text()),
+        Chunk(todo.is_folded_parent(), "› ..."),
         Chunk(print_to_stdout, _ANSI_RESET),
         Chunk(width == 0, " "),
     )[: width - 1].ljust(width - 1, " ")
@@ -174,14 +175,20 @@ def _print_todo(
     stdscr: curses.window,
     todo: Todo,
     display_string: str,
-    position: int,
+    todo_print_position: tuple[int, int],
     highlight: range,
 ) -> None:
+    """
+    todo_print_position is a tuple containing the
+    todo_position and print_position, which are
+    normally the same
+    """
     counter = 0
+    position, print_position = todo_print_position
     while counter < len(display_string) - 1:
         try:
             stdscr.addch(
-                position + 1,
+                print_position + 1,
                 counter,
                 display_string[counter],
                 curses.color_pair(todo.get_color().as_int() or Color.WHITE.as_int())
@@ -203,7 +210,7 @@ def _print_todo(
                 counter, todo, display_string, stdscr.getmaxyx()[1]
             )
         ):
-            stdscr.addch(position + 1, counter, "\u0336")
+            stdscr.addch(print_position + 1, counter, "\u0336")
         counter += 1
 
 
@@ -238,10 +245,12 @@ def print_todos(
         height - 1, list(todos), int(selected), prev_start=prev_start
     )
     highlight = range(temp_selected, len(selected) + temp_selected)
+    print_position = -1
     for relative, (position, todo) in zip(
         [*range(temp_selected - 1, -1, -1), int(selected), *range(0, len(new_todos))],
         enumerate(new_todos),
     ):
+        print_position += 1
         if stdscr is None:
             print(
                 _color_to_ansi(todo.get_color().as_int())
@@ -250,15 +259,18 @@ def print_todos(
                 )
             )
             continue
-        _print_todo(
-            stdscr,
-            todo,
-            _get_display_string(
-                Todos(new_todos), position, relative, highlight, width, False
-            ),
-            position,
-            highlight,
-        )
+        if not todo.is_folded():
+            _print_todo(
+                stdscr,
+                todo,
+                _get_display_string(
+                    Todos(new_todos), position, relative, highlight, width, False
+                ),
+                (position, print_position),
+                highlight,
+            )
+            continue
+        print_position -= 1
     if stdscr is None:
         return 0
     for position in range(height - len(new_todos) - 1):

@@ -52,6 +52,8 @@ class Key:
     K = 75
     O = 79
     indent_dedent = 90
+    open_bracket = 91
+    close_bracket = 93
     a = 97
     b = 98
     c = 99

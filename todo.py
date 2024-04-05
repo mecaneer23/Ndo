@@ -8,7 +8,7 @@ from typing import Callable, TypeAlias
 from src.class_cursor import Cursor, Positions
 from src.class_history import UndoRedo
 from src.class_mode import SingleLineMode, SingleLineModeImpl
-from src.class_todo import BoxChar, Todo, TodoList, Todos
+from src.class_todo import BoxChar, FoldedState, Todo, TodoList, Todos
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
 from src.cursor_movement import (
     cursor_bottom,
@@ -401,6 +401,24 @@ def _handle_digits(
     )
 
 
+def _set_folded(todos: Todos, selected: int) -> None:
+    """
+    Set the selected todo as a folder parent
+    and set all todos indented below it as folded
+    """
+    parent = todos[selected]
+    index = selected + 1
+    if todos[index].get_indent_level() > parent.get_indent_level():
+        parent.set_folded(FoldedState.PARENT)
+        todos[index].set_folded(FoldedState.FOLDED)
+    while True:
+        index += 1
+        if todos[index].get_indent_level() > parent.get_indent_level():
+            todos[index].set_folded(FoldedState.FOLDED)
+            continue
+        break
+
+
 def _handle_enter(
     stdscr: curses.window, todos: Todos, selected: Cursor, mode: SingleLineModeImpl
 ) -> Todos:
@@ -596,6 +614,7 @@ def main(stdscr: curses.window) -> int:
         Key.J: (selected.multiselect_down, "len(todos)"),
         Key.K: (selected.multiselect_up, "None"),
         Key.O: (new_todo_current, "stdscr, todos, int(selected)"),
+        # Key.open_bracket: (_set_folded, "todos, int(selected)"),
         Key.a: (_handle_alert, "stdscr, todos, int(selected)"),
         Key.b: (magnify_menu, "stdscr, todos, selected"),
         Key.c: (color_todo, "stdscr, todos, selected"),
