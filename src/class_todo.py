@@ -10,6 +10,14 @@ from src.get_args import CHECKBOX, INDENT
 from src.utils import Chunk, Color
 
 
+class FoldedState(Enum):
+    """(FOLDED, DEFAULT, PARENT)"""
+
+    FOLDED = 0
+    DEFAULT = 1
+    PARENT = 2
+
+
 class BoxChar(Enum):
     """(MINUS -, PLUS +, NONE )"""
 
@@ -48,6 +56,7 @@ class Todo:
         self._display_text: str = ""
         self._text: str = ""
         self._indent_level: int = 0
+        self._folded: FoldedState = FoldedState.DEFAULT
         self.set_text(text)
 
     def _init_box_char(self, pointer: int) -> tuple[BoxChar, int]:
@@ -113,6 +122,18 @@ class Todo:
         self._display_text = display_text
         self._text = repr(self)
         return self
+
+    def set_folded(self, state: FoldedState) -> None:
+        """Setter for folded state"""
+        self._folded = state
+
+    def is_folded(self) -> bool:
+        """Return if folded state is folded"""
+        return self._folded == FoldedState.FOLDED
+
+    def is_folded_parent(self) -> bool:
+        """Return whether folded state is parent"""
+        return self._folded == FoldedState.PARENT
 
     def is_toggled(self) -> bool:
         """Return True if this Todo is toggled on"""
