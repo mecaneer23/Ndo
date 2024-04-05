@@ -8,3 +8,4 @@
   -m depends on how the program is run, not a huge issue
 -y feat: add unit tests?
 -g refactor: only return objects (mostly `TodoList`s) when necessary
+-g feat: use ctrl+shift+[ and ctrl+shift+] to fold/unfold
