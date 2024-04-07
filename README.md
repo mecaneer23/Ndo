@@ -96,6 +96,10 @@ Options:
 | <kbd>u</kbd>                                                             | Undo change                         |
 | <kbd>y</kbd>                                                             | Copy todo to clipboard              |
 
+## View a todo list online
+
+Go to [this link](https://mecaneer23.github.io/Ndo/web-display) and upload your file
+
 ## Contributing
 
 Use the following linters and formatters:
