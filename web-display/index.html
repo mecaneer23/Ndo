@@ -66,7 +66,7 @@
                 parent.removeChild(parent.lastChild);
             }
             let file = event.target.files[0];
-            document.title = file.name;
+            document.title = "Viewing " + file.name;
             let reader = new FileReader();
             reader.onload = function (event) {
                 colorizeAndOutput(event.target.result);
