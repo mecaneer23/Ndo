@@ -419,6 +419,25 @@ def _set_folded(todos: Todos, selected: int) -> None:
         break
 
 
+def _unset_folded(todos: Todos, selected: int) -> None:
+    """
+    If the selected todo is a folder parent,
+    unfold the selected todo and all folded
+    todos below it.
+    """
+    parent = todos[selected]
+    if not parent.is_folded_parent():
+        return
+    parent.set_folded(FoldedState.DEFAULT)
+    index = selected
+    while True:
+        index += 1
+        if todos[index].get_indent_level() > parent.get_indent_level():
+            todos[index].set_folded(FoldedState.DEFAULT)
+            continue
+        break
+
+
 def _handle_enter(
     stdscr: curses.window, todos: Todos, selected: Cursor, mode: SingleLineModeImpl
 ) -> Todos:
@@ -615,6 +634,7 @@ def main(stdscr: curses.window) -> int:
         Key.K: (selected.multiselect_up, "None"),
         Key.O: (new_todo_current, "stdscr, todos, int(selected)"),
         # Key.open_bracket: (_set_folded, "todos, int(selected)"),
+        # Key.close_bracket: (_unset_folded, "todos, int(selected)"),
         Key.a: (_handle_alert, "stdscr, todos, int(selected)"),
         Key.b: (magnify_menu, "stdscr, todos, selected"),
         Key.c: (color_todo, "stdscr, todos, selected"),
