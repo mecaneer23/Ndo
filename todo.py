@@ -420,9 +420,10 @@ def _set_folded(todos: Todos, selected: int) -> None:
     """
     parent = todos[selected]
     index = selected + 1
-    if todos[index].get_indent_level() > parent.get_indent_level():
-        parent.set_folded(FoldedState.PARENT)
-        todos[index].set_folded(FoldedState.FOLDED)
+    if todos[index].get_indent_level() <= parent.get_indent_level():
+        return
+    parent.set_folded(FoldedState.PARENT)
+    todos[index].set_folded(FoldedState.FOLDED)
     _set_fold_state_under(FoldedState.FOLDED, parent.get_indent_level(), todos, index)
 
 
