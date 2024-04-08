@@ -401,6 +401,18 @@ def _handle_digits(
     )
 
 
+def _set_fold_state_under(
+    state: FoldedState, parent_indent_level: int, todos: Todos, start_index: int
+) -> None:
+    index = start_index
+    while True:
+        index += 1
+        if todos[index].get_indent_level() > parent_indent_level:
+            todos[index].set_folded(state)
+            continue
+        break
+
+
 def _set_folded(todos: Todos, selected: int) -> None:
     """
     Set the selected todo as a folder parent
@@ -411,12 +423,7 @@ def _set_folded(todos: Todos, selected: int) -> None:
     if todos[index].get_indent_level() > parent.get_indent_level():
         parent.set_folded(FoldedState.PARENT)
         todos[index].set_folded(FoldedState.FOLDED)
-    while True:
-        index += 1
-        if todos[index].get_indent_level() > parent.get_indent_level():
-            todos[index].set_folded(FoldedState.FOLDED)
-            continue
-        break
+    _set_fold_state_under(FoldedState.FOLDED, parent.get_indent_level(), todos, index)
 
 
 def _unset_folded(todos: Todos, selected: int) -> None:
@@ -429,13 +436,9 @@ def _unset_folded(todos: Todos, selected: int) -> None:
     if not parent.is_folded_parent():
         return
     parent.set_folded(FoldedState.DEFAULT)
-    index = selected
-    while True:
-        index += 1
-        if todos[index].get_indent_level() > parent.get_indent_level():
-            todos[index].set_folded(FoldedState.DEFAULT)
-            continue
-        break
+    _set_fold_state_under(
+        FoldedState.DEFAULT, parent.get_indent_level(), todos, selected
+    )
 
 
 def _handle_enter(
