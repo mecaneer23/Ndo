@@ -11,8 +11,7 @@ except ImportError:
     CLIPBOARD_EXISTS = False  # pyright: ignore[reportConstantRedefinition]
 
 from src.class_cursor import Cursor
-from src.class_todo import Todo, TodoList, Todos
-from src.cursor_movement import cursor_down
+from src.class_todo import Todo, Todos
 from src.get_args import FILENAME, TKINTER_GUI
 from src.io import update_file
 from src.utils import alert
@@ -61,13 +60,13 @@ def _todo_from_clipboard(
 
 
 def paste_todo(
-    stdscr: curses.window, todos: Todos, selected: int, copied_todo: Todo
-) -> TodoList:
+    stdscr: curses.window, todos: Todos, selected: Cursor, copied_todo: Todo
+) -> Todos:
     """Paste a todo from copied_todo or clipboard if available"""
     temp = todos.copy()
-    todos = _todo_from_clipboard(stdscr, todos, selected, copied_todo)
+    todos = _todo_from_clipboard(stdscr, todos, int(selected), copied_todo)
     stdscr.clear()
     if temp != todos:
-        selected = cursor_down(selected, len(todos))
+        selected.slide_down(len(todos), True)
     update_file(FILENAME, todos)
-    return TodoList(todos, selected)
+    return todos

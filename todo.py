@@ -10,9 +10,6 @@ from src.class_history import UndoRedo
 from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, FoldedState, Todo, TodoList, Todos
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
-from src.cursor_movement import (
-    relative_cursor_to,
-)
 from src.get_args import (
     FILENAME,
     HEADER,
@@ -300,13 +297,11 @@ def _handle_paste(
     selected: Cursor,
     copied_todo: Todo,
 ) -> Todos:
-    return selected.todo_set_to(
-        paste_todo(
-            stdscr,
-            todos,
-            int(selected),
-            copied_todo,
-        )
+    return paste_todo(
+        stdscr,
+        todos,
+        selected,
+        copied_todo,
     )
 
 
@@ -349,8 +344,9 @@ def _handle_sort_menu(
 def _handle_digits(
     stdscr: curses.window, todos: Todos, selected: Cursor, digit: int
 ) -> None:
+    
     selected.set_to(
-        relative_cursor_to(
+        selected.relative_cursor_to(
             stdscr, todos, int(selected), Key.normalize_ascii_digit_to_digit(digit)
         )
     )
