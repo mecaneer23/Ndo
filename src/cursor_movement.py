@@ -13,10 +13,6 @@ else:
     import curses  # type: ignore
 
 
-def _cursor_to(position: int, len_todos: int) -> int:
-    return clamp(position, 0, len_todos)
-
-
 def relative_cursor_to(
     win: curses.window, todos: Todos, selected: int, first_digit: int
 ) -> int:
@@ -34,17 +30,19 @@ def relative_cursor_to(
         except Key.ctrl_c:
             return selected
         if key in (Key.up, Key.k):
-            return _cursor_to(
+            return clamp(
                 selected - int(total),
+                0,
                 len(todos),
             )
         if key in (Key.down, Key.j):
-            return _cursor_to(
+            return clamp(
                 selected + int(total),
+                0,
                 len(todos),
             )
         if key in (Key.g, Key.G):
-            return _cursor_to(int(total) - 1, len(todos))
+            return clamp(int(total) - 1, 0, len(todos))
         if key in Key.digits():
             total += str(Key.normalize_ascii_digit_to_digit(key))
             continue
@@ -54,13 +52,3 @@ def relative_cursor_to(
 def cursor_down(selected: int, len_todos: int) -> int:
     """Move the cursor down one position if possible"""
     return clamp(selected + 1, 0, len_todos)
-
-
-def cursor_top(len_todos: int) -> int:
-    """Move the cursor to the top of the list"""
-    return clamp(0, 0, len_todos)
-
-
-def cursor_bottom(len_todos: int) -> int:
-    """Move the cursor to the bottom of the list"""
-    return clamp(len_todos, 0, len_todos)

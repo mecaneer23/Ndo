@@ -11,8 +11,6 @@ from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, FoldedState, Todo, TodoList, Todos
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
 from src.cursor_movement import (
-    cursor_bottom,
-    cursor_top,
     relative_cursor_to,
 )
 from src.get_args import (
@@ -294,14 +292,6 @@ def _handle_edit(
     if len(todos) <= 0:
         return todos
     return edit_todo(stdscr, todos, int(selected), mode)
-
-
-def _handle_to_top(todos: Todos, selected: Cursor) -> None:
-    selected.set_to(cursor_top(len(todos)))
-
-
-def _handle_to_bottom(todos: Todos, selected: Cursor) -> None:
-    selected.set_to(cursor_bottom(len(todos)))
 
 
 def _handle_paste(
@@ -598,7 +588,7 @@ def main(stdscr: curses.window) -> int:
         Key.seven: (_handle_digits, f"stdscr, todos, selected, {Key.seven}"),
         Key.eight: (_handle_digits, f"stdscr, todos, selected, {Key.eight}"),
         Key.nine: (_handle_digits, f"stdscr, todos, selected, {Key.nine}"),
-        Key.G: (_handle_to_bottom, "todos, selected"),
+        Key.G: (selected.to_bottom, "len(todos)"),
         Key.J: (selected.multiselect_down, "len(todos)"),
         Key.K: (selected.multiselect_up, "None"),
         Key.O: (new_todo_current, "stdscr, todos, int(selected)"),
@@ -608,7 +598,7 @@ def main(stdscr: curses.window) -> int:
         Key.b: (magnify_menu, "stdscr, todos, selected"),
         Key.c: (color_todo, "stdscr, todos, selected"),
         Key.d: (_handle_delete_todo, "stdscr, todos, selected, copied_todo"),
-        Key.g: (_handle_to_top, "todos, selected"),
+        Key.g: (selected.to_top, "None"),
         Key.h: (help_menu, "stdscr"),
         Key.i: (_handle_edit, "stdscr, todos, selected, single_line_state"),
         Key.j: (selected.slide_down, "len(todos), True"),

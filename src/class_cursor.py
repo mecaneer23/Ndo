@@ -98,7 +98,7 @@ class Cursor:
         if min(self.positions) == 0:
             return
         if single:
-            self.positions = Positions([min(self.positions) - 1])
+            self.set_to(min(self.positions) - 1)
             return
         self.positions.insert(0, min(self.positions) - 1)
         self.positions.pop()
@@ -108,10 +108,18 @@ class Cursor:
         if max(self.positions) >= max_len - 1:
             return
         if single:
-            self.positions = Positions([max(self.positions) + 1])
+            self.set_to(max(self.positions) + 1)
             return
         self.positions.append(max(self.positions) + 1)
         self.positions.pop(0)
+
+    def to_top(self) -> None:
+        """Move the cursor to the top"""
+        self.set_to(0)
+
+    def to_bottom(self, len_list: int) -> None:
+        """Move the cursor to the bottom"""
+        self.set_to(len_list - 1)
 
     def _select_next(self) -> None:
         """Extend the cursor down by 1"""
