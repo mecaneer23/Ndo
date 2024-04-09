@@ -127,10 +127,10 @@ def todo_down(todos: Todos, selected: Cursor) -> tuple[Todos, Positions]:
 def new_todo_next(
     stdscr: curses.window,
     todos: Todos,
-    selected: int,
+    selected: Cursor,
     default_todo: Todo = Todo(),
     mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
-) -> TodoList:
+) -> Todos:
     """
     Insert a new todo item below the current
     cursor position and update the todo list
@@ -139,15 +139,15 @@ def new_todo_next(
     todos = insert_todo(
         stdscr,
         todos,
-        selected + 1,
-        default_todo=default_todo,
+        int(selected) + 1,
+        default_todo=default_todo.copy(),
         mode=mode,
     )
     stdscr.clear()
     if temp != todos:
-        selected = cursor_down(selected, len(todos))
+        selected.slide_down(len(todos), True)
     update_file(FILENAME, todos)
-    return TodoList(todos, selected)
+    return todos
 
 
 def new_todo_current(stdscr: curses.window, todos: Todos, selected: int) -> Todos:
@@ -264,24 +264,6 @@ def _toggle_todo_note(todos: Todos, selected: Cursor) -> None:
         todo = todos[pos]
         todo.set_box_char(BoxChar.NONE if todo.has_box() else BoxChar.MINUS)
     update_file(FILENAME, todos)
-
-
-def _handle_new_todo_next(
-    stdscr: curses.window,
-    todos: Todos,
-    selected: Cursor,
-    mode: SingleLineModeImpl,
-    default_todo: Todo = Todo(),
-) -> Todos:
-    return selected.todo_set_to(
-        new_todo_next(
-            stdscr,
-            todos,
-            int(selected),
-            default_todo.copy(),
-            mode,
-        )
-    )
 
 
 def _handle_delete_todo(
@@ -439,7 +421,7 @@ def _handle_enter(
     prev_todo = todos[int(selected)] if len(todos) > 0 else Todo()
     if prev_todo.has_box():
         return toggle(todos, selected)
-    return selected.todo_set_to(new_todo_next(stdscr, todos, int(selected), mode=mode))
+    return new_todo_next(stdscr, todos, selected, mode=mode)
 
 
 def _handle_alert(stdscr: curses.window, todos: Todos, selected: int) -> None:
@@ -501,7 +483,7 @@ def _get_main_input(
             args,
             possible_args,
         )
-        if possible_todos is not None:
+        if isinstance(possible_todos, Todos):
             todos = possible_todos
     return key
 
@@ -607,7 +589,7 @@ def main(stdscr: curses.window) -> int:
         Key.backspace_: (join_lines, "todos, selected"),
         Key.backspace__: (join_lines, "todos, selected"),
         Key.tab: (_handle_indent, "todos, selected"),
-        Key.enter: (_handle_enter, "stdscr, todos, selected, single_line_mode"),
+        Key.enter: (_handle_enter, "stdscr, todos, selected, single_line_state"),
         Key.ctrl_k: (single_line_state.toggle, "None"),
         Key.ctrl_r: (_handle_redo, "selected, history"),
         Key.ctrl_x: (single_line_state.toggle, "None"),
@@ -636,10 +618,10 @@ def main(stdscr: curses.window) -> int:
         Key.d: (_handle_delete_todo, "stdscr, todos, selected, copied_todo"),
         Key.g: (_handle_to_top, "todos, selected"),
         Key.h: (help_menu, "stdscr"),
-        Key.i: (_handle_edit, "stdscr, todos, selected, single_line_mode"),
+        Key.i: (_handle_edit, "stdscr, todos, selected, single_line_state"),
         Key.j: (selected.slide_down, "len(todos), True"),
         Key.k: (selected.slide_up, "True"),
-        Key.o: (_handle_new_todo_next, "stdscr, todos, selected, single_line_mode"),
+        Key.o: (new_todo_next, "stdscr, todos, selected, Todo(), single_line_state"),
         Key.p: (_handle_paste, "stdscr, todos, selected, copied_todo"),
         Key.s: (_handle_sort_menu, "stdscr, todos, selected"),
         Key.u: (_handle_undo, "selected, history"),
@@ -684,17 +666,17 @@ def main(stdscr: curses.window) -> int:
         sublist_top = print_todos(stdscr, todos, selected, sublist_top)
         stdscr.refresh()
         if single_line_state.is_off():
-            todos = _handle_new_todo_next(
-                stdscr, todos, selected, single_line_state, Todo()
+            todos = new_todo_next(
+                stdscr, todos, selected, Todo(), single_line_state
             )
             continue
         if single_line_state.is_once():
-            todos = _handle_new_todo_next(
+            todos = new_todo_next(
                 stdscr,
                 todos,
                 selected,
-                single_line_state,
                 Todo(single_line_state.get_extra_data()),
+                single_line_state,
             )
             single_line_state.set_on()
             continue
@@ -707,7 +689,8 @@ def main(stdscr: curses.window) -> int:
                 "int(selected)": int(selected),
                 "history": history,
                 "len(todos)": len(todos),
-                "single_line_mode": single_line_state,
+                "Todo()": Todo(),
+                "single_line_state": single_line_state,
                 "selected": selected,
                 "stdscr": stdscr,
                 "todos": todos,
