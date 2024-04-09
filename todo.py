@@ -666,9 +666,7 @@ def main(stdscr: curses.window) -> int:
         sublist_top = print_todos(stdscr, todos, selected, sublist_top)
         stdscr.refresh()
         if single_line_state.is_off():
-            todos = new_todo_next(
-                stdscr, todos, selected, Todo(), single_line_state
-            )
+            todos = new_todo_next(stdscr, todos, selected, Todo(), single_line_state)
             continue
         if single_line_state.is_once():
             todos = new_todo_next(
