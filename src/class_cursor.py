@@ -93,16 +93,22 @@ class Cursor:
         self.positions = positions
         return todos
 
-    def slide_up(self) -> None:
+    def slide_up(self, single: bool = False) -> None:
         """Shift each value in the cursor up by 1"""
         if min(self.positions) == 0:
+            return
+        if single:
+            self.positions = Positions([min(self.positions) - 1])
             return
         self.positions.insert(0, min(self.positions) - 1)
         self.positions.pop()
 
-    def slide_down(self, max_len: int) -> None:
+    def slide_down(self, max_len: int, single: bool = False) -> None:
         """Shift each value in the cursor down by 1"""
         if max(self.positions) >= max_len - 1:
+            return
+        if single:
+            self.positions = Positions([max(self.positions) + 1])
             return
         self.positions.append(max(self.positions) + 1)
         self.positions.pop(0)

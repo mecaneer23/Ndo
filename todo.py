@@ -14,7 +14,6 @@ from src.cursor_movement import (
     cursor_bottom,
     cursor_down,
     cursor_top,
-    cursor_up,
     relative_cursor_to,
 )
 from src.get_args import (
@@ -265,14 +264,6 @@ def _toggle_todo_note(todos: Todos, selected: Cursor) -> None:
         todo = todos[pos]
         todo.set_box_char(BoxChar.NONE if todo.has_box() else BoxChar.MINUS)
     update_file(FILENAME, todos)
-
-
-def _handle_cursor_up(todos: Todos, selected: Cursor) -> None:
-    selected.set_to(cursor_up(int(selected), len(todos)))
-
-
-def _handle_cursor_down(todos: Todos, selected: Cursor) -> None:
-    selected.set_to(cursor_down(int(selected), len(todos)))
 
 
 def _handle_new_todo_next(
@@ -646,15 +637,15 @@ def main(stdscr: curses.window) -> int:
         Key.g: (_handle_to_top, "todos, selected"),
         Key.h: (help_menu, "stdscr"),
         Key.i: (_handle_edit, "stdscr, todos, selected, single_line_mode"),
-        Key.j: (_handle_cursor_down, "todos, selected"),
-        Key.k: (_handle_cursor_up, "todos, selected"),
+        Key.j: (selected.slide_down, "len(todos), True"),
+        Key.k: (selected.slide_up, "True"),
         Key.o: (_handle_new_todo_next, "stdscr, todos, selected, single_line_mode"),
         Key.p: (_handle_paste, "stdscr, todos, selected, copied_todo"),
         Key.s: (_handle_sort_menu, "stdscr, todos, selected"),
         Key.u: (_handle_undo, "selected, history"),
         Key.y: (copy_todo, "stdscr, todos, selected, copied_todo"),
-        Key.down: (_handle_cursor_down, "todos, selected"),
-        Key.up: (_handle_cursor_up, "todos, selected"),
+        Key.down: (selected.slide_down, "len(todos), True"),
+        Key.up: (selected.slide_up, "True"),
         Key.delete: (_toggle_todo_note, "todos, selected"),
         Key.shift_tab_windows: (_handle_dedent, "todos, selected"),
         Key.shift_tab: (_handle_dedent, "todos, selected"),
@@ -720,6 +711,7 @@ def main(stdscr: curses.window) -> int:
                 "selected": selected,
                 "stdscr": stdscr,
                 "todos": todos,
+                "True": True,
             },
         )
         if isinstance(next_step, Todos):

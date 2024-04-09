@@ -51,11 +51,6 @@ def relative_cursor_to(
         return selected
 
 
-def cursor_up(selected: int, len_todos: int) -> int:
-    """Move the cursor up one position if possible"""
-    return clamp(selected - 1, 0, len_todos)
-
-
 def cursor_down(selected: int, len_todos: int) -> int:
     """Move the cursor down one position if possible"""
     return clamp(selected + 1, 0, len_todos)
