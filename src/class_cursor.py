@@ -51,6 +51,9 @@ class Cursor:
     def __str__(self) -> str:
         return str(self.positions[0])
 
+    def __repr__(self) -> str:
+        return " ".join(map(str, self.positions))
+
     def __int__(self) -> int:
         return self.positions[0]
 
@@ -107,7 +110,6 @@ class Cursor:
     def _select_next(self) -> None:
         """Extend the cursor down by 1"""
         self.positions.append(max(self.positions) + 1)
-        self.positions.sort()
 
     def _deselect_next(self) -> None:
         """Retract the cursor by 1"""
@@ -121,8 +123,7 @@ class Cursor:
 
     def _select_prev(self) -> None:
         """Extend the cursor up by 1"""
-        self.positions.append(min(self.positions) - 1)
-        self.positions.sort()
+        self.positions.insert(0, min(self.positions) - 1)
 
     def get_deletable(self) -> Positions:
         """
@@ -133,7 +134,7 @@ class Cursor:
         return Positions([min(self.positions) for _ in self.positions])
 
     def multiselect_down(self, max_len: int) -> None:
-        """Move the cursor down by 1"""
+        """Extend the cursor down by 1"""
         if max(self.positions) >= max_len - 1:
             return
         if len(self.positions) == 1 or self.direction == _Direction.DOWN:
@@ -143,7 +144,7 @@ class Cursor:
         self._deselect_prev()
 
     def multiselect_up(self) -> None:
-        """Move the cursor up by 1"""
+        """Extend the cursor up by 1"""
         if min(self.positions) == 0 and self.direction == _Direction.UP:
             return
         if len(self.positions) == 1 or self.direction == _Direction.UP:
