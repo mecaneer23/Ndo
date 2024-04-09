@@ -12,7 +12,6 @@ from src.class_todo import BoxChar, FoldedState, Todo, TodoList, Todos
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
 from src.cursor_movement import (
     cursor_bottom,
-    cursor_down,
     cursor_top,
     relative_cursor_to,
 )
@@ -213,12 +212,12 @@ def edit_todo(
     return todos
 
 
-def blank_todo(todos: Todos, selected: int) -> TodoList:
+def blank_todo(todos: Todos, selected: Cursor) -> Todos:
     """Create an empty Todo object"""
-    insert_empty_todo(todos, selected + 1)
-    selected = cursor_down(selected, len(todos))
+    insert_empty_todo(todos, int(selected) + 1)
+    selected.slide_down(len(todos), True)
     update_file(FILENAME, todos)
-    return TodoList(todos, selected)
+    return todos
 
 
 def toggle(todos: Todos, selected: Cursor) -> Todos:
@@ -319,13 +318,6 @@ def _handle_paste(
             copied_todo,
         )
     )
-
-
-def _handle_insert_blank_todo(
-    todos: Todos,
-    selected: Cursor,
-) -> Todos:
-    return selected.todo_set_to(blank_todo(todos, int(selected)))
 
 
 def _handle_todo_down(
@@ -594,7 +586,7 @@ def main(stdscr: curses.window) -> int:
         Key.ctrl_r: (_handle_redo, "selected, history"),
         Key.ctrl_x: (single_line_state.toggle, "None"),
         Key.escape: (lambda: None, "None"),
-        Key.minus: (_handle_insert_blank_todo, "todos, selected"),
+        Key.minus: (blank_todo, "todos, selected"),
         Key.slash: (search_menu, "stdscr, todos, selected"),
         Key.zero: (_handle_digits, f"stdscr, todos, selected, {Key.zero}"),
         Key.one: (_handle_digits, f"stdscr, todos, selected, {Key.one}"),
