@@ -341,17 +341,6 @@ def _handle_sort_menu(
     return selected.todo_set_to(sort_menu(stdscr, todos, selected))
 
 
-def _handle_digits(
-    stdscr: curses.window, todos: Todos, selected: Cursor, digit: int
-) -> None:
-    
-    selected.set_to(
-        selected.relative_cursor_to(
-            stdscr, todos, int(selected), Key.normalize_ascii_digit_to_digit(digit)
-        )
-    )
-
-
 def _set_fold_state_under(
     state: FoldedState, parent_indent_level: int, todos: Todos, start_index: int
 ) -> None:
@@ -574,16 +563,16 @@ def main(stdscr: curses.window) -> int:
         Key.escape: (lambda: None, "None"),
         Key.minus: (blank_todo, "todos, selected"),
         Key.slash: (search_menu, "stdscr, todos, selected"),
-        Key.zero: (_handle_digits, f"stdscr, todos, selected, {Key.zero}"),
-        Key.one: (_handle_digits, f"stdscr, todos, selected, {Key.one}"),
-        Key.two: (_handle_digits, f"stdscr, todos, selected, {Key.two}"),
-        Key.three: (_handle_digits, f"stdscr, todos, selected, {Key.three}"),
-        Key.four: (_handle_digits, f"stdscr, todos, selected, {Key.four}"),
-        Key.five: (_handle_digits, f"stdscr, todos, selected, {Key.five}"),
-        Key.six: (_handle_digits, f"stdscr, todos, selected, {Key.six}"),
-        Key.seven: (_handle_digits, f"stdscr, todos, selected, {Key.seven}"),
-        Key.eight: (_handle_digits, f"stdscr, todos, selected, {Key.eight}"),
-        Key.nine: (_handle_digits, f"stdscr, todos, selected, {Key.nine}"),
+        Key.zero: (selected.relative_to, "stdscr, 0, len(todos), True"),
+        Key.one: (selected.relative_to, "stdscr, 1, len(todos), True"),
+        Key.two: (selected.relative_to, "stdscr, 2, len(todos), True"),
+        Key.three: (selected.relative_to, "stdscr, 3, len(todos), True"),
+        Key.four: (selected.relative_to, "stdscr, 4, len(todos), True"),
+        Key.five: (selected.relative_to, "stdscr, 5, len(todos), True"),
+        Key.six: (selected.relative_to, "stdscr, 6, len(todos), True"),
+        Key.seven: (selected.relative_to, "stdscr, 7, len(todos), True"),
+        Key.eight: (selected.relative_to, "stdscr, 8, len(todos), True"),
+        Key.nine: (selected.relative_to, "stdscr, 9, len(todos), True"),
         Key.G: (selected.to_bottom, "len(todos)"),
         Key.J: (selected.multiselect_down, "len(todos)"),
         Key.K: (selected.multiselect_up, "None"),
@@ -623,16 +612,16 @@ def main(stdscr: curses.window) -> int:
         Key.alt_g: (selected.multiselect_top, "None"),
         Key.alt_j: (_handle_todo_down, "todos, selected"),
         Key.alt_k: (_handle_todo_up, "todos, selected"),
-        Key.zero: (selected.multiselect_from, "stdscr, 0, len(todos)"),
-        Key.one: (selected.multiselect_from, "stdscr, 1, len(todos)"),
-        Key.two: (selected.multiselect_from, "stdscr, 2, len(todos)"),
-        Key.three: (selected.multiselect_from, "stdscr, 3, len(todos)"),
-        Key.four: (selected.multiselect_from, "stdscr, 4, len(todos)"),
-        Key.five: (selected.multiselect_from, "stdscr, 5, len(todos)"),
-        Key.six: (selected.multiselect_from, "stdscr, 6, len(todos)"),
-        Key.seven: (selected.multiselect_from, "stdscr, 7, len(todos)"),
-        Key.eight: (selected.multiselect_from, "stdscr, 8, len(todos)"),
-        Key.nine: (selected.multiselect_from, "stdscr, 9, len(todos)"),
+        Key.zero: (selected.relative_to, "stdscr, 0, len(todos), False"),
+        Key.one: (selected.relative_to, "stdscr, 1, len(todos), False"),
+        Key.two: (selected.relative_to, "stdscr, 2, len(todos), False"),
+        Key.three: (selected.relative_to, "stdscr, 3, len(todos), False"),
+        Key.four: (selected.relative_to, "stdscr, 4, len(todos), False"),
+        Key.five: (selected.relative_to, "stdscr, 5, len(todos), False"),
+        Key.six: (selected.relative_to, "stdscr, 6, len(todos), False"),
+        Key.seven: (selected.relative_to, "stdscr, 7, len(todos), False"),
+        Key.eight: (selected.relative_to, "stdscr, 8, len(todos), False"),
+        Key.nine: (selected.relative_to, "stdscr, 9, len(todos), False"),
     }
     history.add(todos, int(selected))
     _print_history(history)
@@ -671,6 +660,7 @@ def main(stdscr: curses.window) -> int:
                 "stdscr": stdscr,
                 "todos": todos,
                 "True": True,
+                "False": False,
             },
         )
         if isinstance(next_step, Todos):

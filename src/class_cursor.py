@@ -194,8 +194,16 @@ class Cursor:
                 continue
             self.multiselect_up()
 
-    def multiselect_from(
-        self, stdscr: curses.window, first_digit: int, max_len: int
+    def _set_to_clamp(self, position: int, max_len: int) -> None:
+        """Set the current position to the given position if between 0 and maxlen"""
+        self.set_to(clamp(position, 0, max_len))
+
+    def relative_to(
+        self,
+        stdscr: curses.window,
+        first_digit: int,
+        max_len: int,
+        single: bool,
     ) -> None:
         """
         Move the cursor to the specified position relative to the current position.
@@ -210,56 +218,25 @@ class Cursor:
                 key = stdscr.getch()
             except KeyboardInterrupt:  # exit on ^C
                 return
-            if key != Key.escape:  # not an escape sequence
-                return
-            stdscr.nodelay(True)
-            subch = stdscr.getch()  # alt + ...
-            stdscr.nodelay(False)
-            if subch == Key.k:
-                self._multiselect_to(self.positions[0] - int(total), max_len)
-            elif subch == Key.j:
-                self._multiselect_to(self.positions[0] + int(total), max_len)
-            elif subch in Key.digits():
-                total += str(Key.normalize_ascii_digit_to_digit(subch))
+            operation = self._set_to_clamp
+            if not single:
+                operation = self._multiselect_to
+                if key != Key.escape:  # not an escape sequence
+                    return
+                stdscr.nodelay(True)
+                key = stdscr.getch()  # alt + ...
+                stdscr.nodelay(False)
+            if key == Key.k:
+                operation(self.positions[0] - int(total), max_len)
+            elif key == Key.j:
+                operation(self.positions[0] + int(total), max_len)
+            elif key in (Key.g, Key.G):  # goto that enumerated position
+                operation(int(total) - 1, max_len)
+            elif key in Key.digits():
+                total += str(Key.normalize_ascii_digit_to_digit(key))
                 continue
             return
 
     def multiselect_all(self, max_len: int) -> None:
         """Set internal positions to entirity of list"""
         self.positions = Positions(range(0, max_len))
-
-    @staticmethod
-    def relative_cursor_to(
-        win: curses.window, todos: Todos, selected: int, first_digit: int
-    ) -> int:
-        """
-        Move the cursor to the specified position relative to the current position.
-
-        Because the trigger can only be a single keypress, this function also uses a
-        window object to getch until the user presses g or shift + g. This allows
-        for relative movement greater than 9 lines away.
-        """
-        total = str(first_digit)
-        while True:
-            try:
-                key = win.getch()
-            except Key.ctrl_c:
-                return selected
-            if key in (Key.up, Key.k):
-                return clamp(
-                    selected - int(total),
-                    0,
-                    len(todos),
-                )
-            if key in (Key.down, Key.j):
-                return clamp(
-                    selected + int(total),
-                    0,
-                    len(todos),
-                )
-            if key in (Key.g, Key.G):
-                return clamp(int(total) - 1, 0, len(todos))
-            if key in Key.digits():
-                total += str(Key.normalize_ascii_digit_to_digit(key))
-                continue
-            return selected
