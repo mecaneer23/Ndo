@@ -6,7 +6,8 @@ multiple consecutive positions.
 """
 
 from enum import Enum
-from typing import Iterable
+from functools import wraps
+from typing import Any, Callable, Iterable, TypeVar
 
 from src.class_todo import Todos, TodoList
 from src.get_args import TKINTER_GUI
@@ -17,6 +18,9 @@ if TKINTER_GUI:
     import src.tcurses as curses
 else:
     import curses  # type: ignore
+
+
+T = TypeVar("T")
 
 
 class _Direction(Enum):
@@ -42,9 +46,10 @@ class Cursor:
     multiple consecutive positions
     """
 
-    def __init__(self, position: int, *positions: int) -> None:
-        self.positions: Positions = Positions([position, *positions])
+    def __init__(self, position: int, todos: Todos) -> None:
+        self.positions: Positions = Positions([position])
         self.direction: _Direction = _Direction.NONE
+        self.todos: Todos = todos
 
     def __len__(self) -> int:
         return len(self.positions)
@@ -72,6 +77,31 @@ class Cursor:
     def get_last(self) -> int:
         """Return the bottom-most selected position"""
         return self.positions[-1]
+
+    @staticmethod
+    def _updates_cursor(func: Callable[..., T]) -> Callable[..., T]:
+        """
+        Decorate every function that updates the cursor.
+        This function ensures folded todos are handled
+        properly. This basically treats each folded group
+        of todos like its own individual todo.
+        """
+
+        @wraps(func)
+        def _inner(self: "Cursor", *args: list[Any], **kwargs: dict[Any, Any]) -> T:
+            for pos in self.positions:
+                if not self.todos[pos].is_folded_parent():
+                    break
+                count = 0
+                while True:
+                    count += 1
+                    if self.todos[pos + count].is_folded():
+                        self.multiselect_down(len(self.todos))
+                        continue
+                    break
+            return func(self, *args, **kwargs)
+
+        return _inner
 
     def set_to(self, position: int) -> None:
         """Replace the entire cursor with a new single position"""

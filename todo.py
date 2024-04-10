@@ -353,7 +353,7 @@ def _set_fold_state_under(
         break
 
 
-def _set_folded(todos: Todos, selected: int) -> None:
+def _set_folded(stdscr: curses.window, todos: Todos, selected: int) -> None:
     """
     Set the selected todo as a folder parent
     and set all todos indented below it as folded
@@ -365,9 +365,10 @@ def _set_folded(todos: Todos, selected: int) -> None:
     parent.set_folded(FoldedState.PARENT)
     todos[index].set_folded(FoldedState.FOLDED)
     _set_fold_state_under(FoldedState.FOLDED, parent.get_indent_level(), todos, index)
+    stdscr.clear()
 
 
-def _unset_folded(todos: Todos, selected: int) -> None:
+def _unset_folded(stdscr: curses.window, todos: Todos, selected: int) -> None:
     """
     If the selected todo is a folder parent,
     unfold the selected todo and all folded
@@ -380,6 +381,7 @@ def _unset_folded(todos: Todos, selected: int) -> None:
     _set_fold_state_under(
         FoldedState.DEFAULT, parent.get_indent_level(), todos, selected
     )
+    stdscr.clear()
 
 
 def _handle_enter(
@@ -541,7 +543,7 @@ def main(stdscr: curses.window) -> int:
     """
     _init()
     todos = file_string_to_todos(read_file(FILENAME))
-    selected = Cursor(0)
+    selected = Cursor(0, todos)
     sublist_top = 0
     history = UndoRedo()
     single_line_state = SingleLineModeImpl(SingleLineMode.ON)
@@ -577,8 +579,8 @@ def main(stdscr: curses.window) -> int:
         Key.J: (selected.multiselect_down, "len(todos)"),
         Key.K: (selected.multiselect_up, "None"),
         Key.O: (new_todo_current, "stdscr, todos, int(selected)"),
-        # Key.open_bracket: (_set_folded, "todos, int(selected)"),
-        # Key.close_bracket: (_unset_folded, "todos, int(selected)"),
+        # Key.open_bracket: (_set_folded, "stdscr, todos, int(selected)"),
+        # Key.close_bracket: (_unset_folded, "stdscr, todos, int(selected)"),
         Key.a: (_handle_alert, "stdscr, todos, int(selected)"),
         Key.b: (magnify_menu, "stdscr, todos, selected"),
         Key.c: (color_todo, "stdscr, todos, selected"),
@@ -677,7 +679,7 @@ def main(stdscr: curses.window) -> int:
 if __name__ == "__main__":
     if NO_GUI:
         print(f"{HEADER}:")
-        print_todos(None, file_string_to_todos(read_file(FILENAME)), Cursor(0))
+        print_todos(None, file_string_to_todos(read_file(FILENAME)), Cursor(0, Todos(())))
         sys_exit()
 
     wrapper(main)
