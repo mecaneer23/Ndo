@@ -230,7 +230,7 @@ class Cursor:
                 operation(self.positions[0] - int(total), max_len)
             elif key == Key.j:
                 operation(self.positions[0] + int(total), max_len)
-            elif key in (Key.g, Key.G):  # goto that enumerated position
+            elif key in (Key.g, Key.G):
                 operation(int(total) - 1, max_len)
             elif key in Key.digits():
                 total += str(Key.normalize_ascii_digit_to_digit(key))
