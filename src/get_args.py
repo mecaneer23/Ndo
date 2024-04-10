@@ -31,7 +31,6 @@ class TypedNamespace(Namespace):  # pylint: disable=too-few-public-methods
     """
 
     bullet_display: bool
-    checkbox: str
     enumerate: bool
     filename: str
     title: list[str]
