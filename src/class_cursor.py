@@ -79,7 +79,9 @@ class Cursor:
         return self.positions[-1]
 
     @staticmethod
-    def _updates_cursor(func: Callable[..., T]) -> Callable[..., T]:
+    def _updates_cursor(
+        direction: _Direction = _Direction.NONE,
+    ) -> Callable[[Callable[..., T]], Callable[..., T]]:
         """
         Decorate every function that updates the cursor.
         This function ensures folded todos are handled
@@ -87,21 +89,30 @@ class Cursor:
         of todos like its own individual todo.
         """
 
-        @wraps(func)
-        def _inner(self: "Cursor", *args: list[Any], **kwargs: dict[Any, Any]) -> T:
-            for pos in self.positions:
-                if not self.todos[pos].is_folded_parent():
-                    break
-                count = 0
-                while True:
-                    count += 1
-                    if self.todos[pos + count].is_folded():
-                        self.multiselect_down(len(self.todos))
-                        continue
-                    break
-            return func(self, *args, **kwargs)
+        def _decorator(func: Callable[..., T]) -> Callable[..., T]:
+            @wraps(func)
+            def _inner(self: "Cursor", *args: list[Any], **kwargs: dict[Any, Any]) -> T:
+                for pos in self.positions:
+                    # if not self.todos[pos].is_folded_parent():
+                    # break
+                    count = 0
+                    while True:
+                        count += 1
+                        if not self.todos[pos + count].is_folded():
+                            break
+                        if direction == _Direction.UP:
+                            self.multiselect_up()
+                            continue
+                        if direction == _Direction.DOWN:
+                            self.multiselect_down(len(self.todos))
+                            continue
+                        if direction == _Direction.NONE:
+                            func(self, *args, **kwargs)
+                return func(self, *args, **kwargs)
 
-        return _inner
+            return _inner
+
+        return _decorator
 
     def set_to(self, position: int) -> None:
         """Replace the entire cursor with a new single position"""
