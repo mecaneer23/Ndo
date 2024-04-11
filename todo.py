@@ -122,7 +122,7 @@ def new_todo_next(
     stdscr: curses.window,
     todos: Todos,
     selected: Cursor,
-    default_todo: Todo = Todo(),
+    default_todo: Todo,
     mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
 ) -> Todos:
     """
@@ -390,7 +390,7 @@ def _handle_enter(
     prev_todo = todos[int(selected)] if len(todos) > 0 else Todo()
     if prev_todo.has_box():
         return toggle(todos, selected)
-    return new_todo_next(stdscr, todos, selected, mode=mode)
+    return new_todo_next(stdscr, todos, selected, Todo(), mode=mode)
 
 
 def _handle_alert(stdscr: curses.window, todos: Todos, selected: int) -> None:
