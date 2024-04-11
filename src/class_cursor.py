@@ -141,6 +141,8 @@ class Cursor:
             return
         if single:
             self.set_to(min(self.positions) - 1)
+            # while self.todos[self.get_first()].is_folded():
+            #     self.multiselect_up()
             return
         self.positions.insert(0, min(self.positions) - 1)
         self.positions.pop()
