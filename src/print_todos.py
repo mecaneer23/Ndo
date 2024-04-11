@@ -5,7 +5,7 @@ Helper module to handle printing a list of Todo objects
 from typing import Generic, NamedTuple, TypeVar
 
 from src.class_cursor import Cursor
-from src.class_todo import Todo, Todos
+from src.class_todo import Todo, Todos, FoldedState
 from src.get_args import (
     BULLETS,
     ENUMERATE,
@@ -26,6 +26,7 @@ else:
 T = TypeVar("T")
 _ANSI_RESET = "\u001b[0m"
 _ANSI_STRIKETHROUGH = "\033[9m\b"
+DEBUG_FOLD = False
 
 
 class SublistItems(Generic[T], NamedTuple):
@@ -151,8 +152,10 @@ def _get_display_string(  # pylint: disable=too-many-arguments
         Chunk(ENUMERATE and not RELATIVE_ENUMERATE, f"{todos.index(todo) + 1}. "),
         Chunk(RELATIVE_ENUMERATE, f"{relative_pos + 1}. "),
         Chunk(print_to_stdout and todo.is_toggled(), _ANSI_STRIKETHROUGH),
-        Chunk(True, todo.get_display_text()),
+        Chunk(not DEBUG_FOLD, todo.get_display_text()),
         Chunk(todo.is_folded_parent(), "› ..."),
+        Chunk(todo.is_folded() and DEBUG_FOLD, "FOLDED"),
+        Chunk(todo._folded == FoldedState.DEFAULT and DEBUG_FOLD, "DEFAULT"),
         Chunk(print_to_stdout, _ANSI_RESET),
         Chunk(width == 0, " "),
     )[: width - 1].ljust(width - 1, " ")
@@ -259,7 +262,7 @@ def print_todos(
                 )
             )
             continue
-        if not todo.is_folded():
+        if not todo.is_folded() or DEBUG_FOLD:
             _print_todo(
                 stdscr,
                 todo,
