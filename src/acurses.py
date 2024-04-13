@@ -47,6 +47,8 @@ COLOR_MAGENTA = 10**35
 COLOR_CYAN = 10**36
 COLOR_WHITE = 10**37
 
+_ANSI_RESET = "\033[0m"
+
 
 class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def __init__(self) -> None:
@@ -80,8 +82,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
         """Add a string to the screen at a specific position"""
         self.move(y, x)
-        print(text, end="")
-        # TODO: implement attr
+        print(f"{self._parse_attrs(attr)}{text}{_ANSI_RESET}", end="")
 
     def refresh(self) -> None:
         """Sync display. Not necessary for acurses as it's currently non-buffered"""
