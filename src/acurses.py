@@ -7,7 +7,7 @@
 # https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
 
 from os import get_terminal_size
-from sys import stdin, stdout
+from sys import stdin
 from termios import TCSADRAIN, tcgetattr, tcsetattr
 from tty import setcbreak
 from typing import Any, Callable, TypeVar
@@ -26,18 +26,27 @@ ACS_LLCORNER = "└"
 
 ERR = -1
 OK = 0
-A_NORMAL = 0
-A_STANDOUT = 2**1
-A_BOLD = 2**2
 
-COLOR_BLACK = 2**10
-COLOR_RED = 2**11
-COLOR_GREEN = 2**12
-COLOR_YELLOW = 2**13
-COLOR_BLUE = 2**14
-COLOR_MAGENTA = 2**15
-COLOR_CYAN = 2**16
-COLOR_WHITE = 2**17
+A_NORMAL = 10**0
+A_BOLD = 10**1
+A_DIM = 10**2
+A_ITALIC = 10**3
+A_UNDERLINE = 10**4
+A_BLINK = 10**5
+A_STANDOUT = 10**7
+A_REVERSE = 10**7
+A_INVIS = 10**8
+A_STRIKETHROUGH = 10**9
+
+COLOR_BLACK = 10**30
+COLOR_RED = 10**31
+COLOR_GREEN = 10**32
+COLOR_YELLOW = 10**33
+COLOR_BLUE = 10**34
+COLOR_MAGENTA = 10**35
+COLOR_CYAN = 10**36
+COLOR_WHITE = 10**37
+
 
 class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def __init__(self) -> None:
@@ -57,12 +66,21 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
     def move(self, new_y: int, new_x: int) -> None:
         """Move cursor to (new_y, new_x)"""
-        stdout.write(f"\033[{new_y};{new_x}H")
+        print(f"\033[{new_y};{new_x}H", end="")
+
+    def _parse_attrs(self, attrs: int) -> str:
+        """Convert a binary `attrs` into ANSI escape codes"""
+        output = ""
+        for pos, val in enumerate(str(attrs)):
+            if val == "0":
+                continue
+            output += f"\033[{len(str(attrs)) - 1 - pos}m"
+        return output
 
     def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
         """Add a string to the screen at a specific position"""
         self.move(y, x)
-        stdout.write(text)
+        print(text, end="")
         # TODO: implement attr
 
     def refresh(self) -> None:
@@ -197,4 +215,5 @@ def _main(stdscr: window):
 
 
 if __name__ == "__main__":
-    wrapper(_main)
+    # wrapper(_main)
+    pass
