@@ -44,22 +44,17 @@ def wrapper(func: Callable[..., _T], /, *args: list[Any], **kwds: dict[str, Any]
     wrapper().
     """
 
+    fd = stdin.fileno()
+    old_settings = tcgetattr(fd)
+
     try:
-        fd = stdin.fileno()
-        old_settings = tcgetattr(fd)
         setcbreak(fd)
         stdscr = initscr()
-        # curses.noecho()
-        # stdscr.keypad(True)
         # _curses.start_color()
         return func(stdscr, *args, **kwds)
     finally:
         if "stdscr" in locals():
             tcsetattr(fd, TCSADRAIN, old_settings)
-        #     stdscr.keypad(False)  # pyright: ignore
-        #     curses.echo()
-        #     curses.nocbreak()
-        #     curses.endwin()
 
 
 def _main(stdscr: window):
