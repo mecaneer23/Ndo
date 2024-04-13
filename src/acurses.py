@@ -161,10 +161,9 @@ class _CursesWindow:
 
     def clear(self) -> None:
         """Clear the screen"""
-        # TODO: fix: clears too much
         self.move(0, 0)
-        for _ in range(self._height):
-            stdout.write("\033[0J")
+        for i in range(self._height):
+            self.addstr(i, 0, " " * self._width)
         stdout.flush()
 
 
@@ -243,42 +242,3 @@ def newwin(
     and whose height/width is nlines/ncols.
     """
     return _CursesWindow(ncols, nlines, begin_y, begin_x)
-
-
-def _main(stdscr: window):
-    use_default_colors()
-    for i, color in enumerate(
-        [
-            COLOR_RED,
-            COLOR_GREEN,
-            COLOR_YELLOW,
-            COLOR_BLUE,
-            COLOR_MAGENTA,
-            COLOR_CYAN,
-            COLOR_WHITE,
-        ],
-        start=1,
-    ):
-        init_pair(i, color, -1)
-    stdscr.box()
-    stdscr.addstr(1, 1, "Hello, world!", color_pair(6))
-    win = newwin(3, 7, 3, 3)
-    win.addstr(1, 1, str(win._height))
-    win.clear()
-    win.box()
-    stdscr.refresh()
-    # win.addstr(1, 1, "Bold text", color_pair(2))
-    # win.clear()
-    # stdscr.addstr(1, 1, "Bold text", color_pair(5) | A_STANDOUT)
-    while True:
-        x = stdscr.getch()
-        print(x)
-        if x == 27:
-            y = stdscr.getch()
-            print(str(y) + ":")
-        if x == 113:
-            break
-
-
-if __name__ == "__main__":
-    wrapper(_main)
