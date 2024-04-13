@@ -6,6 +6,7 @@
 # TODO: continue implementation with inspiration from following
 # https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
 
+from os import get_terminal_size
 from sys import stdin
 from termios import TCSADRAIN, tcgetattr, tcsetattr
 from tty import setcbreak
@@ -15,6 +16,12 @@ _T = TypeVar("_T")
 
 
 class _CursesWindow:  # pylint: disable=too-many-instance-attributes
+    def __init__(self) -> None:
+        self.buffer: list[str] = []
+        self.stored_attr: int = 0
+        self.stored_x: int = 0
+        self.stored_y: int = 0
+
     def getch(self) -> int:
         """
         Get a character. Note that the integer returned
@@ -25,6 +32,37 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         pressed.
         """
         return ord(stdin.read(1))
+
+    def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
+        """Add a string to the screen"""
+        raise NotImplementedError("addstr")
+
+    def _get_width(self) -> int:
+        return get_terminal_size()[0]
+
+    def _get_height(self) -> int:
+        return get_terminal_size()[1]
+
+    def getmaxyx(self) -> tuple[int, int]:
+        """Get window height and width"""
+        return self._get_height(), self._get_width()
+
+    def addch(self, y: int, x: int, char: str, attr: int = 0) -> None:
+        """Add a character to the screen"""
+        self.buffer.append(char)
+        if len(self.buffer) == 1:
+            self.stored_x = x
+            self.stored_y = y
+        if (
+            attr not in {self.stored_attr, 0}
+            or char == "\n"
+            or len(self.buffer) + self.stored_x >= self._get_width()
+        ):
+            self.addstr(
+                self.stored_y, self.stored_x, "".join(self.buffer), self.stored_attr
+            )
+            self.stored_attr = attr
+            self.buffer.clear()
 
 
 window = _CursesWindow  # pylint: disable=invalid-name
