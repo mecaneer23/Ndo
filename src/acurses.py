@@ -7,7 +7,7 @@
 # https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
 
 from os import get_terminal_size
-from sys import stdin
+from sys import stdin, stdout
 from termios import TCSADRAIN, tcgetattr, tcsetattr
 from tty import setcbreak
 from typing import Any, Callable, TypeVar
@@ -83,7 +83,7 @@ class _CursesWindow:
     def move(self, new_y: int, new_x: int) -> None:
         """Move cursor to (new_y, new_x)"""
         # TODO: might need to add 1 to both args to account for offset
-        print(f"\033[{self.begin_y + new_y};{self.begin_x + new_x}H", end="")
+        stdout.write(f"\033[{self.begin_y + new_y};{self.begin_x + new_x}H")
 
     def _parse_attrs(self, attrs: int) -> str:
         """Convert a binary `attrs` into ANSI escape codes"""
@@ -97,11 +97,12 @@ class _CursesWindow:
     def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
         """Add a string to the screen at a specific position"""
         self.move(y, x)
-        print(f"{self._parse_attrs(attr)}{text}{_ANSI_RESET}", end="")
+        stdout.write(f"{self._parse_attrs(attr)}{text}{_ANSI_RESET}")
 
     def refresh(self) -> None:
-        """Sync display. Not necessary for acurses as it's currently non-buffered"""
-        return
+        """Sync display"""
+        self._clear_buffer()
+        stdout.flush()
 
     def _get_width(self) -> int:
         return self.width if self.width > -1 else get_terminal_size()[0]
@@ -112,6 +113,14 @@ class _CursesWindow:
     def getmaxyx(self) -> tuple[int, int]:
         """Get window height and width"""
         return self._get_height(), self._get_width()
+
+    def _clear_buffer(self, attr: int = -1) -> None:
+        self.addstr(
+            self.stored_y, self.stored_x, "".join(self.buffer), self.stored_attr
+        )
+        if attr != -1:
+            self.stored_attr = attr
+        self.buffer.clear()
 
     def addch(self, y: int, x: int, char: str, attr: int = 0) -> None:
         """Add a character to the screen"""
@@ -124,11 +133,7 @@ class _CursesWindow:
             or char == "\n"
             or len(self.buffer) + self.stored_x >= self._get_width()
         ):
-            self.addstr(
-                self.stored_y, self.stored_x, "".join(self.buffer), self.stored_attr
-            )
-            self.stored_attr = attr
-            self.buffer.clear()
+            self._clear_buffer(attr)
 
     def nodelay(self, flag: bool = True) -> None:
         """
@@ -145,11 +150,11 @@ class _CursesWindow:
             ACS_ULCORNER + ACS_HLINE * (self._get_width() - 2) + ACS_URCORNER,
         )
         for i in range(self._get_height() - 2):
-            self.addch(i + 1, 0, ACS_VLINE)
+            self.addstr(i + 2, 0, ACS_VLINE)
         for i in range(self._get_height() - 2):
-            self.addch(i + 1, self._get_width() - 1, ACS_VLINE)
+            self.addstr(i + 2, self._get_width(), ACS_VLINE)
         self.addstr(
-            self._get_height() - 1,
+            self._get_height(),
             0,
             ACS_LLCORNER + ACS_HLINE * (self._get_width() - 2) + ACS_LRCORNER,
         )
@@ -199,13 +204,15 @@ def wrapper(func: Callable[..., _T], /, *args: list[Any], **kwds: dict[str, Any]
 
     try:
         setcbreak(fd)
-        print("\033[s\033[2J\033[H")
+        stdout.write("\033[s\033[2J\033[H")
+        stdout.flush()
         stdscr = initscr()
         # _curses.start_color()
         return func(stdscr, *args, **kwds)
     finally:
         if "stdscr" in locals():
-            print("\033[u")
+            stdout.write("\033[39;49m\033[0m\033[2J\033[H")
+            stdout.flush()
             tcsetattr(fd, TCSADRAIN, old_settings)
 
 
@@ -220,7 +227,7 @@ def init_pair(pair_number: int, fg: int, bg: int) -> None:
     use_default_colors(), -1.
     """
     # TODO: may need to use ansi "fg;bg" rather than combined
-    _color_pairs.insert(pair_number, fg) # | (max(bg, COLOR_BLACK) * 10**10))
+    _color_pairs.insert(pair_number, fg)  # | (max(bg, COLOR_BLACK) * 10**10))
 
 
 def color_pair(pair_number: int) -> int:
@@ -257,21 +264,22 @@ def _main(stdscr: window):
     ):
         init_pair(i, color, -1)
     stdscr.addstr(10, 1, "Hello, world!", color_pair(6))
-    # stdscr.box()
+    stdscr.box()
+    stdscr.refresh()
     # win = newwin(3, 20, 10, 10)
     # win.clear()
     # win.box()
     # win.addstr(1, 1, "Bold text", color_pair(2))
     # win.clear()
     # stdscr.addstr(1, 1, "Bold text", color_pair(5) | A_STANDOUT)
-    # while True:
-    #     x = stdscr.getch()
-    #     print(x)
-    #     if x == 27:
-    #         y = stdscr.getch()
-    #         print(str(y) + ":")
-    #     if x == 113:
-    #         break
+    while True:
+        x = stdscr.getch()
+        print(x)
+        if x == 27:
+            y = stdscr.getch()
+            print(str(y) + ":")
+        if x == 113:
+            break
 
 
 if __name__ == "__main__":
