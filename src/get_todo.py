@@ -4,18 +4,21 @@ from typing import Any, Callable, Iterable, NamedTuple, cast
 
 from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, Todo
-from src.get_args import INDENT, TKINTER_GUI
+from src.get_args import INDENT, GUI_TYPE, GuiType
 from src.keys import Key
 from src.utils import Color, alert, set_header
 
-if TKINTER_GUI:
-    import src.tcurses as curses
+if GUI_TYPE == GuiType.ANSI:
+    import src.acurses as curses
+elif GUI_TYPE == GuiType.TKINTER:
+    import src.tcurses as curses  # type: ignore
 else:
     import curses  # type: ignore
 
 
 class _Chars(list[str]):
     """A list of characters; an alias for `list[str]`"""
+
     def __init__(self, iterable: Iterable[str]):
         super().__init__(iterable)
 

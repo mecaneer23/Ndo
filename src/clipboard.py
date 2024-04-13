@@ -12,12 +12,14 @@ except ImportError:
 
 from src.class_cursor import Cursor
 from src.class_todo import Todo, Todos
-from src.get_args import FILENAME, TKINTER_GUI
+from src.get_args import FILENAME, GUI_TYPE, GuiType
 from src.io import update_file
 from src.utils import alert
 
-if TKINTER_GUI:
-    import src.tcurses as curses
+if GUI_TYPE == GuiType.ANSI:
+    import src.acurses as curses
+elif GUI_TYPE == GuiType.TKINTER:
+    import src.tcurses as curses  # type: ignore
 else:
     import curses  # type: ignore
 

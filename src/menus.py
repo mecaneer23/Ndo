@@ -18,7 +18,8 @@ from src.get_args import (
     CONTROLS_END_INDEX,
     FILENAME,
     HELP_FILE,
-    TKINTER_GUI,
+    GUI_TYPE,
+    GuiType,
 )
 from src.get_todo import get_todo, hline
 from src.io import update_file
@@ -27,8 +28,10 @@ from src.md_to_py import md_table_to_lines
 from src.print_todos import make_printable_sublist
 from src.utils import Color, alert, clamp, overflow, set_header
 
-if TKINTER_GUI:
-    import src.tcurses as curses
+if GUI_TYPE == GuiType.ANSI:
+    import src.acurses as curses
+elif GUI_TYPE == GuiType.TKINTER:
+    import src.tcurses as curses  # type: ignore
 else:
     import curses  # type: ignore
 
