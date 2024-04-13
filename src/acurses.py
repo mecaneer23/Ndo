@@ -7,13 +7,37 @@
 # https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
 
 from os import get_terminal_size
-from sys import stdin
+from sys import stdin, stdout
 from termios import TCSADRAIN, tcgetattr, tcsetattr
 from tty import setcbreak
 from typing import Any, Callable, TypeVar
 
 _T = TypeVar("_T")
 
+# https://www.w3.org/TR/xml-entity-names/025.html
+ACS_RTEE = "⊣"
+ACS_LTEE = "⊢"
+ACS_HLINE = "─"
+ACS_VLINE = "│"
+ACS_URCORNER = "┐"
+ACS_ULCORNER = "┌"
+ACS_LRCORNER = "┘"
+ACS_LLCORNER = "└"
+
+ERR = -1
+OK = 0
+A_NORMAL = 0
+A_STANDOUT = 2**1
+A_BOLD = 2**2
+
+COLOR_BLACK = 2**10
+COLOR_RED = 2**11
+COLOR_GREEN = 2**12
+COLOR_YELLOW = 2**13
+COLOR_BLUE = 2**14
+COLOR_MAGENTA = 2**15
+COLOR_CYAN = 2**16
+COLOR_WHITE = 2**17
 
 class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def __init__(self) -> None:
@@ -27,15 +51,23 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         Get a character. Note that the integer returned
         does not have to be in ASCII range: function keys,
         keypad keys and so on are represented by numbers
-        higher than 255. In no-delay mode, return -1 if
-        there is no input, otherwise wait until a key is
-        pressed.
+        higher than 255.
         """
         return ord(stdin.read(1))
 
+    def move(self, new_y: int, new_x: int) -> None:
+        """Move cursor to (new_y, new_x)"""
+        stdout.write(f"\033[{new_y};{new_x}H")
+
     def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
-        """Add a string to the screen"""
-        raise NotImplementedError("addstr")
+        """Add a string to the screen at a specific position"""
+        self.move(y, x)
+        stdout.write(text)
+        # TODO: implement attr
+
+    def refresh(self) -> None:
+        """Sync display. Not necessary for acurses as it's currently non-buffered"""
+        return
 
     def _get_width(self) -> int:
         return get_terminal_size()[0]
@@ -63,6 +95,41 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
             )
             self.stored_attr = attr
             self.buffer.clear()
+
+    def nodelay(self, flag: bool = True) -> None:
+        """
+        If flag is True, getch() will be non-blocking.
+        Cannot be unset in acurses.
+        """
+        _ = flag
+
+    def box(self) -> None:
+        """Draw a border around the current window"""
+        self.addstr(
+            0,
+            0,
+            ACS_ULCORNER + ACS_HLINE * (self._get_width() - 2) + ACS_URCORNER,
+        )
+        for i in range(self._get_height() - 2):
+            self.addch(i + 1, 0, ACS_VLINE)
+        for i in range(self._get_height() - 2):
+            self.addch(i + 1, self._get_width() - 1, ACS_VLINE)
+        self.addstr(
+            self._get_height() - 1,
+            0,
+            ACS_LLCORNER + ACS_HLINE * (self._get_width() - 2) + ACS_LRCORNER,
+        )
+
+    def hline(self, y: int, x: int, ch: str, n: int) -> None:
+        """
+        Display a horizontal line starting at (y, x)
+        with length n consisting of the character ch.
+        """
+        self.addstr(y, x, ch * n)
+
+    def clear(self) -> None:
+        """Clear the screen"""
+        raise NotImplementedError("\033[2J")
 
 
 window = _CursesWindow  # pylint: disable=invalid-name
@@ -110,7 +177,8 @@ def _main(stdscr: window):
     #     start=1,
     # ):
     #     curses.init_pair(i, color, -1)
-    # scr.addstr(10, 1, "Hello, world!", curses.color_pair(7))
+    stdscr.addstr(10, 1, "Hello, world!")
+    # stdscr.addstr(10, 1, "Hello, world!", curses.color_pair(7))
     # scr.box()
     # win = curses.newwin(3, 20, 10, 10)
     # win.clear()
