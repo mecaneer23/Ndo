@@ -68,6 +68,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
     def move(self, new_y: int, new_x: int) -> None:
         """Move cursor to (new_y, new_x)"""
+        # TODO: might need to add 1 to both args to account for offset
         print(f"\033[{new_y};{new_x}H", end="")
 
     def _parse_attrs(self, attrs: int) -> str:
