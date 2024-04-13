@@ -1,14 +1,15 @@
 """Command line argument parser for Ndo"""
 
 from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
+from enum import Enum
 from pathlib import Path
 
 from src.md_to_py import md_table_to_lines
 from src.tcurses import window
 from src.working_initscr import wrapper
 
-CONTROLS_BEGIN_INDEX: int = 68
-CONTROLS_END_INDEX: int = 98
+CONTROLS_BEGIN_INDEX: int = 69
+CONTROLS_END_INDEX: int = 99
 
 _DEFAULT_BULLETS: bool = False
 _DEFAULT_ENUMERATE: bool = False
@@ -21,8 +22,15 @@ _DEFAULT_RELATIVE_ENUMERATE: bool = False
 _DEFAULT_SIMPLE_BOXES: bool = False
 _DEFAULT_STRIKETHROUGH: bool = False
 _DEFAULT_TKINTER_GUI = False
+_DEFAULT_ANSI_GUI = False
 
 _CHECKBOX_OPTIONS = ("🗹", "☑")
+
+
+class GuiType(Enum):
+    CURSES = "curses"
+    ANSI = "ansi"
+    TKINTER = "tkinter"
 
 
 class TypedNamespace(Namespace):  # pylint: disable=too-few-public-methods
@@ -41,6 +49,7 @@ class TypedNamespace(Namespace):  # pylint: disable=too-few-public-methods
     simple_boxes: bool
     strikethrough: bool
     tk_gui: bool
+    ansi_gui: bool
 
 
 def _get_checkbox(win: window) -> str:
@@ -98,6 +107,14 @@ def _get_args() -> TypedNamespace:
         default=_DEFAULT_TKINTER_GUI,
         help=f"Boolean: determine if curses (False) or tkinter gui\
             (True) should be used. Default is `{_DEFAULT_TKINTER_GUI}`.",
+    )
+    parser.add_argument(
+        "--ansi-gui",
+        "-a",
+        action="store_true",
+        default=_DEFAULT_ANSI_GUI,
+        help=f"Boolean: determine if curses (False) or ANSI gui\
+            (True) should be used. Default is `{_DEFAULT_ANSI_GUI}`.",
     )
     parser.add_argument(
         "--help",
@@ -197,5 +214,12 @@ NO_GUI: bool = command_line_args.no_gui
 RELATIVE_ENUMERATE: bool = command_line_args.relative_enumeration
 SIMPLE_BOXES: bool = command_line_args.simple_boxes
 STRIKETHROUGH: bool = command_line_args.strikethrough
-TKINTER_GUI: bool = command_line_args.tk_gui
+_gui_type: GuiType
+if command_line_args.ansi_gui:
+    _gui_type = GuiType.ANSI
+elif command_line_args.tk_gui:
+    _gui_type = GuiType.TKINTER
+else:
+    _gui_type = GuiType.CURSES
+GUI_TYPE = _gui_type
 del command_line_args

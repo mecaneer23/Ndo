@@ -13,12 +13,15 @@ from src.get_args import (
     RELATIVE_ENUMERATE,
     SIMPLE_BOXES,
     STRIKETHROUGH,
-    TKINTER_GUI,
+    GUI_TYPE,
+    GuiType,
 )
 from src.utils import Chunk, Color
 
-if TKINTER_GUI:
-    import src.tcurses as curses
+if GUI_TYPE == GuiType.ANSI:
+    import src.acurses as curses
+elif GUI_TYPE == GuiType.TKINTER:
+    import src.tcurses as curses  # type: ignore
 else:
     import curses  # type: ignore
 
