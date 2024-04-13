@@ -46,12 +46,26 @@ COLOR_BLUE = 10**34
 COLOR_MAGENTA = 10**35
 COLOR_CYAN = 10**36
 COLOR_WHITE = 10**37
+FOREGROUND_DEFAULT = 10**39
+BACKGROUND_DEFAULT = 10**49
 
 _ANSI_RESET = "\033[0m"
 
 
-class _CursesWindow:  # pylint: disable=too-many-instance-attributes
-    def __init__(self) -> None:
+class _CursesWindow:
+    def __init__(
+        self,
+        /,
+        width: int = -1,
+        height: int = -1,
+        begin_y: int = 0,
+        begin_x: int = 0,
+    ) -> None:
+        self.width = width
+        self.height = height
+        self.begin_y = begin_y
+        self.begin_x = begin_x
+
         self.buffer: list[str] = []
         self.stored_attr: int = 0
         self.stored_x: int = 0
@@ -69,7 +83,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def move(self, new_y: int, new_x: int) -> None:
         """Move cursor to (new_y, new_x)"""
         # TODO: might need to add 1 to both args to account for offset
-        print(f"\033[{new_y};{new_x}H", end="")
+        print(f"\033[{self.begin_y + new_y};{self.begin_x + new_x}H", end="")
 
     def _parse_attrs(self, attrs: int) -> str:
         """Convert a binary `attrs` into ANSI escape codes"""
@@ -90,10 +104,10 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         return
 
     def _get_width(self) -> int:
-        return get_terminal_size()[0]
+        return self.width if self.width > -1 else get_terminal_size()[0]
 
     def _get_height(self) -> int:
-        return get_terminal_size()[1]
+        return self.height if self.height > -1 else get_terminal_size()[1]
 
     def getmaxyx(self) -> tuple[int, int]:
         """Get window height and width"""
@@ -152,7 +166,18 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         raise NotImplementedError("\033[2J")
 
 
+def use_default_colors() -> None:
+    """Allow using default colors. Not yet implemented."""
+    return
+
+
+def curs_set(visibility: int) -> None:
+    """Set the cursor state. Not yet implemented."""
+    _ = visibility
+
+
 window = _CursesWindow  # pylint: disable=invalid-name
+_color_pairs: list[int] = [FOREGROUND_DEFAULT]
 
 
 def initscr() -> window:
@@ -174,48 +199,80 @@ def wrapper(func: Callable[..., _T], /, *args: list[Any], **kwds: dict[str, Any]
 
     try:
         setcbreak(fd)
+        print("\033[s\033[2J\033[H")
         stdscr = initscr()
         # _curses.start_color()
         return func(stdscr, *args, **kwds)
     finally:
         if "stdscr" in locals():
+            print("\033[u")
             tcsetattr(fd, TCSADRAIN, old_settings)
 
 
+def init_pair(pair_number: int, fg: int, bg: int) -> None:
+    """
+    Change the definition of a color-pair. It takes three arguments:
+    the number of the color-pair to be changed, the foreground color
+    number, and the background color number. The value of pair_number
+    must be between 1 and COLOR_PAIRS - 1 (the 0 color pair is wired
+    to white on black and cannot be changed). The value of fg and bg
+    arguments must be between 0 and COLORS - 1, or, after calling
+    use_default_colors(), -1.
+    """
+    # TODO: may need to use ansi "fg;bg" rather than combined
+    _color_pairs.insert(pair_number, fg) # | (max(bg, COLOR_BLACK) * 10**10))
+
+
+def color_pair(pair_number: int) -> int:
+    """
+    Return the attribute value for displaying text
+    in the specified color pair.
+    """
+    return _color_pairs[pair_number]
+
+
+def newwin(
+    nlines: int, ncols: int, begin_y: int = 0, begin_x: int = 0
+) -> _CursesWindow:
+    """
+    Return a new window, whose left-upper corner is at (begin_y, begin_x),
+    and whose height/width is nlines/ncols.
+    """
+    return _CursesWindow(ncols, nlines, begin_y, begin_x)
+
+
 def _main(stdscr: window):
-    # curses.use_default_colors()
-    # for i, color in enumerate(
-    #     [
-    #         curses.COLOR_RED,
-    #         curses.COLOR_GREEN,
-    #         curses.COLOR_YELLOW,
-    #         curses.COLOR_BLUE,
-    #         curses.COLOR_MAGENTA,
-    #         curses.COLOR_CYAN,
-    #         curses.COLOR_WHITE,
-    #     ],
-    #     start=1,
-    # ):
-    #     curses.init_pair(i, color, -1)
-    stdscr.addstr(10, 1, "Hello, world!")
-    # stdscr.addstr(10, 1, "Hello, world!", curses.color_pair(7))
-    # scr.box()
-    # win = curses.newwin(3, 20, 10, 10)
+    use_default_colors()
+    for i, color in enumerate(
+        [
+            COLOR_RED,
+            COLOR_GREEN,
+            COLOR_YELLOW,
+            COLOR_BLUE,
+            COLOR_MAGENTA,
+            COLOR_CYAN,
+            COLOR_WHITE,
+        ],
+        start=1,
+    ):
+        init_pair(i, color, -1)
+    stdscr.addstr(10, 1, "Hello, world!", color_pair(6))
+    # stdscr.box()
+    # win = newwin(3, 20, 10, 10)
     # win.clear()
     # win.box()
-    # win.addstr(1, 1, "Bold text", curses.color_pair(2))
+    # win.addstr(1, 1, "Bold text", color_pair(2))
     # win.clear()
-    # scr.addstr(1, 1, "Bold text", curses.color_pair(5) | curses.A_STANDOUT)
-    while True:
-        x = stdscr.getch()
-        print(x)
-        if x == 27:
-            y = stdscr.getch()
-            print(str(y) + ":")
-        if x == 113:
-            break
+    # stdscr.addstr(1, 1, "Bold text", color_pair(5) | A_STANDOUT)
+    # while True:
+    #     x = stdscr.getch()
+    #     print(x)
+    #     if x == 27:
+    #         y = stdscr.getch()
+    #         print(str(y) + ":")
+    #     if x == 113:
+    #         break
 
 
 if __name__ == "__main__":
-    # wrapper(_main)
-    pass
+    wrapper(_main)
