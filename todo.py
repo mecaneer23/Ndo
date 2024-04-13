@@ -14,7 +14,8 @@ from src.get_args import (
     FILENAME,
     HEADER,
     NO_GUI,
-    TKINTER_GUI,
+    GUI_TYPE,
+    GuiType,
 )
 from src.get_todo import get_todo
 from src.io import file_string_to_todos, read_file, update_file
@@ -30,8 +31,11 @@ from src.menus import (
 from src.print_todos import print_todos
 from src.utils import alert, clamp, set_header
 
-if TKINTER_GUI:
-    import src.tcurses as curses
+if GUI_TYPE == GuiType.ANSI:
+    import src.acurses as curses
+    from src.acurses import wrapper
+elif GUI_TYPE == GuiType.TKINTER:
+    import src.tcurses as curses  # type: ignore
     from src.tcurses import wrapper
 else:
     import curses  # type: ignore
@@ -679,7 +683,9 @@ def main(stdscr: curses.window) -> int:
 if __name__ == "__main__":
     if NO_GUI:
         print(f"{HEADER}:")
-        print_todos(None, file_string_to_todos(read_file(FILENAME)), Cursor(0, Todos(())))
+        print_todos(
+            None, file_string_to_todos(read_file(FILENAME)), Cursor(0, Todos(()))
+        )
         sys_exit()
 
     wrapper(main)
