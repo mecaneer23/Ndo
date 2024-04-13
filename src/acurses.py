@@ -61,15 +61,15 @@ class _CursesWindow:
         begin_y: int = 0,
         begin_x: int = 0,
     ) -> None:
-        self.width = width
-        self.height = height
-        self.begin_y = begin_y
-        self.begin_x = begin_x
+        self._width = width if width > -1 else get_terminal_size()[0]
+        self._height = height if height > -1 else get_terminal_size()[1]
+        self._begin_y = begin_y
+        self._begin_x = begin_x
 
-        self.buffer: list[str] = []
-        self.stored_attr: int = 0
-        self.stored_x: int = 0
-        self.stored_y: int = 0
+        self._buffer: list[str] = []
+        self._stored_attr: int = 0
+        self._stored_x: int = 0
+        self._stored_y: int = 0
 
     def getch(self) -> int:
         """
@@ -82,8 +82,7 @@ class _CursesWindow:
 
     def move(self, new_y: int, new_x: int) -> None:
         """Move cursor to (new_y, new_x)"""
-        # TODO: might need to add 1 to both args to account for offset
-        stdout.write(f"\033[{self.begin_y + new_y};{self.begin_x + new_x}H")
+        stdout.write(f"\033[{self._begin_y + new_y + 1};{self._begin_x + new_x + 1}H")
 
     def _parse_attrs(self, attrs: int) -> str:
         """Convert a binary `attrs` into ANSI escape codes"""
@@ -104,34 +103,28 @@ class _CursesWindow:
         self._clear_buffer()
         stdout.flush()
 
-    def _get_width(self) -> int:
-        return self.width if self.width > -1 else get_terminal_size()[0]
-
-    def _get_height(self) -> int:
-        return self.height if self.height > -1 else get_terminal_size()[1]
-
     def getmaxyx(self) -> tuple[int, int]:
         """Get window height and width"""
-        return self._get_height(), self._get_width()
+        return self._height, self._width
 
     def _clear_buffer(self, attr: int = -1) -> None:
         self.addstr(
-            self.stored_y, self.stored_x, "".join(self.buffer), self.stored_attr
+            self._stored_y, self._stored_x, "".join(self._buffer), self._stored_attr
         )
         if attr != -1:
-            self.stored_attr = attr
-        self.buffer.clear()
+            self._stored_attr = attr
+        self._buffer.clear()
 
     def addch(self, y: int, x: int, char: str, attr: int = 0) -> None:
         """Add a character to the screen"""
-        self.buffer.append(char)
-        if len(self.buffer) == 1:
-            self.stored_x = x
-            self.stored_y = y
+        self._buffer.append(char)
+        if len(self._buffer) == 1:
+            self._stored_x = x
+            self._stored_y = y
         if (
-            attr not in {self.stored_attr, 0}
+            attr not in {self._stored_attr, 0}
             or char == "\n"
-            or len(self.buffer) + self.stored_x >= self._get_width()
+            or len(self._buffer) + self._stored_x >= self._width
         ):
             self._clear_buffer(attr)
 
@@ -147,16 +140,16 @@ class _CursesWindow:
         self.addstr(
             0,
             0,
-            ACS_ULCORNER + ACS_HLINE * (self._get_width() - 2) + ACS_URCORNER,
+            ACS_ULCORNER + ACS_HLINE * (self._width - 2) + ACS_URCORNER,
         )
-        for i in range(self._get_height() - 2):
-            self.addstr(i + 2, 0, ACS_VLINE)
-        for i in range(self._get_height() - 2):
-            self.addstr(i + 2, self._get_width(), ACS_VLINE)
+        for i in range(self._height - 2):
+            self.addstr(i + 1, 0, ACS_VLINE)
+        for i in range(self._height - 2):
+            self.addstr(i + 1, self._width - 1, ACS_VLINE)
         self.addstr(
-            self._get_height(),
+            self._height - 1,
             0,
-            ACS_LLCORNER + ACS_HLINE * (self._get_width() - 2) + ACS_LRCORNER,
+            ACS_LLCORNER + ACS_HLINE * (self._width - 2) + ACS_LRCORNER,
         )
 
     def hline(self, y: int, x: int, ch: str, n: int) -> None:
@@ -168,7 +161,11 @@ class _CursesWindow:
 
     def clear(self) -> None:
         """Clear the screen"""
-        raise NotImplementedError("\033[2J")
+        # TODO: fix: clears too much
+        self.move(0, 0)
+        for _ in range(self._height):
+            stdout.write("\033[0J")
+        stdout.flush()
 
 
 def use_default_colors() -> None:
@@ -204,14 +201,14 @@ def wrapper(func: Callable[..., _T], /, *args: list[Any], **kwds: dict[str, Any]
 
     try:
         setcbreak(fd)
-        stdout.write("\033[s\033[2J\033[H")
+        stdout.write("\033[s\033[2J\033[H\033[?25l")
         stdout.flush()
         stdscr = initscr()
         # _curses.start_color()
         return func(stdscr, *args, **kwds)
     finally:
         if "stdscr" in locals():
-            stdout.write("\033[39;49m\033[0m\033[2J\033[H")
+            stdout.write("\033[39;49m\033[0m\033[2J\033[H\033[?25h")
             stdout.flush()
             tcsetattr(fd, TCSADRAIN, old_settings)
 
@@ -263,12 +260,13 @@ def _main(stdscr: window):
         start=1,
     ):
         init_pair(i, color, -1)
-    stdscr.addstr(10, 1, "Hello, world!", color_pair(6))
     stdscr.box()
+    stdscr.addstr(1, 1, "Hello, world!", color_pair(6))
+    win = newwin(3, 7, 3, 3)
+    win.addstr(1, 1, str(win._height))
+    win.clear()
+    win.box()
     stdscr.refresh()
-    # win = newwin(3, 20, 10, 10)
-    # win.clear()
-    # win.box()
     # win.addstr(1, 1, "Bold text", color_pair(2))
     # win.clear()
     # stdscr.addstr(1, 1, "Bold text", color_pair(5) | A_STANDOUT)
