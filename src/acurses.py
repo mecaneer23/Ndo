@@ -3,6 +3,9 @@
 # TODO: Windows support, see the following link
 # https://github.com/python/cpython/blob/3.12/Lib/getpass.py
 
+# TODO: continue implementation with inspiration from following
+# https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
+
 from sys import stdin
 from termios import TCSADRAIN, tcgetattr, tcsetattr
 from tty import setcbreak
