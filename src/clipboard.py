@@ -56,6 +56,7 @@ def _todo_from_clipboard(
         todos.insert(selected + 1, Todo(repr(copied_todo)))
         return todos
     if "\n" in todo:
+        alert(stdscr, "Pasting newlines not supported")
         return todos
     todos.insert(selected + 1, Todo(f"- {todo}"))
     return todos
