@@ -137,24 +137,34 @@ class Cursor:
         self.positions = positions
         return todos
 
-    def slide_up(self, single: bool = False) -> None:
-        """Shift each value in the cursor up by 1"""
+    def single_up(self) -> None:
+        """Move a cursor with length 1 up by 1"""
+        if len(self) != 1:
+            raise ValueError("Cursor must have length of exactly 1")
         if min(self.positions) == 0:
             return
-        if single:
-            self.set_to(min(self.positions) - 1)
-            # while self.todos[self.get_first()].is_folded():
-            #     self.multiselect_up()
+        self.set_to(min(self.positions) - 1)
+        # while self.todos[self.get_first()].is_folded():
+        #     self.multiselect_up()
+
+    def slide_up(self) -> None:
+        """Shift each value in the cursor up by 1"""
+        if min(self.positions) == 0:
             return
         self.positions.insert(0, min(self.positions) - 1)
         self.positions.pop()
 
-    def slide_down(self, max_len: int, single: bool = False) -> None:
-        """Shift each value in the cursor down by 1"""
+    def single_down(self, max_len: int) -> None:
+        """Move a cursor with length 1 down by 1"""
+        if len(self) != 1:
+            raise ValueError("Cursor must have length of exactly 1")
         if max(self.positions) >= max_len - 1:
             return
-        if single:
-            self.set_to(max(self.positions) + 1)
+        self.set_to(max(self.positions) + 1)
+
+    def slide_down(self, max_len: int) -> None:
+        """Shift each value in the cursor down by 1"""
+        if max(self.positions) >= max_len - 1:
             return
         self.positions.append(max(self.positions) + 1)
         self.positions.pop(0)

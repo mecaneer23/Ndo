@@ -144,7 +144,7 @@ def new_todo_next(
     )
     stdscr.clear()
     if temp != todos:
-        selected.slide_down(len(todos), True)
+        selected.single_down(len(todos))
     update_file(FILENAME, todos)
     return todos
 
@@ -218,7 +218,7 @@ def edit_todo(
 def blank_todo(todos: Todos, selected: Cursor) -> Todos:
     """Create an empty Todo object"""
     insert_empty_todo(todos, int(selected) + 1)
-    selected.slide_down(len(todos), True)
+    selected.single_down(len(todos))
     update_file(FILENAME, todos)
     return todos
 
@@ -609,15 +609,15 @@ def main(stdscr: curses.window) -> int:
         Key.g: (selected.to_top, "None"),
         Key.h: (help_menu, "stdscr"),
         Key.i: (_handle_edit, "stdscr, todos, selected, single_line_state"),
-        Key.j: (selected.slide_down, "len(todos), True"),
-        Key.k: (selected.slide_up, "True"),
+        Key.j: (selected.single_down, "len(todos)"),
+        Key.k: (selected.single_up, "None"),
         Key.o: (new_todo_next, "stdscr, todos, selected, Todo(), single_line_state"),
         Key.p: (_handle_paste, "stdscr, todos, selected, copied_todo"),
         Key.s: (_handle_sort_menu, "stdscr, todos, selected"),
         Key.u: (_handle_undo, "selected, history"),
         Key.y: (copy_todo, "stdscr, todos, selected, copied_todo"),
-        Key.down: (selected.slide_down, "len(todos), True"),
-        Key.up: (selected.slide_up, "True"),
+        Key.down: (selected.single_down, "len(todos)"),
+        Key.up: (selected.single_up, "None"),
         Key.delete: (_toggle_todo_note, "todos, selected"),
         Key.shift_tab_windows: (_handle_dedent, "todos, selected"),
         Key.shift_tab: (_handle_dedent, "todos, selected"),

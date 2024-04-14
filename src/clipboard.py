@@ -81,6 +81,6 @@ def paste_todo(
     todos = _todo_from_clipboard(stdscr, todos, int(selected), copied_todo)
     stdscr.clear()
     if temp != todos:
-        selected.slide_down(len(todos), True)
+        selected.single_down(len(todos))
     update_file(FILENAME, todos)
     return todos
