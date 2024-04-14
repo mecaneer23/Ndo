@@ -28,6 +28,7 @@ _CHECKBOX_OPTIONS = ("🗹", "☑")
 
 
 class GuiType(Enum):
+    """Specifiy a GUI type, (curses default tui, ansi custom tui, tkinter gui)"""
     CURSES = "curses"
     ANSI = "ansi"
     TKINTER = "tkinter"
