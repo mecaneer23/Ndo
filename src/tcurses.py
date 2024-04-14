@@ -17,7 +17,9 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def _updates_screen(func: Callable[..., None]) -> Callable[..., None]:
         @wraps(func)
         def _inner(
-            self: "_CursesWindow", *args: list[Any], **kwargs: dict[Any, Any]
+            self: "_CursesWindow",
+            *args: list[Any],
+            **kwargs: dict[Any, Any],
         ) -> None:
             screen.configure(state="normal")
             func(self, *args, **kwargs)
@@ -49,7 +51,8 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         root.bind("<Key>", stdscr._handle_key)
 
     def _handle_key(  # pylint: disable=too-many-return-statements
-        self, event: "Event[Any]"
+        self,
+        event: "Event[Any]",
     ) -> None:
         if self.has_key.get() or event.keysym.endswith(("_R", "_L")):
             return
@@ -172,7 +175,10 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
             or len(self.buffer) + self.stored_x >= self.width
         ):
             self.addstr(
-                self.stored_y, self.stored_x, "".join(self.buffer), self.stored_attr
+                self.stored_y,
+                self.stored_x,
+                "".join(self.buffer),
+                self.stored_attr,
             )
             self.stored_attr = attr
             self.buffer.clear()
@@ -293,7 +299,10 @@ def color_pair(pair_number: int) -> int:
 
 
 def newwin(
-    nlines: int, ncols: int, begin_y: int = 0, begin_x: int = 0
+    nlines: int,
+    ncols: int,
+    begin_y: int = 0,
+    begin_x: int = 0,
 ) -> _CursesWindow:
     """
     Return a new window, whose left-upper corner is at (begin_y, begin_x),

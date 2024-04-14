@@ -37,7 +37,10 @@ else:
 
 
 def _simple_scroll_keybinds(
-    win: curses.window, cursor: int, len_lines: int, len_new_lines: int
+    win: curses.window,
+    cursor: int,
+    len_lines: int,
+    len_new_lines: int,
 ) -> int:
     try:
         key = win.getch()
@@ -53,7 +56,8 @@ def _simple_scroll_keybinds(
 
 
 def _get_move_options(
-    len_list: int, additional_options: dict[int, Callable[[int], int]]
+    len_list: int,
+    additional_options: dict[int, Callable[[int], int]],
 ) -> dict[int, Callable[[int], int]]:
     defaults: dict[int, Callable[[int], int]] = {
         Key.k: lambda cursor: cursor - 1,
@@ -89,7 +93,10 @@ def help_menu(parent_win: curses.window) -> None:
     hline(win, 2, 0, curses.ACS_HLINE, win.getmaxyx()[1])
     while True:
         new_lines, _, _ = make_printable_sublist(
-            win.getmaxyx()[0] - 4, lines[2:], cursor, 0
+            win.getmaxyx()[0] - 4,
+            lines[2:],
+            cursor,
+            0,
         )
         for i, line in enumerate(new_lines):
             win.addstr(i + 3, 1, line)
@@ -115,14 +122,18 @@ def magnify_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
     stdscr.clear()
     set_header(stdscr, "Magnifying...")
     lines = big(  # pyright: ignore
-        todos[int(selected)].get_display_text(), width=stdscr.getmaxyx()[1]
+        todos[int(selected)].get_display_text(),
+        width=stdscr.getmaxyx()[1],
     ).split("\n")
     lines.append("")
     lines = [line.ljust(stdscr.getmaxyx()[1] - 2) for line in lines]
     cursor = 0
     while True:
         new_lines, _, _ = make_printable_sublist(
-            stdscr.getmaxyx()[0] - 2, lines, cursor, 0
+            stdscr.getmaxyx()[0] - 2,
+            lines,
+            cursor,
+            0,
         )
         for i, line in enumerate(new_lines):
             stdscr.addstr(i + 1, 1, line)

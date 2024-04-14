@@ -184,7 +184,10 @@ def color_todo(stdscr: curses.window, todos: Todos, selected: Cursor) -> Todos:
 
 
 def edit_todo(
-    stdscr: curses.window, todos: Todos, selected: int, mode: SingleLineModeImpl
+    stdscr: curses.window,
+    todos: Todos,
+    selected: int,
+    mode: SingleLineModeImpl,
 ) -> Todos:
     """
     Open a get_todo input box with the current todo contents. Set
@@ -265,7 +268,10 @@ def _toggle_todo_note(todos: Todos, selected: Cursor) -> None:
 
 
 def _handle_delete_todo(
-    stdscr: curses.window, todos: Todos, selected: Cursor, copied_todo: Todo
+    stdscr: curses.window,
+    todos: Todos,
+    selected: Cursor,
+    copied_todo: Todo,
 ) -> Todos:
     if len(todos) > 0 and CLIPBOARD_EXISTS:
         copy_todo(stdscr, todos, selected, copied_todo)
@@ -346,7 +352,10 @@ def _handle_sort_menu(
 
 
 def _set_fold_state_under(
-    state: FoldedState, parent_indent_level: int, todos: Todos, start_index: int
+    state: FoldedState,
+    parent_indent_level: int,
+    todos: Todos,
+    start_index: int,
 ) -> None:
     index = start_index
     while True:
@@ -383,13 +392,19 @@ def _unset_folded(stdscr: curses.window, todos: Todos, selected: int) -> None:
         return
     parent.set_folded(FoldedState.DEFAULT)
     _set_fold_state_under(
-        FoldedState.DEFAULT, parent.get_indent_level(), todos, selected
+        FoldedState.DEFAULT,
+        parent.get_indent_level(),
+        todos,
+        selected,
     )
     stdscr.clear()
 
 
 def _handle_enter(
-    stdscr: curses.window, todos: Todos, selected: Cursor, mode: SingleLineModeImpl
+    stdscr: curses.window,
+    todos: Todos,
+    selected: Cursor,
+    mode: SingleLineModeImpl,
 ) -> Todos:
     prev_todo = todos[int(selected)] if len(todos) > 0 else Todo()
     if prev_todo.has_box():
@@ -496,7 +511,7 @@ def join_lines(todos: Todos, selected: Cursor) -> None:
     current_todo = int(selected)
 
     todos[prev_todo].set_display_text(
-        f"{todos[prev_todo].get_display_text()} {todos[current_todo].get_display_text()}"
+        f"{todos[prev_todo].get_display_text()} {todos[current_todo].get_display_text()}",
     )
     selected.slide_up()
     todos.pop(current_todo)
@@ -684,7 +699,9 @@ if __name__ == "__main__":
     if NO_GUI:
         print(f"{HEADER}:")
         print_todos(
-            None, file_string_to_todos(read_file(FILENAME)), Cursor(0, Todos(()))
+            None,
+            file_string_to_todos(read_file(FILENAME)),
+            Cursor(0, Todos(())),
         )
         sys_exit()
 

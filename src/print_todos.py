@@ -165,7 +165,10 @@ def _get_display_string(  # pylint: disable=too-many-arguments
 
 
 def _is_within_strikethrough_range(
-    counter: int, todo: Todo, display_string: str, window_width: int
+    counter: int,
+    todo: Todo,
+    display_string: str,
+    window_width: int,
 ) -> bool:
     # make sure to test with -s and -sx
     # issue lies with Alacritty terminal
@@ -213,7 +216,10 @@ def _print_todo(
             STRIKETHROUGH
             and todo.is_toggled()
             and _is_within_strikethrough_range(
-                counter, todo, display_string, stdscr.getmaxyx()[1]
+                counter,
+                todo,
+                display_string,
+                stdscr.getmaxyx()[1],
             )
         ):
             stdscr.addch(print_position + 1, counter, "\u0336")
@@ -234,7 +240,10 @@ def _color_to_ansi(color: int) -> str:
 
 
 def print_todos(
-    stdscr: curses.window | None, todos: Todos, selected: Cursor, prev_start: int = 0
+    stdscr: curses.window | None,
+    todos: Todos,
+    selected: Cursor,
+    prev_start: int = 0,
 ) -> int:
     """
     Output list of Todo objects to a curses stdscr or stdout.
@@ -248,7 +257,10 @@ def print_todos(
     except RuntimeError:
         return 0
     new_todos, temp_selected, prev_start = make_printable_sublist(
-        height - 1, list(todos), int(selected), prev_start=prev_start
+        height - 1,
+        list(todos),
+        int(selected),
+        prev_start=prev_start,
     )
     highlight = range(temp_selected, len(selected) + temp_selected)
     print_position = -1
@@ -261,8 +273,13 @@ def print_todos(
             print(
                 _color_to_ansi(todo.get_color().as_int())
                 + _get_display_string(
-                    Todos(new_todos), position, relative, range(0), width, True
-                )
+                    Todos(new_todos),
+                    position,
+                    relative,
+                    range(0),
+                    width,
+                    True,
+                ),
             )
             continue
         if not todo.is_folded() or DEBUG_FOLD:
@@ -270,7 +287,12 @@ def print_todos(
                 stdscr,
                 todo,
                 _get_display_string(
-                    Todos(new_todos), position, relative, highlight, width, False
+                    Todos(new_todos),
+                    position,
+                    relative,
+                    highlight,
+                    width,
+                    False,
                 ),
                 (position, print_position),
                 highlight,

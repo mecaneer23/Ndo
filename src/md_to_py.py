@@ -10,7 +10,9 @@ S = TypeVar("S")
 
 
 def _get_column_widths(
-    row: str, delimiter: str = "|", strip_spaces: bool = True
+    row: str,
+    delimiter: str = "|",
+    strip_spaces: bool = True,
 ) -> list[int]:
     """
     Return a list of column widths. Columns are determined by a delimiter
@@ -25,7 +27,7 @@ def _get_column_widths(
 
     if len(delimiter) != 1:
         raise ValueError(
-            f"`delimiter` must be one character, is {len(delimiter)} characters"
+            f"`delimiter` must be one character, is {len(delimiter)} characters",
         )
     if delimiter == " ":
         raise ValueError("`delimiter` cannot be a space")
@@ -70,7 +72,7 @@ def _pad_columns(row: str, widths: tuple[int, ...] | int, delimiter: str = "|") 
 
     if len(delimiter) != 1:
         raise ValueError(
-            f"`delimiter` must be one character, is {len(delimiter)} characters"
+            f"`delimiter` must be one character, is {len(delimiter)} characters",
         )
     if delimiter == " ":
         raise ValueError("`delimiter` cannot be a space")
@@ -80,7 +82,7 @@ def _pad_columns(row: str, widths: tuple[int, ...] | int, delimiter: str = "|") 
     if isinstance(widths, tuple) and len(widths) != column_count:
         raise ValueError(
             "`widths` cannot be a tuple of arbitrary length. "
-            f"Is {len(widths)}, should be {column_count}."
+            f"Is {len(widths)}, should be {column_count}.",
         )
 
     if isinstance(widths, int):
@@ -103,11 +105,12 @@ def _pad_columns(row: str, widths: tuple[int, ...] | int, delimiter: str = "|") 
         if widths[column] < non_space_len:
             raise ValueError(
                 f"Width of column `{column}` cannot be less than "
-                f"{non_space_len}, is {widths[column]}"
+                f"{non_space_len}, is {widths[column]}",
             )
         change_amount = widths[column] - non_space_len
         for index in range(
-            prev_delimiter_index, prev_delimiter_index + non_space_len + 1
+            prev_delimiter_index,
+            prev_delimiter_index + non_space_len + 1,
         ):
             new_row += row[index]
         new_row += " " * change_amount
@@ -226,7 +229,7 @@ def md_table_to_lines(
         map(
             lambda iterable: max(iterable) + 2,
             zip(*_exclusive_map(_get_column_widths, lines, exclude=frozenset({1}))),
-        )
+        ),
     )
 
     for i, _ in enumerate(lines):

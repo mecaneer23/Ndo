@@ -109,7 +109,10 @@ class _CursesWindow:
 
     def _clear_buffer(self, attr: int = -1) -> None:
         self.addstr(
-            self._stored_y, self._stored_x, "".join(self._buffer), self._stored_attr
+            self._stored_y,
+            self._stored_x,
+            "".join(self._buffer),
+            self._stored_attr,
         )
         if attr != -1:
             self._stored_attr = attr
@@ -235,7 +238,10 @@ def color_pair(pair_number: int) -> int:
 
 
 def newwin(
-    nlines: int, ncols: int, begin_y: int = 0, begin_x: int = 0
+    nlines: int,
+    ncols: int,
+    begin_y: int = 0,
+    begin_x: int = 0,
 ) -> _CursesWindow:
     """
     Return a new window, whose left-upper corner is at (begin_y, begin_x),

@@ -34,7 +34,11 @@ class _EditString(NamedTuple):
 
 
 def hline(
-    win: curses.window, y_loc: int, x_loc: int, char: str | int, width: int
+    win: curses.window,
+    y_loc: int,
+    x_loc: int,
+    char: str | int,
+    width: int,
 ) -> None:
     """
     Display a horizontal line starting at (y_loc, x_loc)
@@ -49,7 +53,7 @@ def _ensure_valid(win: curses.window) -> None:
     if win.getmaxyx()[0] < 3:
         raise ValueError(
             "Window is too short, it won't be able to\
-            display the minimum 1 line of text."
+            display the minimum 1 line of text.",
         )
     if win.getmaxyx()[0] > 3:
         raise NotImplementedError("Multiline text editing is not supported")
@@ -164,7 +168,11 @@ def _handle_toggle_note_todo(stdscr: curses.window, todo: Todo) -> None:
 
 
 def _handle_indent_dedent(
-    stdscr: curses.window, todo: Todo, action: str, chars: _Chars, position: int
+    stdscr: curses.window,
+    todo: Todo,
+    action: str,
+    chars: _Chars,
+    position: int,
 ) -> _EditString:
     if action == "indent":
         todo.indent()
@@ -184,7 +192,9 @@ def _handle_end(chars: _Chars) -> _EditString:
 
 
 def _passthrough(
-    stdscr: curses.window, edit_string: _EditString, key_name: str
+    stdscr: curses.window,
+    edit_string: _EditString,
+    key_name: str,
 ) -> _EditString:
     alert(stdscr, f"Key `{key_name}` is not supported")
     return edit_string
@@ -300,7 +310,10 @@ def _get_chars_position(
 
 
 def _set_once(
-    mode: SingleLineModeImpl, chars: _Chars, position: int, color: Color
+    mode: SingleLineModeImpl,
+    chars: _Chars,
+    position: int,
+    color: Color,
 ) -> str:
     mode.set_once()
     string = "".join(chars)
@@ -374,7 +387,7 @@ def get_todo(
     while True:
         if len(chars) + 1 >= win.getmaxyx()[1] - 1:
             return todo.set_display_text(
-                _set_once(mode, chars, position, todo.get_color())
+                _set_once(mode, chars, position, todo.get_color()),
             )
         if position == len(chars):
             win.addch(1, len(chars) + 1, "█")
@@ -392,7 +405,10 @@ def get_todo(
             mode.toggle()
             break
         next_step = _get_chars_position(
-            input_char, (stdscr, win), (chars, position, todo), mode
+            input_char,
+            (stdscr, win),
+            (chars, position, todo),
+            mode,
         )
         if next_step is None:
             return original

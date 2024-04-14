@@ -29,6 +29,7 @@ _CHECKBOX_OPTIONS = ("🗹", "☑")
 
 class GuiType(Enum):
     """Specifiy a GUI type, (curses default tui, ansi custom tui, tkinter gui)"""
+
     CURSES = "curses"
     ANSI = "ansi"
     TKINTER = "tkinter"
@@ -74,7 +75,7 @@ def _get_args() -> TypedNamespace:
                 CONTROLS_END_INDEX,
                 str(_DEFAULT_HELP_FILE),
                 frozenset({"<kbd>", "</kbd>"}),
-            )
+            ),
         ),
     )
     parser.add_argument(

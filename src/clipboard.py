@@ -25,7 +25,10 @@ else:
 
 
 def copy_todo(
-    stdscr: curses.window, todos: Todos, selected: Cursor, copied_todo: Todo
+    stdscr: curses.window,
+    todos: Todos,
+    selected: Cursor,
+    copied_todo: Todo,
 ) -> None:
     """
     Set `copied_todo` to be a duplicate of the first selected Todo.
@@ -42,7 +45,10 @@ def copy_todo(
 
 
 def _todo_from_clipboard(
-    stdscr: curses.window, todos: Todos, selected: int, copied_todo: Todo
+    stdscr: curses.window,
+    todos: Todos,
+    selected: int,
+    copied_todo: Todo,
 ) -> Todos:
     """Retrieve copied_todo and insert into todo list"""
     if not CLIPBOARD_EXISTS:
@@ -65,7 +71,10 @@ def _todo_from_clipboard(
 
 
 def paste_todo(
-    stdscr: curses.window, todos: Todos, selected: Cursor, copied_todo: Todo
+    stdscr: curses.window,
+    todos: Todos,
+    selected: Cursor,
+    copied_todo: Todo,
 ) -> Todos:
     """Paste a todo from copied_todo or clipboard if available"""
     temp = todos.copy()

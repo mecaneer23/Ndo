@@ -86,7 +86,10 @@ def set_header(stdscr: curses.window, message: str) -> None:
     Set the header to a specific message.
     """
     stdscr.addstr(
-        0, 0, message.ljust(stdscr.getmaxyx()[1]), curses.A_BOLD | curses.color_pair(2)
+        0,
+        0,
+        message.ljust(stdscr.getmaxyx()[1]),
+        curses.A_BOLD | curses.color_pair(2),
     )
 
 
@@ -132,7 +135,8 @@ def alert(stdscr: curses.window, message: str) -> int:
     border_width = 2
     max_y, max_x = stdscr.getmaxyx()
     height_chunk, width_chunk, chunks = tee(
-        _chunk_message(message, max_x * 3 // 4 - border_width), 3
+        _chunk_message(message, max_x * 3 // 4 - border_width),
+        3,
     )
     width = len(max(width_chunk, key=len)) + border_width
     height = sum(1 for _ in height_chunk) + border_width
