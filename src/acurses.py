@@ -1,7 +1,11 @@
 """An ANSI interface that feels like programming with curses"""
 
-# TODO: Windows support, see the following link
-# https://github.com/python/cpython/blob/3.12/Lib/getpass.py
+from os import name
+
+if name == "nt":
+    # TODO: Windows support, see the following link
+    # https://github.com/python/cpython/blob/3.12/Lib/getpass.py
+    raise ImportError("Windows isn't currently supported")
 
 # TODO: continue implementation with inspiration from following
 # https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
