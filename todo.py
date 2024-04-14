@@ -12,9 +12,9 @@ from src.class_todo import BoxChar, FoldedState, Todo, TodoList, Todos
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
 from src.get_args import (
     FILENAME,
+    GUI_TYPE,
     HEADER,
     NO_GUI,
-    GUI_TYPE,
     GuiType,
 )
 from src.get_todo import get_todo
@@ -39,6 +39,7 @@ elif GUI_TYPE == GuiType.TKINTER:
     from src.tcurses import wrapper
 else:
     import curses  # type: ignore
+
     from src.working_initscr import wrapper
 
 
