@@ -92,7 +92,9 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def _parse_attrs(self, attrs: int) -> str:
         """Convert a binary `attrs` into ANSI escape codes"""
         output = ""
-        for ansi_code in compress(count(), map(int, str(attrs))):
+        iattrs = str(attrs)
+        for ansi_code in compress(count(len(iattrs) - 1, -1), map(int, iattrs[::-1])):
+            # if ansi_code // 10 == 4:
             output += f"\033[{ansi_code}m"
         return output
 
