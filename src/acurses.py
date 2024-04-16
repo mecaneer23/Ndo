@@ -1,21 +1,26 @@
 """An ANSI interface that feels like programming with curses"""
 
-from os import name
-
-if name == "nt":
-    # TODO: Windows support, see the following link
-    # https://github.com/python/cpython/blob/3.12/Lib/getpass.py
-    raise ImportError("Windows isn't currently supported")
-
-# TODO: continue implementation with inspiration from following
-# https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
-
 from itertools import compress, count
-from os import get_terminal_size
+from os import get_terminal_size, name
 from sys import stdin, stdout
-from termios import TCSADRAIN, tcgetattr, tcsetattr
-from tty import setcbreak
 from typing import Any, Callable, TypeVar
+
+try:
+    from termios import TCSADRAIN, tcgetattr, tcsetattr
+    from tty import setcbreak
+except ImportError:
+    from msvcrt import getwch, putwch
+
+    def _write(string: str) -> int:
+        for ch in string:
+            putwch(ch)
+        return 0
+
+    stdin.read = lambda _=-1: getwch()
+    stdout.write = _write
+    stdout.flush = lambda: None
+
+IS_WINDOWS = name == "nt"
 
 _T = TypeVar("_T")
 
@@ -108,6 +113,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         """Add a string to the screen at a specific position"""
         self.move(y, x)
         stdout.write(f"{self._parse_attrs(attr)}{text}{_ANSI_RESET}")
+        stdout.flush()
 
     def refresh(self) -> None:
         """Sync display"""
@@ -209,11 +215,13 @@ def wrapper(func: Callable[..., _T], /, *args: list[Any], **kwds: dict[str, Any]
     wrapper().
     """
 
-    fd = stdin.fileno()
-    old_settings = tcgetattr(fd)
+    if not IS_WINDOWS:
+        fd = stdin.fileno()
+        old_settings = tcgetattr(fd)
 
     try:
-        setcbreak(fd)
+        if not IS_WINDOWS:
+            setcbreak(fd)
         stdout.write("\033[s\033[2J\033[H\033[?25l")
         stdout.flush()
         stdscr = initscr()
@@ -223,7 +231,8 @@ def wrapper(func: Callable[..., _T], /, *args: list[Any], **kwds: dict[str, Any]
         if "stdscr" in locals():
             stdout.write("\033[39;49m\033[0m\033[2J\033[H\033[?25h")
             stdout.flush()
-            tcsetattr(fd, TCSADRAIN, old_settings)
+            if not IS_WINDOWS:
+                tcsetattr(fd, TCSADRAIN, old_settings)
 
 
 def init_pair(pair_number: int, fg: int, bg: int) -> None:
