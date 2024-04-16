@@ -9,7 +9,7 @@ from enum import Enum
 from functools import wraps
 from typing import Any, Callable, Iterable, TypeVar
 
-from src.class_todo import Todos, TodoList
+from src.class_todo import Todos
 from src.get_args import GUI_TYPE, GuiType
 from src.keys import Key
 from src.utils import clamp
@@ -120,22 +120,22 @@ class Cursor:
         """Replace the entire cursor with a new single position"""
         self.positions = Positions([position])
 
-    def todo_set_to(self, todo_position: TodoList) -> Todos:
+    def set_to_passthrough(self, t_position: tuple[T, int]) -> T:
         """
         Replace the entire cursor with a new single position
-        and pass the todo portion of the `TodoList` through
+        and pass the t portion of the tuple through
         the method.
         """
-        self.positions[0] = todo_position[1]
-        return todo_position[0]
+        self.set_to(t_position[1])
+        return t_position[0]
 
-    def todos_override(self, todos: Todos, positions: Positions) -> Todos:
+    def override_passthrough(self, passthrough: T, positions: Positions) -> T:
         """
         Replace the cursor with a new `Positions`, and pass the
-        todos through the method.
+        passthrough through the method.
         """
         self.positions = positions
-        return todos
+        return passthrough
 
     def single_up(self) -> None:
         """Move a cursor with length 1 up by 1"""

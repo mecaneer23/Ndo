@@ -276,17 +276,17 @@ def _handle_delete_todo(
 ) -> Todos:
     if len(todos) > 0 and CLIPBOARD_EXISTS:
         copy_todo(stdscr, todos, selected, copied_todo)
-    return selected.todo_set_to(delete_todo(stdscr, todos, selected))
+    return selected.set_to_passthrough(delete_todo(stdscr, todos, selected))
 
 
 def _handle_undo(selected: Cursor, history: UndoRedo) -> Todos:
-    todos = selected.todo_set_to(history.undo())
+    todos = selected.set_to_passthrough(history.undo())
     update_file(FILENAME, todos)
     return todos
 
 
 def _handle_redo(selected: Cursor, history: UndoRedo) -> Todos:
-    todos = selected.todo_set_to(history.redo())
+    todos = selected.set_to_passthrough(history.redo())
     update_file(FILENAME, todos)
     return todos
 
@@ -320,28 +320,28 @@ def _handle_todo_down(
     todos: Todos,
     selected: Cursor,
 ) -> Todos:
-    return selected.todos_override(*todo_down(todos, selected))
+    return selected.override_passthrough(*todo_down(todos, selected))
 
 
 def _handle_todo_up(
     todos: Todos,
     selected: Cursor,
 ) -> Todos:
-    return selected.todos_override(*todo_up(todos, selected))
+    return selected.override_passthrough(*todo_up(todos, selected))
 
 
 def _handle_indent(
     todos: Todos,
     selected: Cursor,
 ) -> Todos:
-    return selected.todo_set_to(indent(todos, selected))
+    return selected.set_to_passthrough(indent(todos, selected))
 
 
 def _handle_dedent(
     todos: Todos,
     selected: Cursor,
 ) -> Todos:
-    return selected.todo_set_to(dedent(todos, selected))
+    return selected.set_to_passthrough(dedent(todos, selected))
 
 
 def _handle_sort_menu(
@@ -349,7 +349,7 @@ def _handle_sort_menu(
     todos: Todos,
     selected: Cursor,
 ) -> Todos:
-    return selected.todo_set_to(sort_menu(stdscr, todos, selected))
+    return selected.set_to_passthrough(sort_menu(stdscr, todos, selected))
 
 
 def _set_fold_state_under(
