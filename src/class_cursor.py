@@ -139,8 +139,6 @@ class Cursor:
 
     def single_up(self) -> None:
         """Move a cursor with length 1 up by 1"""
-        if len(self) != 1:
-            raise ValueError("Cursor must have length of exactly 1")
         if min(self.positions) == 0:
             return
         self.set_to(min(self.positions) - 1)
@@ -156,8 +154,6 @@ class Cursor:
 
     def single_down(self, max_len: int) -> None:
         """Move a cursor with length 1 down by 1"""
-        if len(self) != 1:
-            raise ValueError("Cursor must have length of exactly 1")
         if max(self.positions) >= max_len - 1:
             return
         self.set_to(max(self.positions) + 1)
