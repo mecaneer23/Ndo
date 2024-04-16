@@ -10,6 +10,7 @@ if name == "nt":
 # TODO: continue implementation with inspiration from following
 # https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
 
+from itertools import compress, count
 from os import get_terminal_size
 from sys import stdin, stdout
 from termios import TCSADRAIN, tcgetattr, tcsetattr
@@ -56,7 +57,7 @@ BACKGROUND_DEFAULT = 10**49
 _ANSI_RESET = "\033[0m"
 
 
-class _CursesWindow:
+class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         /,
@@ -91,10 +92,8 @@ class _CursesWindow:
     def _parse_attrs(self, attrs: int) -> str:
         """Convert a binary `attrs` into ANSI escape codes"""
         output = ""
-        for pos, val in enumerate(str(attrs)):
-            if val == "0":
-                continue
-            output += f"\033[{len(str(attrs)) - 1 - pos}m"
+        for ansi_code in compress(count(), map(int, str(attrs))):
+            output += f"\033[{ansi_code}m"
         return output
 
     def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
