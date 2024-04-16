@@ -32,27 +32,27 @@ ACS_LLCORNER = "└"
 ERR = -1
 OK = 0
 
-A_NORMAL = 10**0
-A_BOLD = 10**1
-A_DIM = 10**2
-A_ITALIC = 10**3
-A_UNDERLINE = 10**4
-A_BLINK = 10**5
-A_STANDOUT = 10**7
-A_REVERSE = 10**7
-A_INVIS = 10**8
-A_STRIKETHROUGH = 10**9
+A_NORMAL = 2**0
+A_BOLD = 2**1
+A_DIM = 2**2
+A_ITALIC = 2**3
+A_UNDERLINE = 2**4
+A_BLINK = 2**5
+A_STANDOUT = 2**7
+A_REVERSE = 2**7
+A_INVIS = 2**8
+A_STRIKETHROUGH = 2**9
 
-COLOR_BLACK = 10**30
-COLOR_RED = 10**31
-COLOR_GREEN = 10**32
-COLOR_YELLOW = 10**33
-COLOR_BLUE = 10**34
-COLOR_MAGENTA = 10**35
-COLOR_CYAN = 10**36
-COLOR_WHITE = 10**37
-FOREGROUND_DEFAULT = 10**39
-BACKGROUND_DEFAULT = 10**49
+COLOR_BLACK = 2**30
+COLOR_RED = 2**31
+COLOR_GREEN = 2**32
+COLOR_YELLOW = 2**33
+COLOR_BLUE = 2**34
+COLOR_MAGENTA = 2**35
+COLOR_CYAN = 2**36
+COLOR_WHITE = 2**37
+FOREGROUND_DEFAULT = 2**39
+BACKGROUND_DEFAULT = 2**49
 
 _ANSI_RESET = "\033[0m"
 
@@ -92,9 +92,15 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def _parse_attrs(self, attrs: int) -> str:
         """Convert a binary `attrs` into ANSI escape codes"""
         output = ""
-        iattrs = str(attrs)
-        for ansi_code in compress(count(len(iattrs) - 1, -1), map(int, iattrs[::-1])):
-            # if ansi_code // 10 == 4:
+        iattrs = bin(attrs)[2:]
+        background = 0
+        for ansi_code in compress(count(len(iattrs) - 1, -1), map(int, iattrs)):
+            if ansi_code // 10 == 4:
+                background = ansi_code
+                continue
+            if ansi_code // 10 == 3 and background != 0:
+                output += f"\033[{ansi_code};{background}m"
+                continue
             output += f"\033[{ansi_code}m"
         return output
 
@@ -230,8 +236,7 @@ def init_pair(pair_number: int, fg: int, bg: int) -> None:
     arguments must be between 0 and COLORS - 1, or, after calling
     use_default_colors(), -1.
     """
-    # TODO: may need to use ansi "fg;bg" rather than combined
-    _color_pairs.insert(pair_number, fg)  # | (max(bg, COLOR_BLACK) * 10**10))
+    _color_pairs.insert(pair_number, fg | (max(bg, COLOR_BLACK) * 2**10))
 
 
 def color_pair(pair_number: int) -> int:
