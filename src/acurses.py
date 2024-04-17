@@ -7,8 +7,8 @@ from sys import stdin, stdout
 from typing import Any, Callable, TypeVar, overload
 
 try:
-    from termios import TCSADRAIN, tcgetattr, tcsetattr
-    from tty import setcbreak
+    from termios import TCSADRAIN, tcgetattr, tcsetattr  # type: ignore
+    from tty import setcbreak  # type: ignore
 except ImportError:
     from msvcrt import getwch, putwch
 
@@ -244,11 +244,11 @@ def wrapper(func: Callable[..., _T], /, *args: list[Any], **kwds: dict[str, Any]
 
     if not IS_WINDOWS:
         fd = stdin.fileno()
-        old_settings = tcgetattr(fd)
+        old_settings = tcgetattr(fd)  # type: ignore
 
     try:
         if not IS_WINDOWS:
-            setcbreak(fd)
+            setcbreak(fd)  # type: ignore
         stdout.write("\033[s\033[2J\033[H\033[?25l")
         stdout.flush()
         stdscr = initscr()
@@ -259,7 +259,7 @@ def wrapper(func: Callable[..., _T], /, *args: list[Any], **kwds: dict[str, Any]
             stdout.write("\033[39;49m\033[0m\033[2J\033[H\033[?25h")
             stdout.flush()
             if not IS_WINDOWS:
-                tcsetattr(fd, TCSADRAIN, old_settings)
+                tcsetattr(fd, TCSADRAIN, old_settings)  # type: ignore
 
 
 def init_pair(pair_number: int, fg: int, bg: int) -> None:
