@@ -1,5 +1,6 @@
 """An ANSI interface that feels like programming with curses"""
 
+from functools import singledispatchmethod
 from itertools import compress, count
 from os import get_terminal_size, name
 from sys import stdin, stdout
@@ -109,11 +110,26 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
             output += f"\033[{ansi_code}m"
         return output
 
-    def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
+    @singledispatchmethod
+    def addstr(
+        self, _: object, __: None = None, ___: None = None, ____: None = None
+    ) -> None:
         """Add a string to the screen at a specific position"""
-        self.move(y, x)
+        _ = __
+        _ = ___
+        _ = ____
+        raise NotImplementedError("Cannot add NoneType: not a string")
+
+    @addstr.register(str)
+    def _(self, text: str, attr: int = 0, _: None = None, __: None = None) -> None:
+        _ = __
         stdout.write(f"{self._parse_attrs(attr)}{text}{_ANSI_RESET}")
         stdout.flush()
+
+    @addstr.register(int)
+    def _(self, y: int, x: int, text: str, attr: int = 0) -> None:
+        self.move(y, x)
+        self.addstr(text, attr)
 
     def refresh(self) -> None:
         """Sync display"""
