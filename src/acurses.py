@@ -4,7 +4,7 @@ from functools import singledispatchmethod
 from itertools import compress, count
 from os import get_terminal_size, name
 from sys import stdin, stdout
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, TypeVar, overload
 
 try:
     from termios import TCSADRAIN, tcgetattr, tcsetattr
@@ -111,22 +111,33 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         return output
 
     @singledispatchmethod
-    def addstr(
+    def _addstr(
         self, _: object, __: None = None, ___: None = None, ____: None = None
     ) -> None:
-        """Add a string to the screen at a specific position"""
         _ = __
         _ = ___
         _ = ____
         raise NotImplementedError("Cannot add NoneType: not a string")
 
-    @addstr.register(str)
+    @overload
+    def addstr(self, text: str, attr: int = 0, _: None = None, __: None = None) -> None:
+        ...
+
+    @overload
+    def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
+        ...
+
+    def addstr(self, *args: Any, **kwargs: Any) -> None:
+        """Add a string to the screen at a specific position"""
+        self._addstr(*args, **kwargs)
+
+    @_addstr.register(str)
     def _(self, text: str, attr: int = 0, _: None = None, __: None = None) -> None:
         _ = __
         stdout.write(f"{self._parse_attrs(attr)}{text}{_ANSI_RESET}")
         stdout.flush()
 
-    @addstr.register(int)
+    @_addstr.register(int)
     def _(self, y: int, x: int, text: str, attr: int = 0) -> None:
         self.move(y, x)
         self.addstr(text, attr)
