@@ -105,8 +105,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
                 background = ansi_code
                 continue
             if ansi_code // 10 == 3 and background != 0:
-                output += f"\033[{ansi_code};{background}m"
-                continue
+                ansi_code = f"{ansi_code};{background}"
             output += f"\033[{ansi_code}m"
         return output
 
