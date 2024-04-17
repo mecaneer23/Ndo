@@ -120,7 +120,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         raise NotImplementedError("Cannot add NoneType: not a string")
 
     @overload
-    def addstr(self, text: str, attr: int = 0, _: None = None, __: None = None) -> None:
+    def addstr(self, text: str, attr: int = 0) -> None:
         ...
 
     @overload
