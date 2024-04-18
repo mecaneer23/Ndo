@@ -237,8 +237,14 @@ def use_default_colors() -> None:
 
 
 def curs_set(visibility: int) -> None:
-    """Set the cursor state. Not yet implemented."""
-    _ = visibility
+    """Set the cursor state. 0 for invisible, 1 for normal"""
+    if visibility == 0:
+        stdout.write("\033[?25l")
+    elif visibility == 1:
+        stdout.write("\033[?25h")
+    else:
+        raise NotImplementedError("Invalid visibility level")
+    stdout.flush()
 
 
 window = _CursesWindow  # pylint: disable=invalid-name
@@ -266,7 +272,7 @@ def wrapper(func: Callable[..., _T], /, *args: list[Any], **kwds: dict[str, Any]
     try:
         if not IS_WINDOWS:
             setcbreak(fd)  # type: ignore
-        stdout.write("\033[s\033[2J\033[H\033[?25l")
+        stdout.write("\033[s\033[2J\033[H")
         stdout.flush()
         stdscr = initscr()
         # _curses.start_color()
