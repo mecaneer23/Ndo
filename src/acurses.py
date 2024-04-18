@@ -101,9 +101,9 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         """Move cursor to (new_y, new_x)"""
         self._pos_y = self._begin_y + new_y + 1
         self._pos_x = self._begin_x + new_x + 1
-        if self._pos_y < 0:
+        if self._pos_y < 1:
             raise ValueError("new y position too small")
-        if self._pos_x < 0:
+        if self._pos_x < 1:
             raise ValueError("new x position too small")
         if self._pos_y > self._begin_y + self._height:
             raise ValueError("new y position too large")
