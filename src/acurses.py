@@ -148,8 +148,10 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def _(self, text: str, attr: int = 0) -> None:
         ansi_attrs = self._parse_attrs(attr)
         stdout.write(ansi_attrs)
-        for char in text[:self._width]:
+        for index, char in enumerate(text[: self._width]):
             stdout.write(char)
+            if index + self._pos_x == self._width:
+                self.move(self._pos_y, 0)
         if ansi_attrs:
             stdout.write(_ANSI_RESET)
         stdout.flush()
