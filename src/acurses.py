@@ -250,7 +250,7 @@ def curs_set(visibility: int) -> None:
 
 
 window = _CursesWindow  # pylint: disable=invalid-name
-_color_pairs: list[int] = [FOREGROUND_DEFAULT]
+_color_pairs: list[int] = [FOREGROUND_DEFAULT | BACKGROUND_DEFAULT]
 
 
 def initscr() -> window:
@@ -297,7 +297,7 @@ def init_pair(pair_number: int, fg: int, bg: int) -> None:
     arguments must be between 0 and COLORS - 1, or, after calling
     use_default_colors(), -1.
     """
-    _color_pairs.insert(pair_number, fg | (max(bg, COLOR_BLACK) * 2**10))
+    _color_pairs.insert(pair_number, fg | max(bg * 2**10, BACKGROUND_DEFAULT))
 
 
 def color_pair(pair_number: int) -> int:
