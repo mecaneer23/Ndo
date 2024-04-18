@@ -62,6 +62,8 @@ BACKGROUND_DEFAULT = 2**49
 
 _ANSI_RESET = "\033[0m"
 
+_KEYS: dict[int, int] = {}
+
 
 class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def __init__(
@@ -72,15 +74,18 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         begin_y: int = 0,
         begin_x: int = 0,
     ) -> None:
-        self._width = width if width > -1 else get_terminal_size()[0]
         self._height = height if height > -1 else get_terminal_size()[1]
+        self._width = width if width > -1 else get_terminal_size()[0]
         self._begin_y = begin_y
         self._begin_x = begin_x
 
         self._buffer: list[str] = []
         self._stored_attr: int = 0
-        self._stored_x: int = 0
         self._stored_y: int = 0
+        self._stored_x: int = 0
+
+        self._pos_y = 0
+        self._pos_x = 0
 
     def getch(self) -> int:
         """
@@ -89,11 +94,22 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         keypad keys and so on are represented by numbers
         higher than 255.
         """
-        return ord(stdin.read(1))
+        char = ord(stdin.read(1))
+        return _KEYS.get(char, char)
 
     def move(self, new_y: int, new_x: int) -> None:
         """Move cursor to (new_y, new_x)"""
-        stdout.write(f"\033[{self._begin_y + new_y + 1};{self._begin_x + new_x + 1}H")
+        self._pos_y = self._begin_y + new_y + 1
+        self._pos_x = self._begin_x + new_x + 1
+        if self._pos_y < 0:
+            raise ValueError("new y position too small")
+        if self._pos_x < 0:
+            raise ValueError("new x position too small")
+        if self._pos_y > self._begin_y + self._height:
+            raise ValueError("new y position too large")
+        if self._pos_x > self._begin_x + self._width:
+            raise ValueError("new x position too large")
+        stdout.write(f"\033[{self._pos_y};{self._pos_x}H")
 
     def _parse_attrs(self, attrs: int) -> str:
         """Convert a binary `attrs` into ANSI escape codes"""
@@ -119,12 +135,10 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         raise NotImplementedError("Cannot add NoneType: not a string")
 
     @overload
-    def addstr(self, text: str, attr: int = 0) -> None:
-        ...
+    def addstr(self, text: str, attr: int = 0) -> None: ...
 
     @overload
-    def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
-        ...
+    def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None: ...
 
     def addstr(self, *args: Any, **kwargs: Any) -> None:
         """Add a string to the screen at a specific position"""
@@ -133,7 +147,9 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     @_addstr.register(str)
     def _(self, text: str, attr: int = 0) -> None:
         ansi_attrs = self._parse_attrs(attr)
-        stdout.write(f"{ansi_attrs}{text}{_ANSI_RESET if ansi_attrs else ''}")
+        stdout.write(
+            f"{ansi_attrs}{text[:self._width]}{_ANSI_RESET if ansi_attrs else ''}"
+        )
         stdout.flush()
 
     @_addstr.register(int)
