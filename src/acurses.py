@@ -147,9 +147,11 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     @_addstr.register(str)
     def _(self, text: str, attr: int = 0) -> None:
         ansi_attrs = self._parse_attrs(attr)
-        stdout.write(
-            f"{ansi_attrs}{text[:self._width]}{_ANSI_RESET if ansi_attrs else ''}"
-        )
+        stdout.write(ansi_attrs)
+        for char in text[:self._width]:
+            stdout.write(char)
+        if ansi_attrs:
+            stdout.write(_ANSI_RESET)
         stdout.flush()
 
     @_addstr.register(int)
