@@ -93,7 +93,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
     def move(self, new_y: int, new_x: int) -> None:
         """Move cursor to (new_y, new_x)"""
-        stdout.write(f"\033[{self._begin_y + new_y + 1};{self._begin_x + new_x + 1}H")
+        stdout.write(f"\033[{self._begin_y + new_y + 1};{self._begin_x + new_x + 3}H")
 
     def _parse_attrs(self, attrs: int) -> str:
         """Convert a binary `attrs` into ANSI escape codes"""
@@ -133,7 +133,8 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     @_addstr.register(str)
     def _(self, text: str, attr: int = 0, _: None = None, __: None = None) -> None:
         _ = __
-        stdout.write(f"{self._parse_attrs(attr)}{text}{_ANSI_RESET}")
+        ansi_attrs = self._parse_attrs(attr)
+        stdout.write(f"{ansi_attrs}{text}{_ANSI_RESET if ansi_attrs else ''}")
         stdout.flush()
 
     @_addstr.register(int)
