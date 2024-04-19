@@ -10,14 +10,14 @@ try:
     from termios import TCSADRAIN, tcgetattr, tcsetattr  # type: ignore
     from tty import setcbreak  # type: ignore
 except ImportError:
-    from msvcrt import getwch, putwch
+    from msvcrt import getwch, putwch  # type: ignore
 
     def _write(string: str) -> int:
         for ch in string:
             putwch(ch)
         return 0
 
-    stdin.read = lambda _=-1: getwch()
+    stdin.read = lambda _=-1: getwch()  # type: ignore
     stdout.write = _write
     stdout.flush = lambda: None
 
