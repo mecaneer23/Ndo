@@ -84,9 +84,6 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         self._stored_y: int = 0
         self._stored_x: int = 0
 
-        self._pos_y = 0
-        self._pos_x = 0
-
     def getch(self) -> int:
         """
         Get a character. Note that the integer returned
@@ -99,17 +96,17 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
     def move(self, new_y: int, new_x: int) -> None:
         """Move cursor to (new_y, new_x)"""
-        self._pos_y = self._begin_y + new_y + 1
-        self._pos_x = self._begin_x + new_x + 1
-        if self._pos_y < 1:
+        pos_y = self._begin_y + new_y
+        pos_x = self._begin_x + new_x
+        if pos_y < 0:
             raise ValueError("new y position too small")
-        if self._pos_x < 1:
+        if pos_x < 0:
             raise ValueError("new x position too small")
-        if self._pos_y > self._begin_y + self._height:
+        if pos_y > self._begin_y + self._height:
             raise ValueError("new y position too large")
-        if self._pos_x > self._begin_x + self._width:
+        if pos_x > self._begin_x + self._width:
             raise ValueError("new x position too large")
-        stdout.write(f"\033[{self._pos_y};{self._pos_x}H")
+        stdout.write(f"\033[{pos_y + 1};{pos_x + 1}H")
 
     def _parse_attrs(self, attrs: int) -> str:
         """Convert a binary `attrs` into ANSI escape codes"""
@@ -135,12 +132,10 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         raise NotImplementedError("Cannot add NoneType: not a string")
 
     @overload
-    def addstr(self, text: str, attr: int = 0) -> None:
-        ...
+    def addstr(self, text: str, attr: int = 0) -> None: ...
 
     @overload
-    def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
-        ...
+    def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None: ...
 
     def addstr(self, *args: Any, **kwargs: Any) -> None:
         """Add a string to the screen at a specific position"""
@@ -150,10 +145,8 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def _(self, text: str, attr: int = 0) -> None:
         ansi_attrs = self._parse_attrs(attr)
         stdout.write(ansi_attrs)
-        for index, char in enumerate(text[: self._width]):
+        for char in text[: self._width]:
             stdout.write(char)
-            if index + self._pos_x == self._width:
-                self.move(self._pos_y, 0)
         if ansi_attrs:
             stdout.write(_ANSI_RESET)
         stdout.flush()
@@ -173,25 +166,26 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
     def addch(self, y: int, x: int, char: str, attr: int = 0) -> None:
         """Add a character to the screen"""
-        self._buffer.append(char)
-        if self._stored_attr == 0:
-            self._stored_attr = attr
-        if len(self._buffer) == 1:
-            self._stored_x = x
-            self._stored_y = y
-        if (
-            attr != self._stored_attr
-            or char == "\n"
-            or len(self._buffer) + self._stored_x >= self._width
-        ):
-            self.addstr(
-                self._stored_y,
-                self._stored_x,
-                "".join(self._buffer),
-                self._stored_attr,
-            )
-            self._stored_attr = attr
-            self._buffer.clear()
+        # self._buffer.append(char)
+        # if self._stored_attr == 0:
+        #     self._stored_attr = attr
+        # if len(self._buffer) == 1:
+        #     self._stored_x = x
+        #     self._stored_y = y
+        # if (
+        #     attr != self._stored_attr
+        #     or char == "\n"
+        #     or len(self._buffer) + self._stored_x >= self._width
+        # ):
+        #     self.addstr(
+        #         self._stored_y,
+        #         self._stored_x,
+        #         "".join(self._buffer),
+        #         self._stored_attr,
+        #     )
+        #     self._stored_attr = attr
+        #     self._buffer.clear()
+        self.addstr(y, x, char, attr)
 
     def nodelay(self, flag: bool = True) -> None:
         """
