@@ -132,10 +132,12 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         raise NotImplementedError("Cannot add NoneType: not a string")
 
     @overload
-    def addstr(self, text: str, attr: int = 0) -> None: ...
+    def addstr(self, text: str, attr: int = 0) -> None:
+        ...
 
     @overload
-    def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None: ...
+    def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
+        ...
 
     def addstr(self, *args: Any, **kwargs: Any) -> None:
         """Add a string to the screen at a specific position"""
@@ -156,34 +158,31 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
     def refresh(self) -> None:
         """Sync display"""
+        self._clear_buffer()
         stdout.flush()
 
     def getmaxyx(self) -> tuple[int, int]:
         """Get window height and width"""
         return self._height, self._width
 
+    def _clear_buffer(self) -> None:
+        self.addstr(
+            self._stored_y,
+            self._stored_x,
+            "".join(self._buffer),
+            self._stored_attr,
+        )
+        self._buffer.clear()
+
     def addch(self, y: int, x: int, char: str, attr: int = 0) -> None:
         """Add a character to the screen"""
-        # self._buffer.append(char)
-        # if self._stored_attr == 0:
-        #     self._stored_attr = attr
-        # if len(self._buffer) == 1:
-        #     self._stored_x = x
-        #     self._stored_y = y
-        # if (
-        #     attr != self._stored_attr
-        #     or char == "\n"
-        #     or len(self._buffer) + self._stored_x >= self._width
-        # ):
-        #     self.addstr(
-        #         self._stored_y,
-        #         self._stored_x,
-        #         "".join(self._buffer),
-        #         self._stored_attr,
-        #     )
-        #     self._stored_attr = attr
-        #     self._buffer.clear()
-        self.addstr(y, x, char, attr)
+        if attr != self._stored_attr or y != self._stored_y:
+            if self._buffer:
+                self._clear_buffer()
+            self._stored_attr = attr
+            self._stored_x = x
+            self._stored_y = y
+        self._buffer.append(char)
 
     def nodelay(self, flag: bool = True) -> None:
         """
