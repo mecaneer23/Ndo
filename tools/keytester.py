@@ -1,7 +1,21 @@
 #!/usr/bin/env python3
 # pylint: disable=missing-docstring
 
-import curses
+# run with `python3 -m tools.keytester`
+
+from argparse import ArgumentParser, Namespace
+
+
+def parse_args() -> Namespace:
+    parser = ArgumentParser()
+    parser.add_argument("-a", "--acurses", action="store_true")
+    return parser.parse_args()
+
+
+if parse_args().acurses:
+    import src.acurses as curses
+else:
+    import curses
 
 
 def main(stdscr: curses.window) -> None:
