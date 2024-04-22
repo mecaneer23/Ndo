@@ -62,7 +62,7 @@ BACKGROUND_DEFAULT = 2**49
 
 _ANSI_RESET = "\033[0m"
 
-_KEYS: dict[int, int] = {}
+_KEYS: dict[int, tuple[int, ...]] = {27: (27, -1)}
 
 
 class _CursesWindow:  # pylint: disable=too-many-instance-attributes
@@ -84,6 +84,8 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         self._stored_y: int = 0
         self._stored_x: int = 0
 
+        self._stored_keys: list[int] = []
+
     def getch(self) -> int:
         """
         Get a character. Note that the integer returned
@@ -91,8 +93,17 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         keypad keys and so on are represented by numbers
         higher than 255.
         """
+        if self._stored_keys:
+            return self._stored_keys.pop(0)
         char = ord(stdin.read(1))
-        return _KEYS.get(char, char)
+        keys = _KEYS.get(char, (char,))
+        if len(keys) == 0:
+            raise NotImplementedError(
+                f"Pressing {char} hasn't been implemented yet in this context"
+            )
+        for key in keys[1:]:
+            self._stored_keys.append(key)
+        return keys[0]
 
     def move(self, new_y: int, new_x: int) -> None:
         """Move cursor to (new_y, new_x)"""
@@ -132,12 +143,10 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         raise NotImplementedError("Cannot add NoneType: not a string")
 
     @overload
-    def addstr(self, text: str, attr: int = 0) -> None:
-        ...
+    def addstr(self, text: str, attr: int = 0) -> None: ...
 
     @overload
-    def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
-        ...
+    def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None: ...
 
     def addstr(self, *args: Any, **kwargs: Any) -> None:
         """Add a string to the screen at a specific position"""
