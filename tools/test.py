@@ -33,9 +33,6 @@ def _main(stdscr: curses.window):
     while True:
         x = stdscr.getch()
         stdscr.addstr(str(x) + "\n")
-        if x == 27:
-            y = stdscr.getch()
-            stdscr.addstr(str(y) + ":")
         if x == 113:
             break
         # stdscr.refresh()
