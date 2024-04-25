@@ -167,17 +167,25 @@ def _handle_toggle_note_todo(stdscr: curses.window, todo: Todo) -> None:
     stdscr.refresh()
 
 
-def _handle_indent_dedent(
+def _handle_indent(
     stdscr: curses.window,
     todo: Todo,
-    action: str,
     chars: _Chars,
     position: int,
 ) -> _EditString:
-    if action == "indent":
-        todo.indent()
-    elif action == "dedent":
-        todo.dedent()
+    todo.indent()
+    set_header(stdscr, f"Tab level: {todo.get_indent_level() // INDENT} tabs")
+    stdscr.refresh()
+    return _EditString(chars, position)
+
+
+def _handle_dedent(
+    stdscr: curses.window,
+    todo: Todo,
+    chars: _Chars,
+    position: int,
+) -> _EditString:
+    todo.dedent()
     set_header(stdscr, f"Tab level: {todo.get_indent_level() // INDENT} tabs")
     stdscr.refresh()
     return _EditString(chars, position)
@@ -245,9 +253,9 @@ def _handle_escape(
             _handle_end,
             (chars,),
         ),
-        Key.indent_dedent: (
-            _handle_indent_dedent,
-            (stdscr_win[0], todo, "dedent", chars, position),
+        Key.dedent: (
+            _handle_dedent,
+            (stdscr_win[0], todo, chars, position),
         ),
     }
     func, args = subch_table[subch]
@@ -297,7 +305,7 @@ def _get_chars_position(
     if input_char == Key.escape:
         return _handle_escape(stdscr_win, chars, position, mode, todo)
     if input_char == Key.tab:
-        return _handle_indent_dedent(stdscr_win[0], todo, "indent", chars, position)
+        return _handle_indent(stdscr_win[0], todo, chars, position)
     backspace_table = {
         Key.backspace: _handle_backspace,
         Key.backspace_: _handle_backspace,
