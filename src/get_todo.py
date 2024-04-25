@@ -392,7 +392,7 @@ def get_todo(
         if position == len(chars):
             win.addch(1, len(chars) + 1, "█")
         for i, char in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
-            win.addch(1, i + 1, char, curses.A_STANDOUT if i == position else 0)
+            win.addch(1, i + 1, char, curses.A_STANDOUT if i == position else curses.A_NORMAL)
         win.refresh()
         try:
             input_char = win.getch()
