@@ -3,7 +3,11 @@
 from functools import singledispatchmethod
 from itertools import compress, count
 from os import get_terminal_size, name
+from queue import Empty as queue_empty
+from queue import Queue
 from sys import stdin, stdout
+from threading import Thread
+from time import time as now
 from typing import Any, Callable, TypeVar, overload
 
 try:
@@ -62,10 +66,15 @@ BACKGROUND_DEFAULT = 2**49
 
 _ANSI_RESET = "\033[0m"
 
-_KEYS: dict[int, tuple[int, ...]] = {27: (27, -1)}
+_SPECIAL_KEYS: dict[str, tuple[int, ...]] = {"27": (27, -1)}
+_SHORT_TIME_SECONDS = 0.01
 
 
 class _CursesWindow:  # pylint: disable=too-many-instance-attributes
+    def _fill_queue(self):
+        while True:
+            self._raw_input.put(ord(stdin.read(1)))
+
     def __init__(
         self,
         /,
@@ -84,7 +93,10 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         self._stored_y: int = 0
         self._stored_x: int = 0
 
-        self._stored_keys: list[int] = []
+        self._stored_keys: Queue[int] = Queue()
+
+        self._raw_input: Queue[int] = Queue()
+        Thread(target=self._fill_queue, daemon=True).start()
 
     def getch(self) -> int:
         """
@@ -93,17 +105,21 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         keypad keys and so on are represented by numbers
         higher than 255.
         """
-        if self._stored_keys:
-            return self._stored_keys.pop(0)
-        char = ord(stdin.read(1))
-        keys = _KEYS.get(char, (char,))
-        if len(keys) == 0:
-            raise NotImplementedError(
-                f"Pressing {char} hasn't been implemented yet in this context"
-            )
-        for key in keys[1:]:
-            self._stored_keys.append(key)
-        return keys[0]
+        char = self._raw_input.get()
+        current = [char]
+        if char == 27:
+            esc = now()
+            while now() - esc < _SHORT_TIME_SECONDS:
+                try:
+                    char = self._raw_input.get(timeout=_SHORT_TIME_SECONDS)
+                except queue_empty:
+                    break
+                if char not in current:
+                    current.append(char)
+        chars = tuple(current)
+        for key in _SPECIAL_KEYS.get("-".join(map(str, chars)), chars):
+            self._stored_keys.put(key)
+        return self._stored_keys.get()
 
     def move(self, new_y: int, new_x: int) -> None:
         """Move cursor to (new_y, new_x)"""
@@ -143,10 +159,12 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         raise NotImplementedError("Cannot add NoneType: not a string")
 
     @overload
-    def addstr(self, text: str, attr: int = 0) -> None: ...
+    def addstr(self, text: str, attr: int = 0) -> None:
+        ...
 
     @overload
-    def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None: ...
+    def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
+        ...
 
     def addstr(self, *args: Any, **kwargs: Any) -> None:
         """Add a string to the screen at a specific position"""
