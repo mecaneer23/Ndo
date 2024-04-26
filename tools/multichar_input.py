@@ -21,21 +21,24 @@ def _main() -> None:
 
     threading.Thread(target=_fill_queue, args=(queue,), daemon=True).start()
 
-    char = queue.get()
-    if char != 27:
-        print(f"key: {char}", end="\n\r")
-        return
-    esc = now()
-    chars.append(27)
-    while now() - esc < _SHORT_TIME_SECONDS:
-        try:
-            char = queue.get(timeout=_SHORT_TIME_SECONDS)
-        except queue_empty:
-            break
-        if char not in chars:
-            chars.append(char)
-    print(chars, end="\n\r")
-    chars.clear()
+    while True:
+        char = queue.get()
+        if char != 27:
+            if char == 113:
+                return
+            print(f"key: {char}", end="\n\r")
+            continue
+        esc = now()
+        chars.append(27)
+        while now() - esc < _SHORT_TIME_SECONDS:
+            try:
+                char = queue.get(timeout=_SHORT_TIME_SECONDS)
+            except queue_empty:
+                break
+            if char not in chars:
+                chars.append(char)
+        print(chars, end="\n\r")
+        chars.clear()
 
 
 if __name__ == "__main__":
