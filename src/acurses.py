@@ -66,7 +66,13 @@ BACKGROUND_DEFAULT = 2**49
 
 _ANSI_RESET = "\033[0m"
 
-_SPECIAL_KEYS: dict[str, tuple[int, ...]] = {"27": (27, -1)}
+_SPECIAL_KEYS: dict[str, set[int]] = {
+    "27": {27, -1},
+    "27-91-65": {259},
+    "27-91-66": {258},
+    "27-91-67": {261},
+    "27-91-68": {260},
+}
 _SHORT_TIME_SECONDS = 0.01
 
 
