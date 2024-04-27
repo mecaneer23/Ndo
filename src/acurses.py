@@ -30,8 +30,8 @@ IS_WINDOWS = name == "nt"
 _T = TypeVar("_T")
 
 # https://www.w3.org/TR/xml-entity-names/025.html
-ACS_RTEE = "⊣"
-ACS_LTEE = "⊢"
+ACS_RTEE = "┤"
+ACS_LTEE = "├"
 ACS_HLINE = "─"
 ACS_VLINE = "│"
 ACS_URCORNER = "┐"
