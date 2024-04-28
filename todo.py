@@ -462,7 +462,7 @@ def _get_main_input(
             stdscr.nodelay(True)
             key = stdscr.getch()
             stdscr.nodelay(False)
-            if key == -1:  # escape, otherwise skip `[`
+            if key == Key.nodelay_escape:
                 return todos
             if key not in keys_esckeys[1]:
                 return key

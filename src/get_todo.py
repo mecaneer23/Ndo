@@ -222,7 +222,7 @@ def _handle_escape(
     todo: Todo,
 ) -> _EditString | None | str:
     stdscr_win[1].nodelay(True)
-    if stdscr_win[1].getch() == -1:  # check for escape
+    if stdscr_win[1].getch() == Key.nodelay_escape:
         mode.set_on()
         return None
     stdscr_win[1].nodelay(False)
@@ -400,7 +400,9 @@ def get_todo(
         if position == len(chars):
             win.addch(1, len(chars) + 1, "█")
         for i, char in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
-            win.addch(1, i + 1, char, curses.A_STANDOUT if i == position else curses.A_NORMAL)
+            win.addch(
+                1, i + 1, char, curses.A_STANDOUT if i == position else curses.A_NORMAL
+            )
         win.refresh()
         try:
             input_char = win.getch()

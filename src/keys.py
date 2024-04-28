@@ -12,6 +12,7 @@ class Key:
     A wrapper to access keys as curses refers to them. Mostly ascii.
     """
 
+    nodelay_escape = -1
     ctrl_a = 1
     backspace = 8
     tab = 9
