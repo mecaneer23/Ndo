@@ -111,7 +111,7 @@ class _Getch:
         self._block = block
 
 
-GETCH = _Getch()
+_GETCH = _Getch()
 
 
 class _CursesWindow:  # pylint: disable=too-many-instance-attributes
@@ -144,20 +144,20 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         there is no input, otherwise wait until a key is
         pressed.
         """
-        if not GETCH.is_blocking():
+        if not _GETCH.is_blocking():
             try:
                 return self._stored_keys.get(block=False)
             except queue_empty:
                 return -1
         if not self._stored_keys.empty():
             return self._stored_keys.get()
-        char = GETCH.get()
+        char = _GETCH.get()
         current = [char]
         if char == 27:
             esc = now()
             while now() - esc < _SHORT_TIME_SECONDS:
                 try:
-                    char = GETCH.get(timeout=_SHORT_TIME_SECONDS)
+                    char = _GETCH.get(timeout=_SHORT_TIME_SECONDS)
                 except queue_empty:
                     break
                 if char not in current:
@@ -259,7 +259,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
     def nodelay(self, flag: bool = True) -> None:
         """If flag is True, getch() will be non-blocking"""
-        GETCH.set_blocking(not flag)
+        _GETCH.set_blocking(not flag)
 
     def box(self) -> None:
         """Draw a border around the current window"""
