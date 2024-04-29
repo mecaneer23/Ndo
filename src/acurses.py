@@ -67,7 +67,6 @@ BACKGROUND_DEFAULT = 2**49
 _ANSI_RESET = "\033[0m"
 
 _SPECIAL_KEYS: dict[str, set[int]] = {
-    "27": {27, -1},
     "27-91-65": {259},
     "27-91-66": {258},
     "27-91-67": {261},
@@ -76,11 +75,41 @@ _SPECIAL_KEYS: dict[str, set[int]] = {
 _SHORT_TIME_SECONDS = 0.01
 
 
-class _CursesWindow:  # pylint: disable=too-many-instance-attributes
-    def _fill_queue(self):
-        while True:
-            self._raw_input.put(ord(stdin.read(1)))
+class _Getch:
+    def __init__(self) -> None:
+        self._block = True
+        self._raw_input: Queue[int] = Queue()
+        Thread(target=self._fill_queue, daemon=True).start()
 
+    def _fill_queue(self) -> None:
+        while True:
+            self._raw_input.put(ord(stdin.read(1)), block=self._block)
+
+    def put(self, item: int, block: bool = True, timeout: float | None = None) -> None:
+        """Add an item to the queue"""
+        self._raw_input.put(item, block, timeout)
+
+    def get(self, block: bool = True, timeout: float | None = None) -> int:
+        """Get an item from the queue"""
+        return self._raw_input.get(block, timeout)
+
+    def empty(self) -> bool:
+        """Return True if the queue is empty"""
+        return self._raw_input.empty()
+
+    def is_blocking(self) -> bool:
+        """Return True if the Getch object is blocking"""
+        return self._block
+
+    def set_blocking(self, block: bool) -> None:
+        """Set blocking status"""
+        self._block = block
+
+
+GETCH = _Getch()
+
+
+class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         /,
@@ -101,23 +130,29 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
         self._stored_keys: Queue[int] = Queue()
 
-        self._raw_input: Queue[int] = Queue()
-        Thread(target=self._fill_queue, daemon=True).start()
-
     def getch(self) -> int:
         """
         Get a character. Note that the integer returned
         does not have to be in ASCII range: function keys,
         keypad keys and so on are represented by numbers
-        higher than 255.
+        higher than 255. In no-delay mode, return -1 if
+        there is no input, otherwise wait until a key is
+        pressed.
         """
-        char = self._raw_input.get()
+        if not GETCH.is_blocking():
+            try:
+                return GETCH.get(block=False)
+            except queue_empty:
+                return -1
+        if not self._stored_keys.empty():
+            return self._stored_keys.get()
+        char = GETCH.get()
         current = [char]
         if char == 27:
             esc = now()
             while now() - esc < _SHORT_TIME_SECONDS:
                 try:
-                    char = self._raw_input.get(timeout=_SHORT_TIME_SECONDS)
+                    char = GETCH.get(timeout=_SHORT_TIME_SECONDS)
                 except queue_empty:
                     break
                 if char not in current:
@@ -218,11 +253,8 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         self._buffer.append(char)
 
     def nodelay(self, flag: bool = True) -> None:
-        """
-        If flag is True, getch() will be non-blocking.
-        Cannot be unset in acurses.
-        """
-        _ = flag
+        """If flag is True, getch() will be non-blocking"""
+        GETCH.set_blocking(not flag)
 
     def box(self) -> None:
         """Draw a border around the current window"""
