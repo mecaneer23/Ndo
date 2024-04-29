@@ -66,6 +66,7 @@ BACKGROUND_DEFAULT = 2**49
 
 _ANSI_RESET = "\033[0m"
 
+# Key names for the values of this dict can be found in src.keys
 _SPECIAL_KEYS: dict[str, set[int]] = {
     "27-91-65": {259},
     "27-91-66": {258},
