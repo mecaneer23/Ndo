@@ -76,6 +76,7 @@ _SPECIAL_KEYS: dict[str, set[int]] = {
     "27-91-51-126": {330},
     "27-91-53-126": {339},  # page up
     "27-91-54-126": {338},  # page down
+    "27-91-90": {353},
 }
 _SHORT_TIME_SECONDS = 0.01
 
