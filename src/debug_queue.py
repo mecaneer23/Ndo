@@ -32,3 +32,7 @@ class Queue(Generic[T]):
     def empty(self) -> bool:
         """Return True if the queue is empty"""
         return self.queue.empty()
+
+    def get_items(self) -> list[T]:
+        """Get internal list of items from the queue"""
+        return self.items
