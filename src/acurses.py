@@ -4,7 +4,8 @@ from functools import singledispatchmethod
 from itertools import compress, count
 from os import get_terminal_size, name
 from queue import Empty as queue_empty
-from queue import Queue
+# from queue import Queue
+from src.debug_queue import Queue
 from sys import stdin, stdout
 from threading import Thread
 from time import time as now
@@ -73,6 +74,8 @@ _SPECIAL_KEYS: dict[str, set[int]] = {
     "27-91-67": {261},
     "27-91-68": {260},
     "27-91-51-126": {330},
+    "27-91-53-126": {339},  # page up
+    "27-91-54-126": {338},  # page down
 }
 _SHORT_TIME_SECONDS = 0.01
 
@@ -96,11 +99,11 @@ class _Getch:
         return self._raw_input.get(block, timeout)
 
     def empty(self) -> bool:
-        """Return True if the queue is empty"""
+        """Return whether the queue is empty"""
         return self._raw_input.empty()
 
     def is_blocking(self) -> bool:
-        """Return True if the Getch object is blocking"""
+        """Return whether the Getch object is blocking"""
         return self._block
 
     def set_blocking(self, block: bool) -> None:
@@ -143,7 +146,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         """
         if not GETCH.is_blocking():
             try:
-                return GETCH.get(block=False)
+                return self._stored_keys.get(block=False)
             except queue_empty:
                 return -1
         if not self._stored_keys.empty():
