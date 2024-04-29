@@ -4,8 +4,7 @@ from functools import singledispatchmethod
 from itertools import compress, count
 from os import get_terminal_size, name
 from queue import Empty as queue_empty
-# from queue import Queue
-from src.debug_queue import Queue
+from queue import Queue
 from sys import stdin, stdout
 from threading import Thread
 from time import time as now
