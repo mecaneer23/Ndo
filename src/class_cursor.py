@@ -137,8 +137,11 @@ class Cursor:
         self.positions = positions
         return passthrough
 
-    def single_up(self) -> None:
+    def single_up(self, max_len: int) -> None:
         """Move a cursor with length 1 up by 1"""
+        if len(self.positions) == max_len:
+            self.set_to(0)
+            return
         if min(self.positions) == 0:
             return
         self.set_to(min(self.positions) - 1)
@@ -154,6 +157,8 @@ class Cursor:
 
     def single_down(self, max_len: int) -> None:
         """Move a cursor with length 1 down by 1"""
+        if len(self.positions) == max_len:
+            self.set_to(min(self.positions))
         if max(self.positions) >= max_len - 1:
             return
         self.set_to(max(self.positions) + 1)
