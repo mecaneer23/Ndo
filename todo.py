@@ -6,7 +6,7 @@ from sys import exit as sys_exit
 from typing import Callable, TypeAlias
 
 from src.class_cursor import Cursor
-from src.class_history import TodoList, UndoRedo
+from src.class_history import UndoRedo
 from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, FoldedState, Todo, Todos
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
@@ -107,20 +107,20 @@ def move_todo(todos: Todos, selected: int, destination: int) -> Todos:
     return todos
 
 
-def todo_up(todos: Todos, selected: Cursor) -> TodoList:
+def todo_up(todos: Todos, selected: Cursor) -> Todos:
     """Move the selected todo(s) up"""
     todos = move_todo(todos, selected.get_last(), selected.get_first() - 1)
     update_file(FILENAME, todos)
     selected.slide_up()
-    return TodoList(todos, selected.get())
+    return todos
 
 
-def todo_down(todos: Todos, selected: Cursor) -> TodoList:
+def todo_down(todos: Todos, selected: Cursor) -> Todos:
     """Move the selected todo(s) down"""
     todos = move_todo(todos, selected.get_first(), selected.get_last() + 1)
     update_file(FILENAME, todos)
     selected.slide_down(len(todos))
-    return TodoList(todos, selected.get())
+    return todos
 
 
 def new_todo_next(
@@ -288,20 +288,6 @@ def _handle_redo(selected: Cursor, history: UndoRedo) -> Todos:
     todos = selected.override_passthrough(*history.redo())
     update_file(FILENAME, todos)
     return todos
-
-
-def _handle_todo_down(
-    todos: Todos,
-    selected: Cursor,
-) -> Todos:
-    return selected.override_passthrough(*todo_down(todos, selected))
-
-
-def _handle_todo_up(
-    todos: Todos,
-    selected: Cursor,
-) -> Todos:
-    return selected.override_passthrough(*todo_up(todos, selected))
 
 
 def _set_fold_state_under(
@@ -573,19 +559,19 @@ def main(stdscr: curses.window) -> int:
         Key.shift_tab_windows: (dedent, "todos, selected"),
         Key.shift_tab: (dedent, "todos, selected"),
         Key.alt_j_windows: (
-            _handle_todo_down,
+            todo_down,
             "todos, selected",
         ),
         Key.alt_k_windows: (
-            _handle_todo_up,
+            todo_up,
             "todos, selected",
         ),
     }
     esc_keys: dict[int, tuple[Callable[..., Todos | None], str]] = {
         Key.alt_G: (selected.multiselect_bottom, "len(todos)"),
         Key.alt_g: (selected.multiselect_top, "None"),
-        Key.alt_j: (_handle_todo_down, "todos, selected"),
-        Key.alt_k: (_handle_todo_up, "todos, selected"),
+        Key.alt_j: (todo_down, "todos, selected"),
+        Key.alt_k: (todo_up, "todos, selected"),
         Key.zero: (selected.relative_to, "stdscr, 0, len(todos), False"),
         Key.one: (selected.relative_to, "stdscr, 1, len(todos), False"),
         Key.two: (selected.relative_to, "stdscr, 2, len(todos), False"),
