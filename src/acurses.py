@@ -249,7 +249,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
     def addch(self, y: int, x: int, char: str, attr: int = 0) -> None:
         """Add a character to the screen"""
-        if attr != self._stored_attr or y != self._stored_y:
+        if attr != self._stored_attr or y != self._stored_y or x - self._stored_x > 1:
             if self._buffer:
                 self._clear_buffer()
             self._stored_attr = attr
