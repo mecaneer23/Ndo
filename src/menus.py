@@ -72,14 +72,12 @@ def help_menu(parent_win: curses.window) -> None:
     """Show a scrollable help menu, generated from the README"""
     parent_win.clear()
     set_header(parent_win, "Help (k/j to scroll):")
-    lines: list[str] = []
-    for line in md_table_to_lines(
+    lines = md_table_to_lines(
         CONTROLS_BEGIN_INDEX,
         CONTROLS_END_INDEX,
         str(HELP_FILE),
         frozenset({"<kbd>", "</kbd>", "(arranged alphabetically)"}),
-    ):
-        lines.append(line[:-2])
+    )
     win = curses.newwin(
         min(parent_win.getmaxyx()[0] - 1, len(lines) + 2),
         len(lines[0]) + 2,
