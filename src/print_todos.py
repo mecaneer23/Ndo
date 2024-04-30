@@ -27,13 +27,14 @@ else:
     import curses  # type: ignore
 
 
-T = TypeVar("T")
+_T = TypeVar("_T")
 _ANSI_RESET = "\u001b[0m"
 _ANSI_STRIKETHROUGH = "\033[9m\b"
-DEBUG_FOLD = False
+_DEBUG_FOLD = False
+_EMPTY_LINE_WIDTH = 8
 
 
-class SublistItems(Generic[T], NamedTuple):
+class SublistItems(Generic[_T], NamedTuple):
     """
     NamedTuple representing a slice of a
     list of T, an index within that list,
@@ -47,7 +48,7 @@ class SublistItems(Generic[T], NamedTuple):
     if `int` values aren't provided, they are initialized to 0
     """
 
-    slice: list[T]
+    slice: list[_T]
     cursor: int = 0
     start: int = 0
 
@@ -64,11 +65,11 @@ def _get_bullet(indentation_level: int) -> str:
 
 def make_printable_sublist(
     height: int,
-    lst: list[T],
+    lst: list[_T],
     cursor: int,
     distance: int = -1,
     prev_start: int = -1,
-) -> SublistItems[T]:
+) -> SublistItems[_T]:
     """
     Return a tuple including:
         - a slice of a list with length <= height
@@ -144,7 +145,7 @@ def _get_display_string(  # pylint: disable=too-many-arguments
 ) -> str:
     todo = todos[position]
     if position in highlight and todo.is_empty():
-        return "⎯" * 8
+        return "─" * _EMPTY_LINE_WIDTH
     return Chunk.join(
         Chunk(True, todo.get_indent_level() * " "),
         Chunk(not todo.is_empty() and not SIMPLE_BOXES, todo.get_box()),
@@ -156,10 +157,10 @@ def _get_display_string(  # pylint: disable=too-many-arguments
         Chunk(ENUMERATE and not RELATIVE_ENUMERATE, f"{todos.index(todo) + 1}. "),
         Chunk(RELATIVE_ENUMERATE, f"{relative_pos + 1}. "),
         Chunk(print_to_stdout and todo.is_toggled(), _ANSI_STRIKETHROUGH),
-        Chunk(not DEBUG_FOLD, todo.get_display_text()),
+        Chunk(not _DEBUG_FOLD, todo.get_display_text()),
         Chunk(todo.is_folded_parent(), "› ..."),
-        Chunk(todo.is_folded() and DEBUG_FOLD, "FOLDED"),
-        Chunk(todo._folded == FoldedState.DEFAULT and DEBUG_FOLD, "DEFAULT"),
+        Chunk(todo.is_folded() and _DEBUG_FOLD, "FOLDED"),
+        Chunk(todo._folded == FoldedState.DEFAULT and _DEBUG_FOLD, "DEFAULT"),
         Chunk(print_to_stdout, _ANSI_RESET),
         Chunk(width == 0, " "),
     )[: width - 1].ljust(width - 1, " ")
@@ -298,7 +299,7 @@ def print_todos(
                 ),
             )
             continue
-        if not todo.is_folded() or DEBUG_FOLD:
+        if not todo.is_folded() or _DEBUG_FOLD:
             _print_todo(
                 stdscr,
                 todo,
