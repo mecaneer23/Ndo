@@ -200,6 +200,8 @@ def edit_todo(
     Open a get_todo input box with the current todo contents. Set
     the todo to the edited contents.
     """
+    if len(todos) <= 0:
+        return todos
     max_y, max_x = stdscr.getmaxyx()
     todo = todos[selected].get_display_text()
     ncols = (
@@ -284,17 +286,6 @@ def _handle_redo(selected: Cursor, history: UndoRedo) -> Todos:
     todos = selected.set_to_passthrough(history.redo())
     update_file(FILENAME, todos)
     return todos
-
-
-def _handle_edit(
-    stdscr: curses.window,
-    todos: Todos,
-    selected: Cursor,
-    mode: SingleLineModeImpl,
-) -> Todos:
-    if len(todos) <= 0:
-        return todos
-    return edit_todo(stdscr, todos, int(selected), mode)
 
 
 def _handle_todo_down(
@@ -567,7 +558,7 @@ def main(stdscr: curses.window) -> int:
         Key.d: (delete_todo, "stdscr, todos, selected, copied_todo"),
         Key.g: (selected.to_top, "None"),
         Key.h: (help_menu, "stdscr"),
-        Key.i: (_handle_edit, "stdscr, todos, selected, single_line_state"),
+        Key.i: (edit_todo, "stdscr, todos, int(selected), single_line_state"),
         Key.j: (selected.single_down, "len(todos)"),
         Key.k: (selected.single_up, "len(todos)"),
         Key.o: (new_todo_next, "stdscr, todos, selected, Todo(), single_line_state"),
