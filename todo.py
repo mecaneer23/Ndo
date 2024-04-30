@@ -8,7 +8,7 @@ from typing import Callable, TypeAlias
 from src.class_cursor import Cursor, Positions
 from src.class_history import UndoRedo
 from src.class_mode import SingleLineMode, SingleLineModeImpl
-from src.class_todo import BoxChar, FoldedState, Todo, TodoList, Todos
+from src.class_todo import BoxChar, FoldedState, Todo, Todos
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
 from src.get_args import (
     FILENAME,
@@ -251,20 +251,20 @@ def quit_program(todos: Todos, edits: int, prev_time: float) -> int:
     return update_file(FILENAME, todos)
 
 
-def indent(todos: Todos, selected: Cursor) -> TodoList:
+def indent(todos: Todos, selected: Cursor) -> Todos:
     """Indent selected todos"""
     for pos in selected.get():
         todos[pos].indent()
     update_file(FILENAME, todos)
-    return TodoList(todos, selected.get_first())
+    return todos
 
 
-def dedent(todos: Todos, selected: Cursor) -> TodoList:
+def dedent(todos: Todos, selected: Cursor) -> Todos:
     """Un-indent selected todos"""
     for pos in selected.get():
         todos[pos].dedent()
     update_file(FILENAME, todos)
-    return TodoList(todos, selected.get_first())
+    return todos
 
 
 def _toggle_todo_note(todos: Todos, selected: Cursor) -> None:
@@ -323,20 +323,6 @@ def _handle_todo_up(
     selected: Cursor,
 ) -> Todos:
     return selected.override_passthrough(*todo_up(todos, selected))
-
-
-def _handle_indent(
-    todos: Todos,
-    selected: Cursor,
-) -> Todos:
-    return selected.set_to_passthrough(indent(todos, selected))
-
-
-def _handle_dedent(
-    todos: Todos,
-    selected: Cursor,
-) -> Todos:
-    return selected.set_to_passthrough(dedent(todos, selected))
 
 
 def _handle_sort_menu(
@@ -573,7 +559,7 @@ def main(stdscr: curses.window) -> int:
         Key.backspace: (join_lines, "todos, selected"),
         Key.backspace_: (join_lines, "todos, selected"),
         Key.backspace__: (join_lines, "todos, selected"),
-        Key.tab: (_handle_indent, "todos, selected"),
+        Key.tab: (indent, "todos, selected"),
         Key.enter: (_handle_enter, "stdscr, todos, selected, single_line_state"),
         Key.ctrl_k: (single_line_state.toggle, "None"),
         Key.ctrl_r: (_handle_redo, "selected, history"),
@@ -614,8 +600,8 @@ def main(stdscr: curses.window) -> int:
         Key.down: (selected.single_down, "len(todos)"),
         Key.up: (selected.single_up, "len(todos)"),
         Key.delete: (_toggle_todo_note, "todos, selected"),
-        Key.shift_tab_windows: (_handle_dedent, "todos, selected"),
-        Key.shift_tab: (_handle_dedent, "todos, selected"),
+        Key.shift_tab_windows: (dedent, "todos, selected"),
+        Key.shift_tab: (dedent, "todos, selected"),
         Key.alt_j_windows: (
             _handle_todo_down,
             "todos, selected",
