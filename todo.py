@@ -270,6 +270,8 @@ def dedent(todos: Todos, selected: Cursor) -> Todos:
 
 
 def _toggle_todo_note(todos: Todos, selected: Cursor) -> None:
+    if len(todos) == 0:
+        return
     for pos in selected.get():
         todo = todos[pos]
         todo.set_box_char(BoxChar.NONE if todo.has_box() else BoxChar.MINUS)
