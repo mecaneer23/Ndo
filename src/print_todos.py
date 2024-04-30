@@ -2,18 +2,19 @@
 Helper module to handle printing a list of Todo objects
 """
 
-from typing import Generic, NamedTuple, TypeVar
+from functools import cache
+from typing import Generic, NamedTuple, TypeVar, cast
 
 from src.class_cursor import Cursor
-from src.class_todo import Todo, Todos, FoldedState
+from src.class_todo import FoldedState, Todo, Todos
 from src.get_args import (
     BULLETS,
     ENUMERATE,
+    GUI_TYPE,
     INDENT,
     RELATIVE_ENUMERATE,
     SIMPLE_BOXES,
     STRIKETHROUGH,
-    GUI_TYPE,
     GuiType,
 )
 from src.utils import Chunk, Color
@@ -164,19 +165,30 @@ def _get_display_string(  # pylint: disable=too-many-arguments
     )[: width - 1].ljust(width - 1, " ")
 
 
+@cache
+def _find_first_alphanum(text: str) -> int:
+    for index, char in enumerate(text):
+        if char.isalpha():
+            return index
+    return -1
+
+
 def _is_within_strikethrough_range(
     counter: int,
-    todo: Todo,
     display_string: str,
     window_width: int,
 ) -> bool:
     # make sure to test with -s and -sx
     # issue lies with Alacritty terminal
-    offset = len(display_string.rstrip()) - len(todo.get_display_text())
+
+    # This only works if the display string is smaller than the window width
+    # offset = len(display_string.rstrip()) - len(todo.get_display_text())
+
+    offset = _find_first_alphanum(display_string)
     return (
-        offset
+        offset - 1
         < counter
-        < window_width - (window_width - len(display_string.rstrip())) + 1
+        < window_width - (window_width - len(display_string.rstrip()))
     )
 
 
@@ -195,13 +207,26 @@ def _print_todo(
     counter = 0
     position, print_position = todo_print_position
     while counter < len(display_string) - 1:
+        should_strikethrough = (
+            STRIKETHROUGH
+            and todo.is_toggled()
+            and _is_within_strikethrough_range(
+                counter,
+                display_string,
+                stdscr.getmaxyx()[1],
+            )
+        )
+        attrs = curses.color_pair(todo.get_color().as_int() or Color.WHITE.as_int())
+        if position in highlight:
+            attrs |= curses.A_STANDOUT
+        if should_strikethrough and GUI_TYPE == GuiType.ANSI:
+            attrs |= cast(int, curses.A_STRIKETHROUGH)  # pyright: ignore
         try:
             stdscr.addch(
                 print_position + 1,
                 counter,
                 display_string[counter],
-                curses.color_pair(todo.get_color().as_int() or Color.WHITE.as_int())
-                | (curses.A_STANDOUT if position in highlight else 0),
+                attrs,
             )
         except OverflowError:
             # This function call will throw an OverflowError if
@@ -212,16 +237,7 @@ def _print_todo(
             # boxes when printing.
             counter += 1
             continue
-        if (
-            STRIKETHROUGH
-            and todo.is_toggled()
-            and _is_within_strikethrough_range(
-                counter,
-                todo,
-                display_string,
-                stdscr.getmaxyx()[1],
-            )
-        ):
+        if should_strikethrough and GUI_TYPE == GuiType.CURSES:
             stdscr.addch(print_position + 1, counter, "\u0336")
         counter += 1
 

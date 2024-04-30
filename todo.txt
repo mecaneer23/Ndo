@@ -10,4 +10,4 @@
   -b in _updates_cursor if pos + count > len(todos) IndexOutOfBounds error
   -b how can we save folded state when todos are pulled from file and list is recreated?
 -c fix: key transposition for acurses esc keys
--c feat: implement strikethough for acurses
++c feat: implement strikethough for acurses
