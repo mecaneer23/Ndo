@@ -297,20 +297,6 @@ def _handle_edit(
     return edit_todo(stdscr, todos, int(selected), mode)
 
 
-def _handle_paste(
-    stdscr: curses.window,
-    todos: Todos,
-    selected: Cursor,
-    copied_todo: Todo,
-) -> Todos:
-    return paste_todo(
-        stdscr,
-        todos,
-        selected,
-        copied_todo,
-    )
-
-
 def _handle_todo_down(
     todos: Todos,
     selected: Cursor,
@@ -593,7 +579,7 @@ def main(stdscr: curses.window) -> int:
         Key.j: (selected.single_down, "len(todos)"),
         Key.k: (selected.single_up, "len(todos)"),
         Key.o: (new_todo_next, "stdscr, todos, selected, Todo(), single_line_state"),
-        Key.p: (_handle_paste, "stdscr, todos, selected, copied_todo"),
+        Key.p: (paste_todo, "stdscr, todos, selected, copied_todo"),
         Key.s: (_handle_sort_menu, "stdscr, todos, selected"),
         Key.u: (_handle_undo, "selected, history"),
         Key.y: (copy_todo, "stdscr, todos, selected, copied_todo"),
