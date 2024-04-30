@@ -4,7 +4,7 @@ and TodoList (list of Todo + cursor (int)).
 """
 
 from enum import Enum
-from typing import Iterable, NamedTuple
+from typing import Iterable
 
 from src.get_args import CHECKBOX, INDENT
 from src.utils import Chunk, Color
@@ -221,13 +221,3 @@ class Todos(list[Todo]):
 
     def __init__(self, iterable: Iterable[Todo]) -> None:
         super().__init__(iterable)
-
-
-class TodoList(NamedTuple):
-    """
-    An object representing the todos
-    and a cursor (int) within the list
-    """
-
-    todos: Todos
-    cursor: int

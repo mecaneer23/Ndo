@@ -5,8 +5,8 @@ from pathlib import Path
 from sys import exit as sys_exit
 from typing import Callable, TypeAlias
 
-from src.class_cursor import Cursor, Positions
-from src.class_history import UndoRedo
+from src.class_cursor import Cursor
+from src.class_history import TodoList, UndoRedo
 from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, FoldedState, Todo, Todos
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
@@ -107,20 +107,20 @@ def move_todo(todos: Todos, selected: int, destination: int) -> Todos:
     return todos
 
 
-def todo_up(todos: Todos, selected: Cursor) -> tuple[Todos, Positions]:
+def todo_up(todos: Todos, selected: Cursor) -> TodoList:
     """Move the selected todo(s) up"""
     todos = move_todo(todos, selected.get_last(), selected.get_first() - 1)
     update_file(FILENAME, todos)
     selected.slide_up()
-    return todos, selected.get()
+    return TodoList(todos, selected.get())
 
 
-def todo_down(todos: Todos, selected: Cursor) -> tuple[Todos, Positions]:
+def todo_down(todos: Todos, selected: Cursor) -> TodoList:
     """Move the selected todo(s) down"""
     todos = move_todo(todos, selected.get_first(), selected.get_last() + 1)
     update_file(FILENAME, todos)
     selected.slide_down(len(todos))
-    return todos, selected.get()
+    return TodoList(todos, selected.get())
 
 
 def new_todo_next(
@@ -277,13 +277,13 @@ def _toggle_todo_note(todos: Todos, selected: Cursor) -> None:
 
 
 def _handle_undo(selected: Cursor, history: UndoRedo) -> Todos:
-    todos = selected.set_to_passthrough(history.undo())
+    todos = selected.override_passthrough(*history.undo())
     update_file(FILENAME, todos)
     return todos
 
 
 def _handle_redo(selected: Cursor, history: UndoRedo) -> Todos:
-    todos = selected.set_to_passthrough(history.redo())
+    todos = selected.override_passthrough(*history.redo())
     update_file(FILENAME, todos)
     return todos
 
@@ -596,7 +596,7 @@ def main(stdscr: curses.window) -> int:
         Key.eight: (selected.relative_to, "stdscr, 8, len(todos), False"),
         Key.nine: (selected.relative_to, "stdscr, 9, len(todos), False"),
     }
-    history.add(todos, int(selected))
+    history.add(todos, selected)
     _print_history(history)
 
     while True:
@@ -642,7 +642,7 @@ def main(stdscr: curses.window) -> int:
             Key.ctrl_r,
             Key.u,
         ):  # redo/undo
-            history.add(todos, int(selected))
+            history.add(todos, selected)
         _print_history(history)
         edits -= 1
 

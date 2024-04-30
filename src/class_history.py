@@ -2,7 +2,20 @@
 Helpers for storing and retrieving TodoList object records.
 """
 
-from src.class_todo import Todo, Todos, TodoList
+from typing import NamedTuple
+
+from src.class_cursor import Cursor, Positions
+from src.class_todo import Todo, Todos
+
+
+class TodoList(NamedTuple):
+    """
+    An object representing the todos
+    and a cursor (Positions) within the list
+    """
+
+    todos: Todos
+    cursor: Positions
 
 
 class _Restorable:
@@ -12,9 +25,10 @@ class _Restorable:
 
     SEPARATOR = " |SEP|"
 
-    def __init__(self, todos: Todos, selected: int) -> None:
+    def __init__(self, todos: Todos, selected: Cursor) -> None:
         self.stored: str = self.SEPARATOR.join([repr(todo) for todo in todos])
-        self.selected: int = selected
+        self.first: int = selected.get_first()
+        self.last: int = selected.get_last()
 
     def get(self) -> TodoList:
         """
@@ -23,11 +37,15 @@ class _Restorable:
         Return the stored TodoList object.
         """
 
-        stored = self.stored.split(self.SEPARATOR)
-        return TodoList(Todos([Todo(line) for line in stored]), self.selected)
+        return TodoList(
+            Todos([Todo(line) for line in self.stored.split(self.SEPARATOR)]),
+            Positions(range(self.first, self.last + 1)),
+        )
 
     def __repr__(self) -> str:
-        return self.stored.replace(self.SEPARATOR, ", ") + f": {self.selected}"
+        return (
+            self.stored.replace(self.SEPARATOR, ", ") + f": {self.first}..{self.last}"
+        )
 
 
 class UndoRedo:
@@ -36,39 +54,39 @@ class UndoRedo:
     """
 
     def __init__(self) -> None:
-        self.history: list[_Restorable] = []
-        self.index: int = -1
+        self._history: list[_Restorable] = []
+        self._index: int = -1
 
-    def add(self, todos: Todos, selected: int) -> None:
+    def add(self, todos: Todos, selected: Cursor) -> None:
         """
         Add a TodoList to the history.
         Backs up current state for potential retrieval later.
         """
 
-        self.history.append(_Restorable(todos, selected))
-        self.index = len(self.history) - 1
+        self._history.append(_Restorable(todos, selected))
+        self._index = len(self._history) - 1
 
     def undo(self) -> TodoList:
         """
         Return the previous TodoList state.
         """
-        if self.index > 0:
-            self.index -= 1
-        return self.history[self.index].get()
+        if self._index > 0:
+            self._index -= 1
+        return self._history[self._index].get()
 
     def redo(self) -> TodoList:
         """
         Return the next TodoList state, if it exists
         """
-        if self.index < len(self.history) - 1:
-            self.index += 1
-        return self.history[self.index].get()
+        if self._index < len(self._history) - 1:
+            self._index += 1
+        return self._history[self._index].get()
 
     def __repr__(self) -> str:
         return (
             "\n".join(
-                f"{'>' if i == self.index else ' '}  {v}"
-                for i, v in enumerate(self.history)
+                f"{'>' if i == self._index else ' '}  {v}"
+                for i, v in enumerate(self._history)
             )
-            + f"\nlength: ({len(self.history)})\nindex: ({self.index})"
+            + f"\nlength: ({len(self._history)})\nindex: ({self._index})"
         )
