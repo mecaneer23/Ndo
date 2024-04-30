@@ -311,14 +311,6 @@ def _handle_todo_up(
     return selected.override_passthrough(*todo_up(todos, selected))
 
 
-def _handle_sort_menu(
-    stdscr: curses.window,
-    todos: Todos,
-    selected: Cursor,
-) -> Todos:
-    return selected.set_to_passthrough(sort_menu(stdscr, todos, selected))
-
-
 def _set_fold_state_under(
     state: FoldedState,
     parent_indent_level: int,
@@ -580,7 +572,7 @@ def main(stdscr: curses.window) -> int:
         Key.k: (selected.single_up, "len(todos)"),
         Key.o: (new_todo_next, "stdscr, todos, selected, Todo(), single_line_state"),
         Key.p: (paste_todo, "stdscr, todos, selected, copied_todo"),
-        Key.s: (_handle_sort_menu, "stdscr, todos, selected"),
+        Key.s: (sort_menu, "stdscr, todos, selected"),
         Key.u: (_handle_undo, "selected, history"),
         Key.y: (copy_todo, "stdscr, todos, selected, copied_todo"),
         Key.down: (selected.single_down, "len(todos)"),

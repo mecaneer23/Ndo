@@ -12,7 +12,7 @@ except ImportError:
     FIGLET_FORMAT_EXISTS = False  # pyright: ignore[reportConstantRedefinition]
 
 from src.class_cursor import Cursor
-from src.class_todo import Todo, TodoList, Todos
+from src.class_todo import Todo, Todos
 from src.get_args import (
     CONTROLS_BEGIN_INDEX,
     CONTROLS_END_INDEX,
@@ -223,7 +223,7 @@ def _get_indented_sections(todos: Todos) -> list[Todos]:
     return indented_sections
 
 
-def _sort_by(method: str, todos: Todos, selected: Cursor) -> TodoList:
+def _sort_by(method: str, todos: Todos, selected: Cursor) -> Todos:
     key = _get_sorting_methods()[method]
     selected_todo = todos[int(selected)]
     sorted_todos = Todos([])
@@ -231,10 +231,11 @@ def _sort_by(method: str, todos: Todos, selected: Cursor) -> TodoList:
         for todo in section:
             sorted_todos.append(todo)
     update_file(FILENAME, sorted_todos)
-    return TodoList(sorted_todos, sorted_todos.index(selected_todo))
+    selected.set_to(sorted_todos.index(selected_todo))
+    return sorted_todos
 
 
-def sort_menu(parent_win: curses.window, todos: Todos, selected: Cursor) -> TodoList:
+def sort_menu(parent_win: curses.window, todos: Todos, selected: Cursor) -> Todos:
     """
     Show a menu to choose a method to sort the `Todos`.
     Immediately sort the list and return the sorted list.
@@ -263,10 +264,10 @@ def sort_menu(parent_win: curses.window, todos: Todos, selected: Cursor) -> Todo
         try:
             key = win.getch()
         except KeyboardInterrupt:
-            return TodoList(todos, int(selected))
-        return_options: dict[int, Callable[..., TodoList]] = {
-            Key.q: lambda: TodoList(todos, int(selected)),
-            Key.escape: lambda: TodoList(todos, int(selected)),
+            return todos
+        return_options: dict[int, Callable[..., Todos]] = {
+            Key.q: lambda: todos,
+            Key.escape: lambda: todos,
             Key.enter: lambda: _sort_by(lines[cursor], todos, selected),
         }
         if key in move_options:
