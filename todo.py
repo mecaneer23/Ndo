@@ -558,14 +558,8 @@ def main(stdscr: curses.window) -> int:
         Key.delete: (_toggle_todo_note, "todos, selected"),
         Key.shift_tab_windows: (dedent, "todos, selected"),
         Key.shift_tab: (dedent, "todos, selected"),
-        Key.alt_j_windows: (
-            todo_down,
-            "todos, selected",
-        ),
-        Key.alt_k_windows: (
-            todo_up,
-            "todos, selected",
-        ),
+        Key.alt_j_windows: (todo_down, "todos, selected"),
+        Key.alt_k_windows: (todo_up, "todos, selected"),
     }
     esc_keys: dict[int, tuple[Callable[..., Todos | None], str]] = {
         Key.alt_G: (selected.multiselect_bottom, "len(todos)"),
