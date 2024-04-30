@@ -66,7 +66,7 @@ Options:
 
 ## Controls
 
-| Keys (arranged alphabetically)                                           | Description                         |
+| Key (arranged alphabetically)                                            | Description                         |
 | ------------------------------------------------------------------------ | ----------------------------------- |
 | <kbd>-</kbd>                                                             | Insert blank line                   |
 | <kbd>/</kbd>                                                             | Search for a sequence               |
