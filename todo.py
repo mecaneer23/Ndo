@@ -160,15 +160,21 @@ def new_todo_current(stdscr: curses.window, todos: Todos, selected: int) -> Todo
     return todos
 
 
-def delete_todo(stdscr: curses.window, todos: Todos, selected: Cursor) -> TodoList:
+def delete_todo(
+    stdscr: curses.window,
+    todos: Todos,
+    selected: Cursor,
+    copied_todo: Todo,
+) -> Todos:
     """Remove each Todo in `selected` from the list"""
-    positions = selected.get_deletable()
-    for pos in positions:
+    if len(todos) > 0 and CLIPBOARD_EXISTS:
+        copy_todo(stdscr, todos, selected, copied_todo)
+    for pos in selected.get_deletable():
         todos = remove_todo(todos, pos)
     selected.set_to(clamp(int(selected), 0, len(todos)))
     stdscr.clear()
     update_file(FILENAME, todos)
-    return TodoList(todos, int(selected))
+    return todos
 
 
 def color_todo(stdscr: curses.window, todos: Todos, selected: Cursor) -> Todos:
@@ -266,17 +272,6 @@ def _toggle_todo_note(todos: Todos, selected: Cursor) -> None:
         todo = todos[pos]
         todo.set_box_char(BoxChar.NONE if todo.has_box() else BoxChar.MINUS)
     update_file(FILENAME, todos)
-
-
-def _handle_delete_todo(
-    stdscr: curses.window,
-    todos: Todos,
-    selected: Cursor,
-    copied_todo: Todo,
-) -> Todos:
-    if len(todos) > 0 and CLIPBOARD_EXISTS:
-        copy_todo(stdscr, todos, selected, copied_todo)
-    return selected.set_to_passthrough(delete_todo(stdscr, todos, selected))
 
 
 def _handle_undo(selected: Cursor, history: UndoRedo) -> Todos:
@@ -605,7 +600,7 @@ def main(stdscr: curses.window) -> int:
         Key.a: (_handle_alert, "stdscr, todos, int(selected)"),
         Key.b: (magnify_menu, "stdscr, todos, selected"),
         Key.c: (color_todo, "stdscr, todos, selected"),
-        Key.d: (_handle_delete_todo, "stdscr, todos, selected, copied_todo"),
+        Key.d: (delete_todo, "stdscr, todos, selected, copied_todo"),
         Key.g: (selected.to_top, "None"),
         Key.h: (help_menu, "stdscr"),
         Key.i: (_handle_edit, "stdscr, todos, selected, single_line_state"),
