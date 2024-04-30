@@ -357,8 +357,7 @@ def _handle_enter(
     selected: Cursor,
     mode: SingleLineModeImpl,
 ) -> Todos:
-    todo = todos[int(selected)] if len(todos) > 0 else Todo()
-    if todo.has_box():
+    if len(todos) > 0 and todos[int(selected)].has_box():
         return toggle(todos, selected)
     return new_todo_next(stdscr, todos, selected, Todo(), mode=mode)
 
