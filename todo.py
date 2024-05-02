@@ -384,24 +384,25 @@ def _get_main_input(
         return todos
     if key == Key.q:
         return todos
-    if key in keys_esckeys[0]:
-        func, args = keys_esckeys[0][key]
-        if key == Key.escape:
-            stdscr.nodelay(True)
-            key = stdscr.getch()
-            stdscr.nodelay(False)
-            if key == Key.nodelay_escape:
-                return todos
-            if key not in keys_esckeys[1]:
-                return key
-            func, args = keys_esckeys[1][key]
-        possible_todos = _get_possible_todos(
-            func,
-            args,
-            possible_args,
-        )
-        if isinstance(possible_todos, Todos):
-            todos = possible_todos
+    if key not in keys_esckeys[0]:
+        raise KeyError(f"Invalid key: {key}/{chr(key)}")
+    func, args = keys_esckeys[0][key]
+    if key == Key.escape:
+        stdscr.nodelay(True)
+        key = stdscr.getch()
+        stdscr.nodelay(False)
+        if key == Key.nodelay_escape:
+            return todos
+        if key not in keys_esckeys[1]:
+            raise KeyError(f"Invalid key after escape: {key}/{chr(key)}")
+        func, args = keys_esckeys[1][key]
+    possible_todos = _get_possible_todos(
+        func,
+        args,
+        possible_args,
+    )
+    if isinstance(possible_todos, Todos):
+        todos = possible_todos
     return key
 
 
