@@ -245,10 +245,10 @@ def remove_file(filename: Path) -> int:
     return 0
 
 
-def quit_program(todos: Todos, created_new_file: bool, prev_time: float) -> int:
+def quit_program(todos: Todos, prev_time: float) -> int:
     """Exit the program, writing to disk first"""
     todos, _ = update_modified_time(prev_time, todos)
-    if created_new_file and len(todos) == 0:
+    if len(todos) == 0:
         return remove_file(FILENAME)
     return update_file(FILENAME, todos)
 
@@ -490,11 +490,6 @@ def main(stdscr: curses.window) -> int:
     color and indentation level. Used for copy/paste
     operations.
 
-    created_new_file:
-    bool, used to indicate whether the file was newly
-    created and modified or not, determines whether
-    to delete file in quit_program()
-
     file_modified_time:
     Last time of file modification. Used to determine
     when to overwrite the save file.
@@ -506,7 +501,6 @@ def main(stdscr: curses.window) -> int:
     history = UndoRedo()
     single_line_state = SingleLineModeImpl(SingleLineMode.ON)
     copied_todo = Todo()
-    created_new_file = len(todos) == 0
     file_modified_time = get_file_modified_time(FILENAME)
     # if adding a new feature that updates `todos`,
     # make sure it also calls update_file()
@@ -617,7 +611,7 @@ def main(stdscr: curses.window) -> int:
             },
         )
         if isinstance(next_step, Todos):
-            return quit_program(next_step, created_new_file, file_modified_time)
+            return quit_program(next_step, file_modified_time)
         if next_step not in (
             Key.ctrl_r,
             Key.u,
