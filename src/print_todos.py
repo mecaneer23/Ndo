@@ -125,14 +125,10 @@ def _info_message(stdscr: curses.window, height: int, width: int) -> None:
         stdscr.addstr(height // 3 + i, (width - maxlen) // 2, line.center(maxlen))
 
 
-def _get_height_width(stdscr: curses.window | None, length: int) -> tuple[int, int]:
+def _get_height_width(stdscr: curses.window | None) -> tuple[int, int]:
     if stdscr is None:
         return 0, 0
-    height, width = stdscr.getmaxyx()
-    if length == 0:
-        _info_message(stdscr, height, width)
-        raise RuntimeError("No todos to display")
-    return height, width
+    return stdscr.getmaxyx()
 
 
 def _get_display_string(  # pylint: disable=too-many-arguments
@@ -269,9 +265,9 @@ def print_todos(
     (Interally calls make_printable_sublist with that value).
     """
 
-    try:
-        height, width = _get_height_width(stdscr, len(todos))
-    except RuntimeError:
+    height, width = _get_height_width(stdscr)
+    if len(todos) == 0 and stdscr is not None:
+        _info_message(stdscr, height, width)
         return 0
     new_todos, temp_selected, prev_start = make_printable_sublist(
         height - 1,
