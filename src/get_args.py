@@ -5,8 +5,6 @@ from enum import Enum
 from pathlib import Path
 
 from src.md_to_py import md_table_to_lines
-from src.tcurses import window
-from src.working_initscr import wrapper
 
 CONTROLS_BEGIN_INDEX: int = 69
 CONTROLS_END_INDEX: int = 99
@@ -52,15 +50,6 @@ class TypedNamespace(Namespace):  # pylint: disable=too-few-public-methods
     strikethrough: bool
     tk_gui: bool
     ansi_gui: bool
-
-
-def _get_checkbox(win: window) -> str:
-    try:
-        win.addch(0, 0, _CHECKBOX_OPTIONS[0])
-        win.clear()
-        return _CHECKBOX_OPTIONS[0]
-    except TypeError:
-        return _CHECKBOX_OPTIONS[1]
 
 
 def _get_args() -> TypedNamespace:
@@ -206,7 +195,7 @@ def _get_header(title: list[str]) -> str:
 
 command_line_args = _get_args()
 BULLETS: bool = command_line_args.bullet_display
-CHECKBOX: str = wrapper(_get_checkbox) if not command_line_args.simple_boxes else ""
+CHECKBOX: str = _CHECKBOX_OPTIONS[1] if not command_line_args.simple_boxes else ""
 ENUMERATE: bool = command_line_args.enumerate
 FILENAME: Path = _parse_filename(command_line_args.filename)
 HEADER: str = _get_header(command_line_args.title)
