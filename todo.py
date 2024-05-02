@@ -43,8 +43,6 @@ else:
     from src.working_initscr import wrapper
 
 
-PRINT_HISTORY = False
-HISTORY_FILE = "debugging/log.txt"
 # Migrate the following once Python 3.12 is more common
 # type PossibleArgs = ...
 PossibleArgs: TypeAlias = (
@@ -356,13 +354,6 @@ def _handle_alert(stdscr: curses.window, todos: Todos, selected: int) -> None:
     alert(stdscr, todos[selected].get_display_text())
 
 
-def _print_history(history: UndoRedo) -> None:
-    """Print passed in `history` to `HISTORY_FILE` if `PRINT_HISTORY` is enabled"""
-    if PRINT_HISTORY:
-        with open(HISTORY_FILE, "w", encoding="utf-8") as log_file:
-            print(history, file=log_file)
-
-
 def _get_possible_todos(
     func: Callable[..., Todos | None],
     args: str,
@@ -572,7 +563,6 @@ def main(stdscr: curses.window) -> int:
         Key.nine: (selected.relative_to, "stdscr, 9, len(todos), False"),
     }
     history.add(todos, selected)
-    _print_history(history)
 
     while True:
         todos, file_modified_time = update_modified_time(file_modified_time, todos)
@@ -617,7 +607,6 @@ def main(stdscr: curses.window) -> int:
             Key.u,
         ):  # redo/undo
             history.add(todos, selected)
-        _print_history(history)
 
 
 if __name__ == "__main__":
