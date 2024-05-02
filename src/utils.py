@@ -141,6 +141,7 @@ def alert(stdscr: curses.window, message: str) -> int:
     width = len(max(width_chunk, key=len)) + border_width
     height = sum(1 for _ in height_chunk) + border_width
     win = curses.newwin(height, width, max_y // 2 - height, max_x // 2 - width // 2)
+    win.clear()
     win.box()
     for index, chunk in enumerate(chunks, start=1):
         win.addstr(index, border_width // 2, chunk)
