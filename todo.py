@@ -385,7 +385,7 @@ def _get_main_input(
     if key == Key.q:
         return todos
     if key not in keys_esckeys[0]:
-        raise KeyError(f"Invalid key: {key}/{chr(key)}")
+        raise KeyError(f"Invalid key: `{key}` | `{chr(key)}`")
     func, args = keys_esckeys[0][key]
     if key == Key.escape:
         stdscr.nodelay(True)
@@ -394,7 +394,7 @@ def _get_main_input(
         if key == Key.nodelay_escape:
             return todos
         if key not in keys_esckeys[1]:
-            raise KeyError(f"Invalid key after escape: {key}/{chr(key)}")
+            raise KeyError(f"Invalid key after escape: `{key}` | `{chr(key)}`")
         func, args = keys_esckeys[1][key]
     possible_todos = _get_possible_todos(
         func,
