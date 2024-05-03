@@ -508,6 +508,7 @@ def main(stdscr: curses.window) -> int:
         Key.backspace__: (join_lines, "todos, selected"),
         Key.tab: (indent, "todos, selected"),
         Key.enter: (_handle_enter, "stdscr, todos, selected, single_line_state"),
+        Key.enter_: (_handle_enter, "stdscr, todos, selected, single_line_state"),
         Key.ctrl_k: (single_line_state.toggle, "None"),
         Key.ctrl_r: (_handle_redo, "selected, history"),
         Key.ctrl_x: (single_line_state.toggle, "None"),
