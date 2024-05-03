@@ -2,8 +2,9 @@
 Helper module to handle printing a list of Todo objects
 """
 
+from dataclasses import astuple, dataclass
 from functools import cache
-from typing import Generic, NamedTuple, TypeVar, cast
+from typing import TYPE_CHECKING, Generic, Iterator, TypeVar, cast
 
 from src.class_cursor import Cursor
 from src.class_todo import FoldedState, Todo, Todos
@@ -34,9 +35,13 @@ _DEBUG_FOLD = False
 _EMPTY_LINE_WIDTH = 8
 
 
-class SublistItems(Generic[_T], NamedTuple):
+@dataclass
+class SublistItems(
+    Generic[_T],
+    tuple[list[_T], int, int] if TYPE_CHECKING else object,
+):  # pylint: disable=useless-object-inheritance
     """
-    NamedTuple representing a slice of a
+    Pseudo-NamedTuple representing a slice of a
     list of T, an index within that list,
     and a start value to be passed into
     make_printable_sublist.
@@ -45,12 +50,22 @@ class SublistItems(Generic[_T], NamedTuple):
     cursor: int
     start: int
 
-    if `int` values aren't provided, they are initialized to 0
+    If `int` values aren't provided, they are initialized to 0.
+
+    This class is implemented as a pseudo-NamedTuple rather than
+    a typing.NamedTuple because of a bug with generic NamedTuples
+    in Python3.10.
     """
 
     slice: list[_T]
     cursor: int = 0
     start: int = 0
+
+    def __iter__(self) -> Iterator[list[_T] | int]:
+        """
+        Allows unpacking of SublistItems instances.
+        """
+        return iter(astuple(self))
 
 
 def _get_bullet(indentation_level: int) -> str:

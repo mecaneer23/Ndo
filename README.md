@@ -130,4 +130,3 @@ systemctl start docker
 ## Bugs
 
 - Long todos don't render properly in strikethrough mode (in certain terminals)
-- "TypeError: Multiple inheritance with NamedTuple" is not supported when trying to start `Ndo` using python3.10. This can be worked around by removing `Generic[T]` from the `SublistItems` class definition in [src/print_todos.py](src/print_todos.py), however this breaks static type checkers. This change should not be implemented as it is fixed in both earlier and later python versions.
