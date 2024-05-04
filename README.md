@@ -54,7 +54,7 @@ Options:
 | --bullet-display, -b                                        | Boolean: determine if Notes are displayed with a bullet point in front or not. Default is `False`.                                  |
 | --enumerate, -e                                             | Boolean: determines if todos are numbered when printed or not. Default is `False`.                                                  |
 | --tk-gui, -g                                                | Boolean: determine if curses (False) or tkinter gui (True) should be used. Default is `False`.                                      |
-| --ansi-gui, -a                                              | Boolean: determine if curses (False) or ANSI gui (True) should be used. Default is `False`.                                         |
+| --curses-gui, -c                                            | Boolean: determine if ANSI (False) or curses gui (True) should be used. Default is `False`.                                         |
 | --help, -h                                                  | Show this help message and exit.                                                                                                    |
 | --help-file HELP_FILE                                       | Allows passing alternate file to specify help menu. Default is `README.md`.                                                         |
 | --indentation-level INDENTATION_LEVEL, -i INDENTATION_LEVEL | Allows specification of indentation level. Default is `2`.                                                                          |

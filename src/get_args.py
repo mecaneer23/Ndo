@@ -20,7 +20,7 @@ _DEFAULT_RELATIVE_ENUMERATE: bool = False
 _DEFAULT_SIMPLE_BOXES: bool = False
 _DEFAULT_STRIKETHROUGH: bool = False
 _DEFAULT_TKINTER_GUI = False
-_DEFAULT_ANSI_GUI = False
+_DEFAULT_CURSES_GUI = False
 
 _CHECKBOX_OPTIONS = ("🗹", "☑")
 
@@ -49,7 +49,7 @@ class TypedNamespace(Namespace):  # pylint: disable=too-few-public-methods
     simple_boxes: bool
     strikethrough: bool
     tk_gui: bool
-    ansi_gui: bool
+    curses_gui: bool
 
 
 def _get_args() -> TypedNamespace:
@@ -100,12 +100,12 @@ def _get_args() -> TypedNamespace:
             (True) should be used. Default is `{_DEFAULT_TKINTER_GUI}`.",
     )
     parser.add_argument(
-        "--ansi-gui",
-        "-a",
+        "--curses-gui",
+        "-c",
         action="store_true",
-        default=_DEFAULT_ANSI_GUI,
-        help=f"Boolean: determine if curses (False) or ANSI gui\
-            (True) should be used. Default is `{_DEFAULT_ANSI_GUI}`.",
+        default=_DEFAULT_CURSES_GUI,
+        help=f"Boolean: determine if ANSI (False) or curses gui\
+            (True) should be used. Default is `{_DEFAULT_CURSES_GUI}`.",
     )
     parser.add_argument(
         "--help",
@@ -206,11 +206,11 @@ RELATIVE_ENUMERATE: bool = command_line_args.relative_enumeration
 SIMPLE_BOXES: bool = command_line_args.simple_boxes
 STRIKETHROUGH: bool = command_line_args.strikethrough
 _gui_type: GuiType
-if command_line_args.ansi_gui:
-    _gui_type = GuiType.ANSI
+if command_line_args.curses_gui:
+    _gui_type = GuiType.CURSES
 elif command_line_args.tk_gui:
     _gui_type = GuiType.TKINTER
 else:
-    _gui_type = GuiType.CURSES
+    _gui_type = GuiType.ANSI
 GUI_TYPE = _gui_type
 del command_line_args
