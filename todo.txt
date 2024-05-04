@@ -4,7 +4,7 @@
 -m fix: make startup faster
   -m depends on how the program is run, not a huge issue
 -y feat: add unit tests?
--g refactor: only return objects (mostly `TodoList`s) when necessary
++g refactor: only return objects (mostly `TodoList`s) when necessary
 -b feat: use [ and ] to fold/unfold
   -b needs movement adjustment
   -b in _updates_cursor if pos + count > len(todos) IndexOutOfBounds error
