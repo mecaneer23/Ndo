@@ -12,3 +12,4 @@
 - fix: arrow keys in acurses when get_todo box is open
 - fix: reimplement acurses support for windows
 - fix: if holding down a key in acurses, make sure it doesn't stay pressed longer than it should (i.e. holding j key)
+- feat: allow for passing just first letter of gui option to -g flag (i.e. todo.py -gn or todo.py -gc)
