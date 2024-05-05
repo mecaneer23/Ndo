@@ -294,6 +294,19 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
             self.addstr(i, 0, " " * self._width)
         stdout.flush()
 
+    def timeout(self, delay: int) -> None:
+        """
+        Set blocking or non-blocking read behavior for
+        the window. If delay is negative, blocking read
+        is used (which will wait indefinitely for input).
+        If delay is zero, then non-blocking read is used,
+        and getch() will return -1 if no input is waiting.
+        If delay is positive, then getch() will block for
+        delay milliseconds, and return -1 if there is
+        still no input at the end of that time.
+        """
+        raise NotImplementedError("timeout")
+
 
 def use_default_colors() -> None:
     """Allow using default colors. Not yet implemented."""
