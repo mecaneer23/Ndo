@@ -30,7 +30,7 @@ else:
 
 _T = TypeVar("_T")
 _ANSI_RESET = "\u001b[0m"
-_ANSI_STRIKETHROUGH = "\033[9m\b"
+_ANSI_STRIKETHROUGH = "\033[9m"
 _DEBUG_FOLD = False
 _EMPTY_LINE_WIDTH = 8
 

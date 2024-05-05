@@ -4,8 +4,9 @@
 -m fix: make startup faster
   -m depends on how the program is run, not a huge issue
 -y feat: add unit tests?
-+g refactor: only return objects (mostly `TodoList`s) when necessary
 -b feat: use [ and ] to fold/unfold
   -b needs movement adjustment
   -b in _updates_cursor if pos + count > len(todos) IndexOutOfBounds error
   -b how can we save folded state when todos are pulled from file and list is recreated?
+- refactor: simplify redundancy between _get_display_string and _print_todo
+- fix: arrow keys in acurses when get_todo box is open
