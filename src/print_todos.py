@@ -286,10 +286,11 @@ def print_todos(
         return 0
     new_todos, temp_selected, prev_start = make_printable_sublist(
         height - 1,
-        list(todos),
+        todos,
         int(selected),
         prev_start=prev_start,
     )
+    new_todos = Todos(new_todos)
     highlight = range(temp_selected, len(selected) + temp_selected)
     print_position = -1
     for relative, (position, todo) in zip(
@@ -301,7 +302,7 @@ def print_todos(
             print(
                 _color_to_ansi(todo.get_color().as_int())
                 + _get_display_string(
-                    Todos(new_todos),
+                    new_todos,
                     position,
                     relative,
                     range(0),
@@ -315,7 +316,7 @@ def print_todos(
                 stdscr,
                 todo,
                 _get_display_string(
-                    Todos(new_todos),
+                    new_todos,
                     position,
                     relative,
                     highlight,
