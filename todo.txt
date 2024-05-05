@@ -8,5 +8,5 @@
   -b needs movement adjustment
   -b in _updates_cursor if pos + count > len(todos) IndexOutOfBounds error
   -b how can we save folded state when todos are pulled from file and list is recreated?
-- refactor: simplify redundancy between _get_display_string and _print_todo
+- refactor: simplify redundancy between _get_display_string and _print_todo (strikethrough)
 - fix: arrow keys in acurses when get_todo box is open
