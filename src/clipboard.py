@@ -12,13 +12,13 @@ except ImportError:
 
 from src.class_cursor import Cursor
 from src.class_todo import Todo, Todos
-from src.get_args import FILENAME, GUI_TYPE, GuiType
+from src.get_args import FILENAME, UI_TYPE, UiType
 from src.io import update_file
 from src.utils import alert
 
-if GUI_TYPE == GuiType.ANSI:
+if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
-elif GUI_TYPE == GuiType.TKINTER:
+elif UI_TYPE == UiType.TKINTER:
     import src.tcurses as curses  # type: ignore
 else:
     import curses  # type: ignore

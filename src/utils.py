@@ -6,11 +6,11 @@ from enum import Enum
 from itertools import tee
 from typing import Iterable, NamedTuple
 
-from src.get_args import GUI_TYPE, GuiType
+from src.get_args import UI_TYPE, UiType
 
-if GUI_TYPE == GuiType.ANSI:
+if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
-elif GUI_TYPE == GuiType.TKINTER:
+elif UI_TYPE == UiType.TKINTER:
     import src.tcurses as curses  # type: ignore
 else:
     import curses  # type: ignore

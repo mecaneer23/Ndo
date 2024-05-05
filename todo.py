@@ -12,9 +12,9 @@ from src.class_todo import BoxChar, FoldedState, Todo, Todos
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
 from src.get_args import (
     FILENAME,
-    GUI_TYPE,
+    UI_TYPE,
     HEADER,
-    GuiType,
+    UiType,
 )
 from src.get_todo import get_todo
 from src.io import file_string_to_todos, read_file, update_file
@@ -30,10 +30,10 @@ from src.menus import (
 from src.print_todos import print_todos
 from src.utils import alert, clamp, set_header
 
-if GUI_TYPE == GuiType.ANSI:
+if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
     from src.acurses import wrapper
-elif GUI_TYPE == GuiType.TKINTER:
+elif UI_TYPE == UiType.TKINTER:
     import src.tcurses as curses  # type: ignore
     from src.tcurses import wrapper
 else:
@@ -616,7 +616,7 @@ def main(stdscr: curses.window) -> int:
 
 
 if __name__ == "__main__":
-    if GUI_TYPE == GuiType.NONE:
+    if UI_TYPE == UiType.NONE:
         print(f"{HEADER}:")
         print_todos(
             None,

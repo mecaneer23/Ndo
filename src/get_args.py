@@ -22,8 +22,8 @@ _DEFAULT_STRIKETHROUGH: bool = False
 _CHECKBOX_OPTIONS = ("🗹", "☑")
 
 
-class GuiType(Enum):
-    """Specifiy a GUI type, (curses default tui, ansi custom tui, tkinter gui)"""
+class UiType(Enum):
+    """Represent various supported types of UI"""
 
     CURSES = "curses"
     ANSI = "ansi"
@@ -34,7 +34,7 @@ class GuiType(Enum):
         return self.value
 
 
-_DEFAULT_GUI = GuiType.ANSI
+_DEFAULT_UI = UiType.ANSI
 
 
 class TypedNamespace(Namespace):  # pylint: disable=too-few-public-methods
@@ -51,7 +51,7 @@ class TypedNamespace(Namespace):  # pylint: disable=too-few-public-methods
     relative_enumeration: bool
     simple_boxes: bool
     strikethrough: bool
-    gui: GuiType
+    ui: UiType
 
 
 def _get_args() -> TypedNamespace:
@@ -94,13 +94,13 @@ def _get_args() -> TypedNamespace:
             printed or not. Default is `{_DEFAULT_ENUMERATE}`.",
     )
     parser.add_argument(
-        "--gui",
+        "--ui",
         "-g",
-        type=GuiType,
-        choices=list(GuiType),
-        default=_DEFAULT_GUI,
-        help=f"GuiType: determine how todos should be rendered.\
-            Default is `{_DEFAULT_GUI}`. If `none` is passed,\
+        type=UiType,
+        choices=list(UiType),
+        default=_DEFAULT_UI,
+        help=f"UiType: determine how todos should be rendered.\
+            Default is `{_DEFAULT_UI}`. If `none` is passed,\
             print state of a todolist to stdout without a user\
             interface.",
     )
@@ -192,5 +192,5 @@ INDENT: int = command_line_args.indentation_level
 RELATIVE_ENUMERATE: bool = command_line_args.relative_enumeration
 SIMPLE_BOXES: bool = command_line_args.simple_boxes
 STRIKETHROUGH: bool = command_line_args.strikethrough
-GUI_TYPE: GuiType = command_line_args.gui
+UI_TYPE: UiType = command_line_args.ui
 del command_line_args

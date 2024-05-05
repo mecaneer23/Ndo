@@ -4,13 +4,13 @@ from typing import Any, Callable, Iterable, NamedTuple, cast
 
 from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, Todo
-from src.get_args import INDENT, GUI_TYPE, GuiType
+from src.get_args import INDENT, UI_TYPE, UiType
 from src.keys import Key
 from src.utils import Color, alert, set_header
 
-if GUI_TYPE == GuiType.ANSI:
+if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
-elif GUI_TYPE == GuiType.TKINTER:
+elif UI_TYPE == UiType.TKINTER:
     import src.tcurses as curses  # type: ignore
 else:
     import curses  # type: ignore

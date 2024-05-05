@@ -11,18 +11,18 @@ from src.class_todo import FoldedState, Todo, Todos
 from src.get_args import (
     BULLETS,
     ENUMERATE,
-    GUI_TYPE,
+    UI_TYPE,
     INDENT,
     RELATIVE_ENUMERATE,
     SIMPLE_BOXES,
     STRIKETHROUGH,
-    GuiType,
+    UiType,
 )
 from src.utils import Chunk, Color
 
-if GUI_TYPE == GuiType.ANSI:
+if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
-elif GUI_TYPE == GuiType.TKINTER:
+elif UI_TYPE == UiType.TKINTER:
     import src.tcurses as curses  # type: ignore
 else:
     import curses  # type: ignore
@@ -231,7 +231,7 @@ def _print_todo(
         attrs = curses.color_pair(todo.get_color().as_int() or Color.WHITE.as_int())
         if position in highlight:
             attrs |= curses.A_STANDOUT
-        if should_strikethrough and GUI_TYPE == GuiType.ANSI:
+        if should_strikethrough and UI_TYPE == UiType.ANSI:
             attrs |= cast(int, curses.A_STRIKETHROUGH)  # pyright: ignore
         try:
             stdscr.addch(
@@ -249,7 +249,7 @@ def _print_todo(
             # boxes when printing.
             counter += 1
             continue
-        if should_strikethrough and GUI_TYPE == GuiType.CURSES:
+        if should_strikethrough and UI_TYPE == UiType.CURSES:
             stdscr.addch(print_position + 1, counter, "\u0336")
         counter += 1
 
