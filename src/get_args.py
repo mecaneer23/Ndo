@@ -15,12 +15,9 @@ _DEFAULT_FILENAME: Path = Path("todo.txt")
 _DEFAULT_HEADER: list[str] = [""]
 _DEFAULT_HELP_FILE: Path = Path(__file__).parent.parent.joinpath("README.md").absolute()
 _DEFAULT_INDENT: int = 2
-_DEFAULT_NO_GUI: bool = False
 _DEFAULT_RELATIVE_ENUMERATE: bool = False
 _DEFAULT_SIMPLE_BOXES: bool = False
 _DEFAULT_STRIKETHROUGH: bool = False
-_DEFAULT_TKINTER_GUI = False
-_DEFAULT_CURSES_GUI = False
 
 _CHECKBOX_OPTIONS = ("🗹", "☑")
 
@@ -31,6 +28,13 @@ class GuiType(Enum):
     CURSES = "curses"
     ANSI = "ansi"
     TKINTER = "tkinter"
+    NONE = "none"
+
+    def __str__(self) -> str:
+        return self.value
+
+
+_DEFAULT_GUI = GuiType.ANSI
 
 
 class TypedNamespace(Namespace):  # pylint: disable=too-few-public-methods
@@ -44,12 +48,10 @@ class TypedNamespace(Namespace):  # pylint: disable=too-few-public-methods
     title: list[str]
     help_file: Path
     indentation_level: int
-    no_gui: bool
     relative_enumeration: bool
     simple_boxes: bool
     strikethrough: bool
-    tk_gui: bool
-    curses_gui: bool
+    gui: GuiType
 
 
 def _get_args() -> TypedNamespace:
@@ -92,20 +94,15 @@ def _get_args() -> TypedNamespace:
             printed or not. Default is `{_DEFAULT_ENUMERATE}`.",
     )
     parser.add_argument(
-        "--tk-gui",
+        "--gui",
         "-g",
-        action="store_true",
-        default=_DEFAULT_TKINTER_GUI,
-        help=f"Boolean: determine if curses (False) or tkinter gui\
-            (True) should be used. Default is `{_DEFAULT_TKINTER_GUI}`.",
-    )
-    parser.add_argument(
-        "--curses-gui",
-        "-c",
-        action="store_true",
-        default=_DEFAULT_CURSES_GUI,
-        help=f"Boolean: determine if ANSI (False) or curses gui\
-            (True) should be used. Default is `{_DEFAULT_CURSES_GUI}`.",
+        type=GuiType,
+        choices=list(GuiType),
+        default=_DEFAULT_GUI,
+        help=f"GuiType: determine how todos should be rendered.\
+            Default is `{_DEFAULT_GUI}. If `none` is passed,\
+            print state of a todolist to stdout without a user\
+            interface.",
     )
     parser.add_argument(
         "--help",
@@ -127,15 +124,6 @@ def _get_args() -> TypedNamespace:
         default=_DEFAULT_INDENT,
         help=f"Allows specification of indentation level. \
             Default is `{_DEFAULT_INDENT}`.",
-    )
-    parser.add_argument(
-        "--no-gui",
-        "-n",
-        action="store_true",
-        default=_DEFAULT_NO_GUI,
-        help=f"Boolean: If true, do not start a curses gui,\
-            rather, just print out the todo list. Default is\
-            `{_DEFAULT_NO_GUI}`.",
     )
     parser.add_argument(
         "--relative-enumeration",
@@ -201,16 +189,8 @@ FILENAME: Path = _parse_filename(command_line_args.filename)
 HEADER: str = _get_header(command_line_args.title)
 HELP_FILE: Path = Path(command_line_args.help_file)
 INDENT: int = command_line_args.indentation_level
-NO_GUI: bool = command_line_args.no_gui
 RELATIVE_ENUMERATE: bool = command_line_args.relative_enumeration
 SIMPLE_BOXES: bool = command_line_args.simple_boxes
 STRIKETHROUGH: bool = command_line_args.strikethrough
-_gui_type: GuiType
-if command_line_args.curses_gui:
-    _gui_type = GuiType.CURSES
-elif command_line_args.tk_gui:
-    _gui_type = GuiType.TKINTER
-else:
-    _gui_type = GuiType.ANSI
-GUI_TYPE = _gui_type
+GUI_TYPE: GuiType = command_line_args.gui
 del command_line_args

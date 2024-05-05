@@ -14,7 +14,6 @@ from src.get_args import (
     FILENAME,
     GUI_TYPE,
     HEADER,
-    NO_GUI,
     GuiType,
 )
 from src.get_todo import get_todo
@@ -617,7 +616,7 @@ def main(stdscr: curses.window) -> int:
 
 
 if __name__ == "__main__":
-    if NO_GUI:
+    if GUI_TYPE == GuiType.NONE:
         print(f"{HEADER}:")
         print_todos(
             None,
