@@ -163,7 +163,9 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
                 if char not in current:
                     current.append(char)
         chars = tuple(current)
-        for key in _SPECIAL_KEYS.get("-".join(map(str, chars)), chars):
+        for key in ({} if not _GETCH.is_blocking() else _SPECIAL_KEYS).get(
+            "-".join(map(str, chars)), chars
+        ):
             self._stored_keys.put(key)
         return self._stored_keys.get()
 
