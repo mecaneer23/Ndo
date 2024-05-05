@@ -100,7 +100,7 @@ def _get_args() -> TypedNamespace:
         choices=list(GuiType),
         default=_DEFAULT_GUI,
         help=f"GuiType: determine how todos should be rendered.\
-            Default is `{_DEFAULT_GUI}. If `none` is passed,\
+            Default is `{_DEFAULT_GUI}`. If `none` is passed,\
             print state of a todolist to stdout without a user\
             interface.",
     )
