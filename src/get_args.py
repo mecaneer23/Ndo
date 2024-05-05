@@ -6,8 +6,8 @@ from pathlib import Path
 
 from src.md_to_py import md_table_to_lines
 
-CONTROLS_BEGIN_INDEX: int = 69
-CONTROLS_END_INDEX: int = 99
+CONTROLS_BEGIN_INDEX: int = 67
+CONTROLS_END_INDEX: int = 97
 
 _DEFAULT_BULLETS: bool = False
 _DEFAULT_ENUMERATE: bool = False

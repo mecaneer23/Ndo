@@ -49,20 +49,18 @@ Positional arguments:
 
 Options:
 
-| Option                                                      | Description                                                                                                                         |
-| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| --bullet-display, -b                                        | Boolean: determine if Notes are displayed with a bullet point in front or not. Default is `False`.                                  |
-| --enumerate, -e                                             | Boolean: determines if todos are numbered when printed or not. Default is `False`.                                                  |
-| --tk-gui, -g                                                | Boolean: determine if curses (False) or tkinter gui (True) should be used. Default is `False`.                                      |
-| --curses-gui, -c                                            | Boolean: determine if ANSI (False) or curses gui (True) should be used. Default is `False`.                                         |
-| --help, -h                                                  | Show this help message and exit.                                                                                                    |
-| --help-file HELP_FILE                                       | Allows passing alternate file to specify help menu. Default is `README.md`.                                                         |
-| --indentation-level INDENTATION_LEVEL, -i INDENTATION_LEVEL | Allows specification of indentation level. Default is `2`.                                                                          |
-| --no-gui, -n                                                | Boolean: If true, do not start a curses gui, rather, just print out the todo list. Default is `False`.                              |
-| --relative-enumeration, -r                                  | Boolean: determines if todos are numbered when printed. Numbers relatively rather than absolutely. Default is `False`.              |
-| --simple-boxes, -x                                          | Boolean: allow rendering simpler checkboxes if terminal doesn't support default ascii checkboxes. Default is `False`.               |
-| --strikethrough, -s                                         | Boolean: strikethrough completed todos - option to disable because some terminals don't support strikethroughs. Default is `False`. |
-| --title TITLE, -t TITLE                                     | Allows passing alternate header. Default is `filename`.                                                                             |
+| Option                                                          | Description                                                                                                                                            |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| --bullet-display, -b                                            | Boolean: determine if Notes are displayed with a bullet point in front or not. Default is `False`.                                                     |
+| --enumerate, -e                                                 | Boolean: determines if todos are numbered when printed or not. Default is `False`.                                                                     |
+| --gui {curses,ansi,tkinter,none}, -g {curses,ansi,tkinter,none} | GuiType: determine how todos should be rendered. Default is `ansi`. If `none` is passed, print state of a todolist to stdout without a user interface. |
+| --help, -h                                                      | Show this help message and exit.                                                                                                                       |
+| --help-file HELP_FILE                                           | Allows passing alternate file to specify help menu. Default is `README.md`.                                                                            |
+| --indentation-level INDENTATION_LEVEL, -i INDENTATION_LEVEL     | Allows specification of indentation level. Default is `2`.                                                                                             |
+| --relative-enumeration, -r                                      | Boolean: determines if todos are numbered when printed. Numbers relatively rather than absolutely. Default is `False`.                                 |
+| --simple-boxes, -x                                              | Boolean: allow rendering simpler checkboxes if terminal doesn't support default ascii checkboxes. Default is `False`.                                  |
+| --strikethrough, -s                                             | Boolean: strikethrough completed todos - option to disable because some terminals don't support strikethroughs. Default is `False`.                    |
+| --title TITLE, -t TITLE                                         | Allows passing alternate header. Default is `filename`.                                                                                                |
 
 ## Controls
 
