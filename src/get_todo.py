@@ -258,6 +258,9 @@ def _handle_escape(
             (stdscr_win[0], todo, chars, position),
         ),
     }
+    if subch not in subch_table:
+        alert(stdscr_win[0], f"Invalid key: {subch}")
+        return _EditString(chars, position)
     func, args = subch_table[subch]
     return func(*args)
 
