@@ -1,8 +1,14 @@
 """Command line argument parser for Ndo"""
 
-from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
+from argparse import (
+    ArgumentParser,
+    ArgumentTypeError,
+    Namespace,
+    RawDescriptionHelpFormatter,
+)
 from enum import Enum
 from pathlib import Path
+from typing import Type, TypeVar
 
 from src.md_to_py import md_table_to_lines
 
@@ -54,6 +60,30 @@ class TypedNamespace(Namespace):  # pylint: disable=too-few-public-methods
     ui: UiType
 
 
+_GenericEnum = TypeVar("_GenericEnum", bound=Enum)
+
+
+def get_first_char_dict(enum: Type[_GenericEnum]) -> dict[str, _GenericEnum]:
+    """
+    Return a dictionary mapping the first letter of each Enum
+    item to the corresponding Enum item.
+    """
+    keys = [item.name for item in enum]
+    return dict(zip((key[0] for key in keys), enum))
+
+
+_FIRST_CHAR_DICT = get_first_char_dict(UiType)
+
+
+def _get_ui_type(string: str) -> UiType:
+    try:
+        if len(string) == 1:
+            return _FIRST_CHAR_DICT[string.upper()]
+        return UiType[string.upper()]
+    except KeyError as err:
+        raise ArgumentTypeError(f"Invalid color: {string}") from err
+
+
 def _get_args() -> TypedNamespace:
     parser = ArgumentParser(
         description="Ndo is a todo list program to help you manage your todo lists",
@@ -96,7 +126,7 @@ def _get_args() -> TypedNamespace:
     parser.add_argument(
         "--ui",
         "-g",
-        type=UiType,
+        type=_get_ui_type,
         choices=list(UiType),
         default=_DEFAULT_UI,
         help=f"UiType: determine how todos should be rendered.\
