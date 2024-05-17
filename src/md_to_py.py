@@ -232,9 +232,9 @@ def md_table_to_lines(
         ),
     )
 
+    lines[1] = "-" * (sum(max_column_lengths) - 2)
     for i, _ in enumerate(lines):
         if i == 1:
-            lines[1] = "-" * (sum(max_column_lengths) - 2)
             continue
         lines[i] = _pad_columns(lines[i], max_column_lengths)
         for old, new in {" | ": "  ", "| ": "", " |": ""}.items():
