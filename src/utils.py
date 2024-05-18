@@ -146,4 +146,6 @@ def alert(stdscr: curses.window, message: str) -> int:
     for index, chunk in enumerate(chunks, start=1):
         win.addstr(index, border_width // 2, chunk)
     win.refresh()
-    return stdscr.getch()
+    key = stdscr.getch()
+    stdscr.clear()
+    return key
