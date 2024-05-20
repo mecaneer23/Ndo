@@ -3,7 +3,7 @@ Convert a MarkDown table to a formatted Python list.
 """
 
 from itertools import repeat
-from typing import Callable, Iterable, Iterator, TypeVar
+from typing import Callable, Iterable, Iterator, Sequence, TypeVar
 
 T = TypeVar("T")
 S = TypeVar("S")
@@ -57,6 +57,28 @@ def _get_column_widths(
         count += 1
 
     return output[:-1]
+
+
+def _get_delimiter_locations(rows: Sequence[str], delimiter: str = "|") -> Iterator[int]:
+    remaining_rows = len(rows)
+    location_number = [0 for _ in range(remaining_rows)]
+    column = 1
+    for pos in range(len(max(rows, key=len))):
+        for index, row in enumerate(rows):
+            if pos == len(row):
+                remaining_rows -= 1
+                continue
+            if pos > len(row):
+                continue
+            if row[pos] == delimiter:
+                location_number[index] += 1
+            if all(num >= column for num in location_number):
+                column += 1
+                yield pos
+
+
+def _get_max_column_widths():
+    raise NotImplementedError()
 
 
 def _pad_columns(row: str, widths: tuple[int, ...] | int, delimiter: str = "|") -> str:
