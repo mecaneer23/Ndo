@@ -60,7 +60,10 @@ def _get_column_widths(
     return output[:-1]
 
 
-def _get_delimiter_locations(rows: Sequence[str], delimiter: str = "|") -> Iterator[int]:
+def _get_delimiter_locations(
+    rows: Sequence[str],
+    delimiter: str = "|",
+) -> Iterator[int]:
     """
     Yield an iterator of delimiter locations.
 
