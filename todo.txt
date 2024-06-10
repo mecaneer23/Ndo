@@ -9,6 +9,7 @@
   -b in _updates_cursor if pos + count > len(todos) IndexOutOfBounds error
   -b how can we save folded state when todos are pulled from file and list is recreated?
 - refactor: simplify redundancy between _get_display_string and _print_todo (strikethrough)
-- fix: arrow keys in acurses when get_todo box is open
 - fix: reimplement acurses support for windows
 - fix: if holding down a key in acurses, make sure it doesn't stay pressed longer than it should (i.e. holding j key)
+- feat!: migrate get_todo from keypad(0) to keypad(1) using a large dict similar to the one in main() in todo.py
+- fix: artifacting when using arrow keys in acurses with keypad off (namely when get_todo box is open)
