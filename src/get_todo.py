@@ -380,8 +380,8 @@ def get_todo(
             If the window is too short to display the minimum
             1 line of text.
         NotImplementedError:
-            If the window is too long to display the maximum
-            n characters.
+            If the window is more than 3 characters tall, as
+            multiline text editing isn't supported.
 
     Returns:
         Todo: Similar to the built in input() function,
