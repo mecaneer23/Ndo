@@ -94,9 +94,9 @@ class _Getch:
         """Add an item to the queue"""
         self._raw_input.put(item, block, timeout)
 
-    def get(self, block: bool = True, timeout: float | None = None) -> int:
+    def get(self, timeout: float = 0) -> int:
         """Get an item from the queue"""
-        return self._raw_input.get(block, timeout)
+        return self._raw_input.get(timeout=timeout)
 
     def empty(self) -> bool:
         """Return whether the queue is empty"""
@@ -157,7 +157,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
             esc = now()
             while now() - esc < _SHORT_TIME_SECONDS:
                 try:
-                    char = _GETCH.get(timeout=_SHORT_TIME_SECONDS)
+                    char = _GETCH.get(_SHORT_TIME_SECONDS)
                 except queue_empty:
                     break
                 if char not in current:
@@ -207,12 +207,10 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         raise NotImplementedError("Cannot add NoneType: not a string")
 
     @overload
-    def addstr(self, text: str, attr: int = 0) -> None:
-        ...
+    def addstr(self, text: str, attr: int = 0) -> None: ...
 
     @overload
-    def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
-        ...
+    def addstr(self, y: int, x: int, text: str, attr: int = 0) -> None: ...
 
     def addstr(self, *args: Any, **kwargs: Any) -> None:
         """Add a string to the screen at a specific position"""
