@@ -223,6 +223,7 @@ def _handle_escape(
 ) -> _EditString | None | str:
     stdscr_win[1].nodelay(True)
     if stdscr_win[1].getch() == Key.nodelay_escape:
+        stdscr_win[1].nodelay(False)
         mode.set_on()
         return None
     stdscr_win[1].nodelay(False)
