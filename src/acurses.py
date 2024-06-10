@@ -94,7 +94,7 @@ class _Getch:
         """Add an item to the queue"""
         self._raw_input.put(item, block, timeout)
 
-    def get(self, timeout: float = 0) -> int:
+    def get(self, timeout: float | None = None) -> int:
         """Get an item from the queue"""
         return self._raw_input.get(timeout=timeout)
 
