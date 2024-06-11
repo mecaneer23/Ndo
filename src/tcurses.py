@@ -228,6 +228,14 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
                 " " * self.width,
             )
 
+    def keypad(self, flag: bool) -> None:
+        """
+        If flag is True, enable keypad mode.
+        If flag is False, disable keypad mode.
+        """
+        _ = flag
+        raise NotImplementedError("tcurses keypad")
+
 
 ERR = -1
 OK = 0
