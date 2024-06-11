@@ -154,6 +154,14 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
                 return -1
         if not self._stored_keys.empty():
             return self._stored_keys.get()
+
+        chars = self._get_current_from_buffer()
+        keys = _KEYPAD_KEYS if _GETCH.is_blocking() and self._keypad else {}
+        for key in keys.get("-".join(map(str, chars)), chars):
+            self._stored_keys.put(key)
+        return self._stored_keys.get()
+
+    def _get_current_from_buffer(self) -> list[int]:
         char = _GETCH.get()
         current = [char]
         if char == 27:
@@ -165,11 +173,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
                     break
                 if char not in current:
                     current.append(char)
-        chars = tuple(current)
-        keys = _KEYPAD_KEYS if _GETCH.is_blocking() and self._keypad else {}
-        for key in keys.get("-".join(map(str, chars)), chars):
-            self._stored_keys.put(key)
-        return self._stored_keys.get()
+        return current
 
     def move(self, new_y: int, new_x: int) -> None:
         """Move cursor to (new_y, new_x)"""
