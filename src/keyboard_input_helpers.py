@@ -3,14 +3,14 @@ Utility functions for handling keyboard input in curses
 systems
 """
 
-from typing import TypeVar
+from typing import Mapping, TypeVar
 
 _T = TypeVar("_T")
 
 def get_executable_args(
     args: str,
-    possible_args: dict[str, _T | int],
-) -> list[_T | int]:
+    possible_args: Mapping[str, _T | int | str],
+) -> list[_T | int | str]:
     """
     Convert `args` from a comma-space (, ) delimited string
     to separate python objects provided in `possible_args`.
@@ -24,11 +24,11 @@ def get_executable_args(
         "set_str": set_str,
     }
     """
-    params: list[_T | int] = []
+    params: list[_T | int | str] = []
     for arg in args.split(", "):
         if arg.isdigit():
             params.append(int(arg))
             continue
         if arg != "None":
-            params.append(possible_args[arg])
+            params.append(possible_args.get(arg, arg))
     return params
