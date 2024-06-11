@@ -12,12 +12,13 @@ from src.class_todo import BoxChar, FoldedState, Todo, Todos
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
 from src.get_args import (
     FILENAME,
-    UI_TYPE,
     HEADER,
+    UI_TYPE,
     UiType,
 )
 from src.get_todo import get_todo
 from src.io import file_string_to_todos, read_file, update_file
+from src.keyboard_input_helpers import get_executable_args
 from src.keys import Key
 from src.menus import (
     color_menu,
@@ -44,7 +45,7 @@ else:
 
 # Migrate the following once Python 3.12 is more common
 # type PossibleArgs = ...
-PossibleArgs: TypeAlias = (
+_PossibleArgs: TypeAlias = (
     Todo | int | UndoRedo | SingleLineModeImpl | Cursor | curses.window | Todos
 )
 
@@ -353,21 +354,6 @@ def _handle_alert(stdscr: curses.window, todos: Todos, selected: int) -> None:
     alert(stdscr, todos[selected].get_display_text())
 
 
-def _get_possible_todos(
-    func: Callable[..., Todos | None],
-    args: str,
-    possible_args: dict[str, PossibleArgs],
-) -> Todos | None:
-    params: list[PossibleArgs] = []
-    for arg in args.split(", "):
-        if arg.isdigit():
-            params.append(int(arg))
-            continue
-        if arg != "None":
-            params.append(possible_args[arg])
-    return func(*params)
-
-
 def _get_main_input(
     stdscr: curses.window,
     todos: Todos,
@@ -375,7 +361,7 @@ def _get_main_input(
         dict[int, tuple[Callable[..., Todos | None], str]],
         dict[int, tuple[Callable[..., Todos | None], str]],
     ],
-    possible_args: dict[str, PossibleArgs],
+    possible_args: dict[str, _PossibleArgs],
 ) -> int | Todos:
     try:
         key: int = stdscr.getch()
@@ -400,10 +386,11 @@ def _get_main_input(
             )
             return -1
         func, args = keys_esckeys[1][key]
-    possible_todos = _get_possible_todos(
-        func,
-        args,
-        possible_args,
+    possible_todos = func(
+        *get_executable_args(
+            args,
+            possible_args,
+        )
     )
     if isinstance(possible_todos, Todos):
         todos = possible_todos
