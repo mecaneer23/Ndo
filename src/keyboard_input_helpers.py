@@ -24,11 +24,12 @@ def get_executable_args(
         "set_str": set_str,
     }
     """
+    if args == "None":
+        return []
     params: list[_T | int | str] = []
     for arg in args.split(", "):
         if arg.isdigit():
             params.append(int(arg))
             continue
-        if arg != "None":
-            params.append(possible_args.get(arg, arg))
+        params.append(possible_args.get(arg, arg))
     return params
