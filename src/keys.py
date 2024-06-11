@@ -27,7 +27,6 @@ class Key:
     slash = 47
     zero = 48
     one = 49
-    ctrl_arrow = 49
     two = 50
     three = 51
     four = 52
@@ -62,7 +61,6 @@ class Key:
     s = 115
     u = 117
     y = 121
-    tilde = 126
     backspace_ = 127
     down = 258
     up = 259
