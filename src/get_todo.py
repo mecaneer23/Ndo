@@ -1,10 +1,11 @@
 """Open a text input box, implement typing, and return text input"""
 
-from typing import Any, Callable, Iterable, NamedTuple, cast
+from typing import Callable, Iterable, NamedTuple, cast
 
 from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, Todo
 from src.get_args import INDENT, UI_TYPE, UiType
+from src.keyboard_input_helpers import get_executable_args
 from src.keys import Key
 from src.utils import Color, alert, set_header
 
@@ -123,48 +124,33 @@ def _handle_delete(chars: _Chars, position: int) -> _EditString:
     return _EditString(chars, position)
 
 
-def _handle_ctrl_arrow(win: curses.window, chars: _Chars, position: int) -> _EditString:
-    for _ in ";5":
-        win.getch()
-    options: dict[int, Callable[[_Chars, int], _EditString]] = {
-        Key.right_arrow: _handle_ctrl_right_arrow,
-        Key.left_arrow: _handle_ctrl_left_arrow,
-    }
-    direction = win.getch()
-    if direction in options:
-        chars, position = options[direction](chars, position)
-    return _EditString(chars, position)
-
-
-def _handle_delete_modifiers(
-    stdscr_win: tuple[curses.window, curses.window],
-    todo: Todo,
+def _handle_escape(
+    stdscr: curses.window,
+    win: curses.window,
     chars: _Chars,
     position: int,
-) -> _EditString:
+) -> _EditString | None:
+    win.nodelay(True)
+    if win.getch() == Key.nodelay_escape:
+        win.nodelay(False)
+        return None
+    win.nodelay(False)
     try:
-        input_char = stdscr_win[1].getch()
+        input_char = win.getch()
     except KeyboardInterrupt:
-        return _EditString(chars, position)
-    if input_char == Key.tilde:
-        return _handle_delete(chars, position)
-    if input_char == Key.semi_colon:
-        try:
-            modifier = stdscr_win[1].getch()
-        except KeyboardInterrupt:
-            return _EditString(chars, position)
-        stdscr_win[1].getch()  # skip `~`
-        if modifier == Key.modifier_ctrl:
-            return _handle_ctrl_delete(chars, position)
-        if modifier in (Key.modifier_shift, Key.modifier_alt):
-            _handle_toggle_note_todo(stdscr_win[0], todo)
-    return _EditString(chars, position)
+        return None
+    if input_char == Key.ctrl_delete:
+        return _handle_ctrl_delete(chars, position)
+    return _error_passthrough(stdscr, str(input_char), chars, position)
 
 
-def _handle_toggle_note_todo(stdscr: curses.window, todo: Todo) -> None:
+def _handle_toggle_note_todo(
+    stdscr: curses.window, todo: Todo, chars: _Chars, position: int
+) -> _EditString:
     _toggle_note_todo(todo)
     set_header(stdscr, "Todo" if todo.has_box() else "Note")
     stdscr.refresh()
+    return _EditString(chars, position)
 
 
 def _handle_indent(
@@ -199,71 +185,24 @@ def _handle_end(chars: _Chars) -> _EditString:
     return _EditString(chars, len(chars))
 
 
-def _passthrough(
+def _error_passthrough(
     stdscr: curses.window,
-    edit_string: _EditString,
     key_name: str,
+    chars: _Chars | None = None,
+    position: int | None = None,
 ) -> _EditString:
     alert(stdscr, f"Key `{key_name}` is not supported")
-    return edit_string
+    return (
+        _EditString(chars, position)
+        if chars is not None and position is not None
+        else _EditString(_Chars({}), 0)
+    )
 
 
 def _handle_new_todo(chars: _Chars, position: int, mode: SingleLineModeImpl) -> str:
     mode.set_once()
     mode.set_extra_data("".join(chars[position:]))
     return "".join(chars[:position])
-
-
-def _handle_escape(
-    stdscr_win: tuple[curses.window, curses.window],
-    chars: _Chars,
-    position: int,
-    mode: SingleLineModeImpl,
-    todo: Todo,
-) -> _EditString | None | str:
-    stdscr_win[1].nodelay(True)
-    if stdscr_win[1].getch() == Key.nodelay_escape:
-        stdscr_win[1].nodelay(False)
-        mode.set_on()
-        return None
-    stdscr_win[1].nodelay(False)
-    try:
-        subch = stdscr_win[1].getch()
-    except KeyboardInterrupt:
-        return None
-    if subch == Key.down_arrow:
-        return _handle_new_todo(chars, position, mode)
-
-    subch_table: dict[int, tuple[Callable[..., _EditString], tuple[Any, ...]]] = {
-        Key.left_arrow: (_handle_left_arrow, (chars, position)),
-        Key.right_arrow: (_handle_right_arrow, (chars, position)),
-        Key.up_arrow: (
-            _passthrough,
-            (stdscr_win[0], _EditString(chars, position), "up arrow"),
-        ),
-        Key.modifier_delete: (
-            _handle_delete_modifiers,
-            (stdscr_win, todo, chars, position),
-        ),
-        Key.ctrl_arrow: (_handle_ctrl_arrow, (stdscr_win[1], chars, position)),
-        Key.home: (
-            _handle_home,
-            (chars,),
-        ),
-        Key.end: (
-            _handle_end,
-            (chars,),
-        ),
-        Key.dedent: (
-            _handle_dedent,
-            (stdscr_win[0], todo, chars, position),
-        ),
-    }
-    if subch not in subch_table:
-        alert(stdscr_win[0], f"Invalid key: {subch}")
-        return _EditString(chars, position)
-    func, args = subch_table[subch]
-    return func(*args)
 
 
 def _handle_backspace(chars: _Chars, position: int) -> _EditString:
@@ -285,7 +224,7 @@ def _handle_ctrl_backspace(chars: _Chars, position: int) -> _EditString:
     return _EditString(chars, position)
 
 
-def _handle_ascii(chars: _Chars, position: int, input_char: int) -> _EditString:
+def _handle_printable(chars: _Chars, position: int, input_char: int) -> _EditString:
     chars.insert(position, chr(input_char))
     if position < len(chars):
         position += 1
@@ -297,28 +236,6 @@ def _toggle_note_todo(todo: Todo) -> None:
         todo.set_box_char(BoxChar.MINUS)
         return
     todo.set_box_char(BoxChar.NONE)
-
-
-def _get_chars_position(
-    input_char: int,
-    stdscr_win: tuple[curses.window, curses.window],
-    chars_position_todo: tuple[_Chars, int, Todo],
-    mode: SingleLineModeImpl,
-) -> _EditString | None | str:
-    chars, position, todo = chars_position_todo
-    if input_char == Key.escape:
-        return _handle_escape(stdscr_win, chars, position, mode, todo)
-    if input_char == Key.tab:
-        return _handle_indent(stdscr_win[0], todo, chars, position)
-    backspace_table = {
-        Key.backspace: _handle_backspace,
-        Key.backspace_: _handle_backspace,
-        Key.backspace__: _handle_backspace,
-        Key.ctrl_backspace: _handle_ctrl_backspace,
-    }
-    if input_char in backspace_table:
-        return backspace_table[input_char](chars, position)
-    return _handle_ascii(chars, position, input_char)
 
 
 def _set_once(
@@ -396,6 +313,31 @@ def get_todo(
     position = len(chars)
     win.box()
     win.nodelay(False)
+    win.keypad(True)
+
+    keys: dict[int, tuple[Callable[..., _EditString], str]] = {
+        Key.left: (_handle_left_arrow, "chars, position"),
+        Key.right: (_handle_right_arrow, "chars, position"),
+        Key.up: (
+            _error_passthrough,
+            "stdscr, up arrow, chars, position",
+        ),
+        Key.backspace: (_handle_backspace, "chars, position"),
+        Key.backspace_: (_handle_backspace, "chars, position"),
+        Key.backspace__: (_handle_backspace, "chars, position"),
+        Key.ctrl_backspace: (_handle_ctrl_backspace, "chars, position"),
+        Key.shift_tab: (_handle_dedent, "stdscr, todo, chars, position"),
+        Key.shift_tab_windows: (_handle_dedent, "stdscr, todo, chars, position"),
+        Key.tab: (_handle_indent, "stdscr, todo, chars, position"),
+        Key.ctrl_left_arrow: (_handle_ctrl_left_arrow, "chars, position"),
+        Key.ctrl_right_arrow: (_handle_ctrl_right_arrow, "chars, position"),
+        Key.home: (_handle_home, "chars"),
+        Key.end: (_handle_end, "chars"),
+        Key.delete: (_handle_delete, "chars, position"),
+        Key.shift_delete: (_handle_toggle_note_todo, "stdscr, todo"),
+        Key.alt_delete: (_handle_toggle_note_todo, "stdscr, todo"),
+    }
+
     while True:
         if len(chars) + 1 >= win.getmaxyx()[1] - 1:
             return todo.set_display_text(
@@ -410,25 +352,47 @@ def get_todo(
         win.refresh()
         try:
             input_char = win.getch()
-        except KeyboardInterrupt:  # ctrl+c
+        except Key.ctrl_c:
             mode.set_on()
             return original
+        if input_char == Key.escape:
+            possible_chars_position = _handle_escape(
+                stdscr,
+                win,
+                chars,
+                position,
+            )
+            if possible_chars_position is None:
+                mode.set_on()
+                return original
+            chars, position = possible_chars_position
+            continue
         if input_char in (Key.enter, Key.enter_):
             break
         if input_char in (Key.ctrl_k, Key.ctrl_x):
             mode.toggle()
             break
-        next_step = _get_chars_position(
-            input_char,
-            (stdscr, win),
-            (chars, position, todo),
-            mode,
-        )
-        if next_step is None:
-            return original
-        if isinstance(next_step, str):
+        if input_char == Key.down:
             mode.set_extra_data(f"{todo.get_color().as_char()} {mode.get_extra_data()}")
-            return todo.set_display_text(next_step)
-        chars, position = next_step
+            return todo.set_display_text(_handle_new_todo(chars, position, mode))
+        if input_char in keys:
+            func, joined_args = keys[input_char]
+            chars, position = func(
+                *get_executable_args(
+                    joined_args,
+                    {
+                        "chars": chars,
+                        "position": position,
+                        "stdscr": stdscr,
+                        "stdscr_win": (stdscr, win),
+                        "todo": todo,
+                    },
+                )
+            )
+            continue
+        if chr(input_char).isprintable():
+            chars, position = _handle_printable(chars, position, input_char)
+            continue
+        _error_passthrough(stdscr, str(input_char))
 
     return todo.set_display_text("".join(chars))
