@@ -68,21 +68,21 @@ BACKGROUND_DEFAULT = 2**49
 
 _ANSI_RESET = "\033[0m"
 
-_KEYPAD_KEYS: dict[str, set[int]] = {
-    "27-91-65": {Key.up_arrow},
-    "27-91-66": {Key.down_arrow},
-    "27-91-67": {Key.right_arrow},
-    "27-91-68": {Key.left_arrow},
-    "27-91-51-126": {Key.delete},
-    "27-91-53-126": {Key.page_up},
-    "27-91-54-126": {Key.page_down},
-    "27-91-90": {Key.shift_tab},
-    "27-91-49-59-53-68": {Key.ctrl_left_arrow},
-    "27-91-49-59-53-67": {Key.ctrl_right_arrow},
-    "27-91-72": {Key.home},
-    "27-91-70": {Key.end},
-    "27-91-51-59-50-126": {Key.shift_delete},
-    "27-91-51-59-126": {Key.alt_delete},
+_KEYPAD_KEYS: dict[str, int] = {
+    "27-91-65": Key.up_arrow,
+    "27-91-66": Key.down_arrow,
+    "27-91-67": Key.right_arrow,
+    "27-91-68": Key.left_arrow,
+    "27-91-51-126": Key.delete,
+    "27-91-53-126": Key.page_up,
+    "27-91-54-126": Key.page_down,
+    "27-91-90": Key.shift_tab,
+    "27-91-49-59-53-68": Key.ctrl_left_arrow,
+    "27-91-49-59-53-67": Key.ctrl_right_arrow,
+    "27-91-72": Key.home,
+    "27-91-70": Key.end,
+    "27-91-51-59-50-126": Key.shift_delete,
+    "27-91-51-59-126": Key.alt_delete,
 }
 _SHORT_TIME_SECONDS = 0.01
 
@@ -163,7 +163,11 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
         chars = self._get_current_from_buffer()
         keys = _KEYPAD_KEYS if _GETCH.is_blocking() and self._keypad else {}
-        for key in keys.get("-".join(map(str, chars)), chars):
+        key = "-".join(map(str, chars))
+        if key in keys:
+            self._stored_keys.put(keys[key])
+            return self._stored_keys.get()
+        for key in chars:
             self._stored_keys.put(key)
         return self._stored_keys.get()
 
