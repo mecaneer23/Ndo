@@ -167,8 +167,8 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         if key in keys:
             self._stored_keys.put(keys[key])
             return self._stored_keys.get()
-        for key in chars:
-            self._stored_keys.put(key)
+        for char in chars:
+            self._stored_keys.put(char)
         return self._stored_keys.get()
 
     def _get_current_from_buffer(self) -> list[int]:
