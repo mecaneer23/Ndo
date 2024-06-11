@@ -266,7 +266,7 @@ class Cursor:
         while True:
             try:
                 key = stdscr.getch()
-            except KeyboardInterrupt:  # exit on ^C
+            except Key.ctrl_c:
                 return
             operation = self._set_to_clamp
             if not single:

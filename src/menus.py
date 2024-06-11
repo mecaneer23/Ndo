@@ -180,7 +180,7 @@ def color_menu(parent_win: curses.window, original: Color) -> Color:
             )
         try:
             key = win.getch()
-        except KeyboardInterrupt:
+        except Key.ctrl_c:
             return original
         return_options: dict[int, Callable[[], Color]] = {
             Key.q: lambda: original,
@@ -263,7 +263,7 @@ def sort_menu(parent_win: curses.window, todos: Todos, selected: Cursor) -> Todo
             )
         try:
             key = win.getch()
-        except KeyboardInterrupt:
+        except Key.ctrl_c:
             return todos
         return_options: dict[int, Callable[..., Todos]] = {
             Key.q: lambda: todos,

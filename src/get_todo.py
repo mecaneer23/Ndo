@@ -137,7 +137,7 @@ def _handle_escape(
     win.nodelay(False)
     try:
         input_char = win.getch()
-    except KeyboardInterrupt:
+    except Key.ctrl_c:
         return None
     if input_char == Key.ctrl_delete:
         return _handle_ctrl_delete(chars, position)
