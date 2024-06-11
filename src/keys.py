@@ -62,10 +62,10 @@ class Key:
     u = 117
     y = 121
     backspace_ = 127
-    down = 258
-    up = 259
-    left = 260
-    right = 261
+    down_arrow = 258
+    up_arrow = 259
+    left_arrow = 260
+    right_arrow = 261
     home = 262
     backspace__ = 263
     delete = 330

@@ -46,9 +46,9 @@ def _simple_scroll_keybinds(
         key = win.getch()
     except Key.ctrl_c:
         return -1
-    if key in (Key.up, Key.k):
+    if key in (Key.up_arrow, Key.k):
         cursor = clamp(cursor - 1, 0, len_lines - 2)
-    elif key in (Key.down, Key.j, Key.enter):
+    elif key in (Key.down_arrow, Key.j, Key.enter):
         cursor = clamp(cursor + 1, 0, len_lines - len_new_lines - 1)
     else:
         return -1

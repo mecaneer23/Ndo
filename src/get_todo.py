@@ -316,9 +316,9 @@ def get_todo(
     win.keypad(True)
 
     keys: dict[int, tuple[Callable[..., _EditString], str]] = {
-        Key.left: (_handle_left_arrow, "chars, position"),
-        Key.right: (_handle_right_arrow, "chars, position"),
-        Key.up: (
+        Key.left_arrow: (_handle_left_arrow, "chars, position"),
+        Key.right_arrow: (_handle_right_arrow, "chars, position"),
+        Key.up_arrow: (
             _error_passthrough,
             "stdscr, up arrow, chars, position",
         ),
@@ -372,7 +372,7 @@ def get_todo(
         if input_char in (Key.ctrl_k, Key.ctrl_x):
             mode.toggle()
             break
-        if input_char == Key.down:
+        if input_char == Key.down_arrow:
             mode.set_extra_data(f"{todo.get_color().as_char()} {mode.get_extra_data()}")
             return todo.set_display_text(_handle_new_todo(chars, position, mode))
         if input_char in keys:
