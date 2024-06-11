@@ -165,8 +165,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         keys = _KEYPAD_KEYS if _GETCH.is_blocking() and self._keypad else {}
         key = "-".join(map(str, chars))
         if key in keys:
-            self._stored_keys.put(keys[key])
-            return self._stored_keys.get()
+            return keys[key]
         for char in chars:
             self._stored_keys.put(char)
         return self._stored_keys.get()
