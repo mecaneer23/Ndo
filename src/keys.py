@@ -77,8 +77,12 @@ class Key:
     backspace_ = 127
     down = 258
     up = 259
+    left = 260
+    right = 261
     backspace__ = 263
     delete = 330
+    page_down = 338
+    page_up = 339
     shift_tab_windows = 351
     shift_tab = 353
     alt_j_windows = 426

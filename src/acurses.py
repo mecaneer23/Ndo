@@ -10,6 +10,8 @@ from threading import Thread
 from time import time as now
 from typing import Any, Callable, TypeVar, overload
 
+from src.keys import Key
+
 try:
     from termios import TCSADRAIN, tcgetattr, tcsetattr  # type: ignore
     from tty import setcbreak  # type: ignore
@@ -66,16 +68,15 @@ BACKGROUND_DEFAULT = 2**49
 
 _ANSI_RESET = "\033[0m"
 
-# Key names for the values of this dict can be found in src.keys
 _KEYPAD_KEYS: dict[str, set[int]] = {
-    "27-91-65": {259},
-    "27-91-66": {258},
-    "27-91-67": {261},
-    "27-91-68": {260},
-    "27-91-51-126": {330},
-    "27-91-53-126": {339},  # page up
-    "27-91-54-126": {338},  # page down
-    "27-91-90": {353},
+    "27-91-65": {Key.up},
+    "27-91-66": {Key.down},
+    "27-91-67": {Key.right},
+    "27-91-68": {Key.left},
+    "27-91-51-126": {Key.delete},
+    "27-91-53-126": {Key.page_up},
+    "27-91-54-126": {Key.page_down},
+    "27-91-90": {Key.shift_tab},
 }
 _SHORT_TIME_SECONDS = 0.01
 
