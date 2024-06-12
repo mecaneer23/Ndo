@@ -173,7 +173,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def _get_current_from_buffer(self) -> list[int]:
         char = _GETCH.get()
         current = [char]
-        if char == 27:
+        if char == Key.escape:
             esc = now()
             while now() - esc < _SHORT_TIME_SECONDS:
                 try:
