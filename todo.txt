@@ -12,4 +12,3 @@
 - fix: reimplement acurses support for windows
 - fix: if holding down a key in acurses, make sure it doesn't stay pressed longer than it should (i.e. holding j key) (only reproducible in some terminals)
 - fix: artifacting when using arrow keys in acurses with keypad off (namely when get_todo box is open)
-- fix: up and down arrow keys in acurses for navigation
