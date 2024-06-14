@@ -374,6 +374,7 @@ def wrapper(func: Callable[..., _T], /, *args: list[Any], **kwds: dict[str, Any]
         stdout.write("\033[s\033[2J\033[H")
         stdout.flush()
         stdscr = initscr()
+        stdscr.keypad(True)
         # _curses.start_color()
         return func(stdscr, *args, **kwds)
     finally:
