@@ -343,10 +343,12 @@ def get_todo(
             return todo.set_display_text(
                 _set_once(mode, chars, position, todo.get_color()),
             )
-        if position == len(chars):
-            win.addch(1, len(chars) + 1, "█")
+        # Why isn't this bit necessary? Does the for loop print it correctly regardless?
+        # if position == len(chars):
+        #     win.addch(1, len(chars) + 1, "█")
         for i, char in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
-            win.addch(
+            # why does acurses break if the following line uses addch rather than addstr?
+            win.addstr(
                 1, i + 1, char, curses.A_STANDOUT if i == position else curses.A_NORMAL
             )
         win.refresh()
