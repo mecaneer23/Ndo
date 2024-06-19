@@ -97,17 +97,9 @@ class _Getch:
         while True:
             self._raw_input.put(ord(stdin.read(1)), block=self._block)
 
-    def put(self, item: int, block: bool = True, timeout: float | None = None) -> None:
-        """Add an item to the queue"""
-        self._raw_input.put(item, block, timeout)
-
     def get(self, timeout: float | None = None) -> int:
         """Get an item from the queue"""
         return self._raw_input.get(timeout=timeout)
-
-    def empty(self) -> bool:
-        """Return whether the queue is empty"""
-        return self._raw_input.empty()
 
     def is_blocking(self) -> bool:
         """Return whether the Getch object is blocking"""
