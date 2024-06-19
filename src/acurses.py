@@ -87,6 +87,13 @@ _KEYPAD_KEYS: dict[str, int] = {
 _SHORT_TIME_SECONDS = 0.01
 
 
+class error(Exception):
+    """
+    Exception raised when a curses library function returns an error.
+    Not implemented for acurses.
+    """
+
+
 class _Getch:
     def __init__(self) -> None:
         self._block = True
@@ -99,7 +106,7 @@ class _Getch:
 
     def get(self, timeout: float | None = None) -> int:
         """Get an item from the queue"""
-        return self._raw_input.get(timeout=timeout)
+        return self._raw_input.get(timeout != 0, timeout=timeout)
 
     def is_blocking(self) -> bool:
         """Return whether the Getch object is blocking"""
@@ -138,6 +145,8 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
         self._attrs = 0
 
+        self._timeout: float | None = None
+
     def getch(self) -> int:
         """
         Get a character. Note that the integer returned
@@ -165,7 +174,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         return self._stored_keys.get()
 
     def _get_current_from_buffer(self) -> list[int]:
-        char = _GETCH.get()
+        char = _GETCH.get(self._timeout)
         current = [char]
         if char == Key.escape:
             esc = now()
@@ -183,13 +192,13 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         pos_y = self._begin_y + new_y
         pos_x = self._begin_x + new_x
         if pos_y < 0:
-            raise ValueError("new y position too small")
+            raise error("new y position too small")
         if pos_x < 0:
-            raise ValueError("new x position too small")
+            raise error("new x position too small")
         if pos_y > self._begin_y + self._height:
-            raise ValueError("new y position too large")
+            raise error("new y position too large")
         if pos_x > self._begin_x + self._width:
-            raise ValueError("new x position too large")
+            raise error("new x position too large")
         stdout.write(f"\033[{pos_y + 1};{pos_x + 1}H")
 
     def _parse_attrs(self, attrs: int) -> str:
@@ -301,7 +310,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
             self.addstr(i, 0, " " * self._width)
         stdout.flush()
 
-    def timeout(self, delay: int) -> None:
+    def timeout(self, delay: float) -> None:
         """
         Set blocking or non-blocking read behavior for
         the window. If delay is negative, blocking read
@@ -312,7 +321,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         delay milliseconds, and return -1 if there is
         still no input at the end of that time.
         """
-        raise NotImplementedError("timeout")
+        self._timeout = delay
 
     def keypad(self, flag: bool = False) -> None:
         """
