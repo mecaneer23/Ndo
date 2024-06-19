@@ -144,6 +144,8 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
         self._keypad: bool = False
 
+        self._attrs = 0
+
     def getch(self) -> int:
         """
         Get a character. Note that the integer returned
@@ -201,7 +203,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def _parse_attrs(self, attrs: int) -> str:
         """Convert a binary `attrs` into ANSI escape codes"""
         output = ""
-        iattrs = bin(attrs)[2:]
+        iattrs = bin(attrs | self._attrs)[2:]
         background = 0
         for ansi_code in compress(count(len(iattrs) - 1, -1), map(int, iattrs)):
             if ansi_code // 10 == 4:
@@ -328,6 +330,27 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         left as is in the input stream.
         """
         self._keypad = flag
+
+    def attron(self, attr: int) -> None:
+        """
+        Add attribute attr from the “background” set
+        applied to all writes to the current window.
+        """
+        self._attrs |= attr
+
+    def attroff(self, attr: int) -> None:
+        """
+        Remove attribute attr from the “background” set
+        applied to all writes to the current window.
+        """
+        self._attrs ^= attr
+
+    def attrset(self, attr: int) -> None:
+        """
+        Set the “background” set of attributes to attr.
+        This set is initially 0 (no attributes).
+        """
+        self._attrs = attr
 
 
 def use_default_colors() -> None:
