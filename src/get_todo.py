@@ -385,7 +385,6 @@ def get_todo(
                         "chars": chars,
                         "position": position,
                         "stdscr": stdscr,
-                        "stdscr_win": (stdscr, win),
                         "todo": todo,
                     },
                 )
