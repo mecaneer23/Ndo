@@ -344,9 +344,11 @@ def get_todo(
                 _set_once(mode, chars, position, todo.get_color()),
             )
         for i, char in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
-            # why does acurses break if the following line uses addch rather than addstr?
-            win.addstr(
-                1, i + 1, char, curses.A_STANDOUT if i == position else curses.A_NORMAL
+            win.addstr(  # Don't use addch; output should not be buffered
+                1,
+                i + 1,
+                char,
+                curses.A_STANDOUT if i == position else curses.A_NORMAL,
             )
         win.refresh()
         try:
