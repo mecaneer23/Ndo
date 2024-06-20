@@ -59,16 +59,12 @@ def _todo_from_clipboard(
             "Paste dependency not available: try running `pip install pyperclip`",
         )
         return todos
-    todo = paste()  # pyright: ignore
-    if copied_todo.get_display_text() == todo:
+    pasted = paste()  # pyright: ignore
+    if copied_todo.get_display_text() == pasted:
         todos.insert(selected + 1, Todo(repr(copied_todo)))
         return todos
-    if "\n" in todo:
-        todo = todo.strip()
-        for index, line in enumerate(todo.split("\n"), start=1):
-            todos.insert(selected + index, Todo(f"- {line}"))
-        return todos
-    todos.insert(selected + 1, Todo(f"- {todo}"))
+    for index, line in enumerate(pasted.strip().split("\n"), start=1):
+        todos.insert(selected + index, Todo(f"- {line}"))
     return todos
 
 
