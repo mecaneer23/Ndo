@@ -14,6 +14,7 @@ class Key:
 
     nodelay_escape = -1
     ctrl_a = 1
+    ctrl_f = 6
     backspace = 8
     tab = 9
     enter = 10

@@ -489,6 +489,7 @@ def main(stdscr: curses.window) -> int:
     # make sure it also calls update_file()
     keys: dict[int, tuple[Callable[..., Todos | None], str]] = {
         Key.ctrl_a: (selected.multiselect_all, "len(todos)"),
+        Key.ctrl_f: (search_menu, "stdscr, todos, selected"),
         Key.backspace: (join_lines, "todos, selected"),
         Key.backspace_: (join_lines, "todos, selected"),
         Key.backspace__: (join_lines, "todos, selected"),
