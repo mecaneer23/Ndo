@@ -38,7 +38,8 @@ def copy_todo(
     if not CLIPBOARD_EXISTS:
         alert(
             stdscr,
-            "Copy dependency not available: try running `pip install pyperclip`",
+            "Copied internally. External copy dependency not "
+            "available: try running `pip install pyperclip`",
         )
         return
     copy(  # pyright: ignore[reportPossiblyUnboundVariable]
@@ -54,9 +55,11 @@ def _todo_from_clipboard(
 ) -> Todos:
     """Retrieve copied_todo and insert into todo list"""
     if not CLIPBOARD_EXISTS:
+        todos.insert(selected + 1, Todo(repr(copied_todo)))
         alert(
             stdscr,
-            "Paste dependency not available: try running `pip install pyperclip`",
+            "Pasting from internal buffer. External paste dependency "
+            "not available: try running `pip install pyperclip`",
         )
         return todos
     pasted = paste()  # pyright: ignore
