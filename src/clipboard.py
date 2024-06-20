@@ -41,7 +41,9 @@ def copy_todo(
             "Copy dependency not available: try running `pip install pyperclip`",
         )
         return
-    copy(todos[int(selected)].get_display_text())  # pyright: ignore
+    copy(  # pyright: ignore[reportPossiblyUnboundVariable]
+        "\n".join([todos[pos].get_display_text() for pos in selected.get()])
+    )
 
 
 def _todo_from_clipboard(
