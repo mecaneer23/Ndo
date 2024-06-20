@@ -14,3 +14,7 @@
 - fix: enable keyboardinterrupts throughout the app
   - in get_todo box
   - in main window
+- fix: acurses preserve terminal from prior to app instantiation
+- fix: overflow in get_todo for lines with length > 2*width
+- fix: copy operation on multiple lines should work for clipboard
+  - maybe migrate copied_todo to list of todos and add multiple line paste operation from in app copy?
