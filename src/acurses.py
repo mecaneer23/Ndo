@@ -87,7 +87,7 @@ _KEYPAD_KEYS: dict[str, int] = {
 _SHORT_TIME_SECONDS = 0.01
 
 
-class error(Exception):
+class error(Exception):  # pylint: disable=invalid-name
     """
     Exception raised when a curses library function returns an error.
     Not implemented for acurses.
