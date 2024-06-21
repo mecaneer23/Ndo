@@ -44,7 +44,7 @@ def _simple_scroll_keybinds(
 ) -> int:
     try:
         key = win.getch()
-    except Key.ctrl_c:
+    except KeyboardInterrupt:
         return -1
     if key in (Key.up_arrow, Key.k):
         cursor = clamp(cursor - 1, 0, len_lines - 2)
@@ -180,7 +180,7 @@ def color_menu(parent_win: curses.window, original: Color) -> Color:
             )
         try:
             key = win.getch()
-        except Key.ctrl_c:
+        except KeyboardInterrupt:
             return original
         return_options: dict[int, Callable[[], Color]] = {
             Key.q: lambda: original,
@@ -263,7 +263,7 @@ def sort_menu(parent_win: curses.window, todos: Todos, selected: Cursor) -> Todo
             )
         try:
             key = win.getch()
-        except Key.ctrl_c:
+        except KeyboardInterrupt:
             return todos
         return_options: dict[int, Callable[..., Todos]] = {
             Key.q: lambda: todos,

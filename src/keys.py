@@ -109,8 +109,3 @@ class Key:
         if 48 <= ascii_digit <= 57:
             return ascii_digit - 48
         raise ValueError(f"Ascii digit `{ascii_digit}` must represent a digit.")
-
-    class ctrl_c(KeyboardInterrupt):  # pylint: disable=invalid-name
-        """
-        Wrapper for KeyboardInterrupt
-        """

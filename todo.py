@@ -365,7 +365,7 @@ def _get_main_input(
 ) -> int | Todos:
     try:
         key: int = stdscr.getch()
-    except Key.ctrl_c:
+    except KeyboardInterrupt:
         return todos
     if key == Key.q:
         return todos

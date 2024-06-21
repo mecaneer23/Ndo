@@ -137,7 +137,7 @@ def _handle_escape(
     win.nodelay(False)
     try:
         input_char = win.getch()
-    except Key.ctrl_c:
+    except KeyboardInterrupt:
         return None
     if input_char == Key.ctrl_delete:
         return _handle_ctrl_delete(chars, position)
@@ -353,7 +353,7 @@ def get_todo(
         win.refresh()
         try:
             input_char = win.getch()
-        except Key.ctrl_c:
+        except KeyboardInterrupt:
             mode.set_on()
             return original
         if input_char == Key.escape:
