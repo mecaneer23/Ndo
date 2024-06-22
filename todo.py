@@ -567,6 +567,7 @@ def main(stdscr: curses.window) -> int:
             todos = new_todo_next(stdscr, todos, selected, Todo(), single_line_state)
             continue
         if single_line_state.is_once():
+            single_line_state.set_on()
             todos = new_todo_next(
                 stdscr,
                 todos,
@@ -574,7 +575,6 @@ def main(stdscr: curses.window) -> int:
                 Todo(single_line_state.get_extra_data()),
                 single_line_state,
             )
-            single_line_state.set_on()
             continue
         next_step = _get_main_input(
             stdscr,

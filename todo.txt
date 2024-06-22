@@ -12,5 +12,4 @@
 - fix: reimplement acurses support for windows
 - fix: if holding down a key in acurses, make sure it doesn't stay pressed longer than it should (i.e. holding j key) (only reproducible in some terminals)
 - fix: acurses preserve terminal from prior to app instantiation
-- fix: overflow in get_todo for lines with length > 2*width
 - feat: migrate copied_todo to list of todos and add multiple line paste operation from in app copy
