@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Entry point for Ndo. This module mostly binds keypresses to various functions"""
 
+from itertools import pairwise
 from pathlib import Path
 from sys import exit as sys_exit
-from typing import Callable, TypeAlias
+from typing import Callable, Sequence, TypeAlias
 
 from src.class_cursor import Cursor
 from src.class_history import UndoRedo
@@ -423,20 +424,28 @@ def update_modified_time(prev_time: float, todos: Todos) -> tuple[Todos, float]:
     return todos, current_time
 
 
+def _get_captained_selection(selected: Cursor) -> Sequence[int] | None:
+    if len(selected) != 1:
+        return selected.get()
+    first = selected.get_first()
+    if first - 1 >= first:
+        return None
+    return (first - 1, first)
+
+
 def join_lines(todos: Todos, selected: Cursor) -> None:
     """Combine current line with previous line by concatenation."""
-    if len(selected) > 1 or len(todos) < 2:
+
+    captained_selection = _get_captained_selection(selected)
+    if captained_selection is None:
         return
 
-    prev_todo = int(selected) - 1
-    current_todo = int(selected)
-
-    todos[prev_todo].set_display_text(
-        f"{todos[prev_todo].get_display_text()} "
-        + todos[current_todo].get_display_text(),
-    )
-    selected.slide_up()
-    todos.pop(current_todo)
+    for addend, captain in pairwise(reversed(captained_selection)):
+        todos[captain].set_display_text(
+            todos[captain].get_display_text() + " " + todos[addend].get_display_text()
+        )
+        todos.pop(addend)
+    selected.set_to(captained_selection[0])
     update_file(FILENAME, todos)
 
 
