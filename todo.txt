@@ -15,3 +15,4 @@
 - feat: migrate copied_todo to list of todos and add multiple line paste operation from in app copy
 - fix: visual glitch when len(todos) == 1
 - feat: make join_lines allow for a multi-todo selection
+- feat: migrate Positions to internally just store start and stop and generate list using range
