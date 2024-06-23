@@ -278,15 +278,17 @@ def _toggle_todo_note(todos: Todos, selected: Cursor) -> None:
 
 
 def _handle_undo(selected: Cursor, history: UndoRedo) -> Todos:
-    todos = selected.override_passthrough(*history.undo())
-    update_file(FILENAME, todos)
-    return todos
+    todo_list = history.undo()
+    selected.set(todo_list.start, todo_list.stop)
+    update_file(FILENAME, todo_list.todos)
+    return todo_list.todos
 
 
 def _handle_redo(selected: Cursor, history: UndoRedo) -> Todos:
-    todos = selected.override_passthrough(*history.redo())
-    update_file(FILENAME, todos)
-    return todos
+    todo_list = history.redo()
+    selected.set(todo_list.start, todo_list.stop)
+    update_file(FILENAME, todo_list.todos)
+    return todo_list.todos
 
 
 def _set_fold_state_under(

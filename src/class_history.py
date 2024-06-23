@@ -4,19 +4,19 @@ Helpers for storing and retrieving TodoList object records.
 
 from typing import NamedTuple
 
-from src.class_cursor import Cursor, Positions
+from src.class_cursor import Cursor
 from src.class_todo import Todo, Todos
 
 
 class TodoList(NamedTuple):
     """
     An object representing the todos
-    and a cursor (Positions) within the list
+    and a cursor (start and stop integers) within the list
     """
 
     todos: Todos
-    cursor: Positions
-
+    start: int
+    stop: int
 
 class _Restorable:
     """
@@ -39,7 +39,8 @@ class _Restorable:
 
         return TodoList(
             Todos([Todo(line) for line in self.stored.split(self.SEPARATOR)]),
-            Positions(self.first, self.last + 1),
+            self.first,
+            self.last + 1,
         )
 
     def __repr__(self) -> str:

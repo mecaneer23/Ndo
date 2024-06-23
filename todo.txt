@@ -14,4 +14,3 @@
 - fix: acurses preserve terminal from prior to app instantiation
 - feat: migrate copied_todo to list of todos and add multiple line paste operation from in app copy
 - fix: visual glitch when len(todos) == 1
-- feat: remove Positions and integrate functionality into Cursor class directly
