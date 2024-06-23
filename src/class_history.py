@@ -39,7 +39,7 @@ class _Restorable:
 
         return TodoList(
             Todos([Todo(line) for line in self.stored.split(self.SEPARATOR)]),
-            Positions(range(self.first, self.last + 1)),
+            Positions(self.first, self.last + 1),
         )
 
     def __repr__(self) -> str:

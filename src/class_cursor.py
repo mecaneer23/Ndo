@@ -9,7 +9,7 @@ from enum import Enum
 
 # from functools import wraps
 # from typing import Any, Callable, Iterable, TypeVar
-from typing import Iterable, TypeVar
+from typing import TypeVar
 
 from src.class_todo import Todos
 from src.get_args import UI_TYPE, UiType
@@ -33,25 +33,55 @@ class _Direction(Enum):
     NONE = 2
 
 
-class Positions(list[int]):
+class Positions:
     """
-    Wrapper for a list of indices of positions
+    Store a group of consecutive ints
     """
 
-    def __init__(self, iterable: Iterable[int]):
-        super().__init__(iterable)
+    @classmethod
+    def from_start(cls, start: int) -> "Positions":
+        """Construct a Positions object from a single int"""
+        return cls(start, start + 1)
+
+    def __init__(self, start: int, stop: int) -> None:
+        self._start = start
+        self._stop = stop
+
+    def get_start(self) -> int:
+        """Getter for start"""
+        return self._start
+
+    def get_stop(self) -> int:
+        """Getter for stop"""
+        return self._stop
+
+    def __len__(self) -> int:
+        return self._stop - self._start
+
+    def __contains__(self, child: int) -> bool:
+        return self._start <= child < self._stop
+
+    def as_range(self) -> range:
+        """Getter for Positions represented as an iterator"""
+        return range(self._start, self._stop)
+
+    def raise_start(self, amount: int) -> None:
+        """Raise start by `amount`"""
+        self._start += amount
+
+    def raise_stop(self, amount: int) -> None:
+        """Raise stop by `amount`"""
+        self._stop += amount
 
 
 class Cursor:
     """
-    Store position(s) in a list using a `Positions` object
-
-    Especially helpful for storing a cursor which might span
-    multiple consecutive positions
+    Store potentially multiple consectutive position(s) using a
+    `Positions` object
     """
 
     def __init__(self, position: int, todos: Todos) -> None:
-        self._positions: Positions = Positions([position])
+        self._positions: Positions = Positions.from_start(position)
         self._direction: _Direction = _Direction.NONE
         # self._todos: Todos = todos
         _ = todos
@@ -60,28 +90,31 @@ class Cursor:
         return len(self._positions)
 
     def __str__(self) -> str:
-        return str(self._positions[0])
+        return str(self.get_first())
 
     def __repr__(self) -> str:
-        return " ".join(map(str, self._positions))
+        return " ".join(map(str, self._positions.as_range()))
 
     def __int__(self) -> int:
-        return self._positions[0]
+        return self.get_first()
 
     def __contains__(self, child: int) -> bool:
         return child in self._positions
 
-    def get(self) -> Positions:
-        """Return a `Positions` object holding the current cursor"""
-        return self._positions
+    def __iter__(self) -> range:
+        return self.get()
+
+    def get(self) -> range:
+        """Return a iterable object holding the current cursor"""
+        return self._positions.as_range()
 
     def get_first(self) -> int:
         """Return the top-most selected position"""
-        return self._positions[0]
+        return self._positions.get_start()
 
     def get_last(self) -> int:
         """Return the bottom-most selected position"""
-        return self._positions[-1]
+        return self._positions.get_stop() - 1
 
     # @staticmethod
     # def _updates_cursor(
@@ -121,7 +154,7 @@ class Cursor:
 
     def set_to(self, position: int) -> None:
         """Replace the entire cursor with a new single position"""
-        self._positions = Positions([position])
+        self._positions = Positions.from_start(position)
 
     def override_passthrough(self, passthrough: T, positions: Positions) -> T:
         """
@@ -136,33 +169,33 @@ class Cursor:
         if len(self._positions) == max_len:
             self.set_to(0)
             return
-        if min(self._positions) == 0:
+        if self.get_first() == 0:
             return
-        self.set_to(min(self._positions) - 1)
+        self.set_to(self.get_first() - 1)
         # while self.todos[self.get_first()].is_folded():
         #     self.multiselect_up()
 
     def slide_up(self) -> None:
         """Shift each value in the cursor up by 1"""
-        if min(self._positions) == 0:
+        if self.get_first() == 0:
             return
-        self._positions.insert(0, min(self._positions) - 1)
-        self._positions.pop()
+        self._positions.raise_start(-1)
+        self._positions.raise_stop(-1)
 
     def single_down(self, max_len: int) -> None:
         """Move a cursor with length 1 down by 1"""
         if len(self._positions) == max_len:
-            self.set_to(min(self._positions))
-        if max(self._positions) >= max_len - 1:
+            self.set_to(self.get_first())
+        if self.get_last() >= max_len - 1:
             return
-        self.set_to(max(self._positions) + 1)
+        self.set_to(self.get_last() + 1)
 
     def slide_down(self, max_len: int) -> None:
         """Shift each value in the cursor down by 1"""
-        if max(self._positions) >= max_len - 1:
+        if self.get_last() >= max_len - 1:
             return
-        self._positions.append(max(self._positions) + 1)
-        self._positions.pop(0)
+        self._positions.raise_start(1)
+        self._positions.raise_stop(1)
 
     def to_top(self) -> None:
         """Move the cursor to the top"""
@@ -174,33 +207,34 @@ class Cursor:
 
     def _select_next(self) -> None:
         """Extend the cursor down by 1"""
-        self._positions.append(max(self._positions) + 1)
+        self._positions.raise_stop(1)
 
     def _deselect_next(self) -> None:
         """Retract the cursor by 1"""
         if len(self._positions) > 1:
-            self._positions.remove(max(self._positions))
+            self._positions.raise_stop(-1)
 
     def _deselect_prev(self) -> None:
         """Remove the first position of the cursor"""
         if len(self._positions) > 1:
-            self._positions.remove(min(self._positions))
+            self._positions.raise_start(1)
 
     def _select_prev(self) -> None:
         """Extend the cursor up by 1"""
-        self._positions.insert(0, min(self._positions) - 1)
+        self._positions.raise_start(-1)
 
-    def get_deletable(self) -> Positions:
+    def get_deletable(self) -> list[int]:
         """
-        Return a Positions object with each value
+        Return a list with the same length as the
+        current internal `positions` with each value
         set to the minimum position of the current
         Cursor
         """
-        return Positions([min(self._positions) for _ in self._positions])
+        return [self.get_first() for _ in self._positions.as_range()]
 
     def multiselect_down(self, max_len: int) -> None:
         """Extend the cursor down by 1"""
-        if max(self._positions) >= max_len - 1:
+        if self.get_last() >= max_len - 1:
             return
         if len(self._positions) == 1 or self._direction == _Direction.DOWN:
             self._select_next()
@@ -210,7 +244,7 @@ class Cursor:
 
     def multiselect_up(self) -> None:
         """Extend the cursor up by 1"""
-        if min(self._positions) == 0 and self._direction == _Direction.UP:
+        if self.get_first() == 0 and self._direction == _Direction.UP:
             return
         if len(self._positions) == 1 or self._direction == _Direction.UP:
             self._select_prev()
@@ -223,22 +257,22 @@ class Cursor:
         Select every position between 0 and
         the current top of the selection
         """
-        for _ in range(self._positions[0], 0, -1):
+        for _ in range(self.get_first(), 0, -1):
             self.multiselect_up()
 
     def multiselect_bottom(self, max_len: int) -> None:
         """
         Select every position between the
-        current top of the selection and
+        current bottom of the selection and
         the `max_len` of the list
         """
-        for _ in range(self._positions[0], max_len):
+        for _ in range(self.get_last() - 1, max_len):
             self.multiselect_down(max_len)
 
     def _multiselect_to(self, position: int, max_len: int) -> None:
         """Select from current position up or down `position`"""
-        direction = -1 if position < self._positions[0] else 1
-        for _ in range(self._positions[0], position, direction):
+        direction = -1 if position < self.get_first() else 1
+        for _ in range(self.get_first(), position, direction):
             if direction == 1:
                 self.multiselect_down(max_len)
                 continue
@@ -277,9 +311,9 @@ class Cursor:
                 key = stdscr.getch()  # alt + ...
                 stdscr.nodelay(False)
             if key == Key.k:
-                operation(self._positions[0] - int(total), max_len)
+                operation(self.get_first() - int(total), max_len)
             elif key == Key.j:
-                operation(self._positions[0] + int(total), max_len)
+                operation(self.get_first() + int(total), max_len)
             elif key in (Key.g, Key.G):
                 operation(int(total) - 1, max_len)
             elif key in Key.digits():
@@ -289,4 +323,4 @@ class Cursor:
 
     def multiselect_all(self, max_len: int) -> None:
         """Set internal positions to entirity of list"""
-        self._positions = Positions(range(0, max_len))
+        self._positions = Positions(0, max_len)
