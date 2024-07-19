@@ -5,17 +5,15 @@ module provides a functional workaround.
 
 Thanks to https://github.com/zephyrproject-rtos/windows-curses/issues/50
 for the inspiration.
-
-This file also serves as a partial replacement for curses, so it is
-unnecessary to import tcurses.
 """
 
 import curses
-from typing import Any, Callable, TypeVar
+from typing import Callable, Concatenate, ParamSpec, TypeVar
 
 import _curses
 
-T = TypeVar("T")
+P = ParamSpec("P")
+R = TypeVar("R")
 
 
 def initscr() -> curses.window:
@@ -24,16 +22,15 @@ def initscr() -> curses.window:
     for key, value in _curses.__dict__.items():
         if key[0:4] == "ACS_" or key in ("LINES", "COLS"):
             setattr(curses, key, value)
-    return stdscr
+    return stdscr  # pyright: ignore[reportReturnType]
 
 
-# def wrapper(
-#     func: Callable[Concatenate[curses.window, P], R],
-#     /,
-#     *args: P.args,
-#     **kwargs: P.kwargs
-# ) -> R:
-def wrapper(func: Callable[..., T], /, *args: list[Any], **kwds: dict[str, Any]) -> T:
+def wrapper(
+    func: Callable[Concatenate[curses.window, P], R],
+    /,
+    *args: P.args,
+    **kwds: P.kwargs,
+) -> R:
     """
     Wrapper function that initializes curses and calls another function,
     restoring normal keyboard/screen behavior on error.
