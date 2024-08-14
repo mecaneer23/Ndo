@@ -334,8 +334,8 @@ def get_todo(
         Key.home: (_handle_home, "chars"),
         Key.end: (_handle_end, "chars"),
         Key.delete: (_handle_delete, "chars, position"),
-        Key.shift_delete: (_handle_toggle_note_todo, "stdscr, todo"),
-        Key.alt_delete: (_handle_toggle_note_todo, "stdscr, todo"),
+        Key.shift_delete: (_handle_toggle_note_todo, "stdscr, todo, chars, position"),
+        Key.alt_delete: (_handle_toggle_note_todo, "stdscr, todo, chars, position"),
     }
 
     while True:
