@@ -1,5 +1,5 @@
 """
-MIT License (c) 2023
+MIT License (c) 2023-2024
 """
 
 # most of the key values aren't good variable names out of context,
