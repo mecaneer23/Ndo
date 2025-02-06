@@ -106,7 +106,25 @@ def overflow(counter: int, minimum: int, maximum: int) -> int:
     return counter
 
 
-def _chunk_message(message: str, width: int) -> Iterable[str]:
+def _chunk_message(message: str, width: int, delimiter: str = " ") -> Iterable[str]:
+    """
+    Split a message into chunks of length `width`
+    (or as close as possible by splitting on `delimiter`)
+
+    Algorithm:
+      - Initialize a left and right pointer, left at
+      the left end of the `message`, and right at the
+      theoretical full width position
+      - while True:
+        - decrement right
+        - if `message` has been exhausted, yield
+        remaining as final value and break
+        - if character at right position is delimiter,
+        yield chunk upto that point and slide window to
+        begin at next available position
+        - if no delimiter in window, yield full width
+        and slide window
+    """
     left = 0
     right = width + 1
     while True:
@@ -114,14 +132,15 @@ def _chunk_message(message: str, width: int) -> Iterable[str]:
         if right >= len(message):
             yield message[left:]
             break
-        if message[right] == " ":
+        if message[right] == delimiter:
             yield message[left:right]
             left = right + 1
             right += width
             continue
         if right == left:
             yield message[left : left + width]
-            continue
+            left += width
+            right = left + width
 
 
 def alert(stdscr: curses.window, message: str) -> int:
