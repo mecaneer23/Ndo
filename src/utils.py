@@ -2,18 +2,19 @@
 General utilities, useful across multiple other files
 """
 
+from collections.abc import Iterable
 from enum import Enum
 from itertools import tee
-from typing import Iterable, NamedTuple
+from typing import NamedTuple
 
 from src.get_args import UI_TYPE, UiType
 
 if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
 elif UI_TYPE == UiType.TKINTER:
-    import src.tcurses as curses  # type: ignore
+    import src.tcurses as curses
 else:
-    import curses  # type: ignore
+    import curses
 
 
 class Chunk(NamedTuple):
@@ -69,9 +70,10 @@ class Color(Enum):
     @staticmethod
     def as_dict() -> dict[str, int]:
         """
-        Get all colors represented as a mapping of color name to corresponding int value
+        Get all colors represented as a mapping of color name
+        to corresponding int value
         """
-        return dict((color.name.capitalize(), color.value) for color in Color)
+        return {color.name.capitalize(): color.value for color in Color}
 
 
 def clamp(number: int, minimum: int, maximum: int) -> int:
@@ -106,7 +108,11 @@ def overflow(counter: int, minimum: int, maximum: int) -> int:
     return counter
 
 
-def _chunk_message(message: str, width: int, delimiter: str = " ") -> Iterable[str]:
+def _chunk_message(
+    message: str,
+    width: int,
+    delimiter: str = " ",
+) -> Iterable[str]:
     """
     Split a message into chunks of length `width`
     (or as close as possible by splitting on `delimiter`)
@@ -159,7 +165,12 @@ def alert(stdscr: curses.window, message: str) -> int:
     )
     width = len(max(width_chunk, key=len)) + border_width
     height = sum(1 for _ in height_chunk) + border_width
-    win = curses.newwin(height, width, max_y // 2 - height, max_x // 2 - width // 2)
+    win = curses.newwin(
+        height,
+        width,
+        max_y // 2 - height,
+        max_x // 2 - width // 2,
+    )
     win.clear()
     win.box()
     for index, chunk in enumerate(chunks, start=1):
