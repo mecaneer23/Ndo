@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""Entry point for Ndo. This module mostly binds keypresses to various functions"""
+"""
+Entry point for Ndo. This module mostly binds keypresses to various functions
+"""
+# ruff: noqa: FBT003
 
+from collections.abc import Sequence
 from itertools import pairwise
 from pathlib import Path
 from sys import exit as sys_exit
-from typing import Callable, Sequence, TypeAlias
+from typing import Callable, TypeAlias
 
 from src.class_cursor import Cursor
 from src.class_history import UndoRedo
@@ -36,16 +40,16 @@ if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
     from src.acurses import wrapper
 elif UI_TYPE == UiType.TKINTER:
-    import src.tcurses as curses  # type: ignore
+    import src.tcurses as curses
     from src.tcurses import wrapper
 else:
-    import curses  # type: ignore
+    import curses
 
     from src.working_initscr import wrapper
 
 
 # Migrate the following once Python 3.12 is more common
-# type PossibleArgs = ...
+# type _PossibleArgs = ...
 _PossibleArgs: TypeAlias = (
     Todo | int | UndoRedo | SingleLineModeImpl | Cursor | curses.window | Todos
 )
@@ -57,21 +61,25 @@ def get_file_modified_time(filename: Path) -> float:
 
     st_ctime should return the most recent modification time cross platform
     """
-    return filename.stat().st_ctime  # pyright: ignore
+    return filename.stat().st_ctime  # pyright: ignore[reportDeprecated]
 
 
 def insert_todo(
     stdscr: curses.window,
     todos: Todos,
     index: int,
-    default_todo: Todo = Todo(),
-    mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
+    default_todo: Todo | None = None,
+    mode: SingleLineModeImpl | None = None,
 ) -> Todos:
     """
     Using the get_todo menu, prompt the user for a new Todo.
     Add the new Todo to the list of Todos (`todos`) at the
     specified `index`.
     """
+    if default_todo is None:
+        default_todo = Todo()
+    if mode is None:
+        mode = SingleLineModeImpl(SingleLineMode.NONE)
     todo = get_todo(
         stdscr,
         get_newwin(stdscr),
@@ -99,10 +107,10 @@ def remove_todo(todos: Todos, index: int) -> Todos:
     return todos
 
 
-def move_todo(todos: Todos, selected: int, destination: int) -> Todos:
-    """Move the todo(s) at `selected` to `destination`"""
-    if min(selected, destination) >= 0 and max(selected, destination) < len(todos):
-        todos.insert(selected, todos.pop(destination))
+def move_todo(todos: Todos, group: int, destination: int) -> Todos:
+    """Move the todo(s) in `group` to `destination`"""
+    if min(group, destination) >= 0 and max(group, destination) < len(todos):
+        todos.insert(group, todos.pop(destination))
     return todos
 
 
@@ -127,12 +135,14 @@ def new_todo_next(
     todos: Todos,
     selected: Cursor,
     default_todo: Todo,
-    mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
+    mode: SingleLineModeImpl | None = None,
 ) -> Todos:
     """
     Insert a new todo item below the current
     cursor position and update the todo list
     """
+    if mode is None:
+        mode = SingleLineModeImpl(SingleLineMode.NONE)
     temp = todos.copy()
     todos = insert_todo(
         stdscr,
@@ -148,7 +158,11 @@ def new_todo_next(
     return todos
 
 
-def new_todo_current(stdscr: curses.window, todos: Todos, selected: int) -> Todos:
+def new_todo_current(
+    stdscr: curses.window,
+    todos: Todos,
+    selected: int,
+) -> Todos:
     """
     Insert a new todo item at the current cursor
     position, moving the rest of the list down
@@ -204,9 +218,13 @@ def edit_todo(
     max_y, max_x = stdscr.getmaxyx()
     todo = todos[selected].get_display_text()
     ncols = (
-        max(max_x * 3 // 4, len(todo) + 3) if len(todo) < max_x - 1 else max_x * 3 // 4
+        max(max_x * 3 // 4, len(todo) + 3)
+        if len(todo) < max_x - 1
+        else max_x * 3 // 4
     )
-    begin_x = max_x // 8 if len(todo) < max_x - 1 - ncols else (max_x - ncols) // 2
+    begin_x = (
+        max_x // 8 if len(todo) < max_x - 1 - ncols else (max_x - ncols) // 2
+    )
     edited_todo = get_todo(
         stdscr,
         curses.newwin(3, ncols, max_y // 2 - 3, begin_x),
@@ -317,7 +335,12 @@ def _set_folded(stdscr: curses.window, todos: Todos, selected: int) -> None:
         return
     parent.set_folded(FoldedState.PARENT)
     todos[index].set_folded(FoldedState.FOLDED)
-    _set_fold_state_under(FoldedState.FOLDED, parent.get_indent_level(), todos, index)
+    _set_fold_state_under(
+        FoldedState.FOLDED,
+        parent.get_indent_level(),
+        todos,
+        index,
+    )
     stdscr.clear()
 
 
@@ -373,7 +396,10 @@ def _get_main_input(
     if key == Key.q:
         return todos
     if key not in keys_esckeys[0]:
-        alert(stdscr, f"Invalid key: `{key}` | `{chr(key)}`. Press `h` for help.")
+        alert(
+            stdscr,
+            f"Invalid key: `{key}` | `{chr(key)}`. Press `h` for help.",
+        )
         return -1
     func, args = keys_esckeys[0][key]
     if key == Key.escape:
@@ -385,7 +411,8 @@ def _get_main_input(
         if key not in keys_esckeys[1]:
             alert(
                 stdscr,
-                f"Invalid key after escape: `{key}` | `{chr(key)}`. Press `h` for help.",
+                f"Invalid key after escape: `{key}` | `{chr(key)}`."
+                "Press `h` for help.",
             )
             return -1
         func, args = keys_esckeys[1][key]
@@ -393,7 +420,7 @@ def _get_main_input(
         *get_executable_args(
             args,
             possible_args,
-        )
+        ),
     )
     if isinstance(possible_todos, Todos):
         todos = possible_todos
@@ -444,7 +471,9 @@ def join_lines(todos: Todos, selected: Cursor) -> None:
 
     for addend, captain in pairwise(reversed(captained_selection)):
         todos[captain].set_display_text(
-            todos[captain].get_display_text() + " " + todos[addend].get_display_text()
+            todos[captain].get_display_text()
+            + " "
+            + todos[addend].get_display_text(),
         )
         todos.pop(addend)
     selected.set_to(captained_selection[0])
@@ -505,8 +534,14 @@ def main(stdscr: curses.window) -> int:
         Key.backspace_: (join_lines, "todos, selected"),
         Key.backspace__: (join_lines, "todos, selected"),
         Key.tab: (indent, "todos, selected"),
-        Key.enter: (_handle_enter, "stdscr, todos, selected, single_line_state"),
-        Key.enter_: (_handle_enter, "stdscr, todos, selected, single_line_state"),
+        Key.enter: (
+            _handle_enter,
+            "stdscr, todos, selected, single_line_state",
+        ),
+        Key.enter_: (
+            _handle_enter,
+            "stdscr, todos, selected, single_line_state",
+        ),
         Key.ctrl_k: (single_line_state.toggle, "None"),
         Key.ctrl_r: (_handle_redo, "selected, history"),
         Key.ctrl_x: (single_line_state.toggle, "None"),
@@ -538,7 +573,10 @@ def main(stdscr: curses.window) -> int:
         Key.i: (edit_todo, "stdscr, todos, int(selected), single_line_state"),
         Key.j: (selected.single_down, "len(todos)"),
         Key.k: (selected.single_up, "len(todos)"),
-        Key.o: (new_todo_next, "stdscr, todos, selected, Todo(), single_line_state"),
+        Key.o: (
+            new_todo_next,
+            "stdscr, todos, selected, Todo(), single_line_state",
+        ),
         Key.p: (paste_todo, "stdscr, todos, selected, copied_todo"),
         Key.s: (sort_menu, "stdscr, todos, selected"),
         Key.u: (_handle_undo, "selected, history"),
@@ -570,12 +608,21 @@ def main(stdscr: curses.window) -> int:
     history.add(todos, selected)
 
     while True:
-        todos, file_modified_time = update_modified_time(file_modified_time, todos)
+        todos, file_modified_time = update_modified_time(
+            file_modified_time,
+            todos,
+        )
         set_header(stdscr, f"{HEADER}:")
         sublist_top = print_todos(stdscr, todos, selected, sublist_top)
         stdscr.refresh()
         if single_line_state.is_off():
-            todos = new_todo_next(stdscr, todos, selected, Todo(), single_line_state)
+            todos = new_todo_next(
+                stdscr,
+                todos,
+                selected,
+                Todo(),
+                single_line_state,
+            )
             continue
         if single_line_state.is_once():
             single_line_state.set_on()
@@ -616,7 +663,7 @@ def main(stdscr: curses.window) -> int:
 
 if __name__ == "__main__":
     if UI_TYPE == UiType.NONE:
-        print(f"{HEADER}:")
+        print(f"{HEADER}:")  # noqa: T201
         print_todos(
             None,
             file_string_to_todos(read_file(FILENAME)),
