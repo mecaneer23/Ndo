@@ -116,8 +116,9 @@ def _get_args() -> TypedNamespace:
         "-b",
         action="store_true",
         default=_DEFAULT_BULLETS,
-        help=f"Boolean: determine if Notes are displayed with\
-            a bullet point in front or not. Default is `{_DEFAULT_BULLETS}`.",
+        help=f"Boolean: determine if Todos are displayed with\
+            a bullet point rather than a checkbox.\
+            Default is `{_DEFAULT_BULLETS}`.",
     )
     parser.add_argument(
         "--enumerate",

@@ -51,7 +51,7 @@ Options:
 
 | Option                                                         | Description                                                                                                                                           |
 | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| --bullet-display, -b                                           | Boolean: determine if Notes are displayed with a bullet point in front or not. Default is `False`.                                                    |
+| --bullet-display, -b                                           | Boolean: determine if Todos are displayed with a bullet point rather than a checkbox. Default is `False`.                                             |
 | --enumerate, -e                                                | Boolean: determines if todos are numbered when printed or not. Default is `False`.                                                                    |
 | --ui {curses,ansi,tkinter,none}, -g {curses,ansi,tkinter,none} | UiType: determine how todos should be rendered. Default is `ansi`. If `none` is passed, print state of a todolist to stdout without a user interface. |
 | --help, -h                                                     | Show this help message and exit.                                                                                                                      |

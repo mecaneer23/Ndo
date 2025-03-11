@@ -80,6 +80,10 @@ def _get_bullet(indentation_level: int) -> str:
     return symbols[indentation_level // INDENT % len(symbols)]
 
 
+def _get_checkmark(simple: bool) -> str:
+    return "X" if simple else "✓"
+
+
 def make_printable_sublist(
     height: int,
     lst: list[_T],
@@ -165,11 +169,21 @@ def _get_display_string(  # noqa: PLR0913  # pylint: disable=too-many-arguments,
         return "─" * _EMPTY_LINE_WIDTH
     return Chunk.join(
         Chunk(True, todo.get_indent_level() * " "),
-        Chunk(not todo.is_empty() and not SIMPLE_BOXES, todo.get_box()),
-        Chunk(not todo.is_empty() and SIMPLE_BOXES, todo.get_simple_box()),
         Chunk(
-            not todo.has_box() and BULLETS,
+            not todo.is_empty() and not SIMPLE_BOXES and not BULLETS,
+            todo.get_box(),
+        ),
+        Chunk(
+            not todo.is_empty() and SIMPLE_BOXES and not BULLETS,
+            todo.get_simple_box(),
+        ),
+        Chunk(
+            todo.has_box() and BULLETS and not todo.is_toggled(),
             f"{_get_bullet(todo.get_indent_level())} ",
+        ),
+        Chunk(
+            todo.has_box() and BULLETS and todo.is_toggled(),
+            f"{_get_checkmark(SIMPLE_BOXES)} ",
         ),
         Chunk(
             ENUMERATE and not RELATIVE_ENUMERATE,
