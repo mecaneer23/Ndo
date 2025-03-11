@@ -1,21 +1,23 @@
 """
 Helper module to handle printing a list of Todo objects
 """
+# ruff: noqa: FBT001, FBT003
 
+from collections.abc import Iterator
 from dataclasses import astuple, dataclass
 from functools import cache
-from typing import TYPE_CHECKING, Generic, Iterator, TypeVar, cast
+from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from src.class_cursor import Cursor
-from src.class_todo import FoldedState, Todo, Todos
+from src.class_todo import Todo, Todos
 from src.get_args import (
     BULLETS,
     ENUMERATE,
-    UI_TYPE,
     INDENT,
     RELATIVE_ENUMERATE,
     SIMPLE_BOXES,
     STRIKETHROUGH,
+    UI_TYPE,
     UiType,
 )
 from src.utils import Chunk, Color
@@ -23,9 +25,9 @@ from src.utils import Chunk, Color
 if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
 elif UI_TYPE == UiType.TKINTER:
-    import src.tcurses as curses  # type: ignore
+    import src.tcurses as curses
 else:
-    import curses  # type: ignore
+    import curses
 
 
 _T = TypeVar("_T")
@@ -110,7 +112,7 @@ def make_printable_sublist(
             enter the previous cursor position. If this is the first
             time you are calling this function, pass in a value < 1.
     """
-    start = prev_start if prev_start > 0 else 0
+    start = max(0, prev_start)
     if len(lst) < height or height < 0:
         return SublistItems(lst, cursor, start)
     if distance == 0:
@@ -137,7 +139,11 @@ def _info_message(stdscr: curses.window, height: int, width: int) -> None:
     )
     maxlen = len(max(text, key=len))
     for i, line in enumerate(text):
-        stdscr.addstr(height // 3 + i, (width - maxlen) // 2, line.center(maxlen))
+        stdscr.addstr(
+            height // 3 + i,
+            (width - maxlen) // 2,
+            line.center(maxlen),
+        )
 
 
 def _get_height_width(stdscr: curses.window | None) -> tuple[int, int]:
@@ -146,7 +152,7 @@ def _get_height_width(stdscr: curses.window | None) -> tuple[int, int]:
     return stdscr.getmaxyx()
 
 
-def _get_display_string(  # pylint: disable=too-many-arguments
+def _get_display_string(  # noqa: PLR0913  # pylint: disable=too-many-arguments, too-many-positional-arguments
     todos: Todos,
     position: int,
     relative_pos: int,
@@ -165,13 +171,16 @@ def _get_display_string(  # pylint: disable=too-many-arguments
             not todo.has_box() and BULLETS,
             f"{_get_bullet(todo.get_indent_level())} ",
         ),
-        Chunk(ENUMERATE and not RELATIVE_ENUMERATE, f"{todos.index(todo) + 1}. "),
+        Chunk(
+            ENUMERATE and not RELATIVE_ENUMERATE,
+            f"{todos.index(todo) + 1}. ",
+        ),
         Chunk(RELATIVE_ENUMERATE, f"{relative_pos + 1}. "),
         Chunk(ansi_strikethrough and todo.is_toggled(), _ANSI_STRIKETHROUGH),
         Chunk(not _DEBUG_FOLD, todo.get_display_text()),
-        Chunk(todo.is_folded_parent(), "› ..."),
+        Chunk(todo.is_folded_parent(), "› ..."),  # noqa: RUF001
         Chunk(todo.is_folded() and _DEBUG_FOLD, "FOLDED"),
-        Chunk(todo._folded == FoldedState.DEFAULT and _DEBUG_FOLD, "DEFAULT"),
+        # Chunk(todo._folded == FoldedState.DEFAULT and _DEBUG_FOLD, "DEFAULT"),
         Chunk(ansi_strikethrough, _ANSI_RESET),
         Chunk(width == 0, " "),
     )[: width - 1].ljust(width - 1, " ")
@@ -228,11 +237,13 @@ def _print_todo(
                 stdscr.getmaxyx()[1],
             )
         )
-        attrs = curses.color_pair(todo.get_color().as_int() or Color.WHITE.as_int())
+        attrs = curses.color_pair(
+            todo.get_color().as_int() or Color.WHITE.as_int(),
+        )
         if position in highlight:
             attrs |= curses.A_STANDOUT
         if should_strikethrough and UI_TYPE == UiType.ANSI:
-            attrs |= cast(int, curses.A_STRIKETHROUGH)  # pyright: ignore
+            attrs |= cast(int, curses.A_STRIKETHROUGH)  # type: ignore  # noqa: PGH003
         try:
             stdscr.addch(
                 print_position + 1,
@@ -294,12 +305,16 @@ def print_todos(
     highlight = range(temp_selected, len(selected) + temp_selected)
     print_position = -1
     for relative, (position, todo) in zip(
-        [*range(temp_selected - 1, -1, -1), int(selected), *range(0, len(new_todos))],
+        [
+            *range(temp_selected - 1, -1, -1),
+            int(selected),
+            *range(len(new_todos)),
+        ],
         enumerate(new_todos),
     ):
         print_position += 1
         if stdscr is None:
-            print(
+            print(  # noqa: T201
                 _color_to_ansi(todo.get_color().as_int())
                 + _get_display_string(
                     new_todos,
