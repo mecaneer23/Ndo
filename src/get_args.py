@@ -8,7 +8,7 @@ from argparse import (
 )
 from enum import Enum
 from pathlib import Path
-from typing import Type, TypeVar
+from typing import TypeVar
 
 from src.md_to_py import md_table_to_lines
 
@@ -19,7 +19,9 @@ _DEFAULT_BULLETS: bool = False
 _DEFAULT_ENUMERATE: bool = False
 _DEFAULT_FILENAME: Path = Path("todo.txt")
 _DEFAULT_HEADER: list[str] = [""]
-_DEFAULT_HELP_FILE: Path = Path(__file__).parent.parent.joinpath("README.md").absolute()
+_DEFAULT_HELP_FILE: Path = (
+    Path(__file__).parent.parent.joinpath("README.md").absolute()
+)
 _DEFAULT_INDENT: int = 2
 _DEFAULT_RELATIVE_ENUMERATE: bool = False
 _DEFAULT_SIMPLE_BOXES: bool = False
@@ -63,7 +65,7 @@ class TypedNamespace(Namespace):  # pylint: disable=too-few-public-methods
 _GenericEnum = TypeVar("_GenericEnum", bound=Enum)
 
 
-def get_first_char_dict(enum: Type[_GenericEnum]) -> dict[str, _GenericEnum]:
+def get_first_char_dict(enum: type[_GenericEnum]) -> dict[str, _GenericEnum]:
     """
     Return a dictionary mapping the first letter of each Enum
     item to the corresponding Enum item.
@@ -81,12 +83,14 @@ def _get_ui_type(string: str) -> UiType:
             return _FIRST_CHAR_DICT[string.upper()]
         return UiType[string.upper()]
     except KeyError as err:
-        raise ArgumentTypeError(f"Invalid color: {string}") from err
+        msg = f"Invalid color: {string}"
+        raise ArgumentTypeError(msg) from err
 
 
 def _get_args() -> TypedNamespace:
     parser = ArgumentParser(
-        description="Ndo is a todo list program to help you manage your todo lists",
+        description="Ndo is a todo list program to"
+        "help you manage your todo lists",
         add_help=False,
         formatter_class=RawDescriptionHelpFormatter,
         epilog="Controls:\n  "
@@ -213,7 +217,9 @@ def _get_header(title: list[str]) -> str:
 
 command_line_args = _get_args()
 BULLETS: bool = command_line_args.bullet_display
-CHECKBOX: str = _CHECKBOX_OPTIONS[1] if not command_line_args.simple_boxes else ""
+CHECKBOX: str = (
+    _CHECKBOX_OPTIONS[1] if not command_line_args.simple_boxes else ""
+)
 ENUMERATE: bool = command_line_args.enumerate
 FILENAME: Path = _parse_filename(command_line_args.filename)
 HEADER: str = _get_header(command_line_args.title)
