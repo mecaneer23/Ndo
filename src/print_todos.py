@@ -243,7 +243,10 @@ def _print_todo(
         if position in highlight:
             attrs |= curses.A_STANDOUT
         if should_strikethrough and UI_TYPE == UiType.ANSI:
-            attrs |= cast(int, curses.A_STRIKETHROUGH)  # type: ignore  # noqa: PGH003
+            attrs |= cast(
+                int,
+                curses.A_STRIKETHROUGH,  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+            )
         try:
             stdscr.addch(
                 print_position + 1,

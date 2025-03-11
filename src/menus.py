@@ -2,6 +2,7 @@
 Various helpful menus and their helper functions.
 """
 
+from functools import partial
 from typing import Callable
 
 try:
@@ -31,9 +32,9 @@ from src.utils import Color, alert, clamp, overflow, set_header
 if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
 elif UI_TYPE == UiType.TKINTER:
-    import src.tcurses as curses  # type: ignore
+    import src.tcurses as curses
 else:
-    import curses  # type: ignore
+    import curses
 
 
 def _simple_scroll_keybinds(
@@ -99,7 +100,12 @@ def help_menu(parent_win: curses.window) -> None:
         for i, line in enumerate(new_lines):
             win.addstr(i + 3, 1, line)
         win.refresh()
-        cursor = _simple_scroll_keybinds(win, cursor, len(lines), len(new_lines))
+        cursor = _simple_scroll_keybinds(
+            win,
+            cursor,
+            len(lines),
+            len(new_lines),
+        )
         if cursor < 0:
             break
     parent_win.clear()
@@ -114,12 +120,13 @@ def magnify_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
     if not FIGLET_FORMAT_EXISTS:
         alert(
             stdscr,
-            "Magnify dependency not available: try running `pip install pyfiglet`",
+            "Magnify dependency not available:"
+            "try running `pip install pyfiglet`",
         )
         return
     stdscr.clear()
     set_header(stdscr, "Magnifying...")
-    lines = big(  # pyright: ignore
+    lines = big(  # pyright: ignore[reportPossiblyUnboundVariable]
         todos[int(selected)].get_display_text(),
         width=stdscr.getmaxyx()[1],
     ).split("\n")
@@ -136,7 +143,12 @@ def magnify_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
         for i, line in enumerate(new_lines):
             stdscr.addstr(i + 1, 1, line)
         stdscr.refresh()
-        cursor = _simple_scroll_keybinds(stdscr, cursor, len(lines), len(new_lines))
+        cursor = _simple_scroll_keybinds(
+            stdscr,
+            cursor,
+            len(lines),
+            len(new_lines),
+        )
         if cursor < 0:
             break
     stdscr.refresh()
@@ -147,7 +159,9 @@ def color_menu(parent_win: curses.window, original: Color) -> Color:
     """Show a menu to choose a color. Return the chosen Color."""
     parent_win.clear()
     set_header(parent_win, "Colors:")
-    lines = [i.ljust(len(max(Color.as_dict(), key=len))) for i in Color.as_dict()]
+    lines = [
+        i.ljust(len(max(Color.as_dict(), key=len))) for i in Color.as_dict()
+    ]
     win = curses.newwin(
         len(lines) + 2,
         len(lines[0]) + 2,
@@ -185,7 +199,7 @@ def color_menu(parent_win: curses.window, original: Color) -> Color:
         return_options: dict[int, Callable[[], Color]] = {
             Key.q: lambda: original,
             Key.escape: lambda: original,
-            Key.enter: lambda: Color(Color.as_dict()[lines[cursor].strip()]),
+            Key.enter: partial(Color, Color.as_dict()[lines[cursor].strip()]),
         }
         if key in move_options:
             move_func = move_options[key]
@@ -201,7 +215,9 @@ def color_menu(parent_win: curses.window, original: Color) -> Color:
 
 def _get_sorting_methods() -> dict[str, Callable[[Todos], str]]:
     return {
-        "Alphabetical": lambda top_level_todo: top_level_todo[0].get_display_text(),
+        "Alphabetical": lambda top_level_todo: top_level_todo[
+            0
+        ].get_display_text(),
         "Completed": lambda top_level_todo: (
             "1" if top_level_todo[0].is_toggled() else "0"
         ),
@@ -235,7 +251,11 @@ def _sort_by(method: str, todos: Todos, selected: Cursor) -> Todos:
     return sorted_todos
 
 
-def sort_menu(parent_win: curses.window, todos: Todos, selected: Cursor) -> Todos:
+def sort_menu(
+    parent_win: curses.window,
+    todos: Todos,
+    selected: Cursor,
+) -> Todos:
     """
     Show a menu to choose a method to sort the `Todos`.
     Immediately sort the list and return the sorted list.
@@ -268,7 +288,7 @@ def sort_menu(parent_win: curses.window, todos: Todos, selected: Cursor) -> Todo
         return_options: dict[int, Callable[..., Todos]] = {
             Key.q: lambda: todos,
             Key.escape: lambda: todos,
-            Key.enter: lambda: _sort_by(lines[cursor], todos, selected),
+            Key.enter: partial(_sort_by, lines[cursor], todos, selected),
         }
         if key in move_options:
             func = move_options[key]
