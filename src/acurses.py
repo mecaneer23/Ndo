@@ -1,9 +1,10 @@
 """An ANSI interface that feels like programming with curses"""
+# ruff: noqa: TRY003, EM101
 
 from functools import singledispatchmethod
 from itertools import compress, count
 from os import get_terminal_size, name
-from queue import Empty as queue_empty
+from queue import Empty as queue_empty  # noqa: N813
 from queue import Queue
 from sys import stdin, stdout
 from threading import Thread
@@ -13,17 +14,23 @@ from typing import Any, Callable, TypeVar, overload
 from src.keys import Key
 
 try:
-    from termios import TCSADRAIN, tcgetattr, tcsetattr  # type: ignore
-    from tty import setcbreak  # type: ignore
+    from termios import (
+        TCSADRAIN,  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
+        tcgetattr,  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
+        tcsetattr,  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
+    )
+    from tty import (
+        setcbreak,  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
+    )
 except ImportError:
-    from msvcrt import getwch, putwch  # type: ignore
+    from msvcrt import getwch, putwch
 
     def _write(string: str) -> int:
         for ch in string:
             putwch(ch)
         return 0
 
-    stdin.read = lambda _=-1: getwch()  # type: ignore
+    stdin.read = lambda _=-1: getwch()
     stdout.write = _write
     stdout.flush = lambda: None
 
@@ -87,7 +94,7 @@ _KEYPAD_KEYS: dict[str, int] = {
 _SHORT_TIME_SECONDS = 0.01
 
 
-class error(Exception):  # pylint: disable=invalid-name
+class error(Exception):  # pylint: disable=invalid-name  # noqa: N801, N818
     """
     Exception raised when a curses library function returns an error.
     Not implemented for acurses.
@@ -112,7 +119,7 @@ class _Getch:
         """Return whether the Getch object is blocking"""
         return self._block
 
-    def set_blocking(self, block: bool) -> None:
+    def set_blocking(self, block: bool) -> None:  # noqa: FBT001
         """Set blocking status"""
         self._block = block
 
@@ -203,21 +210,32 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
     def _parse_attrs(self, attrs: int) -> str:
         """Convert a binary `attrs` into ANSI escape codes"""
+        decimal_bits = 10
+        ansi_background_bit_shifted = 4
+        ansi_foreground_bit_shifted = 3
         output = ""
         iattrs = bin(attrs | self._attrs)[2:]
         background = 0
         for ansi_code in compress(count(len(iattrs) - 1, -1), map(int, iattrs)):
-            if ansi_code // 10 == 4:
+            if ansi_code // decimal_bits == ansi_background_bit_shifted:
                 background = ansi_code
                 continue
-            if ansi_code // 10 == 3 and background != 0:
-                ansi_code = f"{ansi_code};{background}"
-            output += f"\033[{ansi_code}m"
+            ansi_str = str(ansi_code)
+            if (
+                ansi_code // decimal_bits == ansi_foreground_bit_shifted
+                and background != 0
+            ):
+                ansi_str = f"{ansi_code};{background}"
+            output += f"\033[{ansi_str}m"
         return output
 
     @singledispatchmethod
     def _addstr(
-        self, _: object, __: None = None, ___: None = None, ____: None = None
+        self,
+        _: object,
+        __: None = None,
+        ___: None = None,
+        ____: None = None,
     ) -> None:
         _ = __
         _ = ___
@@ -237,7 +255,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     @_addstr.register(str)
     def _(self, text: str, attr: int = 0) -> None:
         ansi_attrs = self._parse_attrs(attr)
-        stdout.write(f"{ansi_attrs}{text[:self._width]}")
+        stdout.write(f"{ansi_attrs}{text[: self._width]}")
         if ansi_attrs:
             stdout.write(_ANSI_RESET)
         stdout.flush()
@@ -267,7 +285,11 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
     def addch(self, y: int, x: int, char: str, attr: int = 0) -> None:
         """Add a character to the screen"""
-        if attr != self._stored_attr or y != self._stored_y or x - self._stored_x > 1:
+        if (
+            attr != self._stored_attr
+            or y != self._stored_y
+            or x - self._stored_x > 1
+        ):
             if self._buffer:
                 self._clear_buffer()
             self._stored_attr = attr
@@ -275,7 +297,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
             self._stored_y = y
         self._buffer.append(char)
 
-    def nodelay(self, flag: bool = True) -> None:
+    def nodelay(self, flag: bool = True) -> None:  # noqa: FBT001, FBT002
         """If flag is True, getch() will be non-blocking"""
         _GETCH.set_blocking(not flag)
 
@@ -323,7 +345,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         """
         self._timeout = delay
 
-    def keypad(self, flag: bool = False) -> None:
+    def keypad(self, flag: bool = False) -> None:  # noqa: FBT001, FBT002
         """
         If flag is True, escape sequences generated by some
         keys (keypad, function keys) will be interpreted by
@@ -375,11 +397,19 @@ _color_pairs: list[int] = [FOREGROUND_DEFAULT | BACKGROUND_DEFAULT]
 
 
 def initscr() -> window:
-    """Initialize the library. Return a window object which represents the whole screen."""
+    """
+    Initialize the library. Return a window object which represents
+    the whole screen.
+    """
     return _CursesWindow()
 
 
-def wrapper(func: Callable[..., _T], /, *args: list[Any], **kwds: dict[str, Any]) -> _T:
+def wrapper(
+    func: Callable[..., _T],
+    /,
+    *args: list[Any],
+    **kwds: dict[str, Any],
+) -> _T:
     """
     Wrapper function that initializes curses and calls another function,
     restoring normal keyboard/screen behavior on error.
@@ -390,15 +420,15 @@ def wrapper(func: Callable[..., _T], /, *args: list[Any], **kwds: dict[str, Any]
 
     if not IS_WINDOWS:
         fd = stdin.fileno()
-        old_settings = tcgetattr(fd)  # type: ignore
+        old_settings = tcgetattr(fd)  # pyright: ignore[reportUnknownVariableType, reportPossiblyUnboundVariable]
 
     try:
         if not IS_WINDOWS:
-            setcbreak(fd)  # type: ignore
+            setcbreak(fd)  # pyright: ignore[reportPossiblyUnboundVariable]
         stdout.write("\033[s\033[2J\033[H")
         stdout.flush()
         stdscr = initscr()
-        stdscr.keypad(True)
+        stdscr.keypad(True)  # noqa: FBT003
         # _curses.start_color()
         return func(stdscr, *args, **kwds)
     finally:
@@ -406,7 +436,7 @@ def wrapper(func: Callable[..., _T], /, *args: list[Any], **kwds: dict[str, Any]
             stdout.write("\033[39;49m\033[0m\033[2J\033[H\033[?25h")
             stdout.flush()
             if not IS_WINDOWS:
-                tcsetattr(fd, TCSADRAIN, old_settings)  # type: ignore
+                tcsetattr(fd, TCSADRAIN, old_settings)  # pyright: ignore[reportUnknownVariableType, reportPossiblyUnboundVariable]
 
 
 def init_pair(pair_number: int, fg: int, bg: int) -> None:
