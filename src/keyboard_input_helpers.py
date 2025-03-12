@@ -3,7 +3,8 @@ Utility functions for handling keyboard input in curses
 systems
 """
 
-from typing import Mapping, TypeVar
+from collections.abc import Mapping
+from typing import TypeVar
 
 _T = TypeVar("_T")
 

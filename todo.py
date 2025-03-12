@@ -22,7 +22,7 @@ from src.get_args import (
     UiType,
 )
 from src.get_todo import get_todo
-from src.io import file_string_to_todos, read_file, update_file
+from src.io_ import file_string_to_todos, read_file, update_file
 from src.keyboard_input_helpers import get_executable_args
 from src.keys import Key
 from src.menus import (

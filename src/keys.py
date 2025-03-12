@@ -37,7 +37,7 @@ class Key:
     eight = 56
     nine = 57
     G = 71
-    alt_G = 71
+    alt_G = 71  # noqa: N815
     J = 74
     K = 75
     O = 79
@@ -106,6 +106,10 @@ class Key:
         Take in a Key which represents a digit and
         return the digit it represents.
         """
-        if 48 <= ascii_digit <= 57:
-            return ascii_digit - 48
-        raise ValueError(f"Ascii digit `{ascii_digit}` must represent a digit.")
+        ascii_zero = 48
+        ascii_nine = 57
+
+        if ascii_zero <= ascii_digit <= ascii_nine:
+            return ascii_digit - ascii_zero
+        msg = f"Ascii digit `{ascii_digit}` must represent a digit."
+        raise ValueError(msg)

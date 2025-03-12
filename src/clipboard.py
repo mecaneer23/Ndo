@@ -13,7 +13,7 @@ except ImportError:
 from src.class_cursor import Cursor
 from src.class_todo import Todo, Todos
 from src.get_args import FILENAME, UI_TYPE, UiType
-from src.io import update_file
+from src.io_ import update_file
 from src.utils import alert
 
 if UI_TYPE == UiType.ANSI:

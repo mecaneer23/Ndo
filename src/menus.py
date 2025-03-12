@@ -23,7 +23,7 @@ from src.get_args import (
     UiType,
 )
 from src.get_todo import get_todo, hline
-from src.io import update_file
+from src.io_ import update_file
 from src.keys import Key
 from src.md_to_py import md_table_to_lines
 from src.print_todos import make_printable_sublist
