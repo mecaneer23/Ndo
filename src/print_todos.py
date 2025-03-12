@@ -178,11 +178,17 @@ def _get_display_string(  # noqa: PLR0913  # pylint: disable=too-many-arguments,
             todo.get_simple_box(),
         ),
         Chunk(
-            todo.has_box() and BULLETS and not todo.is_toggled(),
+            not todo.is_empty()
+            and todo.has_box()
+            and BULLETS
+            and not todo.is_toggled(),
             f"{_get_bullet(todo.get_indent_level())} ",
         ),
         Chunk(
-            todo.has_box() and BULLETS and todo.is_toggled(),
+            not todo.is_empty()
+            and todo.has_box()
+            and BULLETS
+            and todo.is_toggled(),
             f"{_get_checkmark(SIMPLE_BOXES)} ",
         ),
         Chunk(
