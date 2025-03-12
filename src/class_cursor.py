@@ -4,12 +4,14 @@ Helpers for storing a cursor, or a position in a list.
 Especially helpful for storing a cursor which might span
 multiple consecutive positions.
 """
+# ruff: noqa: ERA001
 
+from collections.abc import Iterator
 from enum import Enum
 
 # from functools import wraps
 # from typing import Any, Callable, Iterable, TypeVar
-from typing import Iterator, TypeVar
+from typing import TypeVar
 
 from src.class_todo import Todos
 from src.get_args import UI_TYPE, UiType
@@ -19,9 +21,9 @@ from src.utils import clamp
 if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
 elif UI_TYPE == UiType.TKINTER:
-    import src.tcurses as curses  # type: ignore
+    import src.tcurses as curses
 else:
-    import curses  # type: ignore
+    import curses
 
 
 T = TypeVar("T")
@@ -98,7 +100,7 @@ class Cursor:
 
     #     def _decorator(func: Callable[..., T]) -> Callable[..., T]:
     #         @wraps(func)
-    #         def _inner(self: "Cursor", *args: list[Any], **kwargs: dict[Any, Any]) -> T:
+            # def _inner(self: "Cursor", *args: list[Any], **kwargs: dict[Any, Any]) -> T:
     #             for pos in self:
     #                 # if not self._todos[pos].is_folded_parent():
     #                 # break
@@ -246,7 +248,9 @@ class Cursor:
             self.multiselect_up()
 
     def _set_to_clamp(self, position: int, max_len: int) -> None:
-        """Set the current position to the given position if between 0 and maxlen"""
+        """
+        Set the current position to the given position if between 0 and maxlen
+        """
         self.set_to(clamp(position, 0, max_len))
 
     def relative_to(
@@ -254,14 +258,15 @@ class Cursor:
         stdscr: curses.window,
         first_digit: int,
         max_len: int,
-        single: bool,
+        single: bool,  # noqa: FBT001
     ) -> None:
         """
-        Move the cursor to the specified position relative to the current position.
+        Move the cursor to the specified position relative to the current
+        position.
 
-        Because the trigger can only be a single keypress, this function also uses a
-        window object to getch until the user presses g or shift + g. This allows
-        for relative movement greater than 9 lines away.
+        Because the trigger can only be a single keypress, this function also
+        uses a window object to getch until the user presses g or shift + g.
+        This allows for relative movement greater than 9 lines away.
         """
         total = str(first_digit)
         while True:
@@ -274,9 +279,9 @@ class Cursor:
                 operation = self._multiselect_to
                 if key != Key.escape:  # not an escape sequence
                     return
-                stdscr.nodelay(True)
+                stdscr.nodelay(True)  # noqa: FBT003
                 key = stdscr.getch()  # alt + ...
-                stdscr.nodelay(False)
+                stdscr.nodelay(False)  # noqa: FBT003
             if key == Key.k:
                 operation(self.get_first() - int(total), max_len)
             elif key == Key.j:

@@ -18,6 +18,7 @@ class TodoList(NamedTuple):
     start: int
     stop: int
 
+
 class _Restorable:
     """
     Back up and save a TodoList object, one snippet in time.
@@ -45,7 +46,8 @@ class _Restorable:
 
     def __repr__(self) -> str:
         return (
-            self.stored.replace(self.SEPARATOR, ", ") + f": {self.first}..{self.last}"
+            self.stored.replace(self.SEPARATOR, ", ")
+            + f": {self.first}..{self.last}"
         )
 
 

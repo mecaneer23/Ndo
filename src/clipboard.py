@@ -19,9 +19,9 @@ from src.utils import alert
 if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
 elif UI_TYPE == UiType.TKINTER:
-    import src.tcurses as curses  # type: ignore
+    import src.tcurses as curses
 else:
-    import curses  # type: ignore
+    import curses
 
 
 def copy_todo(
@@ -43,7 +43,7 @@ def copy_todo(
         )
         return
     copy(  # pyright: ignore[reportPossiblyUnboundVariable]
-        "\n".join([todos[pos].get_display_text() for pos in selected.get()])
+        "\n".join([todos[pos].get_display_text() for pos in selected.get()]),
     )
 
 
@@ -62,7 +62,7 @@ def _todo_from_clipboard(
             "not available: try running `pip install pyperclip`",
         )
         return todos
-    pasted = paste()  # pyright: ignore
+    pasted = paste()  # pyright: ignore[reportPossiblyUnboundVariable]
     if copied_todo.get_display_text() == pasted:
         todos.insert(selected + 1, Todo(repr(copied_todo)))
         return todos

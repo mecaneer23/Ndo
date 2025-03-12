@@ -1,6 +1,7 @@
 """Open a text input box, implement typing, and return text input"""
 
-from typing import Callable, Iterable, NamedTuple, cast
+from collections.abc import Iterable
+from typing import Callable, NamedTuple, cast
 
 from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, Todo
@@ -12,15 +13,15 @@ from src.utils import Color, alert, set_header
 if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
 elif UI_TYPE == UiType.TKINTER:
-    import src.tcurses as curses  # type: ignore
+    import src.tcurses as curses
 else:
-    import curses  # type: ignore
+    import curses
 
 
 class _Chars(list[str]):
     """A list of characters; an alias for `list[str]`"""
 
-    def __init__(self, iterable: Iterable[str]):
+    def __init__(self, iterable: Iterable[str]) -> None:
         super().__init__(iterable)
 
 
@@ -51,13 +52,15 @@ def hline(
 
 
 def _ensure_valid(win: curses.window) -> None:
-    if win.getmaxyx()[0] < 3:
-        raise ValueError(
-            "Window is too short, it won't be able to\
-            display the minimum 1 line of text.",
-        )
-    if win.getmaxyx()[0] > 3:
-        raise NotImplementedError("Multiline text editing is not supported")
+    min_line_amount = 1
+    border_total_width = 2
+    if win.getmaxyx()[0] < min_line_amount + border_total_width:
+        msg = "Window is too short, it won't be able to\
+            display the minimum 1 line of text."
+        raise ValueError(msg)
+    if win.getmaxyx()[0] > min_line_amount + border_total_width:
+        msg = "Multiline text editing is not supported"
+        raise NotImplementedError(msg)
 
 
 def _init_todo(todo: Todo, prev_todo: Todo, mode: SingleLineModeImpl) -> Todo:
@@ -130,11 +133,11 @@ def _handle_escape(
     chars: _Chars,
     position: int,
 ) -> _EditString | None:
-    win.nodelay(True)
+    win.nodelay(True)  # noqa: FBT003
     if win.getch() == Key.nodelay_escape:
-        win.nodelay(False)
+        win.nodelay(False)  # noqa: FBT003
         return None
-    win.nodelay(False)
+    win.nodelay(False)  # noqa: FBT003
     try:
         input_char = win.getch()
     except KeyboardInterrupt:
@@ -145,7 +148,10 @@ def _handle_escape(
 
 
 def _handle_toggle_note_todo(
-    stdscr: curses.window, todo: Todo, chars: _Chars, position: int
+    stdscr: curses.window,
+    todo: Todo,
+    chars: _Chars,
+    position: int,
 ) -> _EditString:
     _toggle_note_todo(todo)
     set_header(stdscr, "Todo" if todo.has_box() else "Note")
@@ -199,7 +205,11 @@ def _error_passthrough(
     )
 
 
-def _handle_new_todo(chars: _Chars, position: int, mode: SingleLineModeImpl) -> str:
+def _handle_new_todo(
+    chars: _Chars,
+    position: int,
+    mode: SingleLineModeImpl,
+) -> str:
     mode.set_once()
     mode.set_extra_data("".join(chars[position:]))
     return "".join(chars[:position])
@@ -224,7 +234,11 @@ def _handle_ctrl_backspace(chars: _Chars, position: int) -> _EditString:
     return _EditString(chars, position)
 
 
-def _handle_printable(chars: _Chars, position: int, input_char: int) -> _EditString:
+def _handle_printable(
+    chars: _Chars,
+    position: int,
+    input_char: int,
+) -> _EditString:
     chars.insert(position, chr(input_char))
     if position < len(chars):
         position += 1
@@ -264,7 +278,7 @@ def get_todo(
     win: curses.window,
     todo: Todo,
     prev_todo: Todo,
-    mode: SingleLineModeImpl = SingleLineModeImpl(SingleLineMode.NONE),
+    mode: SingleLineModeImpl | None = None,
 ) -> Todo:
     """
     Reads a string from the given window. Returns a todo from the user.
@@ -305,6 +319,8 @@ def get_todo(
         Todo: Similar to the built in input() function,
         returns a Todo object containing the user's entry.
     """
+    if mode is None:
+        mode = SingleLineModeImpl(SingleLineMode.NONE)
 
     _ensure_valid(win)
     todo = _init_todo(todo, prev_todo, mode)
@@ -312,8 +328,8 @@ def get_todo(
     chars = _Chars(todo.get_display_text())
     position = len(chars)
     win.box()
-    win.nodelay(False)
-    win.keypad(True)
+    win.nodelay(False)  # noqa: FBT003
+    win.keypad(True)  # noqa: FBT003
 
     keys: dict[int, tuple[Callable[..., _EditString], str]] = {
         Key.left_arrow: (_handle_left_arrow, "chars, position"),
@@ -327,15 +343,24 @@ def get_todo(
         Key.backspace__: (_handle_backspace, "chars, position"),
         Key.ctrl_backspace: (_handle_ctrl_backspace, "chars, position"),
         Key.shift_tab: (_handle_dedent, "stdscr, todo, chars, position"),
-        Key.shift_tab_windows: (_handle_dedent, "stdscr, todo, chars, position"),
+        Key.shift_tab_windows: (
+            _handle_dedent,
+            "stdscr, todo, chars, position",
+        ),
         Key.tab: (_handle_indent, "stdscr, todo, chars, position"),
         Key.ctrl_left_arrow: (_handle_ctrl_left_arrow, "chars, position"),
         Key.ctrl_right_arrow: (_handle_ctrl_right_arrow, "chars, position"),
         Key.home: (_handle_home, "chars"),
         Key.end: (_handle_end, "chars"),
         Key.delete: (_handle_delete, "chars, position"),
-        Key.shift_delete: (_handle_toggle_note_todo, "stdscr, todo, chars, position"),
-        Key.alt_delete: (_handle_toggle_note_todo, "stdscr, todo, chars, position"),
+        Key.shift_delete: (
+            _handle_toggle_note_todo,
+            "stdscr, todo, chars, position",
+        ),
+        Key.alt_delete: (
+            _handle_toggle_note_todo,
+            "stdscr, todo, chars, position",
+        ),
     }
 
     while True:
@@ -374,8 +399,12 @@ def get_todo(
             mode.toggle()
             break
         if input_char == Key.down_arrow:
-            mode.set_extra_data(f"{todo.get_color().as_char()} {mode.get_extra_data()}")
-            return todo.set_display_text(_handle_new_todo(chars, position, mode))
+            mode.set_extra_data(
+                f"{todo.get_color().as_char()} {mode.get_extra_data()}",
+            )
+            return todo.set_display_text(
+                _handle_new_todo(chars, position, mode),
+            )
         if input_char in keys:
             func, joined_args = keys[input_char]
             chars, position = func(
@@ -387,7 +416,7 @@ def get_todo(
                         "stdscr": stdscr,
                         "todo": todo,
                     },
-                )
+                ),
             )
             continue
         if chr(input_char).isprintable():

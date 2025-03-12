@@ -12,18 +12,29 @@ from typing import Generic, TypeVar
 
 T = TypeVar("T")
 
+
 class Queue(Generic[T]):
     """A queue that has a readable debug state"""
+
     def __init__(self) -> None:
         self.queue: StockQueue[T] = StockQueue()
         self.items: list[T] = []
 
-    def put(self, item: T, block: bool = True, timeout: float | None = None) -> None:
+    def put(
+        self,
+        item: T,
+        block: bool = True,  # noqa: FBT001, FBT002
+        timeout: float | None = None,
+    ) -> None:
         """Add an item to the queue"""
         self.queue.put(item, block, timeout)
         self.items.append(item)
 
-    def get(self, block: bool = True, timeout: float | None = None) -> T:
+    def get(
+        self,
+        block: bool = True,  # noqa: FBT001, FBT002
+        timeout: float | None = None,
+    ) -> T:
         """Get an item from the queue"""
         if len(self.items) > 0:
             self.items.pop(0)

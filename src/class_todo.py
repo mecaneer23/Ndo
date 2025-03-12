@@ -3,8 +3,8 @@ Class definitions for a Todo, Todos (list of Todo),
 and TodoList (list of Todo + cursor (int)).
 """
 
+from collections.abc import Iterable
 from enum import Enum
-from typing import Iterable
 
 from src.get_args import CHECKBOX, INDENT
 from src.utils import Chunk, Color
@@ -201,7 +201,7 @@ class Todo:
 
     def __repr__(self) -> str:
         return Chunk.join(
-            Chunk(True, self._indent_level * " "),
+            Chunk(True, self._indent_level * " "),  # noqa: FBT003
             Chunk(
                 self._box_char != BoxChar.NONE and not self.is_empty(),
                 str(self._box_char),
@@ -212,7 +212,7 @@ class Todo:
                 or self._color != Color.WHITE,
                 " ",
             ),
-            Chunk(True, self._display_text),
+            Chunk(True, self._display_text),  # noqa: FBT003
         )
 
 
