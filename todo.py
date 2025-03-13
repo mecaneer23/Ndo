@@ -21,7 +21,7 @@ from src.get_args import (
     UI_TYPE,
     UiType,
 )
-from src.get_todo import get_todo
+from src.get_todo import InputTodo
 from src.io_ import file_string_to_todos, read_file, update_file
 from src.keyboard_input_helpers import get_executable_args
 from src.keys import Key
@@ -80,13 +80,13 @@ def insert_todo(
         default_todo = Todo()
     if mode is None:
         mode = SingleLineModeImpl(SingleLineMode.NONE)
-    todo = get_todo(
+    todo = InputTodo(
         stdscr,
         get_newwin(stdscr),
         todo=default_todo,
         prev_todo=todos[index - 1] if len(todos) > 0 else Todo(),
         mode=mode,
-    )
+    ).get_todo()
     if todo.is_empty():
         return todos
     todos.insert(index, todo)
@@ -225,13 +225,13 @@ def edit_todo(
     begin_x = (
         max_x // 8 if len(todo) < max_x - 1 - ncols else (max_x - ncols) // 2
     )
-    edited_todo = get_todo(
+    edited_todo = InputTodo(
         stdscr,
         curses.newwin(3, ncols, max_y // 2 - 3, begin_x),
         todo=todos[selected],
         prev_todo=Todo(),
         mode=mode,
-    )
+    ).get_todo()
     if edited_todo.is_empty():
         return todos
     todos[selected] = edited_todo

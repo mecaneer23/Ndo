@@ -6,7 +6,6 @@ from typing import Callable, NamedTuple, cast
 from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, Todo
 from src.get_args import INDENT, UI_TYPE, UiType
-from src.keyboard_input_helpers import get_executable_args
 from src.keys import Key
 from src.utils import Color, alert, set_header
 
@@ -51,238 +50,12 @@ def hline(
     win.addch(y_loc, x_loc + width - 1, cast(str, curses.ACS_RTEE))
 
 
-def _ensure_valid(win: curses.window) -> None:
-    min_line_amount = 1
-    border_total_width = 2
-    if win.getmaxyx()[0] < min_line_amount + border_total_width:
-        msg = "Window is too short, it won't be able to\
-            display the minimum 1 line of text."
-        raise ValueError(msg)
-    if win.getmaxyx()[0] > min_line_amount + border_total_width:
-        msg = "Multiline text editing is not supported"
-        raise NotImplementedError(msg)
-
-
-def _init_todo(todo: Todo, prev_todo: Todo, mode: SingleLineModeImpl) -> Todo:
-    if todo.is_empty():
-        todo.set_indent_level(prev_todo.get_indent_level())
-        todo.set_color(prev_todo.get_color())
-        if not prev_todo.has_box():
-            todo.set_box_char(BoxChar.NONE)
-    if mode.is_off():
-        todo.set_box_char(BoxChar.NONE)
-    return todo
-
-
-def _handle_right_arrow(chars: _Chars, position: int) -> _EditString:
-    if position < len(chars):
-        position += 1
-    return _EditString(chars, position)
-
-
-def _handle_ctrl_right_arrow(chars: _Chars, position: int) -> _EditString:
-    while True:
-        if position >= len(chars) - 1:
-            break
-        position += 1
-        if chars[position] == " ":
-            break
-    return _EditString(chars, position)
-
-
-def _handle_left_arrow(chars: _Chars, position: int) -> _EditString:
-    if position > 0:
-        position -= 1
-    return _EditString(chars, position)
-
-
-def _handle_ctrl_left_arrow(chars: _Chars, position: int) -> _EditString:
-    while True:
-        if position <= 0:
-            break
-        position -= 1
-        if chars[position] == " ":
-            break
-    return _EditString(chars, position)
-
-
-def _handle_ctrl_delete(chars: _Chars, position: int) -> _EditString:
-    if position < len(chars) - 1:
-        chars.pop(position)
-        position -= 1
-    while True:
-        if position >= len(chars) - 1:
-            break
-        position += 1
-        if chars[position] == " ":
-            break
-        chars.pop(position)
-        position -= 1
-    return _EditString(chars, position)
-
-
-def _handle_delete(chars: _Chars, position: int) -> _EditString:
-    if position < len(chars):
-        chars.pop(position)
-    return _EditString(chars, position)
-
-
-def _handle_escape(
-    stdscr: curses.window,
-    win: curses.window,
-    chars: _Chars,
-    position: int,
-) -> _EditString | None:
-    win.nodelay(True)  # noqa: FBT003
-    if win.getch() == Key.nodelay_escape:
-        win.nodelay(False)  # noqa: FBT003
-        return None
-    win.nodelay(False)  # noqa: FBT003
-    try:
-        input_char = win.getch()
-    except KeyboardInterrupt:
-        return None
-    if input_char == Key.ctrl_delete:
-        return _handle_ctrl_delete(chars, position)
-    return _error_passthrough(stdscr, str(input_char), chars, position)
-
-
-def _handle_toggle_note_todo(
-    stdscr: curses.window,
-    todo: Todo,
-    chars: _Chars,
-    position: int,
-) -> _EditString:
-    _toggle_note_todo(todo)
-    set_header(stdscr, "Todo" if todo.has_box() else "Note")
-    stdscr.refresh()
-    return _EditString(chars, position)
-
-
-def _handle_indent(
-    stdscr: curses.window,
-    todo: Todo,
-    chars: _Chars,
-    position: int,
-) -> _EditString:
-    todo.indent()
-    set_header(stdscr, f"Tab level: {todo.get_indent_level() // INDENT} tabs")
-    stdscr.refresh()
-    return _EditString(chars, position)
-
-
-def _handle_dedent(
-    stdscr: curses.window,
-    todo: Todo,
-    chars: _Chars,
-    position: int,
-) -> _EditString:
-    todo.dedent()
-    set_header(stdscr, f"Tab level: {todo.get_indent_level() // INDENT} tabs")
-    stdscr.refresh()
-    return _EditString(chars, position)
-
-
-def _handle_home(chars: _Chars) -> _EditString:
-    return _EditString(chars, 0)
-
-
-def _handle_end(chars: _Chars) -> _EditString:
-    return _EditString(chars, len(chars))
-
-
-def _error_passthrough(
-    stdscr: curses.window,
-    key_name: str,
-    chars: _Chars | None = None,
-    position: int | None = None,
-) -> _EditString:
-    alert(stdscr, f"Key `{key_name}` is not supported")
-    return (
-        _EditString(chars, position)
-        if chars is not None and position is not None
-        else _EditString(_Chars({}), 0)
-    )
-
-
-def _handle_new_todo(
-    chars: _Chars,
-    position: int,
-    mode: SingleLineModeImpl,
-) -> str:
-    mode.set_once()
-    mode.set_extra_data("".join(chars[position:]))
-    return "".join(chars[:position])
-
-
-def _handle_backspace(chars: _Chars, position: int) -> _EditString:
-    if position > 0:
-        position -= 1
-        chars.pop(position)
-    return _EditString(chars, position)
-
-
-def _handle_ctrl_backspace(chars: _Chars, position: int) -> _EditString:
-    while True:
-        if position <= 0:
-            break
-        position -= 1
-        if chars[position] == " ":
-            chars.pop(position)
-            break
-        chars.pop(position)
-    return _EditString(chars, position)
-
-
-def _handle_printable(
-    chars: _Chars,
-    position: int,
-    input_char: int,
-) -> _EditString:
-    chars.insert(position, chr(input_char))
-    if position < len(chars):
-        position += 1
-    return _EditString(chars, position)
-
-
-def _toggle_note_todo(todo: Todo) -> None:
-    if not todo.has_box():
-        todo.set_box_char(BoxChar.MINUS)
-        return
-    todo.set_box_char(BoxChar.NONE)
-
-
-def _set_once(
-    mode: SingleLineModeImpl,
-    chars: _Chars,
-    position: int,
-    color: Color,
-) -> str:
-    mode.set_once()
-    string = "".join(chars)
-    two_lines = (
-        string.rsplit(None, 1)
-        if position > len(chars) - 1
-        else (string[:position], string[position:])
-    )
-    if len(two_lines) == 1:
-        line = two_lines[0]
-        mode.set_extra_data(f"{color.as_char()} {line[-1]}")
-        return line[:-1]
-    mode.set_extra_data(f"{color.as_char()} {two_lines[1]}")
-    return two_lines[0]
-
-
-def get_todo(
-    stdscr: curses.window,
-    win: curses.window,
-    todo: Todo,
-    prev_todo: Todo,
-    mode: SingleLineModeImpl | None = None,
-) -> Todo:
+class InputTodo:
     """
     Reads a string from the given window. Returns a todo from the user.
     Functions like a JavaScript alert box for user input.
+
+    Once class is instantiated, call get_todo()
 
     Args:
         stdscr (Window object):
@@ -319,109 +92,269 @@ def get_todo(
         Todo: Similar to the built in input() function,
         returns a Todo object containing the user's entry.
     """
-    if mode is None:
-        mode = SingleLineModeImpl(SingleLineMode.NONE)
 
-    _ensure_valid(win)
-    todo = _init_todo(todo, prev_todo, mode)
-    original = todo.copy()
-    chars = _Chars(todo.get_display_text())
-    position = len(chars)
-    win.box()
-    win.nodelay(False)  # noqa: FBT003
-    win.keypad(True)  # noqa: FBT003
+    def __init__(
+        self,
+        stdscr: curses.window,
+        win: curses.window,
+        todo: Todo,
+        prev_todo: Todo,
+        mode: SingleLineModeImpl | None = None,
+    ) -> None:
+        self._stdscr = stdscr
+        self._win = win
+        self._todo = todo
+        self._prev_todo = prev_todo
+        self._mode = (
+            SingleLineModeImpl(SingleLineMode.NONE) if mode is None else mode
+        )
+        self._ensure_valid()
+        self._init_todo()
+        self._chars = _Chars(todo.get_display_text())
+        self._position = len(self._chars)
 
-    keys: dict[int, tuple[Callable[..., _EditString], str]] = {
-        Key.left_arrow: (_handle_left_arrow, "chars, position"),
-        Key.right_arrow: (_handle_right_arrow, "chars, position"),
-        Key.up_arrow: (
-            _error_passthrough,
-            "stdscr, up arrow, chars, position",
-        ),
-        Key.backspace: (_handle_backspace, "chars, position"),
-        Key.backspace_: (_handle_backspace, "chars, position"),
-        Key.backspace__: (_handle_backspace, "chars, position"),
-        Key.ctrl_backspace: (_handle_ctrl_backspace, "chars, position"),
-        Key.shift_tab: (_handle_dedent, "stdscr, todo, chars, position"),
-        Key.shift_tab_windows: (
-            _handle_dedent,
-            "stdscr, todo, chars, position",
-        ),
-        Key.tab: (_handle_indent, "stdscr, todo, chars, position"),
-        Key.ctrl_left_arrow: (_handle_ctrl_left_arrow, "chars, position"),
-        Key.ctrl_right_arrow: (_handle_ctrl_right_arrow, "chars, position"),
-        Key.home: (_handle_home, "chars"),
-        Key.end: (_handle_end, "chars"),
-        Key.delete: (_handle_delete, "chars, position"),
-        Key.shift_delete: (
-            _handle_toggle_note_todo,
-            "stdscr, todo, chars, position",
-        ),
-        Key.alt_delete: (
-            _handle_toggle_note_todo,
-            "stdscr, todo, chars, position",
-        ),
-    }
+    def _ensure_valid(self) -> None:
+        min_line_amount = 1
+        border_total_width = 2
+        if self._win.getmaxyx()[0] < min_line_amount + border_total_width:
+            msg = "Window is too short, it won't be able to\
+                display the minimum 1 line of text."
+            raise ValueError(msg)
+        if self._win.getmaxyx()[0] > min_line_amount + border_total_width:
+            msg = "Multiline text editing is not supported"
+            raise NotImplementedError(msg)
 
-    while True:
-        if len(chars) + 1 >= win.getmaxyx()[1] - 1:
-            return todo.set_display_text(
-                _set_once(mode, chars, position, todo.get_color()),
-            )
-        for i, char in enumerate("".join(chars).ljust(win.getmaxyx()[1] - 2)):
-            win.addstr(  # Don't use addch; output should not be buffered
-                1,
-                i + 1,
-                char,
-                curses.A_STANDOUT if i == position else curses.A_NORMAL,
-            )
-        win.refresh()
+    def _init_todo(self) -> None:
+        if self._todo.is_empty():
+            self._todo.set_indent_level(self._prev_todo.get_indent_level())
+            self._todo.set_color(self._prev_todo.get_color())
+            if not self._prev_todo.has_box():
+                self._todo.set_box_char(BoxChar.NONE)
+        if self._mode.is_off():
+            self._todo.set_box_char(BoxChar.NONE)
+
+    def _handle_right_arrow(self) -> _EditString:
+        if self._position < len(self._chars):
+            self._position += 1
+        return _EditString(self._chars, self._position)
+
+    def _handle_ctrl_right_arrow(self) -> _EditString:
+        while True:
+            if self._position >= len(self._chars) - 1:
+                break
+            self._position += 1
+            if self._chars[self._position] == " ":
+                break
+        return _EditString(self._chars, self._position)
+
+    def _handle_left_arrow(self) -> _EditString:
+        if self._position > 0:
+            self._position -= 1
+        return _EditString(self._chars, self._position)
+
+    def _handle_ctrl_left_arrow(self) -> _EditString:
+        while True:
+            if self._position <= 0:
+                break
+            self._position -= 1
+            if self._chars[self._position] == " ":
+                break
+        return _EditString(self._chars, self._position)
+
+    def _handle_ctrl_delete(self) -> _EditString:
+        if self._position < len(self._chars) - 1:
+            self._chars.pop(self._position)
+            self._position -= 1
+        while True:
+            if self._position >= len(self._chars) - 1:
+                break
+            self._position += 1
+            if self._chars[self._position] == " ":
+                break
+            self._chars.pop(self._position)
+            self._position -= 1
+        return _EditString(self._chars, self._position)
+
+    def _handle_delete(self) -> _EditString:
+        if self._position < len(self._chars):
+            self._chars.pop(self._position)
+        return _EditString(self._chars, self._position)
+
+    def _handle_escape(self) -> _EditString | None:
+        self._win.nodelay(True)  # noqa: FBT003
+        if self._win.getch() == Key.nodelay_escape:
+            self._win.nodelay(False)  # noqa: FBT003
+            return None
+        self._win.nodelay(False)  # noqa: FBT003
         try:
-            input_char = win.getch()
+            input_char = self._win.getch()
         except KeyboardInterrupt:
-            mode.set_on()
-            return original
-        if input_char == Key.escape:
-            possible_chars_position = _handle_escape(
-                stdscr,
-                win,
-                chars,
-                position,
-            )
-            if possible_chars_position is None:
-                mode.set_on()
-                return original
-            chars, position = possible_chars_position
-            continue
-        if input_char in (Key.enter, Key.enter_):
-            break
-        if input_char in (Key.ctrl_k, Key.ctrl_x):
-            mode.toggle()
-            break
-        if input_char == Key.down_arrow:
-            mode.set_extra_data(
-                f"{todo.get_color().as_char()} {mode.get_extra_data()}",
-            )
-            return todo.set_display_text(
-                _handle_new_todo(chars, position, mode),
-            )
-        if input_char in keys:
-            func, joined_args = keys[input_char]
-            chars, position = func(
-                *get_executable_args(
-                    joined_args,
-                    {
-                        "chars": chars,
-                        "position": position,
-                        "stdscr": stdscr,
-                        "todo": todo,
-                    },
-                ),
-            )
-            continue
-        if chr(input_char).isprintable():
-            chars, position = _handle_printable(chars, position, input_char)
-            continue
-        _error_passthrough(stdscr, str(input_char))
+            return None
+        if input_char == Key.ctrl_delete:
+            return self._handle_ctrl_delete()
+        return self._error_passthrough(str(input_char))
 
-    return todo.set_display_text("".join(chars))
+    def _handle_toggle_note_todo(self) -> _EditString:
+        self._toggle_note_todo()
+        set_header(self._stdscr, "Todo" if self._todo.has_box() else "Note")
+        self._stdscr.refresh()
+        return _EditString(self._chars, self._position)
+
+    def _handle_indent(self) -> _EditString:
+        self._todo.indent()
+        set_header(
+            self._stdscr,
+            f"Tab level: {self._todo.get_indent_level() // INDENT} tabs",
+        )
+        self._stdscr.refresh()
+        return _EditString(self._chars, self._position)
+
+    def _handle_dedent(self) -> _EditString:
+        self._todo.dedent()
+        set_header(
+            self._stdscr,
+            f"Tab level: {self._todo.get_indent_level() // INDENT} tabs",
+        )
+        self._stdscr.refresh()
+        return _EditString(self._chars, self._position)
+
+    def _handle_home(self) -> _EditString:
+        return _EditString(self._chars, 0)
+
+    def _handle_end(self) -> _EditString:
+        return _EditString(self._chars, len(self._chars))
+
+    def _error_passthrough(
+        self,
+        key_name: str,
+    ) -> _EditString:
+        alert(self._stdscr, f"Key `{key_name}` is not supported")
+        return _EditString(self._chars, self._position)
+
+    def _handle_new_todo(self) -> str:
+        self._mode.set_once()
+        self._mode.set_extra_data("".join(self._chars[self._position :]))
+        return "".join(self._chars[: self._position])
+
+    def _handle_backspace(self) -> _EditString:
+        if self._position > 0:
+            self._position -= 1
+            self._chars.pop(self._position)
+        return _EditString(self._chars, self._position)
+
+    def _handle_ctrl_backspace(self) -> _EditString:
+        while True:
+            if self._position <= 0:
+                break
+            self._position -= 1
+            if self._chars[self._position] == " ":
+                self._chars.pop(self._position)
+                break
+            self._chars.pop(self._position)
+        return _EditString(self._chars, self._position)
+
+    def _handle_printable(self, input_char: int) -> _EditString:
+        self._chars.insert(self._position, chr(input_char))
+        if self._position < len(self._chars):
+            self._position += 1
+        return _EditString(self._chars, self._position)
+
+    def _toggle_note_todo(self) -> None:
+        if not self._todo.has_box():
+            self._todo.set_box_char(BoxChar.MINUS)
+            return
+        self._todo.set_box_char(BoxChar.NONE)
+
+    def _set_once(self, color: Color) -> str:
+        self._mode.set_once()
+        string = "".join(self._chars)
+        two_lines = (
+            string.rsplit(None, 1)
+            if self._position > len(self._chars) - 1
+            else (string[: self._position], string[self._position :])
+        )
+        if len(two_lines) == 1:
+            line = two_lines[0]
+            self._mode.set_extra_data(f"{color.as_char()} {line[-1]}")
+            return line[:-1]
+        self._mode.set_extra_data(f"{color.as_char()} {two_lines[1]}")
+        return two_lines[0]
+
+    def get_todo(self) -> Todo:
+        """External method to get a todo object from the user"""
+        original = self._todo.copy()
+        self._win.box()
+        self._win.nodelay(False)  # noqa: FBT003
+        self._win.keypad(True)  # noqa: FBT003
+
+        keys: dict[int, Callable[..., _EditString]] = {
+            Key.left_arrow: self._handle_left_arrow,
+            Key.right_arrow: self._handle_right_arrow,
+            Key.backspace: self._handle_backspace,
+            Key.backspace_: self._handle_backspace,
+            Key.backspace__: self._handle_backspace,
+            Key.ctrl_backspace: self._handle_ctrl_backspace,
+            Key.shift_tab: self._handle_dedent,
+            Key.shift_tab_windows: self._handle_dedent,
+            Key.tab: self._handle_indent,
+            Key.ctrl_left_arrow: self._handle_ctrl_left_arrow,
+            Key.ctrl_right_arrow: self._handle_ctrl_right_arrow,
+            Key.home: self._handle_home,
+            Key.end: self._handle_end,
+            Key.delete: self._handle_delete,
+            Key.shift_delete: self._handle_toggle_note_todo,
+            Key.alt_delete: self._handle_toggle_note_todo,
+        }
+
+        while True:
+            if len(self._chars) + 1 >= self._win.getmaxyx()[1] - 1:
+                return self._todo.set_display_text(
+                    self._set_once(self._todo.get_color()),
+                )
+            for i, char in enumerate(
+                "".join(self._chars).ljust(self._win.getmaxyx()[1] - 2),
+            ):
+                self._win.addstr(  # avoid addch; output should not be buffered
+                    1,
+                    i + 1,
+                    char,
+                    curses.A_STANDOUT
+                    if i == self._position
+                    else curses.A_NORMAL,
+                )
+            self._win.refresh()
+            try:
+                input_char = self._win.getch()
+            except KeyboardInterrupt:
+                self._mode.set_on()
+                return original
+            if input_char == Key.escape:
+                possible_chars_position = self._handle_escape()
+                if possible_chars_position is None:
+                    self._mode.set_on()
+                    return original
+                self._chars, self._position = possible_chars_position
+                continue
+            if input_char in (Key.enter, Key.enter_):
+                break
+            if input_char in (Key.ctrl_k, Key.ctrl_x):
+                self._mode.toggle()
+                break
+            if input_char == Key.down_arrow:
+                self._mode.set_extra_data(
+                    f"{self._todo.get_color().as_char()} "
+                    f"{self._mode.get_extra_data()}",
+                )
+                return self._todo.set_display_text(self._handle_new_todo())
+            if input_char == Key.up_arrow:
+                self._error_passthrough("up arrow")
+                continue
+            if input_char in keys:
+                self._chars, self._position = keys[input_char]()
+                continue
+            if chr(input_char).isprintable():
+                self._chars, self._position = self._handle_printable(input_char)
+                continue
+            self._error_passthrough(str(input_char))
+
+        return self._todo.set_display_text("".join(self._chars))

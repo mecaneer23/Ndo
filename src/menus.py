@@ -22,7 +22,7 @@ from src.get_args import (
     UI_TYPE,
     UiType,
 )
-from src.get_todo import get_todo, hline
+from src.get_todo import InputTodo, hline
 from src.io_ import update_file
 from src.keys import Key
 from src.md_to_py import md_table_to_lines
@@ -320,12 +320,12 @@ def search_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
     """
     set_header(stdscr, "Searching...")
     stdscr.refresh()
-    sequence = get_todo(
+    sequence = InputTodo(
         stdscr,
         get_newwin(stdscr),
         Todo(),
         Todo(),
-    ).get_display_text()
+    ).get_todo().get_display_text()
     stdscr.clear()
     for i, todo in enumerate(todos[int(selected) :], start=int(selected)):
         if sequence in todo.get_display_text():
