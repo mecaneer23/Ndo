@@ -113,6 +113,10 @@ class InputTodo:
         self._chars = _Chars(todo.get_display_text())
         self._position = len(self._chars)
 
+        self._win.box()
+        self._win.nodelay(False)  # noqa: FBT003
+        self._win.keypad(True)  # noqa: FBT003
+
     def _ensure_valid(self) -> None:
         min_line_amount = 1
         border_total_width = 2
@@ -280,14 +284,45 @@ class InputTodo:
         self._mode.set_extra_data(f"{color.as_char()} {two_lines[1]}")
         return two_lines[0]
 
+    def _display(self) -> None:
+        for i, char in enumerate(
+            "".join(self._chars).ljust(self._win.getmaxyx()[1] - 2),
+        ):
+            self._win.addstr(  # avoid addch; output should not be buffered
+                1,
+                i + 1,
+                char,
+                curses.A_STANDOUT if i == self._position else curses.A_NORMAL,
+            )
+        self._win.refresh()
+
+    def _should_exit(self, input_char: int) -> bool:
+        if input_char in (Key.ctrl_k, Key.ctrl_x):
+            self._mode.toggle()
+            return True
+        return input_char in (Key.enter, Key.enter_)
+
+    def _simple_to_handle(
+        self,
+        input_char: int,
+        key_handlers: dict[int, Callable[..., _EditString]],
+    ) -> bool:
+        if input_char in key_handlers:
+            self._chars, self._position = key_handlers[input_char]()
+            return True
+        if chr(input_char).isprintable():
+            self._handle_printable(input_char)
+            return True
+        if input_char == Key.up_arrow:
+            self._error_passthrough("up arrow")
+            return True
+        return False
+
     def get_todo(self) -> Todo:
         """External method to get a todo object from the user"""
         original = self._todo.copy()
-        self._win.box()
-        self._win.nodelay(False)  # noqa: FBT003
-        self._win.keypad(True)  # noqa: FBT003
 
-        keys: dict[int, Callable[..., _EditString]] = {
+        key_handlers: dict[int, Callable[..., _EditString]] = {
             Key.left_arrow: self._handle_left_arrow,
             Key.right_arrow: self._handle_right_arrow,
             Key.backspace: self._handle_backspace,
@@ -311,23 +346,16 @@ class InputTodo:
                 return self._todo.set_display_text(
                     self._set_once(self._todo.get_color()),
                 )
-            for i, char in enumerate(
-                "".join(self._chars).ljust(self._win.getmaxyx()[1] - 2),
-            ):
-                self._win.addstr(  # avoid addch; output should not be buffered
-                    1,
-                    i + 1,
-                    char,
-                    curses.A_STANDOUT
-                    if i == self._position
-                    else curses.A_NORMAL,
-                )
-            self._win.refresh()
+            self._display()
             try:
                 input_char = self._win.getch()
             except KeyboardInterrupt:
                 self._mode.set_on()
                 return original
+            if self._simple_to_handle(input_char, key_handlers):
+                continue
+            if self._should_exit(input_char):
+                return self._todo.set_display_text("".join(self._chars))
             if input_char == Key.escape:
                 possible_chars_position = self._handle_escape()
                 if possible_chars_position is None:
@@ -335,26 +363,10 @@ class InputTodo:
                     return original
                 self._chars, self._position = possible_chars_position
                 continue
-            if input_char in (Key.enter, Key.enter_):
-                break
-            if input_char in (Key.ctrl_k, Key.ctrl_x):
-                self._mode.toggle()
-                break
             if input_char == Key.down_arrow:
                 self._mode.set_extra_data(
                     f"{self._todo.get_color().as_char()} "
                     f"{self._mode.get_extra_data()}",
                 )
                 return self._todo.set_display_text(self._handle_new_todo())
-            if input_char == Key.up_arrow:
-                self._error_passthrough("up arrow")
-                continue
-            if input_char in keys:
-                self._chars, self._position = keys[input_char]()
-                continue
-            if chr(input_char).isprintable():
-                self._chars, self._position = self._handle_printable(input_char)
-                continue
             self._error_passthrough(str(input_char))
-
-        return self._todo.set_display_text("".join(self._chars))
