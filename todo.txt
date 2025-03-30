@@ -14,3 +14,9 @@
 - fix: acurses preserve terminal from prior to app instantiation
 - feat: migrate copied_todo to list of todos and add multiple line paste operation from in app copy
 - fix: visual glitch when len(todos) == 1
+- feat: add rename file action
+  - $ todo --rename file.txt
+  - open `i` prompt with current filename, enter saves current file with new filename
+- fix: if last character of line is space, space character is translated to next line
+- fix: if editing the middle of the line and line breaks, keep focus on existing line rather than newly created line
+- fix: ctrl+arrow in insert on windows/wsl/hyper
