@@ -275,8 +275,10 @@ class InputTodo:
         two_lines = (
             string.rsplit(None, 1)
             if self._position > len(self._chars) - 1
-            else (string[: self._position], string[self._position :])
+            else [string[: self._position], string[self._position :]]
         )
+        if string.endswith(" "):
+            two_lines[-1] += " "
         if len(two_lines) == 1:
             line = two_lines[0]
             self._mode.set_extra_data(f"{color.as_char()} {line[-1]}")
