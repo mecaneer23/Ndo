@@ -45,9 +45,9 @@ def hline(
     Display a horizontal line starting at (y_loc, x_loc)
     with width `width` consisting of the character `char`
     """
-    win.addch(y_loc, x_loc, cast(str, curses.ACS_LTEE))
-    win.hline(y_loc, x_loc + 1, cast(str, char), width - 2)
-    win.addch(y_loc, x_loc + width - 1, cast(str, curses.ACS_RTEE))
+    win.addch(y_loc, x_loc, cast("str", curses.ACS_LTEE))
+    win.hline(y_loc, x_loc + 1, cast("str", char), width - 2)
+    win.addch(y_loc, x_loc + width - 1, cast("str", curses.ACS_RTEE))
 
 
 class InputTodo:
