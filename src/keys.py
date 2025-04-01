@@ -63,6 +63,7 @@ class Key:
     u = 117
     y = 121
     backspace_ = 127
+    ctrl_backspace_ = 127
     down_arrow = 258
     up_arrow = 259
     left_arrow = 260
