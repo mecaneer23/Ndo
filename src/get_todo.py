@@ -187,17 +187,15 @@ class InputTodo:
     def _handle_escape(self) -> _EditString | None:
         self._win.nodelay(True)  # noqa: FBT003
         input_char = self._win.getch()
+        self._win.nodelay(False)  # noqa: FBT003
         if input_char in (
             Key.ctrl_backspace,
             Key.ctrl_backspace_,
             Key.backspace__,
         ):
-            self._win.nodelay(False)  # noqa: FBT003
             return self._handle_ctrl_backspace()
         if input_char == Key.nodelay_escape:
-            self._win.nodelay(False)  # noqa: FBT003
             return None
-        self._win.nodelay(False)  # noqa: FBT003
         try:
             input_char = self._win.getch()
         except KeyboardInterrupt:
