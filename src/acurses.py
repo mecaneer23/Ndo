@@ -23,14 +23,17 @@ try:
         setcbreak,  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
     )
 except ImportError:
-    from msvcrt import getwch, putwch
+    from msvcrt import (
+        getwch,  # type: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
+        putwch,  # type: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
+    )
 
     def _write(string: str) -> int:
         for ch in string:
             putwch(ch)
         return 0
 
-    stdin.read = lambda _=-1: getwch()
+    stdin.read = lambda _=-1: getwch()  # type: ignore[reportUnknownLambdaType]
     stdout.write = _write
     stdout.flush = lambda: None
 
