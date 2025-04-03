@@ -7,7 +7,7 @@ from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, Todo
 from src.get_args import INDENT, UI_TYPE, UiType
 from src.keys import Key
-from src.utils import Color, alert, set_header
+from src.utils import alert, set_header
 
 if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
@@ -242,7 +242,10 @@ class InputTodo:
 
     def _handle_new_todo(self) -> str:
         self._mode.set_once()
-        self._mode.set_extra_data("".join(self._chars[self._position :]))
+        self._mode.set_extra_data(
+            f"{self._todo.get_color().as_char()} "
+            f"{''.join(self._chars[self._position :])}",
+        )
         return "".join(self._chars[: self._position])
 
     def _handle_backspace(self) -> _EditString:
@@ -274,7 +277,7 @@ class InputTodo:
             return
         self._todo.set_box_char(BoxChar.NONE)
 
-    def _set_once(self, color: Color) -> str:
+    def _set_once(self) -> str:
         self._mode.set_once()
         string = "".join(self._chars)
         two_lines = (
@@ -284,11 +287,12 @@ class InputTodo:
         )
         if string.endswith(" "):
             two_lines[-1] += " "
+        color = self._todo.get_color().as_char()
         if len(two_lines) == 1:
             line = two_lines[0]
-            self._mode.set_extra_data(f"{color.as_char()} {line[-1]}")
+            self._mode.set_extra_data(f"{color} {line[-1]}")
             return line[:-1]
-        self._mode.set_extra_data(f"{color.as_char()} {two_lines[1]}")
+        self._mode.set_extra_data(f"{color} {two_lines[1]}")
         return two_lines[0]
 
     def _display(self) -> None:
@@ -351,7 +355,7 @@ class InputTodo:
         while True:
             if len(self._chars) + 1 >= self._win.getmaxyx()[1] - 1:
                 return self._todo.set_display_text(
-                    self._set_once(self._todo.get_color()),
+                    self._set_once(),
                 )
             self._display()
             try:
@@ -359,8 +363,6 @@ class InputTodo:
             except KeyboardInterrupt:
                 self._mode.set_on()
                 return original
-            if self._simple_to_handle(input_char, key_handlers):
-                continue
             if self._should_exit(input_char):
                 return self._todo.set_display_text("".join(self._chars))
             if input_char == Key.escape:
@@ -371,9 +373,7 @@ class InputTodo:
                 self._chars, self._position = possible_chars_position
                 continue
             if input_char == Key.down_arrow:
-                self._mode.set_extra_data(
-                    f"{self._todo.get_color().as_char()} "
-                    f"{self._mode.get_extra_data()}",
-                )
                 return self._todo.set_display_text(self._handle_new_todo())
+            if self._simple_to_handle(input_char, key_handlers):
+                continue
             self._error_passthrough(str(input_char))
