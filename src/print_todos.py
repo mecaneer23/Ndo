@@ -264,7 +264,7 @@ def _print_todo(
             attrs |= curses.A_STANDOUT
         if should_strikethrough and UI_TYPE == UiType.ANSI:
             attrs |= cast(
-                int,
+                "int",
                 curses.A_STRIKETHROUGH,  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
             )
         try:
