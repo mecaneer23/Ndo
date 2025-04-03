@@ -173,7 +173,7 @@ class InputTodo:
             if self._position >= len(self._chars) - 1:
                 break
             self._position += 1
-            if self._chars[self._position] == " ":
+            if not self._chars[self._position].isalnum():
                 break
             self._chars.pop(self._position)
             self._position -= 1
@@ -259,7 +259,7 @@ class InputTodo:
             if self._position <= 0:
                 break
             self._position -= 1
-            if self._chars[self._position] == " ":
+            if not self._chars[self._position].isalnum():
                 self._chars.pop(self._position)
                 break
             self._chars.pop(self._position)
