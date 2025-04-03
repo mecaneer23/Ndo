@@ -244,7 +244,7 @@ class InputTodo:
         self._mode.set_once()
         self._mode.set_extra_data(
             f"{self._todo.get_color().as_char()} "
-            f"{''.join(self._chars[self._position :])}",
+            "".join(self._chars[self._position :]),
         )
         return "".join(self._chars[: self._position])
 
