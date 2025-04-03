@@ -17,4 +17,3 @@
 - feat: add rename file action
   - $ todo --rename file.txt
   - open `i` prompt with current filename, enter saves current file with new filename
-- feat: add … to the end of todos that are cut off

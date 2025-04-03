@@ -156,6 +156,14 @@ def _get_height_width(stdscr: curses.window | None) -> tuple[int, int]:
     return stdscr.getmaxyx()
 
 
+def _add_ellipsis(string: str, max_length: int) -> str:
+    """Add an ellipsis to the end of a string if it will be cut off"""
+    if len(string) <= max_length:
+        return string
+    ellipsis = "... " if SIMPLE_BOXES else "… "
+    return string[: max_length - len(ellipsis)] + ellipsis
+
+
 def _get_display_string(  # noqa: PLR0913  # pylint: disable=too-many-arguments, too-many-positional-arguments
     todos: Todos,
     position: int,
@@ -167,7 +175,7 @@ def _get_display_string(  # noqa: PLR0913  # pylint: disable=too-many-arguments,
     todo = todos[position]
     if position in highlight and todo.is_empty():
         return "─" * _EMPTY_LINE_WIDTH
-    return Chunk.join(
+    full_string = Chunk.join(
         Chunk(True, todo.get_indent_level() * " "),
         Chunk(
             not todo.is_empty() and not SIMPLE_BOXES and not BULLETS,
@@ -203,7 +211,8 @@ def _get_display_string(  # noqa: PLR0913  # pylint: disable=too-many-arguments,
         # Chunk(todo._folded == FoldedState.DEFAULT and _DEBUG_FOLD, "DEFAULT"),
         Chunk(ansi_strikethrough, _ANSI_RESET),
         Chunk(width == 0, " "),
-    )[: width - 1].ljust(width - 1, " ")
+    ).ljust(width - 1, " ")
+    return _add_ellipsis(full_string, width - 1)
 
 
 @cache
