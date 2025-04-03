@@ -289,16 +289,12 @@ def _print_todo(
 
 
 def _color_to_ansi(color: int) -> str:
-    ansi_codes: dict[int, int] = {
-        1: 31,
-        2: 32,
-        3: 33,
-        4: 34,
-        5: 35,
-        6: 36,
-        7: 37,
-    }
-    return f"\u001b[{ansi_codes[color]}m"
+    min_allowed_color = 1
+    max_allowed_color = 7
+    if not (min_allowed_color <= color <= max_allowed_color):
+        msg = f"Invalid color code: {color}"
+        raise ValueError(msg)
+    return f"\u001b[3{color}m"
 
 
 def print_todos(
