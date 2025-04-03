@@ -5,6 +5,8 @@ at a time and multiple lines at a time.
 
 from enum import Enum
 
+from src.utils import NewTodoPosition
+
 
 class SingleLineMode(Enum):
     """
@@ -36,6 +38,7 @@ class SingleLineModeImpl:
     def __init__(self, mode: "SingleLineMode") -> None:
         self._mode: SingleLineMode = mode
         self._extra_data: str = ""
+        self._offset: NewTodoPosition = NewTodoPosition.NEXT
 
     def toggle(self) -> None:
         """Toggle between ON and OFF"""
@@ -56,9 +59,14 @@ class SingleLineModeImpl:
         """Set mode to ON"""
         self._mode = SingleLineMode.ON
 
-    def set_once(self) -> None:
+    def set_once(self, new_todo_position: NewTodoPosition) -> None:
         """Set mode to ONLY_ONCE"""
         self._mode = SingleLineMode.ONLY_ONCE
+        self._offset = new_todo_position
+
+    def get_offset(self) -> NewTodoPosition:
+        """Return offset, set in call to set_once"""
+        return self._offset
 
     def get_extra_data(self) -> str:
         """

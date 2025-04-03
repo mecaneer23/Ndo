@@ -5,7 +5,6 @@ Entry point for Ndo. This module mostly binds keypresses to various functions
 # ruff: noqa: FBT003
 
 from collections.abc import Sequence
-from enum import Enum
 from itertools import pairwise
 from pathlib import Path
 from sys import exit as sys_exit
@@ -35,7 +34,7 @@ from src.menus import (
     sort_menu,
 )
 from src.print_todos import print_todos
-from src.utils import alert, clamp, set_header
+from src.utils import NewTodoPosition, alert, clamp, set_header
 
 if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
@@ -49,11 +48,6 @@ else:
     from src.working_initscr import wrapper
 
 
-class _NewTodoPosition(Enum):
-    CURRENT = 0
-    NEXT = 1
-
-
 # Migrate the following once Python 3.12 is more common
 # type _PossibleArgs = ...
 _PossibleArgs: TypeAlias = (
@@ -64,7 +58,7 @@ _PossibleArgs: TypeAlias = (
     | Cursor
     | curses.window
     | Todos
-    | _NewTodoPosition
+    | NewTodoPosition
 )
 
 
@@ -148,7 +142,7 @@ def new_todo(  # noqa: PLR0913
     todos: Todos,
     selected: Cursor,
     default_todo: Todo,
-    offset: _NewTodoPosition,
+    offset: NewTodoPosition,
     mode: SingleLineModeImpl | None = None,
 ) -> Todos:
     """
@@ -166,7 +160,7 @@ def new_todo(  # noqa: PLR0913
         mode=mode,
     )
     stdscr.clear()
-    if temp != todos and offset == _NewTodoPosition.NEXT:
+    if temp != todos and offset == NewTodoPosition.NEXT:
         selected.single_down(len(todos))
     update_file(FILENAME, todos)
     return todos
@@ -375,7 +369,7 @@ def _handle_enter(
         todos,
         selected,
         Todo(),
-        _NewTodoPosition.NEXT,
+        NewTodoPosition.NEXT,
         mode=mode,
     )
 
@@ -630,7 +624,7 @@ def main(stdscr: curses.window) -> int:
                 todos,
                 selected,
                 Todo(),
-                _NewTodoPosition.NEXT,
+                NewTodoPosition.NEXT,
                 single_line_state,
             )
             continue
@@ -641,7 +635,7 @@ def main(stdscr: curses.window) -> int:
                 todos,
                 selected,
                 Todo(single_line_state.get_extra_data()),
-                _NewTodoPosition.NEXT,
+                single_line_state.get_offset(),
                 single_line_state,
             )
             continue
@@ -661,8 +655,8 @@ def main(stdscr: curses.window) -> int:
                 "todos": todos,
                 "True": True,
                 "False": False,
-                "NEXT": _NewTodoPosition.NEXT,
-                "CURRENT": _NewTodoPosition.CURRENT,
+                "NEXT": NewTodoPosition.NEXT,
+                "CURRENT": NewTodoPosition.CURRENT,
             },
         )
         if isinstance(next_step, Todos):

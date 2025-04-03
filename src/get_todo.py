@@ -7,7 +7,7 @@ from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, Todo
 from src.get_args import INDENT, UI_TYPE, UiType
 from src.keys import Key
-from src.utils import alert, set_header
+from src.utils import NewTodoPosition, alert, set_header
 
 if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
@@ -241,12 +241,14 @@ class InputTodo:
         return _EditString(self._chars, self._position)
 
     def _handle_new_todo(self) -> str:
-        self._mode.set_once()
+        self._mode.set_once(NewTodoPosition.CURRENT)
+        first_section = "".join(self._chars[: self._position])
+        second_section = "".join(self._chars[self._position :])
         self._mode.set_extra_data(
-            f"{self._todo.get_color().as_char()} "
-            "".join(self._chars[self._position :]),
+            self._todo.get_header() +
+            first_section,
         )
-        return "".join(self._chars[: self._position])
+        return second_section
 
     def _handle_backspace(self) -> _EditString:
         if self._position > 0:
@@ -278,7 +280,7 @@ class InputTodo:
         self._todo.set_box_char(BoxChar.NONE)
 
     def _set_once(self) -> str:
-        self._mode.set_once()
+        self._mode.set_once(NewTodoPosition.NEXT)
         string = "".join(self._chars)
         two_lines = (
             string.rsplit(None, 1)

@@ -199,7 +199,8 @@ class Todo:
         """Return a new object with the same data as this object"""
         return Todo(repr(self))
 
-    def __repr__(self) -> str:
+    def get_header(self) -> str:
+        """Return everything except the display text"""
         return Chunk.join(
             Chunk(True, self._indent_level * " "),  # noqa: FBT003
             Chunk(
@@ -212,8 +213,10 @@ class Todo:
                 or self._color != Color.WHITE,
                 " ",
             ),
-            Chunk(True, self._display_text),  # noqa: FBT003
         )
+
+    def __repr__(self) -> str:
+        return self.get_header() + self._display_text
 
 
 class Todos(list[Todo]):

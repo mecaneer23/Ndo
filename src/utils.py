@@ -76,6 +76,13 @@ class Color(Enum):
         return {color.name.capitalize(): color.value for color in Color}
 
 
+class NewTodoPosition(Enum):
+    """Represent how far offset a new todo should be from a current todo"""
+
+    CURRENT = 0
+    NEXT = 1
+
+
 def clamp(number: int, minimum: int, maximum: int) -> int:
     """
     Clamp a number in between a minimum and maximum.
