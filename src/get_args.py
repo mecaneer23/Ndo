@@ -1,4 +1,23 @@
-"""Command line argument parser for Ndo"""
+"""
+Command line argument parser for Ndo
+
+Modification instructions (adding a command line argument):
+
+
+- add default
+
+- add type to TypedNamespace
+
+- add argument to parser
+
+- add global variable to list at bottom of file
+
+
+- update /README.md with new option
+
+- ensure CONTROLS_BEGIN_INDEX and CONTROLS_END_INDEX in this file are still
+correct
+"""
 
 from argparse import (
     ArgumentParser,
@@ -12,8 +31,8 @@ from typing import TypeVar
 
 from src.md_to_py import md_table_to_lines
 
-CONTROLS_BEGIN_INDEX: int = 67
-CONTROLS_END_INDEX: int = 97
+CONTROLS_BEGIN_INDEX: int = 68
+CONTROLS_END_INDEX: int = 98
 
 _DEFAULT_BULLETS: bool = False
 _DEFAULT_ENUMERATE: bool = False
