@@ -42,9 +42,22 @@ def copy_todo(
             "available: try running `pip install pyperclip`",
         )
         return
-    copy(  # pyright: ignore[reportPossiblyUnboundVariable]
-        "\n".join([todos[pos].get_display_text() for pos in selected.get()]),
-    )
+    try:
+        copy(  # pyright: ignore[reportPossiblyUnboundVariable]
+            "\n".join(
+                [todos[pos].get_display_text() for pos in selected.get()],
+            ),
+        )
+    except OSError as err:
+        exec_format_error = 8
+        if err.errno == exec_format_error:
+            alert(
+                stdscr,
+                "OSError: clip.exe format error, continuing without copy. "
+                "Consider restarting WSL.",
+            )
+            return
+        raise OSError from err
 
 
 def _todo_from_clipboard(
