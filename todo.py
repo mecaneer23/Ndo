@@ -18,6 +18,7 @@ from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
 from src.get_args import (
     FILENAME,
     HEADER,
+    RENAME,
     UI_TYPE,
     UiType,
 )
@@ -34,7 +35,7 @@ from src.menus import (
     sort_menu,
 )
 from src.print_todos import print_todos
-from src.utils import NewTodoPosition, alert, clamp, set_header
+from src.utils import NewTodoPosition, Response, alert, clamp, set_header
 
 if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
@@ -480,7 +481,25 @@ def join_lines(todos: Todos, selected: Cursor) -> None:
     update_file(FILENAME, todos)
 
 
-def main(stdscr: curses.window) -> int:
+def _handle_rename(stdscr: curses.window) -> Response:
+    if not FILENAME.exists():
+        return Response(404, f"{FILENAME} doesn't exist")
+    new_filename_as_todo = InputTodo(
+        stdscr,
+        get_newwin(stdscr),
+        todo=Todo(str(FILENAME)),
+        prev_todo=Todo(),
+    ).get_todo()
+    if new_filename_as_todo.is_empty():
+        return Response(400, "New filename is empty")
+    new_filename = new_filename_as_todo.get_display_text()
+    if new_filename == str(FILENAME):
+        return Response(409, "File name wasn't changed")
+    FILENAME.rename(new_filename)
+    return Response(200, "Success!")
+
+
+def main(stdscr: curses.window) -> Response:
     """
     The main function for Ndo. Mainly provides keybindings
     for the various functions and contains mainloop.
@@ -518,6 +537,8 @@ def main(stdscr: curses.window) -> int:
     when to overwrite the save file.
     """
     _init()
+    if RENAME:
+        return _handle_rename(stdscr)
     todos = file_string_to_todos(read_file(FILENAME))
     selected = Cursor(0, todos)
     sublist_top = 0
@@ -660,7 +681,8 @@ def main(stdscr: curses.window) -> int:
             },
         )
         if isinstance(next_step, Todos):
-            return quit_program(next_step, file_modified_time)
+            quit_program(next_step, file_modified_time)
+            return Response(0, "Quit successfully")
         if next_step not in (
             Key.ctrl_r,
             Key.u,
@@ -678,4 +700,7 @@ if __name__ == "__main__":
         )
         sys_exit()
 
-    wrapper(main)
+    status, msg = wrapper(main)
+    if status != 0:
+        print(f"{status}: {msg}")  # noqa: T201
+    sys_exit(status)

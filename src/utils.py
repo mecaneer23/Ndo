@@ -83,6 +83,13 @@ class NewTodoPosition(Enum):
     NEXT = 1
 
 
+class Response(NamedTuple):
+    """Represent a response object, similar to that from an HTTP response"""
+
+    status_code: int
+    message: str
+
+
 def clamp(number: int, minimum: int, maximum: int) -> int:
     """
     Clamp a number in between a minimum and maximum.

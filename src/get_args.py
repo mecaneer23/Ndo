@@ -24,6 +24,7 @@ _DEFAULT_HELP_FILE: Path = (
 )
 _DEFAULT_INDENT: int = 2
 _DEFAULT_RELATIVE_ENUMERATE: bool = False
+_DEFAULT_RENAME: bool = False
 _DEFAULT_SIMPLE_BOXES: bool = False
 _DEFAULT_STRIKETHROUGH: bool = False
 
@@ -57,6 +58,7 @@ class TypedNamespace(Namespace):  # pylint: disable=too-few-public-methods
     help_file: Path
     indentation_level: int
     relative_enumeration: bool
+    rename: bool
     simple_boxes: bool
     strikethrough: bool
     ui: UiType
@@ -170,6 +172,15 @@ def _get_args() -> TypedNamespace:
             absolutely. Default is `{_DEFAULT_RELATIVE_ENUMERATE}`.",
     )
     parser.add_argument(
+        "--rename",
+        "-n",
+        action="store_true",
+        default=_DEFAULT_RENAME,
+        help=f"Boolean: if true, show prompt to rename\
+            file, rename file to input, and exit. Default\
+            is `{_DEFAULT_RENAME}`.",
+    )
+    parser.add_argument(
         "--simple-boxes",
         "-x",
         action="store_true",
@@ -227,6 +238,7 @@ HEADER: str = _get_header(command_line_args.title)
 HELP_FILE: Path = Path(command_line_args.help_file)
 INDENT: int = command_line_args.indentation_level
 RELATIVE_ENUMERATE: bool = command_line_args.relative_enumeration
+RENAME: bool = command_line_args.rename
 SIMPLE_BOXES: bool = command_line_args.simple_boxes
 STRIKETHROUGH: bool = command_line_args.strikethrough
 UI_TYPE: UiType = command_line_args.ui

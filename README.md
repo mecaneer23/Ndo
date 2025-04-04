@@ -58,6 +58,7 @@ Options:
 | --help-file HELP_FILE                                          | Allows passing alternate file to specify help menu. Default is `README.md`.                                                                           |
 | --indentation-level INDENTATION_LEVEL, -i INDENTATION_LEVEL    | Allows specification of indentation level. Default is `2`.                                                                                            |
 | --relative-enumeration, -r                                     | Boolean: determines if todos are numbered when printed. Numbers relatively rather than absolutely. Default is `False`.                                |
+| --rename, -n                                                   | Boolean: if true, show prompt to rename file, rename file to input, and exit. Default is `False`.                                                     |
 | --simple-boxes, -x                                             | Boolean: allow rendering simpler checkboxes if terminal doesn't support default ascii checkboxes. Default is `False`.                                 |
 | --strikethrough, -s                                            | Boolean: strikethrough completed todos - option to disable because some terminals don't support strikethroughs. Default is `False`.                   |
 | --title TITLE, -t TITLE                                        | Allows passing alternate header. Default is `filename`.                                                                                               |
