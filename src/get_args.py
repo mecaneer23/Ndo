@@ -104,7 +104,7 @@ def _get_ui_type(string: str) -> UiType:
             return _FIRST_CHAR_DICT[string.upper()]
         return UiType[string.upper()]
     except KeyError as err:
-        msg = f"Invalid color: {string}"
+        msg = f"Invalid UI type: {string}"
         raise ArgumentTypeError(msg) from err
 
 
