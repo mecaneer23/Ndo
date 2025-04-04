@@ -15,3 +15,4 @@
 - feat: migrate copied_todo to list of todos and add multiple line paste operation from in app copy
 - fix: visual glitch when len(todos) == 1 in acurses
 - feat!: implement bcurses (browser-curses) using brython
+- fix: if typing in the middle of the line and line breaks, keep focus on top line
