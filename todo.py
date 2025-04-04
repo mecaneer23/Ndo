@@ -72,35 +72,6 @@ def get_file_modified_time(filename: Path) -> float:
     return filename.stat().st_ctime  # pyright: ignore[reportDeprecated]
 
 
-def insert_todo(
-    stdscr: curses.window,
-    todos: Todos,
-    index: int,
-    default_todo: Todo | None = None,
-    mode: SingleLineModeImpl | None = None,
-) -> Todos:
-    """
-    Using the get_todo menu, prompt the user for a new Todo.
-    Add the new Todo to the list of Todos (`todos`) at the
-    specified `index`.
-    """
-    if default_todo is None:
-        default_todo = Todo()
-    if mode is None:
-        mode = SingleLineModeImpl(SingleLineMode.NONE)
-    todo = InputTodo(
-        stdscr,
-        get_newwin(stdscr),
-        todo=default_todo,
-        prev_todo=todos[index - 1] if len(todos) > 0 else Todo(),
-        mode=mode,
-    ).get_todo()
-    if todo.is_empty():
-        return todos
-    todos.insert(index, todo)
-    return todos
-
-
 def insert_empty_todo(todos: Todos, index: int) -> Todos:
     """Add an empty Todo to `todos` at `index`"""
     todos.insert(index, Todo())
@@ -147,19 +118,23 @@ def new_todo(  # noqa: PLR0913
     mode: SingleLineModeImpl | None = None,
 ) -> Todos:
     """
-    Insert a new todo item below the current
-    cursor position and update the todo list
+    Using the get_todo menu, prompt the user for a new Todo.
+    Add the new Todo to the list of Todos (`todos`) at the
+    specified index.
     """
     if mode is None:
         mode = SingleLineModeImpl(SingleLineMode.NONE)
     temp = todos.copy()
-    todos = insert_todo(
+    index = int(selected) + offset.value
+    todo = InputTodo(
         stdscr,
-        todos,
-        int(selected) + offset.value,
-        default_todo=default_todo.copy(),
+        get_newwin(stdscr),
+        todo=default_todo.copy(),
+        prev_todo=todos[index - 1] if len(todos) > 0 else Todo(),
         mode=mode,
-    )
+    ).get_todo()
+    if not todo.is_empty():
+        todos.insert(index, todo)
     stdscr.clear()
     if temp != todos and offset == NewTodoPosition.NEXT:
         selected.single_down(len(todos))
