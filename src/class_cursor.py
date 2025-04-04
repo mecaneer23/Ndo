@@ -155,6 +155,7 @@ class Cursor:
         """Move a cursor with length 1 down by 1"""
         if len(self) == max_len:
             self.set_to(self.get_first())
+            return
         if self.get_last() >= max_len - 1:
             return
         self.set_to(self.get_last() + 1)

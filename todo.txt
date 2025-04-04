@@ -13,4 +13,4 @@
 - fix: if holding down a key in acurses, make sure it doesn't stay pressed longer than it should (i.e. holding j key) (only reproducible in some terminals)
 - fix: acurses preserve terminal from prior to app instantiation
 - feat: migrate copied_todo to list of todos and add multiple line paste operation from in app copy
-- fix: visual glitch when len(todos) == 1
+- fix: visual glitch when len(todos) == 1 in acurses
