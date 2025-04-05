@@ -245,8 +245,7 @@ class InputTodo:
         first_section = "".join(self._chars[: self._position])
         second_section = "".join(self._chars[self._position :])
         self._mode.set_extra_data(
-            self._todo.get_header() +
-            first_section,
+            self._todo.get_header() + first_section,
         )
         return second_section
 
@@ -280,7 +279,12 @@ class InputTodo:
         self._todo.set_box_char(BoxChar.NONE)
 
     def _set_once(self) -> str:
-        self._mode.set_once(NewTodoPosition.NEXT)
+        position = (
+            NewTodoPosition.NEXT
+            if self._position == len(self._chars)
+            else NewTodoPosition.CURRENT
+        )
+        self._mode.set_once(position)
         string = "".join(self._chars)
         two_lines = (
             string.rsplit(None, 1)
@@ -289,13 +293,13 @@ class InputTodo:
         )
         if string.endswith(" "):
             two_lines[-1] += " "
-        color = self._todo.get_color().as_char()
+        header = self._todo.get_header().strip()
         if len(two_lines) == 1:
             line = two_lines[0]
-            self._mode.set_extra_data(f"{color} {line[-1]}")
+            self._mode.set_extra_data(f"{header} {line[-1]}")
             return line[:-1]
-        self._mode.set_extra_data(f"{color} {two_lines[1]}")
-        return two_lines[0]
+        self._mode.set_extra_data(f"{header} {two_lines[position.value]}")
+        return two_lines[int(not bool(position.value))]
 
     def _display(self) -> None:
         for i, char in enumerate(
