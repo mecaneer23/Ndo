@@ -44,6 +44,15 @@ class _Restorable:
             self.last + 1,
         )
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, _Restorable):
+            return False
+        return (
+            self.stored == other.stored
+            and self.first == other.first
+            and self.last == other.last
+        )
+
     def __repr__(self) -> str:
         return (
             self.stored.replace(self.SEPARATOR, ", ")
@@ -66,7 +75,13 @@ class UndoRedo:
         Backs up current state for potential retrieval later.
         """
 
-        self._history.append(_Restorable(todos, selected))
+        new_internal_repr = _Restorable(todos, selected)
+        if (
+            len(self._history) >= 1
+            and new_internal_repr == self._history[-1]
+        ):
+            return
+        self._history.append(new_internal_repr)
         self._index = len(self._history) - 1
 
     def undo(self) -> TodoList:

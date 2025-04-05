@@ -658,10 +658,10 @@ def main(stdscr: curses.window) -> Response:
         if isinstance(next_step, Todos):
             quit_program(next_step, file_modified_time)
             return Response(0, "Quit successfully")
-        if next_step not in (
+        if next_step not in (  # redo/undo
             Key.ctrl_r,
             Key.u,
-        ):  # redo/undo
+        ):
             history.add(todos, selected)
 
 
