@@ -156,9 +156,9 @@ def _get_height_width(stdscr: curses.window | None) -> tuple[int, int]:
     return stdscr.getmaxyx()
 
 
-def _add_ellipsis(string: str, max_length: int) -> str:
+def _add_ellipsis(string: str, max_length: int, do_nothing: bool) -> str:
     """Add an ellipsis to the end of a string if it will be cut off"""
-    if len(string) <= max_length:
+    if len(string) <= max_length or do_nothing:
         return string
     ellipsis = "... " if SIMPLE_BOXES else "… "
     return string[: max_length - len(ellipsis)] + ellipsis
@@ -175,7 +175,7 @@ def _get_display_string(  # noqa: PLR0913  # pylint: disable=too-many-arguments,
     todo = todos[position]
     if position in highlight and todo.is_empty():
         return "─" * _EMPTY_LINE_WIDTH
-    full_string = Chunk.join(
+    before_footers = Chunk.join(
         Chunk(True, todo.get_indent_level() * " "),
         Chunk(
             not todo.is_empty() and not SIMPLE_BOXES and not BULLETS,
@@ -209,10 +209,15 @@ def _get_display_string(  # noqa: PLR0913  # pylint: disable=too-many-arguments,
         Chunk(todo.is_folded_parent(), "› ..."),  # noqa: RUF001
         Chunk(todo.is_folded() and _DEBUG_FOLD, "FOLDED"),
         # Chunk(todo._folded == FoldedState.DEFAULT and _DEBUG_FOLD, "DEFAULT"),
+    ).ljust(width - 1, " ")
+    return _add_ellipsis(
+        before_footers,
+        width - 1,
+        ansi_strikethrough,
+    ) + Chunk.join(
         Chunk(ansi_strikethrough, _ANSI_RESET),
         Chunk(width == 0, " "),
-    ).ljust(width - 1, " ")
-    return _add_ellipsis(full_string, width - 1)
+    )
 
 
 @cache
