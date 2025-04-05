@@ -77,7 +77,12 @@ class Color(Enum):
 
 
 class NewTodoPosition(Enum):
-    """Represent how far offset a new todo should be from a current todo"""
+    """
+    Represent how far offset a new todo should be from a current todo
+
+    Usage might include values assumed to be integer representations
+    of boolean values. Be careful when adding new values to this enum.
+    """
 
     CURRENT = 0
     NEXT = 1
