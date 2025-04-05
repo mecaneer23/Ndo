@@ -15,4 +15,3 @@
 - feat: migrate copied_todo to list of todos and add multiple line paste operation from in app copy
 - fix: visual glitch when len(todos) == 1 in acurses
 - feat!: implement bcurses (browser-curses) using brython
-- fix: editing a line longer than the width of the screen should split close to the width of the screen rather than just a single word

@@ -2,7 +2,7 @@
 General utilities, useful across multiple other files
 """
 
-from collections.abc import Iterable
+from collections.abc import Iterator
 from enum import Enum
 from itertools import tee
 from typing import NamedTuple
@@ -127,11 +127,11 @@ def overflow(counter: int, minimum: int, maximum: int) -> int:
     return counter
 
 
-def _chunk_message(
+def chunk_message(
     message: str,
     width: int,
     delimiter: str = " ",
-) -> Iterable[str]:
+) -> Iterator[str]:
     """
     Split a message into chunks of length `width`
     (or as close as possible by splitting on `delimiter`)
@@ -179,7 +179,7 @@ def alert(stdscr: curses.window, message: str) -> int:
     border_width = 2
     max_y, max_x = stdscr.getmaxyx()
     height_chunk, width_chunk, chunks = tee(
-        _chunk_message(message, max_x * 3 // 4 - border_width),
+        chunk_message(message, max_x * 3 // 4 - border_width),
         3,
     )
     width = len(max(width_chunk, key=len)) + border_width

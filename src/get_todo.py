@@ -7,7 +7,7 @@ from src.class_mode import SingleLineMode, SingleLineModeImpl
 from src.class_todo import BoxChar, Todo
 from src.get_args import INDENT, UI_TYPE, UiType
 from src.keys import Key
-from src.utils import NewTodoPosition, alert, set_header
+from src.utils import NewTodoPosition, alert, chunk_message, set_header
 
 if UI_TYPE == UiType.ANSI:
     import src.acurses as curses
@@ -335,6 +335,13 @@ class InputTodo:
             return True
         return False
 
+    def _handle_long_display_text(self, max_width: int) -> Todo:
+        self._mode.set_once(NewTodoPosition.NEXT)
+        chunks = chunk_message("".join(self._chars), max_width)
+        first_chunk = next(chunks)
+        self._mode.set_extra_data(" ".join(chunks))
+        return self._todo.set_display_text(first_chunk)
+
     def get_todo(self) -> Todo:
         """External method to get a todo object from the user"""
         original = self._todo.copy()
@@ -358,8 +365,12 @@ class InputTodo:
             Key.alt_delete: self._handle_toggle_note_todo,
         }
 
+        max_width = self._win.getmaxyx()[1] - 2
+        if len(self._chars) >= max_width:
+            return self._handle_long_display_text(max_width)
+
         while True:
-            if len(self._chars) + 1 >= self._win.getmaxyx()[1] - 1:
+            if len(self._chars) >= max_width:
                 return self._todo.set_display_text(
                     self._set_once(),
                 )
