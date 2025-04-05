@@ -185,14 +185,14 @@ def edit_todo(
     if len(todos) <= 0:
         return todos
     max_y, max_x = stdscr.getmaxyx()
-    todo = todos[selected].get_display_text()
+    length = len(todos[selected].get_display_text())
     ncols = (
-        max(max_x * 3 // 4, len(todo) + 3)
-        if len(todo) < max_x - 1
+        max(max_x * 3 // 4, length + 3)
+        if length < max_x - 1
         else max_x * 3 // 4
     )
     begin_x = (
-        max_x // 8 if len(todo) < max_x - 1 - ncols else (max_x - ncols) // 2
+        max_x // 8 if length < max_x - 1 - ncols else (max_x - ncols) // 2
     )
     edited_todo = InputTodo(
         stdscr,
