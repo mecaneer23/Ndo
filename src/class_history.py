@@ -76,11 +76,10 @@ class UndoRedo:
         """
 
         new_internal_repr = _Restorable(todos, selected)
-        if (
-            len(self._history) >= 1
-            and new_internal_repr == self._history[-1]
-        ):
+        if len(self._history) >= 1 and new_internal_repr == self._history[-1]:
             return
+        if self._index < len(self._history) - 1:
+            del self._history[self._index + 1 :]
         self._history.append(new_internal_repr)
         self._index = len(self._history) - 1
 
