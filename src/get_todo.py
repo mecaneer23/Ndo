@@ -336,6 +336,7 @@ class InputTodo:
         return False
 
     def _handle_long_display_text(self, max_width: int) -> Todo:
+        """Split a long message into chunks"""
         self._mode.set_once(NewTodoPosition.NEXT)
         chunks = chunk_message("".join(self._chars), max_width)
         first_chunk = next(chunks)
