@@ -445,7 +445,10 @@ def wrapper(
     try:
         if not IS_WINDOWS:
             setcbreak(fd)  # pyright: ignore[reportPossiblyUnboundVariable]
-        stdout.write("\033[s\033[2J\033[H")
+        # SAVE_CURSOR = \033[s
+        # CLEAR_SCREEN = \033[2J
+        # CURSOR_HOME = \033[H
+        stdout.write("\033[?1049h\033[H\033[22t")
         stdout.flush()
         stdscr = initscr()
         stdscr.keypad(True)  # noqa: FBT003
@@ -453,7 +456,8 @@ def wrapper(
         return func(stdscr, *args, **kwds)
     finally:
         if "stdscr" in locals():
-            stdout.write("\033[39;49m\033[0m\033[2J\033[H\033[?25h")
+            # RESET_COLOR = \033[39;49m
+            stdout.write("\033[?1049l\033[23t\033[?25h")
             stdout.flush()
             if not IS_WINDOWS:
                 tcsetattr(fd, TCSADRAIN, old_settings)  # pyright: ignore[reportUnknownVariableType, reportPossiblyUnboundVariable]
