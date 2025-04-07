@@ -27,6 +27,7 @@ except ImportError as err:
         "acurses doesn't currently support Windows."
         "Try running Ndo with `--ui curses`",
     ) from err
+    # https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
     from ctypes import byref, c_ulong, windll
     from msvcrt import (
         getwch,  # type: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
