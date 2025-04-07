@@ -6,7 +6,7 @@ from itertools import compress, count
 from os import get_terminal_size, name
 from queue import Empty as queue_empty  # noqa: N813
 from queue import Queue
-from sys import stdin, stdout
+from sys import argv, stdin, stdout
 from threading import Thread
 from time import time as now
 from typing import Any, Callable, TypeVar, overload
@@ -448,7 +448,8 @@ def wrapper(
         # SAVE_CURSOR = \033[s
         # CLEAR_SCREEN = \033[2J
         # CURSOR_HOME = \033[H
-        stdout.write("\033[?1049h\033[H\033[22t")
+        program_name = argv[0].rsplit("/", 1)[-1].rsplit(".", 1)[0]
+        stdout.write(f"\033[?1049h\033[H\033[22t\033]0;{program_name}\007")
         stdout.flush()
         stdscr = initscr()
         stdscr.keypad(True)  # noqa: FBT003
