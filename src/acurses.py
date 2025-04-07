@@ -22,10 +22,27 @@ try:
     from tty import (
         setcbreak,  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
     )
-except ImportError:
+except ImportError as err:
+    raise NotImplementedError(
+        "acurses doesn't currently support Windows."
+        "Try running Ndo with `--ui curses`",
+    ) from err
+    from ctypes import byref, c_ulong, windll
     from msvcrt import (
         getwch,  # type: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
         putwch,  # type: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
+    )
+
+    _STD_OUTPUT_HANDLE = -11
+    handle = windll.kernel32.GetStdHandle(_STD_OUTPUT_HANDLE)
+    mode = c_ulong()
+
+    windll.kernel32.GetConsoleMode(handle, byref(mode))
+
+    _ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
+    windll.kernel32.SetConsoleMode(
+        handle,
+        mode.value | _ENABLE_VIRTUAL_TERMINAL_PROCESSING,
     )
 
     def _write(string: str) -> int:
