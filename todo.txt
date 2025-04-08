@@ -10,7 +10,14 @@
   -b how can we save folded state when todos are pulled from file and list is recreated?
 -g feat: add multiple line paste operation for in-app copy
   -g migrate copied_todo to list of todos
-- fix: reimplement acurses support for windows
-- fix: if holding down a key in acurses, make sure it doesn't stay pressed longer than it should (i.e. holding j key) (only reproducible in some terminals)
-- fix: visual glitch when len(todos) == 1 in acurses
+-c fix: reimplement acurses support for windows
+-c fix: if holding down a key in acurses, make sure it doesn't stay pressed longer than it should (i.e. holding j key) (only reproducible in some terminals)
+-c fix: visual glitch when len(todos) == 1 in acurses
 - feat!: implement bcurses (browser-curses) using brython
+- docs: add list of input box controls to README
+- fix: select all todos above/below should be predictable and repeatable
+- feat: single down to last item when multiselect includes last item should select only last item
+-y fix: undo/redo on Windows
+-y fix: toggle completion (Delete key) on Windows
+-y fix: dedenting on Windows
+-y fix: sorting on Windows
