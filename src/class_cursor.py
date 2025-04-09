@@ -52,7 +52,7 @@ class Cursor:
         return str(self.get_first())
 
     def __repr__(self) -> str:
-        return " ".join(map(str, self._as_range()))
+        return " ".join(map(str, self.get()))
 
     def __int__(self) -> int:
         return self.get_first()
@@ -63,13 +63,9 @@ class Cursor:
     def __iter__(self) -> Iterator[int]:
         return iter(self.get())
 
-    def _as_range(self) -> range:
-        """Getter for Cursor represented as an iterator"""
-        return range(self._start, self._stop)
-
     def get(self) -> range:
         """Return a iterable object holding the current cursor"""
-        return self._as_range()
+        return range(self._start, self._stop)
 
     def get_first(self) -> int:
         """Return the top-most selected position"""
@@ -175,24 +171,6 @@ class Cursor:
         """Move the cursor to the bottom"""
         self.set_to(len_list - 1)
 
-    def _select_next(self) -> None:
-        """Extend the cursor down by 1"""
-        self._raise_stop(1)
-
-    def _deselect_next(self) -> None:
-        """Retract the cursor by 1"""
-        if len(self) > 1:
-            self._raise_stop(-1)
-
-    def _deselect_prev(self) -> None:
-        """Remove the first position of the cursor"""
-        if len(self) > 1:
-            self._raise_start(1)
-
-    def _select_prev(self) -> None:
-        """Extend the cursor up by 1"""
-        self._raise_start(-1)
-
     def get_deletable(self) -> list[int]:
         """
         Return a list with the same length as the
@@ -200,27 +178,29 @@ class Cursor:
         set to the minimum position of the current
         Cursor
         """
-        return [self.get_first() for _ in self._as_range()]
+        return [self.get_first() for _ in self.get()]
 
     def multiselect_down(self, max_len: int) -> None:
         """Extend the cursor down by 1"""
         if self.get_last() >= max_len - 1:
             return
         if len(self) == 1 or self._direction == _Direction.DOWN:
-            self._select_next()
+            self._raise_stop(1)
             self._direction = _Direction.DOWN
             return
-        self._deselect_prev()
+        if len(self) > 1:
+            self._raise_start(1)
 
     def multiselect_up(self) -> None:
         """Extend the cursor up by 1"""
         if self.get_first() == 0 and self._direction == _Direction.UP:
             return
         if len(self) == 1 or self._direction == _Direction.UP:
-            self._select_prev()
+            self._raise_start(-1)
             self._direction = _Direction.UP
             return
-        self._deselect_next()
+        if len(self) > 1:
+            self._raise_stop(-1)
 
     def multiselect_top(self) -> None:
         """
