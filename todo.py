@@ -364,6 +364,10 @@ class _MainInputResult(NamedTuple):
     key: int = -1
 
 
+def _raise_keyboard_interrupt() -> None:
+    raise KeyboardInterrupt
+
+
 def _get_main_input(
     stdscr: curses.window,
     todos: Todos,
@@ -374,10 +378,9 @@ def _get_main_input(
     possible_args: dict[str, _PossibleArgs],
 ) -> _MainInputResult | int:
     try:
-        key: int = stdscr.getch()
+        if (key := stdscr.getch()) == Key.q:
+            _raise_keyboard_interrupt()
     except KeyboardInterrupt:
-        return _MainInputResult(True, todos)
-    if key == Key.q:
         return _MainInputResult(True, todos)
     if key not in keys_esckeys[0]:
         alert(
