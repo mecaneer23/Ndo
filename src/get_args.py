@@ -246,6 +246,16 @@ def _get_header(title: list[str]) -> str:
     return FILENAME.as_posix()
 
 
+def _fail_if_not_implemented() -> None:
+    if STRIKETHROUGH and UI_TYPE == UiType.CURSES:
+        msg = (
+            "Curses UI doesn't fully support strikethrough."
+            "Try running either in acurses mode or without strikethrough."
+            "(`-sga` or `-gc`)"
+        )
+        raise NotImplementedError(msg)
+
+
 command_line_args = _get_args()
 BULLETS: bool = command_line_args.bullet_display
 CHECKBOX: str = (
@@ -261,4 +271,5 @@ RENAME: bool = command_line_args.rename
 SIMPLE_BOXES: bool = command_line_args.simple_boxes
 STRIKETHROUGH: bool = command_line_args.strikethrough
 UI_TYPE: UiType = command_line_args.ui
+_fail_if_not_implemented()
 del command_line_args
