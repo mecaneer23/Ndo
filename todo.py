@@ -153,7 +153,7 @@ def delete_todo(
         copy_todo(stdscr, todos, selected, copied_todo)
     for pos in selected.get_deletable():
         todos = remove_todo(todos, pos)
-    selected.set_to(clamp(int(selected), 0, len(todos)))
+    selected.set(clamp(int(selected), 0, len(todos)))
     stdscr.clear()
     update_file(FILENAME, todos)
     return todos
@@ -452,7 +452,7 @@ def join_lines(todos: Todos, selected: Cursor) -> None:
             + todos[addend].get_display_text(),
         )
         todos.pop(addend)
-    selected.set_to(captained_selection[0])
+    selected.set(captained_selection[0])
     update_file(FILENAME, todos)
 
 

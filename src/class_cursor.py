@@ -119,22 +119,30 @@ class Cursor:
 
     #     return _decorator
 
-    def set_to(self, position: int) -> None:
-        """Replace the entire cursor with a new single position"""
-        self._start = position
-        self._stop = position + 1
+    def set(self, start: int, stop: int = -1) -> None:
+        """
+        Setter for Cursor
 
-    def set(self, start: int, stop: int) -> None:
-        """Setter for Cursor"""
+        - `start` must be non-negative.
+
+        - If `stop` is omitted or negative, set a single-position cursor at
+        `start`.
+
+        - If `stop` is provided and non-negative, set the range from
+        `start` to `stop`.
+        """
+        if start < 0:
+            msg = f"Start value of `{start}` must be non-negative"
+            raise ValueError(msg)
         self._start = start
-        self._stop = stop
+        self._stop = start + 1 if stop < 0 else stop
 
     def single_up(self, max_len: int) -> None:
         """Move a cursor with length 1 up by 1"""
         if len(self) == max_len or self.get_first() == 0:
-            self.set_to(0)
+            self.set(0)
             return
-        self.set_to(self.get_first() - 1)
+        self.set(self.get_first() - 1)
         # while self.todos[self.get_first()].is_folded():
         #     self.multiselect_up()
 
@@ -148,12 +156,12 @@ class Cursor:
     def single_down(self, max_len: int) -> None:
         """Move a cursor with length 1 down by 1"""
         if len(self) == max_len:
-            self.set_to(self.get_last())
+            self.set(self.get_last())
             return
         if self.get_last() >= max_len - 1:
-            self.set_to(self.get_last())
+            self.set(self.get_last())
             return
-        self.set_to(self.get_last() + 1)
+        self.set(self.get_last() + 1)
 
     def slide_down(self, max_len: int) -> None:
         """Shift each value in the cursor down by 1"""
@@ -164,11 +172,11 @@ class Cursor:
 
     def to_top(self) -> None:
         """Move the cursor to the top"""
-        self.set_to(0)
+        self.set(0)
 
     def to_bottom(self, len_list: int) -> None:
         """Move the cursor to the bottom"""
-        self.set_to(len_list - 1)
+        self.set(len_list - 1)
 
     def get_deletable(self) -> list[int]:
         """
@@ -231,7 +239,7 @@ class Cursor:
         """
         Set the current position to the given position if between 0 and maxlen
         """
-        self.set_to(clamp(position, 0, max_len))
+        self.set(clamp(position, 0, max_len))
 
     def relative_to(
         self,

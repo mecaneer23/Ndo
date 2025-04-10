@@ -247,7 +247,7 @@ def _sort_by(method: str, todos: Todos, selected: Cursor) -> Todos:
         for todo in section:
             sorted_todos.append(todo)
     update_file(FILENAME, sorted_todos)
-    selected.set_to(sorted_todos.index(selected_todo))
+    selected.set(sorted_todos.index(selected_todo))
     return sorted_todos
 
 
@@ -329,6 +329,6 @@ def search_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
     stdscr.clear()
     for i, todo in enumerate(todos[int(selected) :], start=int(selected)):
         if sequence in todo.get_display_text():
-            selected.set_to(i)
+            selected.set(i)
             return
-    selected.set_to(0)
+    selected.set(0)
