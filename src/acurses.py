@@ -24,7 +24,7 @@ try:
     )
 except ImportError as err:
     raise NotImplementedError(
-        "acurses doesn't currently support Windows."
+        "acurses doesn't currently support Windows. "
         "Try running Ndo with `--ui curses`",
     ) from err
     # https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
