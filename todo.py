@@ -72,12 +72,6 @@ def get_file_modified_time(filename: Path) -> float:
     return filename.stat().st_ctime  # pyright: ignore[reportDeprecated]
 
 
-def insert_empty_todo(todos: Todos, index: int) -> Todos:
-    """Add an empty Todo to `todos` at `index`"""
-    todos.insert(index, Todo())
-    return todos
-
-
 def remove_todo(todos: Todos, index: int) -> Todos:
     """Remove the Todo at `index"""
     if len(todos) < 1:
@@ -209,7 +203,7 @@ def edit_todo(
 
 def blank_todo(todos: Todos, selected: Cursor) -> Todos:
     """Create an empty Todo object"""
-    insert_empty_todo(todos, int(selected) + 1)
+    todos.insert(int(selected) + 1, Todo())
     selected.single_down(len(todos))
     update_file(FILENAME, todos)
     return todos
