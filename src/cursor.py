@@ -131,10 +131,7 @@ class Cursor:
         - If `stop` is provided and non-negative, set the range from
         `start` to `stop`.
         """
-        if start < 0:
-            msg = f"Start value of `{start}` must be non-negative"
-            raise ValueError(msg)
-        self._start = start
+        self._start = max(start, 0)
         self._stop = start + 1 if stop < 0 else stop
 
     def single_up(self, max_len: int) -> None:

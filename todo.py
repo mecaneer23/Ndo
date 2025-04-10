@@ -8,7 +8,7 @@ from collections.abc import Sequence
 from itertools import pairwise
 from pathlib import Path
 from sys import exit as sys_exit
-from typing import Callable, TypeAlias
+from typing import Callable, NamedTuple, TypeAlias
 
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
 from src.cursor import Cursor
@@ -191,9 +191,7 @@ def edit_todo(
         if length < max_x - 1
         else max_x * 3 // 4
     )
-    begin_x = (
-        max_x // 8 if length < max_x - 1 - ncols else (max_x - ncols) // 2
-    )
+    begin_x = max_x // 8 if length < max_x - 1 - ncols else (max_x - ncols) // 2
     edited_todo = InputTodo(
         stdscr,
         curses.newwin(3, ncols, max_y // 2 - 3, begin_x),
@@ -356,6 +354,16 @@ def _handle_alert(stdscr: curses.window, todos: Todos, selected: int) -> None:
     alert(stdscr, todos[selected].get_display_text())
 
 
+class _MainInputResult(NamedTuple):
+    """
+    Represent one type of result from _get_main_input()
+    """
+
+    should_exit: bool
+    todos: Todos
+    key: int = -1
+
+
 def _get_main_input(
     stdscr: curses.window,
     todos: Todos,
@@ -364,13 +372,13 @@ def _get_main_input(
         dict[int, tuple[Callable[..., Todos | None], str]],
     ],
     possible_args: dict[str, _PossibleArgs],
-) -> int | Todos:
+) -> _MainInputResult | int:
     try:
         key: int = stdscr.getch()
     except KeyboardInterrupt:
-        return todos
+        return _MainInputResult(True, todos)
     if key == Key.q:
-        return todos
+        return _MainInputResult(True, todos)
     if key not in keys_esckeys[0]:
         alert(
             stdscr,
@@ -383,7 +391,7 @@ def _get_main_input(
         key = stdscr.getch()
         stdscr.nodelay(False)
         if key == Key.nodelay_escape:
-            return todos
+            return _MainInputResult(True, todos)
         if key not in keys_esckeys[1]:
             alert(
                 stdscr,
@@ -399,7 +407,7 @@ def _get_main_input(
         ),
     )
     if isinstance(possible_todos, Todos):
-        todos = possible_todos
+        return _MainInputResult(False, possible_todos, key)
     return key
 
 
@@ -635,7 +643,7 @@ def main(stdscr: curses.window) -> Response:
                 single_line_state,
             )
             continue
-        next_step = _get_main_input(
+        main_input = _get_main_input(
             stdscr,
             todos,
             (keys, esc_keys),
@@ -655,10 +663,14 @@ def main(stdscr: curses.window) -> Response:
                 "CURRENT": NewTodoPosition.CURRENT,
             },
         )
-        if isinstance(next_step, Todos):
-            quit_program(next_step, file_modified_time)
-            return Response(0, "Quit successfully")
-        if next_step not in (  # redo/undo
+        key = main_input
+        if isinstance(main_input, _MainInputResult):
+            if main_input.should_exit:
+                quit_program(main_input.todos, file_modified_time)
+                return Response(0, "Quit successfully")
+            todos = main_input.todos
+            key = main_input.key
+        if key not in (  # redo/undo
             Key.ctrl_r,
             Key.u,
         ):

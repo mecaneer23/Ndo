@@ -271,5 +271,7 @@ RENAME: bool = command_line_args.rename
 SIMPLE_BOXES: bool = command_line_args.simple_boxes
 STRIKETHROUGH: bool = command_line_args.strikethrough
 UI_TYPE: UiType = command_line_args.ui
+UI_TYPE: UiType = UiType.CURSES
+FILENAME: Path = Path("debugging/log.txt")
 _fail_if_not_implemented()
 del command_line_args
