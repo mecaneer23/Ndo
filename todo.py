@@ -10,10 +10,10 @@ from pathlib import Path
 from sys import exit as sys_exit
 from typing import Callable, TypeAlias
 
-from src.class_cursor import Cursor
-from src.class_history import UndoRedo
-from src.class_mode import SingleLineMode, SingleLineModeImpl
-from src.class_todo import BoxChar, FoldedState, Todo, Todos
+from src.cursor import Cursor
+from src.history import UndoRedo
+from src.mode import SingleLineMode, SingleLineModeImpl
+from src.todo import BoxChar, FoldedState, Todo, Todos
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
 from src.get_args import (
     FILENAME,

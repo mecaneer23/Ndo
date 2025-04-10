@@ -3,8 +3,8 @@
 from collections.abc import Iterable
 from typing import Callable, NamedTuple, cast
 
-from src.class_mode import SingleLineMode, SingleLineModeImpl
-from src.class_todo import BoxChar, Todo
+from src.mode import SingleLineMode, SingleLineModeImpl
+from src.todo import BoxChar, Todo
 from src.get_args import INDENT, UI_TYPE, UiType
 from src.keys import Key
 from src.utils import NewTodoPosition, alert, chunk_message, set_header

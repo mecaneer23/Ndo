@@ -4,7 +4,7 @@ File Input/Output handlers for Ndo
 
 from pathlib import Path
 
-from src.class_todo import Todo, Todos
+from src.todo import Todo, Todos
 
 
 def read_file(filename: Path) -> str:

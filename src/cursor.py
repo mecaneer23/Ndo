@@ -13,9 +13,9 @@ from enum import Enum
 # from typing import Any, Callable, Iterable, TypeVar
 from typing import TypeVar
 
-from src.class_todo import Todos
 from src.get_args import UI_TYPE, UiType
 from src.keys import Key
+from src.todo import Todos
 from src.utils import clamp
 
 if UI_TYPE == UiType.ANSI:

@@ -8,8 +8,7 @@ from dataclasses import astuple, dataclass
 from functools import cache
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from src.class_cursor import Cursor
-from src.class_todo import Todo, Todos
+from src.cursor import Cursor
 from src.get_args import (
     BULLETS,
     ENUMERATE,
@@ -20,6 +19,7 @@ from src.get_args import (
     UI_TYPE,
     UiType,
 )
+from src.todo import Todo, Todos
 from src.utils import Chunk, Color
 
 if UI_TYPE == UiType.ANSI:

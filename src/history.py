@@ -4,8 +4,8 @@ Helpers for storing and retrieving TodoList object records.
 
 from typing import NamedTuple
 
-from src.class_cursor import Cursor
-from src.class_todo import Todo, Todos
+from src.cursor import Cursor
+from src.todo import Todo, Todos
 
 
 class TodoList(NamedTuple):

@@ -10,10 +10,10 @@ try:
 except ImportError:
     CLIPBOARD_EXISTS = False  # pyright: ignore[reportConstantRedefinition]
 
-from src.class_cursor import Cursor
-from src.class_todo import Todo, Todos
+from src.cursor import Cursor
 from src.get_args import FILENAME, UI_TYPE, UiType
 from src.io_ import update_file
+from src.todo import Todo, Todos
 from src.utils import alert
 
 if UI_TYPE == UiType.ANSI:

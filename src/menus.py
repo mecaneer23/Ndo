@@ -12,8 +12,7 @@ try:
 except ImportError:
     FIGLET_FORMAT_EXISTS = False  # pyright: ignore[reportConstantRedefinition]
 
-from src.class_cursor import Cursor
-from src.class_todo import Todo, Todos
+from src.cursor import Cursor
 from src.get_args import (
     CONTROLS_BEGIN_INDEX,
     CONTROLS_END_INDEX,
@@ -27,6 +26,7 @@ from src.io_ import update_file
 from src.keys import Key
 from src.md_to_py import md_table_to_lines
 from src.print_todos import make_printable_sublist
+from src.todo import Todo, Todos
 from src.utils import Color, alert, clamp, overflow, set_header
 
 if UI_TYPE == UiType.ANSI:
