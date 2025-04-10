@@ -25,7 +25,7 @@ try:
 except ImportError as err:
     raise NotImplementedError(
         "acurses doesn't currently support Windows. "
-        "Try running Ndo with `--ui curses`",
+        "Is an alternative ui available?",
     ) from err
     # https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
     from ctypes import byref, c_ulong, windll
