@@ -10,11 +10,8 @@ from pathlib import Path
 from sys import exit as sys_exit
 from typing import Callable, TypeAlias
 
-from src.cursor import Cursor
-from src.history import UndoRedo
-from src.mode import SingleLineMode, SingleLineModeImpl
-from src.todo import BoxChar, FoldedState, Todo, Todos
 from src.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
+from src.cursor import Cursor
 from src.get_args import (
     FILENAME,
     HEADER,
@@ -23,6 +20,7 @@ from src.get_args import (
     UiType,
 )
 from src.get_todo import InputTodo
+from src.history import UndoRedo
 from src.io_ import file_string_to_todos, read_file, update_file
 from src.keyboard_input_helpers import get_executable_args
 from src.keys import Key
@@ -34,7 +32,9 @@ from src.menus import (
     search_menu,
     sort_menu,
 )
+from src.mode import SingleLineMode, SingleLineModeImpl
 from src.print_todos import print_todos
+from src.todo import BoxChar, FoldedState, Todo, Todos
 from src.utils import NewTodoPosition, Response, alert, clamp, set_header
 
 if UI_TYPE == UiType.ANSI:

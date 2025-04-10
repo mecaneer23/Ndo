@@ -3,10 +3,10 @@
 from collections.abc import Iterable
 from typing import Callable, NamedTuple, cast
 
-from src.mode import SingleLineMode, SingleLineModeImpl
-from src.todo import BoxChar, Todo
 from src.get_args import INDENT, UI_TYPE, UiType
 from src.keys import Key
+from src.mode import SingleLineMode, SingleLineModeImpl
+from src.todo import BoxChar, Todo
 from src.utils import NewTodoPosition, alert, chunk_message, set_header
 
 if UI_TYPE == UiType.ANSI:

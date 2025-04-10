@@ -6,7 +6,7 @@ A Tkinter interface that feels like programming with curses
 from functools import wraps
 from math import log2
 from threading import Thread
-from tkinter import Tk, Text, BooleanVar, Event
+from tkinter import BooleanVar, Event, Text, Tk
 from typing import Any, Callable, TypeVar
 
 T = TypeVar("T")
