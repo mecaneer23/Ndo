@@ -131,10 +131,8 @@ class Cursor:
 
     def single_up(self, max_len: int) -> None:
         """Move a cursor with length 1 up by 1"""
-        if len(self) == max_len:
+        if len(self) == max_len or self.get_first() == 0:
             self.set_to(0)
-            return
-        if self.get_first() == 0:
             return
         self.set_to(self.get_first() - 1)
         # while self.todos[self.get_first()].is_folded():
@@ -150,9 +148,10 @@ class Cursor:
     def single_down(self, max_len: int) -> None:
         """Move a cursor with length 1 down by 1"""
         if len(self) == max_len:
-            self.set_to(self.get_first())
+            self.set_to(self.get_last())
             return
         if self.get_last() >= max_len - 1:
+            self.set_to(self.get_last())
             return
         self.set_to(self.get_last() + 1)
 

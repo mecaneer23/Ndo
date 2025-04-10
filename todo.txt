@@ -16,8 +16,6 @@
 - feat!: implement bcurses (browser-curses) using brython
 - docs: add list of input box controls to README
 - fix: select all todos above/below should be predictable and repeatable
-- feat: single up to first item when multiselect includes first item should select only first item
-- feat: single down to last item when multiselect includes last item should select only last item
 -y fix: undo/redo on Windows
 -y fix: toggle completion (Delete key) on Windows
 -y fix: dedenting on Windows
