@@ -16,7 +16,5 @@
 - feat!: implement bcurses (browser-curses) using brython
 - docs: add list of input box controls to README
 - fix: select all todos above/below should be predictable and repeatable
--y fix: undo/redo on Windows
 -y fix: toggle completion (Delete key) on Windows
 -y fix: dedenting on Windows
--y fix: sorting on Windows

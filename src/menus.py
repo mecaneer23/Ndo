@@ -36,6 +36,8 @@ elif UI_TYPE == UiType.TKINTER:
 else:
     import curses
 
+_REVERSE_NAME = "Reverse current"
+
 
 def _simple_scroll_keybinds(
     win: curses.window,
@@ -222,6 +224,7 @@ def _get_sorting_methods() -> dict[str, Callable[[Todos], str]]:
             "1" if top_level_todo[0].is_toggled() else "0"
         ),
         "Color": lambda top_level_todo: str(top_level_todo[0].get_color()),
+        _REVERSE_NAME: lambda _: "",
     }
 
 
@@ -243,7 +246,12 @@ def _sort_by(method: str, todos: Todos, selected: Cursor) -> Todos:
     key = _get_sorting_methods()[method]
     selected_todo = todos[int(selected)]
     sorted_todos = Todos([])
-    for section in sorted(_get_indented_sections(todos), key=key):
+    sort_iterable = (
+        reversed(_get_indented_sections(todos))
+        if method == _REVERSE_NAME
+        else sorted(_get_indented_sections(todos), key=key)
+    )
+    for section in sort_iterable:
         for todo in section:
             sorted_todos.append(todo)
     update_file(FILENAME, sorted_todos)
@@ -263,11 +271,12 @@ def sort_menu(
     parent_win.clear()
     set_header(parent_win, "Sort by:")
     lines = list(_get_sorting_methods().keys())
+    len_longest_line = len(max(lines, key=len))
     win = curses.newwin(
         len(lines) + 2,
-        len(lines[0]) + 2,
+        len_longest_line + 2,
         1,
-        (parent_win.getmaxyx()[1] - (len(max(lines, key=len)) + 1)) // 2,
+        (parent_win.getmaxyx()[1] - (len_longest_line + 1)) // 2,
     )
     win.box()
     move_options = _get_move_options(len(lines), {})
@@ -320,12 +329,16 @@ def search_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
     """
     set_header(stdscr, "Searching...")
     stdscr.refresh()
-    sequence = InputTodo(
-        stdscr,
-        get_newwin(stdscr),
-        Todo(),
-        Todo(),
-    ).get_todo().get_display_text()
+    sequence = (
+        InputTodo(
+            stdscr,
+            get_newwin(stdscr),
+            Todo(),
+            Todo(),
+        )
+        .get_todo()
+        .get_display_text()
+    )
     stdscr.clear()
     for i, todo in enumerate(todos[int(selected) :], start=int(selected)):
         if sequence in todo.get_display_text():
