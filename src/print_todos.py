@@ -175,7 +175,16 @@ def _get_display_string(  # noqa: PLR0913  # pylint: disable=too-many-arguments,
     todo = todos[position]
     if position in highlight and todo.is_empty():
         return "─" * _EMPTY_LINE_WIDTH
+    zfill_width = len(str(len(todos)))
     before_footers = Chunk.join(
+        Chunk(
+            ENUMERATE and not RELATIVE_ENUMERATE,
+            str(todos.index(todo) + 1).rjust(zfill_width) + " ",
+        ),
+        Chunk(
+            RELATIVE_ENUMERATE,
+            str(relative_pos + 1).rjust(zfill_width) + " ",
+        ),
         Chunk(True, todo.get_indent_level() * " "),
         Chunk(
             not todo.is_empty() and not SIMPLE_BOXES and not BULLETS,
@@ -199,11 +208,6 @@ def _get_display_string(  # noqa: PLR0913  # pylint: disable=too-many-arguments,
             and todo.is_toggled(),
             f"{_get_checkmark(SIMPLE_BOXES)} ",
         ),
-        Chunk(
-            ENUMERATE and not RELATIVE_ENUMERATE,
-            f"{todos.index(todo) + 1}. ",
-        ),
-        Chunk(RELATIVE_ENUMERATE, f"{relative_pos + 1}. "),
         Chunk(ansi_strikethrough and todo.is_toggled(), _ANSI_STRIKETHROUGH),
         Chunk(not _DEBUG_FOLD, todo.get_display_text()),
         Chunk(todo.is_folded_parent(), "› ..."),  # noqa: RUF001
