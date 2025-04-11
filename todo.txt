@@ -1,6 +1,8 @@
 -r fix: strikethrough in curses
   -r fix long lines (longer than width // 2 - 1)
   -r fix moving down onto a toggled line
+-y fix: toggle completion (Delete key) on certain terminals (Windows in WSL)
+-y fix: dedenting on certain terminals (Windows in WSL)
 -m fix: make startup faster
   -m depends on how the program is run, not a huge issue
 -y feat: add unit tests?
@@ -16,5 +18,5 @@
 - feat!: implement bcurses (browser-curses) using brython
 - docs: add list of input box controls to README
 - fix: select all todos above/below should be predictable and repeatable
--y fix: toggle completion (Delete key) on certain terminals (Windows in WSL)
--y fix: dedenting on certain terminals (Windows in WSL)
+- feat: move todo.py into src folder, rename `src` to `ndo`, make sure relative imports still work and program is still runnable the same way, ensure README reflects any changes
+- fix: multiselect line combination should include top line (make sure combining onto top line doesn't break)
