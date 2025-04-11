@@ -79,6 +79,7 @@ class Key:
     shift_delete = 383
     alt_j_windows = 426
     alt_k_windows = 427
+    ctrl_backspace__ = 504
     alt_delete = 522
     ctrl_right_arrow = 565
     ctrl_left_arrow = 550

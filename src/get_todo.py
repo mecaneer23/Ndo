@@ -194,6 +194,7 @@ class InputTodo:
         if input_char in (
             Key.ctrl_backspace,
             Key.ctrl_backspace_,
+            Key.ctrl_backspace__,
             Key.backspace__,
         ):
             return self._handle_ctrl_backspace()
