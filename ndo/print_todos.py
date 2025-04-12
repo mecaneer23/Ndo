@@ -8,8 +8,8 @@ from dataclasses import astuple, dataclass
 from functools import cache
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from src.cursor import Cursor
-from src.get_args import (
+from ndo.cursor import Cursor
+from ndo.get_args import (
     BULLETS,
     ENUMERATE,
     INDENT,
@@ -19,13 +19,13 @@ from src.get_args import (
     UI_TYPE,
     UiType,
 )
-from src.todo import Todo, Todos
-from src.utils import Chunk, Color
+from ndo.todo import Todo, Todos
+from ndo.utils import Chunk, Color
 
 if UI_TYPE == UiType.ANSI:
-    import src.acurses as curses
+    import ndo.acurses as curses
 elif UI_TYPE == UiType.TKINTER:
-    import src.tcurses as curses
+    import ndo.tcurses as curses
 else:
     import curses
 

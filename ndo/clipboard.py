@@ -10,16 +10,16 @@ try:
 except ImportError:
     CLIPBOARD_EXISTS = False  # pyright: ignore[reportConstantRedefinition]
 
-from src.cursor import Cursor
-from src.get_args import FILENAME, UI_TYPE, UiType
-from src.io_ import update_file
-from src.todo import Todo, Todos
-from src.utils import alert
+from ndo.cursor import Cursor
+from ndo.get_args import FILENAME, UI_TYPE, UiType
+from ndo.io_ import update_file
+from ndo.todo import Todo, Todos
+from ndo.utils import alert
 
 if UI_TYPE == UiType.ANSI:
-    import src.acurses as curses
+    import ndo.acurses as curses
 elif UI_TYPE == UiType.TKINTER:
-    import src.tcurses as curses
+    import ndo.tcurses as curses
 else:
     import curses
 

@@ -13,15 +13,15 @@ from enum import Enum
 # from typing import Any, Callable, Iterable, TypeVar
 from typing import TypeVar
 
-from src.get_args import UI_TYPE, UiType
-from src.keys import Key
-from src.todo import Todos
-from src.utils import clamp
+from ndo.get_args import UI_TYPE, UiType
+from ndo.keys import Key
+from ndo.todo import Todos
+from ndo.utils import clamp
 
 if UI_TYPE == UiType.ANSI:
-    import src.acurses as curses
+    import ndo.acurses as curses
 elif UI_TYPE == UiType.TKINTER:
-    import src.tcurses as curses
+    import ndo.tcurses as curses
 else:
     import curses
 

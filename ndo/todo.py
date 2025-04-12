@@ -6,8 +6,8 @@ and TodoList (list of Todo + cursor (int)).
 from collections.abc import Iterable
 from enum import Enum
 
-from src.get_args import CHECKBOX, INDENT
-from src.utils import Chunk, Color
+from ndo.get_args import CHECKBOX, INDENT
+from ndo.utils import Chunk, Color
 
 
 class FoldedState(Enum):

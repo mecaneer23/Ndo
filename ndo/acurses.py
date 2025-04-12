@@ -11,7 +11,7 @@ from threading import Thread
 from time import time as now
 from typing import Any, Callable, TypeVar, overload
 
-from src.keys import Key
+from ndo.keys import Key
 
 try:
     from termios import (

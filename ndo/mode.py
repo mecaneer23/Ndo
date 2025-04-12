@@ -5,7 +5,7 @@ at a time and multiple lines at a time.
 
 from enum import Enum
 
-from src.utils import NewTodoPosition
+from ndo.utils import NewTodoPosition
 
 
 class SingleLineMode(Enum):

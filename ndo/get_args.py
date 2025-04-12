@@ -29,7 +29,7 @@ from enum import Enum
 from pathlib import Path
 from typing import TypeVar
 
-from src.md_to_py import md_table_to_lines
+from ndo.md_to_py import md_table_to_lines
 
 CONTROLS_BEGIN_INDEX: int = 68
 CONTROLS_END_INDEX: int = 98

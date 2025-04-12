@@ -7,12 +7,12 @@ from enum import Enum
 from itertools import tee
 from typing import NamedTuple
 
-from src.get_args import UI_TYPE, UiType
+from ndo.get_args import UI_TYPE, UiType
 
 if UI_TYPE == UiType.ANSI:
-    import src.acurses as curses
+    import ndo.acurses as curses
 elif UI_TYPE == UiType.TKINTER:
-    import src.tcurses as curses
+    import ndo.tcurses as curses
 else:
     import curses
 

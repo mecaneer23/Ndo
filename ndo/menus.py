@@ -12,8 +12,8 @@ try:
 except ImportError:
     FIGLET_FORMAT_EXISTS = False  # pyright: ignore[reportConstantRedefinition]
 
-from src.cursor import Cursor
-from src.get_args import (
+from ndo.cursor import Cursor
+from ndo.get_args import (
     CONTROLS_BEGIN_INDEX,
     CONTROLS_END_INDEX,
     FILENAME,
@@ -21,18 +21,18 @@ from src.get_args import (
     UI_TYPE,
     UiType,
 )
-from src.get_todo import InputTodo, hline
-from src.io_ import update_file
-from src.keys import Key
-from src.md_to_py import md_table_to_lines
-from src.print_todos import make_printable_sublist
-from src.todo import Todo, Todos
-from src.utils import Color, alert, clamp, overflow, set_header
+from ndo.get_todo import InputTodo, hline
+from ndo.io_ import update_file
+from ndo.keys import Key
+from ndo.md_to_py import md_table_to_lines
+from ndo.print_todos import make_printable_sublist
+from ndo.todo import Todo, Todos
+from ndo.utils import Color, alert, clamp, overflow, set_header
 
 if UI_TYPE == UiType.ANSI:
-    import src.acurses as curses
+    import ndo.acurses as curses
 elif UI_TYPE == UiType.TKINTER:
-    import src.tcurses as curses
+    import ndo.tcurses as curses
 else:
     import curses
 
