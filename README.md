@@ -125,7 +125,3 @@ Use the following linters and formatters:
 ```bash
 systemctl start docker
 ```
-
-## Bugs
-
-- Long todos don't render properly in strikethrough mode (in certain terminals)
