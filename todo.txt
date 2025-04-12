@@ -19,4 +19,3 @@
 - docs: add list of input box controls to README
 - fix: select all todos above/below should be predictable and repeatable
 - feat: move todo.py into src folder, rename `src` to `ndo`, make sure relative imports still work and program is still runnable the same way, ensure README reflects any changes
-- fix: multiselect line combination should include top line (make sure combining onto top line doesn't break)

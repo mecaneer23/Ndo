@@ -4,8 +4,8 @@ Entry point for Ndo. This module mostly binds keypresses to various functions
 """
 # ruff: noqa: FBT003
 
-from collections.abc import Sequence
-from itertools import pairwise
+from collections.abc import Iterator
+from itertools import pairwise, tee
 from pathlib import Path
 from sys import exit as sys_exit
 from typing import Callable, NamedTuple, TypeAlias
@@ -434,30 +434,37 @@ def update_modified_time(prev_time: float, todos: Todos) -> tuple[Todos, float]:
     return todos, current_time
 
 
-def _get_captained_selection(selected: Cursor) -> Sequence[int] | None:
-    if len(selected) != 1:
-        return selected.get()
-    first = selected.get_first()
-    if first - 1 >= first:
-        return None
-    return (first - 1, first)
+def _get_lines_to_join(selected: Cursor) -> Iterator[int]:
+    """
+    Return a sequence of integers corresponding to lines to combine (in
+    reverse order).
+
+    The last item should be the line prior to the selection unless the
+    selection includes the first line (0). Yield the last item at the beginning
+    as well as at the end.
+    """
+
+    zeroith_item = selected.get_first() - 1
+    yield zeroith_item if zeroith_item >= 0 else selected.get_first()
+    yield from reversed(selected.get())
+    if zeroith_item >= 0:
+        yield zeroith_item
 
 
 def join_lines(todos: Todos, selected: Cursor) -> None:
     """Combine current line with previous line by concatenation."""
 
-    captained_selection = _get_captained_selection(selected)
-    if captained_selection is None:
-        return
+    selection = _get_lines_to_join(selected)
+    ending_cursor_location = next(selection)
 
-    for addend, captain in pairwise(reversed(captained_selection)):
+    for addend, captain in pairwise(selection):
         todos[captain].set_display_text(
             todos[captain].get_display_text()
             + " "
             + todos[addend].get_display_text(),
         )
         todos.pop(addend)
-    selected.set(captained_selection[0])
+    selected.set(ending_cursor_location)
     update_file(FILENAME, todos)
 
 
