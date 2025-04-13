@@ -126,7 +126,16 @@ class _Getch:
     def __init__(self) -> None:
         self._block = True
         self._raw_input: Queue[int] = Queue()
+        self._started = False
+
+    def start(self) -> None:
+        """Start the thread that fills the queue"""
         Thread(target=self._fill_queue, daemon=True).start()
+        self._started = True
+
+    def is_started(self) -> bool:
+        """Return whether the queue filling thread has been started"""
+        return self._started
 
     def _fill_queue(self) -> None:
         while True:
@@ -145,10 +154,9 @@ class _Getch:
         self._block = block
 
 
-_GETCH = _Getch()
-
-
 class _CursesWindow:  # pylint: disable=too-many-instance-attributes
+    _GETCH = _Getch()
+
     def __init__(
         self,
         /,
@@ -175,6 +183,9 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
         self._timeout: float | None = None
 
+        if not _CursesWindow._GETCH.is_started():
+            _CursesWindow._GETCH.start()
+
     def getch(self) -> int:
         """
         Get a character. Note that the integer returned
@@ -184,7 +195,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         there is no input, otherwise wait until a key is
         pressed.
         """
-        if not _GETCH.is_blocking():
+        if not _CursesWindow._GETCH.is_blocking():
             try:
                 return self._stored_keys.get(block=False)
             except queue_empty:
@@ -193,7 +204,11 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
             return self._stored_keys.get()
 
         chars = self._get_current_from_buffer()
-        keys = _KEYPAD_KEYS if _GETCH.is_blocking() and self._keypad else {}
+        keys = (
+            _KEYPAD_KEYS
+            if _CursesWindow._GETCH.is_blocking() and self._keypad
+            else {}
+        )
         key = "-".join(map(str, chars))
         if key in keys:
             return keys[key]
@@ -202,13 +217,13 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         return self._stored_keys.get()
 
     def _get_current_from_buffer(self) -> list[int]:
-        char = _GETCH.get(self._timeout)
+        char = _CursesWindow._GETCH.get(self._timeout)
         current = [char]
         if char == Key.escape:
             esc = now()
             while now() - esc < _SHORT_TIME_SECONDS:
                 try:
-                    char = _GETCH.get(_SHORT_TIME_SECONDS)
+                    char = _CursesWindow._GETCH.get(_SHORT_TIME_SECONDS)
                 except queue_empty:
                     break
                 if char not in current:
@@ -320,7 +335,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
     def nodelay(self, flag: bool = True) -> None:  # noqa: FBT001, FBT002
         """If flag is True, getch() will be non-blocking"""
-        _GETCH.set_blocking(not flag)
+        _CursesWindow._GETCH.set_blocking(not flag)
 
     def box(self) -> None:
         """Draw a border around the current window"""
