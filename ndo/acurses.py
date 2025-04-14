@@ -138,6 +138,11 @@ class _Getch:
         return self._started
 
     def _fill_queue(self) -> None:
+        """
+        As keys are pressed, add them to a queue (self._raw_input)
+
+        This function should likely be run as a thread.
+        """
         while True:
             self._raw_input.put(ord(stdin.read(1)), block=self._block)
 
@@ -311,6 +316,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         return self._height, self._width
 
     def _clear_buffer(self) -> None:
+        """Add the contents of the buffer to the screen and clear the buffer."""
         self.addstr(
             self._stored_y,
             self._stored_x,
@@ -362,7 +368,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         self.addstr(y, x, ch * n)
 
     def clear(self) -> None:
-        """Clear the screen"""
+        """Clear the screen (by overwriting every character with a space)"""
         self.move(0, 0)
         for i in range(self._height):
             self.addstr(i, 0, " " * self._width)
