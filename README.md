@@ -116,6 +116,12 @@ Use the following linters and formatters:
 
 - markdownlint
 
+### Testing
+
+```bash
+pytest test
+```
+
 ## Troubleshooting
 
 ### Docker error
