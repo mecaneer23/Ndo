@@ -63,7 +63,7 @@ Options:
 | --strikethrough, -s                                            | Boolean: strikethrough completed todos - option to disable because some terminals don't support strikethroughs. Default is `False`.                   |
 | --title TITLE, -t TITLE                                        | Allows passing alternate header. Default is `filename`.                                                                                               |
 
-## Controls
+## Controls (Normal mode)
 
 | Key (arranged alphabetically)                                            | Description                         |
 | ------------------------------------------------------------------------ | ----------------------------------- |
