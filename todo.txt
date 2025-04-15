@@ -18,3 +18,6 @@
 - feat!: implement bcurses (browser-curses) using brython
 - docs: add list of input box controls to README
 - fix: select all todos above/below should be predictable and repeatable
+- refactor: create singleton abstract class which _Getch uses
+- feat: make enumerations a consistent color (bold green like title)
+- feat: add unique padding to current absolute enumeration
