@@ -16,8 +16,9 @@
 -c fix: if holding down a key in acurses, make sure it doesn't stay pressed longer than it should (i.e. holding j key) (only reproducible in some terminals)
 -c fix: visual glitch when len(todos) == 1 in acurses
 - feat!: implement bcurses (browser-curses) using brython
-- docs: add list of input box controls to README
 - fix: select all todos above/below should be predictable and repeatable
 - refactor: create singleton abstract class which _Getch uses
 - feat: make enumerations a consistent color (bold green like title)
 - feat: add unique padding to current absolute enumeration
+- feat: ctrl + arrow should split on every non-alphanumeric character
+- feat: add help window for input-box controls

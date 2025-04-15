@@ -137,12 +137,14 @@ class InputTodo:
         if self._mode.is_off():
             self._todo.set_box_char(BoxChar.NONE)
 
-    def _handle_right_arrow(self) -> _EditString:
+    def _move_right(self) -> _EditString:
+        """Move the cursor to the right"""
         if self._position < len(self._chars):
             self._position += 1
         return _EditString(self._chars, self._position)
 
-    def _handle_ctrl_right_arrow(self) -> _EditString:
+    def _word_right(self) -> _EditString:
+        """Move the cursor right by a word"""
         while True:
             if self._position >= len(self._chars) - 1:
                 break
@@ -151,12 +153,14 @@ class InputTodo:
                 break
         return _EditString(self._chars, self._position)
 
-    def _handle_left_arrow(self) -> _EditString:
+    def _move_left(self) -> _EditString:
+        """Move the cursor to the left"""
         if self._position > 0:
             self._position -= 1
         return _EditString(self._chars, self._position)
 
-    def _handle_ctrl_left_arrow(self) -> _EditString:
+    def _word_left(self) -> _EditString:
+        """Move the cursor left by a word"""
         while True:
             if self._position <= 0:
                 break
@@ -165,7 +169,8 @@ class InputTodo:
                 break
         return _EditString(self._chars, self._position)
 
-    def _handle_ctrl_delete(self) -> _EditString:
+    def _delete_right_word(self) -> _EditString:
+        """Remove the word to the right of the cursor"""
         if self._position < len(self._chars) - 1:
             self._chars.pop(self._position)
             self._position -= 1
@@ -197,11 +202,11 @@ class InputTodo:
             Key.ctrl_backspace__,
             Key.backspace__,
         ):
-            return self._handle_ctrl_backspace()
+            return self._delete_left_word()
         if input_char == Key.nodelay_escape:
             return None
         if input_char == Key.ctrl_delete:
-            return self._handle_ctrl_delete()
+            return self._delete_right_word()
         return self._error_passthrough(str(input_char))
 
     def _handle_toggle_note_todo(self) -> _EditString:
@@ -228,16 +233,22 @@ class InputTodo:
         self._stdscr.refresh()
         return _EditString(self._chars, self._position)
 
-    def _handle_home(self) -> _EditString:
+    def _move_start(self) -> _EditString:
+        """Move the cursor to the beginning of the string"""
         return _EditString(self._chars, 0)
 
-    def _handle_end(self) -> _EditString:
+    def _move_end(self) -> _EditString:
+        """Move the cursor to the end of the string"""
         return _EditString(self._chars, len(self._chars))
 
     def _error_passthrough(
         self,
         key_name: str,
     ) -> _EditString:
+        """
+        Display an alert message for unsupported keys and
+        return chars and position
+        """
         alert(self._stdscr, f"Key `{key_name}` is not supported")
         return _EditString(self._chars, self._position)
 
@@ -256,7 +267,8 @@ class InputTodo:
             self._chars.pop(self._position)
         return _EditString(self._chars, self._position)
 
-    def _handle_ctrl_backspace(self) -> _EditString:
+    def _delete_left_word(self) -> _EditString:
+        """Remove the word to the left of the cursor"""
         while True:
             if self._position <= 0:
                 break
@@ -349,19 +361,19 @@ class InputTodo:
         original = self._todo.copy()
 
         key_handlers: dict[int, Callable[..., _EditString]] = {
-            Key.left_arrow: self._handle_left_arrow,
-            Key.right_arrow: self._handle_right_arrow,
+            Key.left_arrow: self._move_left,
+            Key.right_arrow: self._move_right,
             Key.backspace: self._handle_backspace,
             Key.backspace_: self._handle_backspace,
             Key.backspace__: self._handle_backspace,
-            Key.ctrl_backspace: self._handle_ctrl_backspace,
+            Key.ctrl_backspace: self._delete_left_word,
             Key.shift_tab: self._handle_dedent,
             Key.shift_tab_windows: self._handle_dedent,
             Key.tab: self._handle_indent,
-            Key.ctrl_left_arrow: self._handle_ctrl_left_arrow,
-            Key.ctrl_right_arrow: self._handle_ctrl_right_arrow,
-            Key.home: self._handle_home,
-            Key.end: self._handle_end,
+            Key.ctrl_left_arrow: self._word_left,
+            Key.ctrl_right_arrow: self._word_right,
+            Key.home: self._move_start,
+            Key.end: self._move_end,
             Key.delete: self._handle_delete,
             Key.shift_delete: self._handle_toggle_note_todo,
             Key.alt_delete: self._handle_toggle_note_todo,

@@ -96,6 +96,27 @@ Options:
 | <kbd>u</kbd>                                                             | Undo change                         |
 | <kbd>y</kbd>                                                             | Copy todo to clipboard              |
 
+## Input box controls (Input mode)
+
+| Key or shortcut                                                     | Description                          |
+| ------------------------------------------------------------------- | ------------------------------------ |
+| Letters, numbers, punctuation, etc.                                 | Add character to textbox             |
+| <kbd>Enter</kbd>                                                    | Return to full list, saving changes  |
+| <kbd>Ctrl</kbd>+<kbd>c</kbd>, <kbd>Esc</kbd>                        | Return to full list without saving   |
+| <kbd>Left</kbd>/<kbd>Right</kbd>                                    | Move the cursor left/right one space |
+| <kbd>Ctrl</kbd>+<kbd>Left</kbd>/<kbd>Ctrl</kbd>+<kbd>Right</kbd>    | Move the cursor left/right one word  |
+| <kbd>Home</kbd>                                                     | Move cursor to left end of textbox   |
+| <kbd>End</kbd>                                                      | Move cursor to right end of textbox  |
+| <kbd>Backspace</kbd>                                                | Delete the character left of cursor  |
+| <kbd>Delete</kbd>                                                   | Delete the character right of cursor |
+| <kbd>Ctrl</kbd>+<kbd>Backspace</kbd>                                | Delete the word left of cursor       |
+| <kbd>Ctrl</kbd>+<kbd>Delete</kbd>                                   | Delete the word right of cursor      |
+| <kbd>Tab</kbd>                                                      | Indent line, to the right            |
+| <kbd>Shift</kbd>+<kbd>Tab</kbd>                                     | De-indent line, to the left          |
+| <kbd>Shift</kbd>+<kbd>Delete</kbd>/<kbd>Alt</kbd>+<kbd>Delete</kbd> | Toggle whether line has checkbox     |
+| <kbd>Ctrl</kbd>+<kbd>x</kbd>, <kbd>k</kbd>                          | Toggle `toggle` and `entry` modes    |
+| <kbd>Down</kbd>                                                     | Split line at cursor                 |
+
 ## View a todo list online
 
 Go to [this link](https://mecaneer23.github.io/Ndo/web-display) and upload your file
