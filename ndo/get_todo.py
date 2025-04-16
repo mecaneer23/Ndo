@@ -196,17 +196,16 @@ class InputTodo:
         except KeyboardInterrupt:
             return None
         self._win.nodelay(False)  # noqa: FBT003
-        if input_char in (
-            Key.ctrl_backspace,
-            Key.ctrl_backspace_,
-            Key.ctrl_backspace__,
-            Key.backspace__,
-        ):
-            return self._delete_left_word()
-        if input_char == Key.nodelay_escape:
-            return None
-        if input_char == Key.ctrl_delete:
-            return self._delete_right_word()
+        table: dict[int, Callable[[], _EditString | None]] = {
+            Key.ctrl_backspace: self._delete_left_word,
+            Key.ctrl_backspace_: self._delete_left_word,
+            Key.ctrl_backspace__: self._delete_left_word,
+            Key.backspace__: self._delete_left_word,
+            Key.nodelay_escape: lambda: None,
+            Key.ctrl_delete: self._delete_right_word,
+        }
+        if input_char in table:
+            return table[input_char]()
         return self._error_passthrough(str(input_char))
 
     def _handle_toggle_note_todo(self) -> _EditString:
