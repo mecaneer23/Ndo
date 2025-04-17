@@ -5,6 +5,7 @@ Helper module to handle printing a list of Todo objects
 
 from collections.abc import Iterator
 from dataclasses import astuple, dataclass
+from itertools import count
 from typing import TYPE_CHECKING, Generic, NamedTuple, TypeVar, cast
 
 from ndo.cursor import Cursor
@@ -179,6 +180,7 @@ def _get_display_strings(  # noqa: PLR0913  # pylint: disable=too-many-arguments
     todos: Todos,
     position: int,
     relative_pos: int,
+    absolute_pos: int,
     highlight: range,
     width: int,
     ansi_strikethrough: bool,
@@ -199,7 +201,7 @@ def _get_display_strings(  # noqa: PLR0913  # pylint: disable=too-many-arguments
     meta_info = Chunk.join(
         Chunk(
             ENUMERATE and not RELATIVE_ENUMERATE,
-            str(todos.index(todo) + 1).rjust(zfill_width) + " ",
+            str(absolute_pos + 1).rjust(zfill_width) + " ",
         ),
         Chunk(
             RELATIVE_ENUMERATE,
@@ -340,13 +342,14 @@ def print_todos(
     new_todos = Todos(new_todos)
     highlight = range(temp_selected, len(selected) + temp_selected)
     print_position = -1  # used only with folding
-    for relative, (position, todo) in zip(
+    for relative, (position, todo), absolute_pos in zip(
         [
             *range(temp_selected - 1, -1, -1),
             int(selected),
             *range(len(new_todos)),
         ],
         enumerate(new_todos),
+        count(prev_start),
     ):
         print_position += 1
         if stdscr is None:
@@ -354,6 +357,7 @@ def print_todos(
                 new_todos,
                 position,
                 relative,
+                absolute_pos,
                 range(0),
                 width,
                 True,
@@ -372,6 +376,7 @@ def print_todos(
                     new_todos,
                     position,
                     relative,
+                    absolute_pos,
                     highlight,
                     width,
                     False,

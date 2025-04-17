@@ -22,4 +22,3 @@
 - feat: ctrl + arrow should split on every non-alphanumeric character
 - feat: add `n` control to move to next instance of found search value, display error if no more found, don't reset selection if no remaining matches
 - refactor: don't pass around unnecessary _EditStrings (_handle_escape)
-- fix: absolute numbering should continue past screen height
