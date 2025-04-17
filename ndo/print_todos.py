@@ -307,9 +307,7 @@ def _print_todo(
 
 
 def _color_to_ansi(color: int) -> str:
-    min_allowed_color = 1
-    max_allowed_color = 7
-    if not (min_allowed_color <= color <= max_allowed_color):
+    if not Color.is_valid(color):
         msg = f"Invalid color code: {color}"
         raise ValueError(msg)
     return f"\u001b[3{color}m"

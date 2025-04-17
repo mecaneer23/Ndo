@@ -75,6 +75,16 @@ class Color(Enum):
         """
         return {color.name.capitalize(): color.value for color in Color}
 
+    @staticmethod
+    def is_valid(color: "Color | int") -> bool:
+        """
+        Check if a color is valid, either as an int or a Color
+        """
+        if isinstance(color, Color):
+            return True
+        return color in Color.as_dict().values()
+
+
 
 class NewTodoPosition(Enum):
     """
