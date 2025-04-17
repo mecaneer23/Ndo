@@ -191,11 +191,10 @@ def _get_enumeration_info(
     return justify(str(pos), zfill_width) + " "
 
 
-def _get_display_strings(  # noqa: PLR0913  # pylint: disable=too-many-arguments, too-many-positional-arguments
-    todos: Todos,
-    position: int,
+def _get_display_strings(
+    todo: Todo,
+    should_highlight: bool,
     enumeration_info: str,
-    highlight: range,
     width: int,
     ansi_strikethrough: bool,
 ) -> _DisplayText:
@@ -208,8 +207,7 @@ def _get_display_strings(  # noqa: PLR0913  # pylint: disable=too-many-arguments
     1. Meta information about the item's position
     2. The todo display text
     """
-    todo = todos[position]
-    if position in highlight and todo.is_empty():
+    if should_highlight and todo.is_empty():
         return _DisplayText("─" * _EMPTY_LINE_WIDTH, "")
     before_footers = Chunk.join(
         Chunk(True, todo.get_indent_level() * " "),
@@ -355,12 +353,11 @@ def print_todos(
         print_position += 1
         if stdscr is None:
             display_strings = _get_display_strings(
-                new_todos,
-                position,
+                new_todos[position],
+                False,
                 str(absolute_pos + 1).rjust(len(str(len(todos)))) + " "
                 if ENUMERATE or RELATIVE_ENUMERATE
                 else "",
-                range(0),
                 width,
                 True,
             )
@@ -375,15 +372,14 @@ def print_todos(
                 stdscr,
                 todo,
                 _get_display_strings(
-                    new_todos,
-                    position,
+                    new_todos[position],
+                    position in highlight,
                     _get_enumeration_info(
                         relative_pos,
                         absolute_pos,
                         len(str(len(todos))) + 1,
                         selected.get(),
                     ),
-                    highlight,
                     width,
                     False,
                 ),
