@@ -336,7 +336,7 @@ def print_todos(
     )
     new_todos = Todos(new_todos)
     highlight = range(temp_selected, len(selected) + temp_selected)
-    print_position = -1
+    print_position = -1  # used only with folding
     for relative, (position, todo) in zip(
         [
             *range(temp_selected - 1, -1, -1),
