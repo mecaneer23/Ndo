@@ -395,7 +395,7 @@ def _get_main_input(
         if key not in keys_esckeys[1]:
             alert(
                 stdscr,
-                f"Invalid key after escape: `{key}` | `{chr(key)}`."
+                f"Invalid key after escape: `{key}` | `{chr(key)}`. "
                 "Press `h` for help.",
             )
             return -1
