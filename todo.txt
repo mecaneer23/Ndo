@@ -21,4 +21,5 @@
 - feat: make enumerations a consistent color (bold green like title)
 - feat: add unique padding to current absolute enumeration
 - feat: ctrl + arrow should split on every non-alphanumeric character
-- feat: add help window for input-box controls
+- feat: add `n` control to move to next instance of found search value, display error if no more found, don't reset selection if no remaining matches
+- refactor: don't pass around unnecessary _EditStrings (_handle_escape)

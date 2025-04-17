@@ -3,7 +3,7 @@ Various helpful menus and their helper functions.
 """
 
 from functools import partial
-from typing import Callable
+from typing import Callable, cast
 
 try:
     from pyfiglet import figlet_format as big
@@ -12,16 +12,13 @@ try:
 except ImportError:
     FIGLET_FORMAT_EXISTS = False  # pyright: ignore[reportConstantRedefinition]
 
+import ndo.get_todo
 from ndo.cursor import Cursor
 from ndo.get_args import (
-    CONTROLS_BEGIN_INDEX,
-    CONTROLS_END_INDEX,
     FILENAME,
-    HELP_FILE,
     UI_TYPE,
     UiType,
 )
-from ndo.get_todo import InputTodo, hline
 from ndo.io_ import update_file
 from ndo.keys import Key
 from ndo.md_to_py import md_table_to_lines
@@ -37,6 +34,22 @@ else:
     import curses
 
 _REVERSE_NAME = "Reverse current"
+
+
+def hline(
+    win: curses.window,
+    y_loc: int,
+    x_loc: int,
+    char: str | int,
+    width: int,
+) -> None:
+    """
+    Display a horizontal line starting at (y_loc, x_loc)
+    with width `width` consisting of the character `char`
+    """
+    win.addch(y_loc, x_loc, cast("str", curses.ACS_LTEE))
+    win.hline(y_loc, x_loc + 1, cast("str", char), width - 2)
+    win.addch(y_loc, x_loc + width - 1, cast("str", curses.ACS_RTEE))
 
 
 def _simple_scroll_keybinds(
@@ -71,14 +84,19 @@ def _get_move_options(
     return defaults | additional_options
 
 
-def help_menu(parent_win: curses.window) -> None:
+def help_menu(
+    parent_win: curses.window,
+    filename: str,
+    begin_index: int,
+    end_index: int,
+) -> None:
     """Show a scrollable help menu, generated from the README"""
     parent_win.clear()
     set_header(parent_win, "Help (k/j to scroll):")
     lines = md_table_to_lines(
-        CONTROLS_BEGIN_INDEX,
-        CONTROLS_END_INDEX,
-        str(HELP_FILE),
+        begin_index,
+        end_index,
+        filename,
         frozenset({"<kbd>", "</kbd>", "(arranged alphabetically)"}),
     )
     win = curses.newwin(
@@ -110,7 +128,6 @@ def help_menu(parent_win: curses.window) -> None:
         )
         if cursor < 0:
             break
-    parent_win.clear()
 
 
 def magnify_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
@@ -330,7 +347,7 @@ def search_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
     set_header(stdscr, "Searching...")
     stdscr.refresh()
     sequence = (
-        InputTodo(
+        ndo.get_todo.InputTodo(
             stdscr,
             get_newwin(stdscr),
             Todo(),

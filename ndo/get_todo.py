@@ -1,10 +1,18 @@
 """Open a text input box, implement typing, and return text input"""
 
 from collections.abc import Iterable
-from typing import Callable, NamedTuple, cast
+from typing import Callable, NamedTuple
 
-from ndo.get_args import INDENT, UI_TYPE, UiType
+from ndo.get_args import (
+    HELP_FILE,
+    INDENT,
+    INPUT_BEGIN_INDEX,
+    INPUT_END_INDEX,
+    UI_TYPE,
+    UiType,
+)
 from ndo.keys import Key
+from ndo.menus import help_menu
 from ndo.mode import SingleLineMode, SingleLineModeImpl
 from ndo.todo import BoxChar, Todo
 from ndo.utils import NewTodoPosition, alert, chunk_message, set_header
@@ -32,22 +40,6 @@ class _EditString(NamedTuple):
 
     string: _Chars
     position: int
-
-
-def hline(
-    win: curses.window,
-    y_loc: int,
-    x_loc: int,
-    char: str | int,
-    width: int,
-) -> None:
-    """
-    Display a horizontal line starting at (y_loc, x_loc)
-    with width `width` consisting of the character `char`
-    """
-    win.addch(y_loc, x_loc, cast("str", curses.ACS_LTEE))
-    win.hline(y_loc, x_loc + 1, cast("str", char), width - 2)
-    win.addch(y_loc, x_loc + width - 1, cast("str", curses.ACS_RTEE))
 
 
 class InputTodo:
@@ -92,6 +84,8 @@ class InputTodo:
         Todo: Similar to the built in input() function,
         returns a Todo object containing the user's entry.
     """
+
+    _HEADER_STRING = "Insert mode: <Alt>+<h> for help"
 
     def __init__(
         self,
@@ -189,6 +183,20 @@ class InputTodo:
             self._chars.pop(self._position)
         return _EditString(self._chars, self._position)
 
+    def _handle_help_menu(self) -> _EditString:
+        """Wrapper for ndo.menus.help_menu()"""
+        help_menu(
+            self._stdscr,
+            str(HELP_FILE),
+            INPUT_BEGIN_INDEX,
+            INPUT_END_INDEX,
+        )
+        self._stdscr.clear()
+        self._win.box()
+        set_header(self._stdscr, self._HEADER_STRING)
+        self._stdscr.refresh()
+        return _EditString(self._chars, self._position)
+
     def _handle_escape(self) -> _EditString | None:
         self._win.nodelay(True)  # noqa: FBT003
         try:
@@ -203,6 +211,7 @@ class InputTodo:
             Key.backspace__: self._delete_left_word,
             Key.nodelay_escape: lambda: None,
             Key.ctrl_delete: self._delete_right_word,
+            Key.alt_h: self._handle_help_menu,
         }
         if input_char in table:
             return table[input_char]()
@@ -357,6 +366,9 @@ class InputTodo:
 
     def get_todo(self) -> Todo:
         """External method to get a todo object from the user"""
+        set_header(self._stdscr, self._HEADER_STRING)
+        self._stdscr.refresh()
+
         original = self._todo.copy()
 
         key_handlers: dict[int, Callable[..., _EditString]] = {

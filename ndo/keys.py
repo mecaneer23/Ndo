@@ -51,6 +51,7 @@ class Key:
     g = 103
     alt_g = 103
     h = 104
+    alt_h = 104
     i = 105
     j = 106
     alt_j = 106

@@ -116,6 +116,7 @@ Options:
 | <kbd>Shift</kbd>+<kbd>Delete</kbd>/<kbd>Alt</kbd>+<kbd>Delete</kbd> | Toggle whether line has checkbox     |
 | <kbd>Ctrl</kbd>+<kbd>x</kbd>, <kbd>k</kbd>                          | Toggle `toggle` and `entry` modes    |
 | <kbd>Down</kbd>                                                     | Split line at cursor                 |
+| <kbd>Alt</kbd>+<kbd>h</kbd>                                         | Show a list of controls              |
 
 ## View a todo list online
 

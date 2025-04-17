@@ -13,8 +13,11 @@ from typing import Callable, NamedTuple, TypeAlias
 from ndo.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
 from ndo.cursor import Cursor
 from ndo.get_args import (
+    CONTROLS_BEGIN_INDEX,
+    CONTROLS_END_INDEX,
     FILENAME,
     HEADER,
+    HELP_FILE,
     RENAME,
     UI_TYPE,
     UiType,
@@ -486,6 +489,17 @@ def _handle_rename(stdscr: curses.window) -> Response:
     return Response(200, "Success!")
 
 
+def _handle_help_menu(stdscr: curses.window) -> None:
+    """Wrapper for ndo.menus.help_menu()"""
+    help_menu(
+        stdscr,
+        str(HELP_FILE),
+        CONTROLS_BEGIN_INDEX,
+        CONTROLS_END_INDEX,
+    )
+    stdscr.clear()
+
+
 def main(stdscr: curses.window) -> Response:
     """
     The main function for Ndo. Mainly provides keybindings
@@ -580,7 +594,7 @@ def main(stdscr: curses.window) -> Response:
         Key.c: (color_todo, "stdscr, todos, selected"),
         Key.d: (delete_todo, "stdscr, todos, selected, copied_todo"),
         Key.g: (selected.to_top, "None"),
-        Key.h: (help_menu, "stdscr"),
+        Key.h: (_handle_help_menu, "stdscr"),
         Key.i: (edit_todo, "stdscr, todos, int(selected), single_line_state"),
         Key.j: (selected.single_down, "len(todos)"),
         Key.k: (selected.single_up, "len(todos)"),
