@@ -275,9 +275,7 @@ def _print_todo(
                 stdscr.getmaxyx()[1],
             )
         )
-        attrs = curses.color_pair(
-            todo.get_color().as_int() or Color.WHITE.as_int(),
-        )
+        attrs = curses.color_pair(todo.get_color().as_int())
         if position in highlight:
             attrs |= curses.A_STANDOUT
         if should_strikethrough and UI_TYPE == UiType.ANSI:
