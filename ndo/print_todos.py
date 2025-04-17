@@ -176,11 +176,27 @@ def _add_ellipsis(
     return string[: max_length - len(ellipsis) - prefix_len] + ellipsis
 
 
+def _get_enumeration_info(
+    relative_pos: int,
+    absolute_pos: int,
+    zfill_width: int,
+    adjusted_highlight: range,
+) -> str:
+    if not (ENUMERATE or RELATIVE_ENUMERATE):
+        return ""
+    if not RELATIVE_ENUMERATE:
+        if absolute_pos in adjusted_highlight:
+            return str(absolute_pos + 1).ljust(zfill_width) + " "
+        return str(absolute_pos + 1).rjust(zfill_width) + " "
+    if absolute_pos in adjusted_highlight:
+        return str(relative_pos).ljust(zfill_width) + " "
+    return str(relative_pos).rjust(zfill_width) + " "
+
+
 def _get_display_strings(  # noqa: PLR0913  # pylint: disable=too-many-arguments, too-many-positional-arguments
     todos: Todos,
     position: int,
-    relative_pos: int,
-    absolute_pos: int,
+    enumeration_info: str,
     highlight: range,
     width: int,
     ansi_strikethrough: bool,
@@ -197,17 +213,6 @@ def _get_display_strings(  # noqa: PLR0913  # pylint: disable=too-many-arguments
     todo = todos[position]
     if position in highlight and todo.is_empty():
         return _DisplayText("─" * _EMPTY_LINE_WIDTH, "")
-    zfill_width = len(str(len(todos)))
-    meta_info = Chunk.join(
-        Chunk(
-            ENUMERATE and not RELATIVE_ENUMERATE,
-            str(absolute_pos + 1).rjust(zfill_width) + " ",
-        ),
-        Chunk(
-            RELATIVE_ENUMERATE,
-            str(relative_pos + 1).rjust(zfill_width) + " ",
-        ),
-    )
     before_footers = Chunk.join(
         Chunk(True, todo.get_indent_level() * " "),
         Chunk(
@@ -237,12 +242,12 @@ def _get_display_strings(  # noqa: PLR0913  # pylint: disable=too-many-arguments
         Chunk(todo.is_folded_parent(), "› ..."),  # noqa: RUF001
         Chunk(todo.is_folded() and _DEBUG_FOLD, "FOLDED"),
         # Chunk(todo._folded == FoldedState.DEFAULT and _DEBUG_FOLD, "DEFAULT"),
-    ).ljust(width - 1 - len(meta_info), " ")
+    ).ljust(width - 1 - len(enumeration_info), " ")
     return _DisplayText(
-        meta_info,
+        enumeration_info,
         _add_ellipsis(
             before_footers,
-            len(meta_info),
+            len(enumeration_info),
             width - 1,
             ansi_strikethrough,
         )
@@ -272,9 +277,7 @@ def _print_todo(
             position + 1,
             column,
             char,
-            curses.A_STANDOUT
-            | curses.A_BOLD
-            | curses.color_pair(todo.get_color().as_int())
+            curses.A_STANDOUT | curses.color_pair(todo.get_color().as_int())
             if position in highlight
             else get_extra_info_attrs(),
         )
@@ -342,11 +345,11 @@ def print_todos(
     new_todos = Todos(new_todos)
     highlight = range(temp_selected, len(selected) + temp_selected)
     print_position = -1  # used only with folding
-    for relative, (position, todo), absolute_pos in zip(
+    for relative_pos, (position, todo), absolute_pos in zip(
         [
-            *range(temp_selected - 1, -1, -1),
-            int(selected),
-            *range(len(new_todos)),
+            *range(temp_selected, 0, -1),
+            int(selected) + 1,
+            *range(1, len(new_todos) + 1),
         ],
         enumerate(new_todos),
         count(prev_start),
@@ -356,15 +359,16 @@ def print_todos(
             display_strings = _get_display_strings(
                 new_todos,
                 position,
-                relative,
-                absolute_pos,
+                str(absolute_pos + 1).rjust(len(str(len(todos)))) + " "
+                if ENUMERATE or RELATIVE_ENUMERATE
+                else "",
                 range(0),
                 width,
                 True,
             )
             print(  # noqa: T201
-                _color_to_ansi(todo.get_color().as_int())
-                + display_strings.prefix
+                display_strings.prefix
+                + _color_to_ansi(todo.get_color().as_int())
                 + display_strings.text,
             )
             continue
@@ -375,8 +379,12 @@ def print_todos(
                 _get_display_strings(
                     new_todos,
                     position,
-                    relative,
-                    absolute_pos,
+                    _get_enumeration_info(
+                        relative_pos,
+                        absolute_pos,
+                        len(str(len(todos))) + 1,
+                        selected.get(),
+                    ),
                     highlight,
                     width,
                     False,
