@@ -539,6 +539,13 @@ def color_pair(pair_number: int) -> int:
     Return the attribute value for displaying text
     in the specified color pair.
     """
+    if pair_number < 0 or pair_number >= len(_color_pairs):
+        msg = (
+            "Invalid color pair number, make sure to call "
+            f"init_pair({pair_number}, ...) before calling "
+            "this function"
+        )
+        raise ValueError(msg)
     return _color_pairs[pair_number]
 
 

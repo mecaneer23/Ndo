@@ -85,7 +85,6 @@ class Color(Enum):
         return color in Color.as_dict().values()
 
 
-
 class NewTodoPosition(Enum):
     """
     Represent how far offset a new todo should be from a current todo
@@ -112,6 +111,18 @@ def clamp(number: int, minimum: int, maximum: int) -> int:
     return min(max(number, minimum), maximum - 1)
 
 
+def get_extra_info_attrs() -> int:
+    """
+    Get the attributes for extra information.
+
+    This seems like it could just be a constant, but color pairs
+    must be initialized before they can be used. It's challenging
+    to ensure that initialization prior to this file being imported,
+    so a function is used so the color_pair function doesn't fail.
+    """
+    return curses.A_BOLD | curses.color_pair(Color.GREEN.as_int())
+
+
 def set_header(stdscr: curses.window, message: str) -> None:
     """
     Set the header to a specific message.
@@ -120,7 +131,7 @@ def set_header(stdscr: curses.window, message: str) -> None:
         0,
         0,
         message.ljust(stdscr.getmaxyx()[1]),
-        curses.A_BOLD | curses.color_pair(2),
+        get_extra_info_attrs(),
     )
 
 

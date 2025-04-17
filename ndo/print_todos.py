@@ -5,8 +5,7 @@ Helper module to handle printing a list of Todo objects
 
 from collections.abc import Iterator
 from dataclasses import astuple, dataclass
-from functools import cache
-from typing import TYPE_CHECKING, Generic, TypeVar, cast
+from typing import TYPE_CHECKING, Generic, NamedTuple, TypeVar, cast
 
 from ndo.cursor import Cursor
 from ndo.get_args import (
@@ -20,7 +19,7 @@ from ndo.get_args import (
     UiType,
 )
 from ndo.todo import Todo, Todos
-from ndo.utils import Chunk, Color
+from ndo.utils import Chunk, Color, get_extra_info_attrs
 
 if UI_TYPE == UiType.ANSI:
     import ndo.acurses as curses
@@ -68,6 +67,13 @@ class SublistItems(
         Allows unpacking of SublistItems instances.
         """
         return iter(astuple(self))
+
+
+class _DisplayText(NamedTuple):
+    """Represent the display text of a todo item, ready to be printed"""
+
+    prefix: str
+    text: str
 
 
 def _get_bullet(indentation_level: int) -> str:
@@ -156,27 +162,41 @@ def _get_height_width(stdscr: curses.window | None) -> tuple[int, int]:
     return stdscr.getmaxyx()
 
 
-def _add_ellipsis(string: str, max_length: int, do_nothing: bool) -> str:
+def _add_ellipsis(
+    string: str,
+    prefix_len: int,
+    max_length: int,
+    do_nothing: bool,
+) -> str:
     """Add an ellipsis to the end of a string if it will be cut off"""
-    if len(string) <= max_length or do_nothing:
+    if prefix_len + len(string) <= max_length or do_nothing:
         return string
     ellipsis = "... " if SIMPLE_BOXES else "… "
-    return string[: max_length - len(ellipsis)] + ellipsis
+    return string[: max_length - len(ellipsis) - prefix_len] + ellipsis
 
 
-def _get_display_string(  # noqa: PLR0913  # pylint: disable=too-many-arguments, too-many-positional-arguments
+def _get_display_strings(  # noqa: PLR0913  # pylint: disable=too-many-arguments, too-many-positional-arguments
     todos: Todos,
     position: int,
     relative_pos: int,
     highlight: range,
     width: int,
     ansi_strikethrough: bool,
-) -> str:
+) -> _DisplayText:
+    """
+    Return a tuple of strings representing a single todo item,
+    to be printed to the screen
+
+    The strings are ordered and should be printed in order.
+
+    1. Meta information about the item's position
+    2. The todo display text
+    """
     todo = todos[position]
     if position in highlight and todo.is_empty():
-        return "─" * _EMPTY_LINE_WIDTH
+        return _DisplayText("─" * _EMPTY_LINE_WIDTH, "")
     zfill_width = len(str(len(todos)))
-    before_footers = Chunk.join(
+    meta_info = Chunk.join(
         Chunk(
             ENUMERATE and not RELATIVE_ENUMERATE,
             str(todos.index(todo) + 1).rjust(zfill_width) + " ",
@@ -185,6 +205,8 @@ def _get_display_string(  # noqa: PLR0913  # pylint: disable=too-many-arguments,
             RELATIVE_ENUMERATE,
             str(relative_pos + 1).rjust(zfill_width) + " ",
         ),
+    )
+    before_footers = Chunk.join(
         Chunk(True, todo.get_indent_level() * " "),
         Chunk(
             not todo.is_empty() and not SIMPLE_BOXES and not BULLETS,
@@ -213,48 +235,26 @@ def _get_display_string(  # noqa: PLR0913  # pylint: disable=too-many-arguments,
         Chunk(todo.is_folded_parent(), "› ..."),  # noqa: RUF001
         Chunk(todo.is_folded() and _DEBUG_FOLD, "FOLDED"),
         # Chunk(todo._folded == FoldedState.DEFAULT and _DEBUG_FOLD, "DEFAULT"),
-    ).ljust(width - 1, " ")
-    return _add_ellipsis(
-        before_footers,
-        width - 1,
-        ansi_strikethrough,
-    ) + Chunk.join(
-        Chunk(ansi_strikethrough, _ANSI_RESET),
-        Chunk(width == 0, " "),
-    )
-
-
-@cache
-def _find_first_alphanum(text: str) -> int:
-    for index, char in enumerate(text):
-        if char.isalpha():
-            return index
-    return -1
-
-
-def _is_within_strikethrough_range(
-    counter: int,
-    display_string: str,
-    window_width: int,
-) -> bool:
-    # make sure to test with -s and -sx
-    # issue lies with Alacritty terminal
-
-    # This only works if the display string is smaller than the window width
-    # offset = len(display_string.rstrip()) - len(todo.get_display_text())
-
-    offset = _find_first_alphanum(display_string)
-    return (
-        offset - 1
-        < counter
-        < window_width - (window_width - len(display_string.rstrip()))
+    ).ljust(width - 1 - len(meta_info), " ")
+    return _DisplayText(
+        meta_info,
+        _add_ellipsis(
+            before_footers,
+            len(meta_info),
+            width - 1,
+            ansi_strikethrough,
+        )
+        + Chunk.join(
+            Chunk(ansi_strikethrough, _ANSI_RESET),
+            Chunk(width == 0, " "),
+        ),
     )
 
 
 def _print_todo(
     stdscr: curses.window,
     todo: Todo,
-    display_string: str,
+    display_strings: _DisplayText,
     todo_print_position: tuple[int, int],
     highlight: range,
 ) -> None:
@@ -265,16 +265,19 @@ def _print_todo(
     """
     counter = 0
     position, print_position = todo_print_position
-    while counter < len(display_string) - 1:
-        should_strikethrough = (
-            STRIKETHROUGH
-            and todo.is_toggled()
-            and _is_within_strikethrough_range(
-                counter,
-                display_string,
-                stdscr.getmaxyx()[1],
-            )
+    for column, char in enumerate(display_strings.prefix):
+        stdscr.addch(
+            position + 1,
+            column,
+            char,
+            curses.A_STANDOUT
+            | curses.A_BOLD
+            | curses.color_pair(todo.get_color().as_int())
+            if position in highlight
+            else get_extra_info_attrs(),
         )
+    while counter < len(display_strings.text) - 1:
+        should_strikethrough = STRIKETHROUGH and todo.is_toggled()
         attrs = curses.color_pair(todo.get_color().as_int())
         if position in highlight:
             attrs |= curses.A_STANDOUT
@@ -286,8 +289,8 @@ def _print_todo(
         try:
             stdscr.addch(
                 print_position + 1,
-                counter,
-                display_string[counter],
+                len(display_strings.prefix) + counter,
+                display_strings.text[counter],
                 attrs,
             )
         except OverflowError:
@@ -347,23 +350,25 @@ def print_todos(
     ):
         print_position += 1
         if stdscr is None:
+            display_strings = _get_display_strings(
+                new_todos,
+                position,
+                relative,
+                range(0),
+                width,
+                True,
+            )
             print(  # noqa: T201
                 _color_to_ansi(todo.get_color().as_int())
-                + _get_display_string(
-                    new_todos,
-                    position,
-                    relative,
-                    range(0),
-                    width,
-                    True,
-                ),
+                + display_strings.prefix
+                + display_strings.text,
             )
             continue
         if not todo.is_folded() or _DEBUG_FOLD:
             _print_todo(
                 stdscr,
                 todo,
-                _get_display_string(
+                _get_display_strings(
                     new_todos,
                     position,
                     relative,
