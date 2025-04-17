@@ -184,13 +184,11 @@ def _get_enumeration_info(
 ) -> str:
     if not (ENUMERATE or RELATIVE_ENUMERATE):
         return ""
-    if not RELATIVE_ENUMERATE:
-        if absolute_pos in adjusted_highlight:
-            return str(absolute_pos + 1).ljust(zfill_width) + " "
-        return str(absolute_pos + 1).rjust(zfill_width) + " "
-    if absolute_pos in adjusted_highlight:
-        return str(relative_pos).ljust(zfill_width) + " "
-    return str(relative_pos).rjust(zfill_width) + " "
+
+    pos = relative_pos if RELATIVE_ENUMERATE else absolute_pos + 1
+    justify = str.ljust if absolute_pos in adjusted_highlight else str.rjust
+
+    return justify(str(pos), zfill_width) + " "
 
 
 def _get_display_strings(  # noqa: PLR0913  # pylint: disable=too-many-arguments, too-many-positional-arguments
