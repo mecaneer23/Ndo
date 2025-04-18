@@ -143,7 +143,7 @@ class InputTodo:
             if self._position >= len(self._chars) - 1:
                 break
             self._position += 1
-            if self._chars[self._position] == " ":
+            if not self._chars[self._position].isalnum():
                 break
         return _EditString(self._chars, self._position)
 
@@ -159,7 +159,7 @@ class InputTodo:
             if self._position <= 0:
                 break
             self._position -= 1
-            if self._chars[self._position] == " ":
+            if not self._chars[self._position].isalnum():
                 break
         return _EditString(self._chars, self._position)
 
