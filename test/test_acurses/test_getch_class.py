@@ -9,11 +9,12 @@ from collections.abc import Generator
 from contextlib import suppress
 from io import StringIO
 from queue import Empty
-from unittest.mock import patch
 
 import pytest
 
 from ndo.acurses import _Getch, window  # type: ignore[reportPrivateUsage]
+
+from .test_utils import mock_stdin_input
 
 window._GETCH.destroy()  # type: ignore[reportPrivateUsage]  # noqa: SLF001  # pylint: disable=protected-access
 
@@ -118,16 +119,8 @@ def test_start_sets_started_flag() -> None:
 
 
 def test_fill_queue_and_get() -> None:
-    test_input = iter("abc")  # Generator-like to simulate real input over time
-
-    def fake_stdin_read(_: int) -> str:
-        try:
-            return next(test_input)
-        except StopIteration:
-            time.sleep(1)  # Simulate blocking when no more input
-            return ""
-
-    with patch("sys.stdin.read", side_effect=fake_stdin_read):
+    data = "abc"
+    with mock_stdin_input(data):
         g = _Getch()
         g.set_blocking(False)
         g.start()
@@ -139,13 +132,13 @@ def test_fill_queue_and_get() -> None:
                 c = g.get(timeout=0.05)
                 if c not in chars:
                     chars.append(c)
-                if len(chars) == 3:
+                if len(chars) == len(data):
                     break
             except Empty:
                 continue
 
         result = [chr(c) for c in chars]
-        assert result == ["a", "b", "c"]
+        assert result == list(data)
 
 
 def test_get_with_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
