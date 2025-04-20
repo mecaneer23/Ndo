@@ -275,13 +275,17 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         pos_y = self._begin_y + new_y
         pos_x = self._begin_x + new_x
         if pos_y < 0:
-            raise error("new y position too small")
+            msg = f"new y position too small: {pos_y}"
+            raise error(msg)
         if pos_x < 0:
-            raise error("new x position too small")
+            msg = f"new x position too small: {pos_x}"
+            raise error(msg)
         if pos_y > self._begin_y + self._height:
-            raise error("new y position too large")
+            msg = f"new y position too large: {pos_y}"
+            raise error(msg)
         if pos_x > self._begin_x + self._width:
-            raise error("new x position too large")
+            msg = f"new x position too large: {pos_x}"
+            raise error(msg)
         stdout.write(f"\033[{pos_y + 1};{pos_x + 1}H")
 
     def _parse_attrs(self, attrs: int) -> str:
@@ -380,6 +384,12 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
     def box(self) -> None:
         """Draw a border around the current window"""
+        if self._width < 0:
+            msg = f"width too small: {self._width}"
+            raise error(msg)
+        if self._height < 0:
+            msg = f"height too small: {self._height}"
+            raise error(msg)
         self.addstr(
             0,
             0,

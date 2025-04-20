@@ -22,3 +22,5 @@
   - display error if no more found
   - don't reset selection if no remaining matches
 - refactor: don't pass around unnecessary _EditStrings (_handle_escape)
+- fix: make sure entering insert mode doesn't crash program for certain length strings
+- fix: handle too-small terminal window for menus more gracefully
