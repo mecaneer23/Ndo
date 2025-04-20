@@ -169,8 +169,12 @@ def _add_ellipsis(
     max_length: int,
 ) -> str:
     """
-    Add an ellipsis to the end of a string if the length of the string
-    + prefix_len is greater than max_length.
+    Add an ellipsis to the end of a string
+    if len(`string`) + `prefix_len` > `max_length`.
+
+    The length of the returned string should have
+    `len` == `max_length` - `prefix_len`
+    (unless `max_length` is less than len(`ellipsis`))
     """
     if prefix_len + len(string) <= max_length:
         return string
