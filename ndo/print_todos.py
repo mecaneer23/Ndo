@@ -167,12 +167,14 @@ def _add_ellipsis(
     string: str,
     prefix_len: int,
     max_length: int,
-    do_nothing: bool,
 ) -> str:
-    """Add an ellipsis to the end of a string if it will be cut off"""
-    if prefix_len + len(string) <= max_length or do_nothing:
+    """
+    Add an ellipsis to the end of a string if the length of the string
+    + prefix_len is greater than max_length.
+    """
+    if prefix_len + len(string) <= max_length:
         return string
-    ellipsis = "... " if SIMPLE_BOXES else "… "
+    ellipsis = "..." if SIMPLE_BOXES else "…"
     return string[: max_length - len(ellipsis) - prefix_len] + ellipsis
 
 
@@ -241,11 +243,12 @@ def _get_display_strings(
     ).ljust(width - 1 - len(enumeration_info), " ")
     return _DisplayText(
         enumeration_info,
-        _add_ellipsis(
+        before_footers
+        if ansi_strikethrough
+        else _add_ellipsis(
             before_footers,
             len(enumeration_info),
             width - 1,
-            ansi_strikethrough,
         )
         + Chunk.join(
             Chunk(ansi_strikethrough, _ANSI_RESET),
@@ -277,7 +280,7 @@ def _print_todo(
             if position in highlight
             else get_extra_info_attrs(),
         )
-    while counter < len(display_strings.text) - 1:
+    while counter < len(display_strings.text):
         should_strikethrough = STRIKETHROUGH and todo.is_toggled()
         attrs = curses.color_pair(todo.get_color().as_int())
         if position in highlight:
