@@ -18,5 +18,7 @@
 - feat!: implement bcurses (browser-curses) using brython
 - fix: select all todos above/below should be predictable and repeatable
 - refactor: create singleton abstract class which _Getch uses
-- feat: add `n` control to move to next instance of found search value, display error if no more found, don't reset selection if no remaining matches
+- feat: add `n` control to move to next instance of found search value
+  - display error if no more found
+  - don't reset selection if no remaining matches
 - refactor: don't pass around unnecessary _EditStrings (_handle_escape)
