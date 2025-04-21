@@ -10,7 +10,7 @@ from sys import argv, stdin, stdout
 from threading import Lock, Thread
 from time import time as now
 from types import TracebackType
-from typing import Any, Callable, TypeVar, overload
+from typing import Any, Callable, Self, TypeVar, overload
 
 from ndo.keys import Key
 
@@ -126,10 +126,10 @@ class error(Exception):  # pylint: disable=invalid-name  # noqa: N801, N818
 class _Singleton:
     """A class for which only one instance can exist concurrently"""
 
-    _instance: "_Singleton | None" = None
+    _instance: Self | None = None
     _lock: Lock = Lock()
 
-    def __new__(cls) -> "_Singleton":
+    def __new__(cls) -> Self:
         with cls._lock:
             if cls._instance is not None:
                 msg = f"Only one instance of {cls.__name__} is allowed."
