@@ -123,17 +123,45 @@ class error(Exception):  # pylint: disable=invalid-name  # noqa: N801, N818
     """
 
 
-class _Getch:
-    _instance: "_Getch | None" = None
+class _Singleton:
+    """A class for which only one instance can exist concurrently"""
+
+    _instance: "_Singleton | None" = None
     _lock: Lock = Lock()
 
-    def __new__(cls) -> "_Getch":
+    def __new__(cls) -> "_Singleton":
         with cls._lock:
             if cls._instance is not None:
-                raise RuntimeError("Only one instance of _Getch is allowed.")
+                msg = f"Only one instance of {cls.__name__} is allowed."
+                raise RuntimeError(msg)
             cls._instance = super().__new__(cls)
         return cls._instance
 
+    @classmethod
+    def destroy(cls) -> None:
+        """Manually destroys the instance"""
+        with cls._lock:
+            if cls._instance is None:
+                msg = f"No instance of {cls.__name__} to destroy."
+                raise RuntimeError(msg)
+            cls._instance = None
+
+    def __enter__(self) -> "_Singleton":
+        """Enter context manager"""
+        return self
+
+    def __exit__(
+        self,
+        type_: type[BaseException] | None,
+        value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        """Exit context manager"""
+        self.destroy()
+        _ = type_, value, traceback
+
+
+class _Getch(_Singleton):
     def __init__(self) -> None:
         self._block = True
         self._raw_input: Queue[int] = Queue()
@@ -170,28 +198,6 @@ class _Getch:
     def set_blocking(self, block: bool) -> None:  # noqa: FBT001
         """Set blocking status"""
         self._block = block
-
-    @classmethod
-    def destroy(cls) -> None:
-        """Manually destroys the instance"""
-        with cls._lock:
-            if cls._instance is None:
-                raise RuntimeError("No instance of _Getch to destroy.")
-            cls._instance = None
-
-    def __enter__(self) -> "_Getch":
-        """Enter context manager"""
-        return self
-
-    def __exit__(
-        self,
-        type_: type[BaseException] | None,
-        value: BaseException | None,
-        traceback: TracebackType | None,
-    ) -> None:
-        """Exit context manager"""
-        self.destroy()
-        _ = type_, value, traceback
 
 
 class _CursesWindow:  # pylint: disable=too-many-instance-attributes
