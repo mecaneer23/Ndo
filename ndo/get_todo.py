@@ -197,25 +197,33 @@ class InputTodo:
         self._stdscr.refresh()
         return _EditString(self._chars, self._position)
 
-    def _handle_escape(self) -> _EditString | None:
+    def _handle_escape(self) -> bool:
+        """
+        Handle escape sequences (including just `esc` key).
+
+        Return whether input window should close.
+        """
         self._win.nodelay(True)  # noqa: FBT003
         try:
             input_char = self._win.getch()
         except KeyboardInterrupt:
-            return None
+            return True
         self._win.nodelay(False)  # noqa: FBT003
-        table: dict[int, Callable[[], _EditString | None]] = {
+        table: dict[int, Callable[[], _EditString]] = {
             Key.ctrl_backspace: self._delete_left_word,
             Key.ctrl_backspace_: self._delete_left_word,
             Key.ctrl_backspace__: self._delete_left_word,
             Key.backspace__: self._delete_left_word,
-            Key.nodelay_escape: lambda: None,
             Key.ctrl_delete: self._delete_right_word,
             Key.alt_h: self._handle_help_menu,
         }
-        if input_char in table:
-            return table[input_char]()
-        return self._error_passthrough(str(input_char))
+        if input_char == Key.nodelay_escape:
+            return True
+        if input_char not in table:
+            self._error_passthrough(str(input_char))
+            return False
+        self._chars, self._position = table[input_char]()
+        return False
 
     def _handle_toggle_note_todo(self) -> _EditString:
         self._toggle_note_todo()
@@ -408,11 +416,9 @@ class InputTodo:
             if self._should_exit(input_char):
                 return self._todo.set_display_text("".join(self._chars))
             if input_char == Key.escape:
-                possible_chars_position = self._handle_escape()
-                if possible_chars_position is None:
+                if self._handle_escape():
                     self._mode.set_on()
                     return original
-                self._chars, self._position = possible_chars_position
                 continue
             if input_char == Key.down_arrow:
                 return self._todo.set_display_text(self._handle_new_todo())
