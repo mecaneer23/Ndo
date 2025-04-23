@@ -22,4 +22,3 @@
   - display error if no more found
   - don't reset selection if no remaining matches
 - fix: make sure entering insert mode doesn't crash program for certain length strings
-- fix: handle too-small terminal window for menus more gracefully

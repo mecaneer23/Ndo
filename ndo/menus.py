@@ -99,9 +99,20 @@ def help_menu(
         filename,
         frozenset({"<kbd>", "</kbd>", "(arranged alphabetically)"}),
     )
+    ncols = len(lines[0]) + 2
+    parent_width = parent_win.getmaxyx()[1]
+    if ncols > parent_width:
+        alert(
+            parent_win,
+            (
+                f"Window width too small: {parent_width}. "
+                f"Must be at least {ncols}."
+            ),
+        )
+        return
     win = curses.newwin(
         min(parent_win.getmaxyx()[0] - 1, len(lines) + 2),
-        len(lines[0]) + 2,
+        ncols,
         1,
         (parent_win.getmaxyx()[1] - (len(lines[0]) + 1)) // 2,
     )
