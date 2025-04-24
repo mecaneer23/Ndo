@@ -59,7 +59,7 @@ def _simple_scroll_keybinds(
     len_new_lines: int,
 ) -> int:
     try:
-        key = win.getch()
+        key = Key(win.getch())
     except KeyboardInterrupt:
         return -1
     if key in (Key.up_arrow, Key.k):
@@ -73,9 +73,9 @@ def _simple_scroll_keybinds(
 
 def _get_move_options(
     len_list: int,
-    additional_options: dict[int, Callable[[int], int]],
-) -> dict[int, Callable[[int], int]]:
-    defaults: dict[int, Callable[[int], int]] = {
+    additional_options: dict[Key, Callable[[int], int]],
+) -> dict[Key, Callable[[int], int]]:
+    defaults: dict[Key, Callable[[int], int]] = {
         Key.k: lambda cursor: cursor - 1,
         Key.j: lambda cursor: cursor + 1,
         Key.g: lambda _: 0,
@@ -223,10 +223,10 @@ def color_menu(parent_win: curses.window, original: Color) -> Color:
                 | (curses.A_STANDOUT if i == cursor else 0),
             )
         try:
-            key = win.getch()
+            key = Key(win.getch())
         except KeyboardInterrupt:
             return original
-        return_options: dict[int, Callable[[], Color]] = {
+        return_options: dict[Key, Callable[[], Color]] = {
             Key.q: lambda: original,
             Key.escape: lambda: original,
             Key.enter: partial(Color, Color.as_dict()[lines[cursor].strip()]),
@@ -319,10 +319,10 @@ def sort_menu(
                 curses.A_STANDOUT if i == cursor else 0,
             )
         try:
-            key = win.getch()
+            key = Key(win.getch())
         except KeyboardInterrupt:
             return todos
-        return_options: dict[int, Callable[..., Todos]] = {
+        return_options: dict[Key, Callable[..., Todos]] = {
             Key.q: lambda: todos,
             Key.escape: lambda: todos,
             Key.enter: partial(_sort_by, lines[cursor], todos, selected),

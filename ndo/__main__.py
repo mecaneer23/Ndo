@@ -361,7 +361,7 @@ class _MainInputResult(NamedTuple):
 
     should_exit: bool
     todos: Todos
-    key: int = -1
+    key: Key = Key(-1)
 
 
 def _raise_keyboard_interrupt() -> None:
@@ -372,37 +372,37 @@ def _get_main_input(
     stdscr: curses.window,
     todos: Todos,
     keys_esckeys: tuple[
-        dict[int, tuple[Callable[..., Todos | None], str]],
-        dict[int, tuple[Callable[..., Todos | None], str]],
+        dict[Key, tuple[Callable[..., Todos | None], str]],
+        dict[Key, tuple[Callable[..., Todos | None], str]],
     ],
     possible_args: dict[str, _PossibleArgs],
-) -> _MainInputResult | int:
+) -> _MainInputResult | Key:
     try:
-        if (key := stdscr.getch()) == Key.q:
+        if (key := Key(stdscr.getch())) == Key.q:
             _raise_keyboard_interrupt()
     except KeyboardInterrupt:
         return _MainInputResult(True, todos)
     if key not in keys_esckeys[0]:
         alert(
             stdscr,
-            f"Invalid key: `{key}` | `{chr(key)}`. Press `h` for help.",
+            f"Invalid key: `{key}` | `{chr(key.value)}`. Press `h` for help.",
         )
-        return -1
-    func, args = keys_esckeys[0][key]
+        return Key(-1)
+    func, args = keys_esckeys[0][Key(key)]
     if key == Key.escape:
         stdscr.nodelay(True)
-        key = stdscr.getch()
+        key = Key(stdscr.getch())
         stdscr.nodelay(False)
         if key == Key.nodelay_escape:
             return _MainInputResult(True, todos)
         if key not in keys_esckeys[1]:
             alert(
                 stdscr,
-                f"Invalid key after escape: `{key}` | `{chr(key)}`. "
+                f"Invalid key after escape: `{key}` | `{chr(key.value)}`. "
                 "Press `h` for help.",
             )
-            return -1
-        func, args = keys_esckeys[1][key]
+            return Key(-1)
+        func, args = keys_esckeys[1][Key(key)]
     possible_todos = func(
         *get_executable_args(
             args,
@@ -552,7 +552,7 @@ def main(stdscr: curses.window) -> Response:
     file_modified_time = get_file_modified_time(FILENAME)
     # if adding a new feature that updates `todos`,
     # make sure it also calls update_file()
-    keys: dict[int, tuple[Callable[..., Todos | None], str]] = {
+    keys: dict[Key, tuple[Callable[..., Todos | None], str]] = {
         Key.ctrl_a: (selected.multiselect_all, "len(todos)"),
         Key.ctrl_f: (search_menu, "stdscr, todos, selected"),
         Key.backspace: (join_lines, "todos, selected"),
@@ -617,7 +617,7 @@ def main(stdscr: curses.window) -> Response:
         Key.alt_j_windows: (todo_down, "todos, selected"),
         Key.alt_k_windows: (todo_up, "todos, selected"),
     }
-    esc_keys: dict[int, tuple[Callable[..., Todos | None], str]] = {
+    esc_keys: dict[Key, tuple[Callable[..., Todos | None], str]] = {
         Key.alt_G: (selected.multiselect_bottom, "len(todos)"),
         Key.alt_g: (selected.multiselect_top, "None"),
         Key.alt_j: (todo_down, "todos, selected"),

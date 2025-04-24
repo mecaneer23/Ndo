@@ -256,7 +256,7 @@ class Cursor:
         total = str(first_digit)
         while True:
             try:
-                key = stdscr.getch()
+                key = Key(stdscr.getch())
             except KeyboardInterrupt:
                 return
             operation = self._set_to_clamp
@@ -265,7 +265,7 @@ class Cursor:
                 if key != Key.escape:  # not an escape sequence
                     return
                 stdscr.nodelay(True)  # noqa: FBT003
-                key = stdscr.getch()  # alt + ...
+                key = Key(stdscr.getch())  # alt + ...
                 stdscr.nodelay(False)  # noqa: FBT003
             if key == Key.k:
                 operation(self.get_first() - int(total), max_len)

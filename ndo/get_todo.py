@@ -205,11 +205,11 @@ class InputTodo:
         """
         self._win.nodelay(True)  # noqa: FBT003
         try:
-            input_char = self._win.getch()
+            input_char = Key(self._win.getch())
         except KeyboardInterrupt:
             return True
         self._win.nodelay(False)  # noqa: FBT003
-        table: dict[int, Callable[[], _EditString]] = {
+        table: dict[Key, Callable[[], _EditString]] = {
             Key.ctrl_backspace: self._delete_left_word,
             Key.ctrl_backspace_: self._delete_left_word,
             Key.ctrl_backspace__: self._delete_left_word,
@@ -295,8 +295,8 @@ class InputTodo:
             self._chars.pop(self._position)
         return _EditString(self._chars, self._position)
 
-    def _handle_printable(self, input_char: int) -> _EditString:
-        self._chars.insert(self._position, chr(input_char))
+    def _handle_printable(self, input_char: Key) -> _EditString:
+        self._chars.insert(self._position, chr(input_char.value))
         if self._position < len(self._chars):
             self._position += 1
         return _EditString(self._chars, self._position)
@@ -342,7 +342,7 @@ class InputTodo:
             )
         self._win.refresh()
 
-    def _should_exit(self, input_char: int) -> bool:
+    def _should_exit(self, input_char: Key) -> bool:
         if input_char in (Key.ctrl_k, Key.ctrl_x):
             self._mode.toggle()
             return True
@@ -350,13 +350,13 @@ class InputTodo:
 
     def _simple_to_handle(
         self,
-        input_char: int,
-        key_handlers: dict[int, Callable[..., _EditString]],
+        input_char: Key,
+        key_handlers: dict[Key, Callable[..., _EditString]],
     ) -> bool:
         if input_char in key_handlers:
-            self._chars, self._position = key_handlers[input_char]()
+            self._chars, self._position = key_handlers[Key(input_char)]()
             return True
-        if chr(input_char).isprintable():
+        if chr(input_char.value).isprintable():
             self._handle_printable(input_char)
             return True
         if input_char == Key.up_arrow:
@@ -379,7 +379,7 @@ class InputTodo:
 
         original = self._todo.copy()
 
-        key_handlers: dict[int, Callable[..., _EditString]] = {
+        key_handlers: dict[Key, Callable[..., _EditString]] = {
             Key.left_arrow: self._move_left,
             Key.right_arrow: self._move_right,
             Key.backspace: self._handle_backspace,
@@ -409,7 +409,7 @@ class InputTodo:
                 )
             self._display()
             try:
-                input_char = self._win.getch()
+                input_char = Key(self._win.getch())
             except KeyboardInterrupt:
                 self._mode.set_on()
                 return original

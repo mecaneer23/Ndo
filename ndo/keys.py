@@ -2,12 +2,13 @@
 MIT License (c) 2023-2024
 """
 
-# most of the key values aren't good variable names out of context,
-# so the following line tells Ruff to ignore them
-# ruff: noqa: E741
+# ruff: noqa: E741, PIE796
+# pylint: disable=invalid-name
+
+from enum import Enum
 
 
-class Key:
+class Key(Enum):
     """
     A wrapper to access keys as curses refers to them. Mostly ascii.
     """
@@ -85,8 +86,25 @@ class Key:
     ctrl_right_arrow = 565
     ctrl_left_arrow = 550
 
+    def __eq__(self, other: object) -> bool:
+        """
+        Compare two Key objects.
+        """
+        if isinstance(other, Key):
+            return self.value == other.value
+        if isinstance(other, int):
+            return self.value == other
+        msg = (
+            f"Cannot compare Key with {type(other)}. "
+            f"Use `Key.{self.name}` or `Key.{self.name}.value`."
+        )
+        raise NotImplementedError(msg)
+
+    def __hash__(self) -> int:
+        return super().__hash__()
+
     @staticmethod
-    def digits() -> tuple[int, ...]:
+    def digits() -> tuple["Key", ...]:
         """
         Return a tuple with the ascii value of every digit (0-9).
         """
@@ -104,15 +122,14 @@ class Key:
         )
 
     @staticmethod
-    def normalize_ascii_digit_to_digit(ascii_digit: int) -> int:
+    def normalize_ascii_digit_to_digit(ascii_digit: "int | Key") -> int:
         """
         Take in a Key which represents a digit and
         return the digit it represents.
         """
-        ascii_zero = 48
-        ascii_nine = 57
-
-        if ascii_zero <= ascii_digit <= ascii_nine:
-            return ascii_digit - ascii_zero
+        if isinstance(ascii_digit, Key):
+            ascii_digit = ascii_digit.value
+        if Key.zero.value <= ascii_digit <= Key.nine.value:
+            return ascii_digit - Key.zero.value
         msg = f"Ascii digit `{ascii_digit}` must represent a digit."
         raise ValueError(msg)

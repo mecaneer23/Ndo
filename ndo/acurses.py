@@ -97,7 +97,7 @@ BACKGROUND_DEFAULT = 2**49
 
 _ANSI_RESET = "\033[0m"
 
-_KEYPAD_KEYS: dict[str, int] = {
+_KEYPAD_KEYS: dict[str, Key] = {
     "27-91-65": Key.up_arrow,
     "27-91-66": Key.down_arrow,
     "27-91-67": Key.right_arrow,
@@ -257,7 +257,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         )
         key = "-".join(map(str, chars))
         if key in keys:
-            return keys[key]
+            return keys[key].value
         for char in chars:
             self._stored_keys.put(char)
         return self._stored_keys.get()
