@@ -12,7 +12,6 @@
   -b how can we save folded state when todos are pulled from file and list is recreated?
 -g feat: add multiple line paste operation for in-app copy
   -g migrate copied_todo to list of todos
--c fix: reimplement acurses support for windows
 -c fix: if holding down a key in acurses, make sure it doesn't stay pressed longer than it should (i.e. holding j key) (only reproducible in some terminals)
   -c happens because there is too much delay between actions. You can press keys faster than the program can respond
 -c fix: visual glitch when len(todos) == 1 in acurses

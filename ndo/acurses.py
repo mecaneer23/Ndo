@@ -3,7 +3,7 @@
 
 from functools import singledispatchmethod
 from itertools import compress, count
-from os import get_terminal_size, name
+from os import get_terminal_size
 from queue import Empty as queue_empty  # noqa: N813
 from queue import Queue
 from sys import argv, stdin, stdout
@@ -23,40 +23,62 @@ try:
     from tty import (
         setcbreak,  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
     )
-except ImportError as err:
-    raise NotImplementedError(
-        "acurses doesn't currently support Windows. "
-        "Is an alternative ui available?",
-    ) from err
-    # https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
-    from ctypes import byref, c_ulong, windll
+except ImportError:
+    from ctypes import WinError, byref, windll, wintypes
     from msvcrt import (
         getwch,  # type: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
-        putwch,  # type: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
     )
 
+    TCSADRAIN = 1  #  type: ignore[reportConstantRedefinition]
+
+    _STD_INPUT_HANDLE = -10
     _STD_OUTPUT_HANDLE = -11
-    handle = windll.kernel32.GetStdHandle(_STD_OUTPUT_HANDLE)
-    mode = c_ulong()
+    _ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4
+    _ENABLE_ECHO_INPUT = 4
+    _ENABLE_LINE_INPUT = 2
 
-    windll.kernel32.GetConsoleMode(handle, byref(mode))
-
-    _ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
-    windll.kernel32.SetConsoleMode(
-        handle,
-        mode.value | _ENABLE_VIRTUAL_TERMINAL_PROCESSING,
-    )
-
-    def _write(string: str) -> int:
-        for ch in string:
-            putwch(ch)
-        return 0
+    def _enable_ansi() -> None:
+        handle = windll.kernel32.GetStdHandle(_STD_OUTPUT_HANDLE)
+        mode = wintypes.DWORD()
+        if not windll.kernel32.GetConsoleMode(
+            handle,
+            byref(mode),
+        ):
+            raise WinError()
+        windll.kernel32.SetConsoleMode(
+            handle,
+            mode.value | _ENABLE_VIRTUAL_TERMINAL_PROCESSING,
+        )
 
     stdin.read = lambda _=-1: getwch()  # type: ignore[reportUnknownLambdaType]
-    stdout.write = _write
-    stdout.flush = lambda: None
+    stdin.fileno = lambda: _STD_INPUT_HANDLE
 
-IS_WINDOWS = name == "nt"
+    def tcgetattr(fd: int) -> int:
+        """Get the terminal attributes"""
+        mode = wintypes.DWORD()
+        if not windll.kernel32.GetConsoleMode(
+            windll.kernel32.GetStdHandle(fd),
+            byref(mode),
+        ):
+            raise WinError()
+        return mode.value
+
+    def tcsetattr(fd: int, when: int, mode: int) -> None:
+        """Set the terminal attributes"""
+        if when != TCSADRAIN:
+            raise NotImplementedError("Only TCSADRAIN is supported for when")
+        windll.kernel32.SetConsoleMode(
+            windll.kernel32.GetStdHandle(fd),
+            mode,
+        )
+
+    def setcbreak(fd: int) -> None:
+        """Set the terminal to cbreak mode"""
+        new_mode = tcgetattr(fd) & ~(_ENABLE_LINE_INPUT | _ENABLE_ECHO_INPUT)
+        tcsetattr(fd, TCSADRAIN, new_mode)  # pyright: ignore[reportUnknownArgumentType]
+
+    _enable_ansi()
+
 
 _T = TypeVar("_T")
 
@@ -511,30 +533,27 @@ def wrapper(
     wrapper().
     """
 
-    if not IS_WINDOWS:
-        fd = stdin.fileno()
-        old_settings = tcgetattr(fd)  # pyright: ignore[reportUnknownVariableType, reportPossiblyUnboundVariable]
+    fd = stdin.fileno()
+    old_settings = tcgetattr(fd)
 
+    program_name = argv[0].rsplit("/", 1)[-1].rsplit(".", 1)[0]
     try:
-        if not IS_WINDOWS:
-            setcbreak(fd)  # pyright: ignore[reportPossiblyUnboundVariable]
+        setcbreak(fd)
         # SAVE_CURSOR = \033[s
         # CLEAR_SCREEN = \033[2J
         # CURSOR_HOME = \033[H
-        program_name = argv[0].rsplit("/", 1)[-1].rsplit(".", 1)[0]
+        # _curses.start_color()
         stdout.write(f"\033[?1049h\033[H\033[22t\033]0;{program_name}\007")
         stdout.flush()
         stdscr = initscr()
         stdscr.keypad(True)  # noqa: FBT003
-        # _curses.start_color()
         return func(stdscr, *args, **kwds)
     finally:
         if "stdscr" in locals():
             # RESET_COLOR = \033[39;49m
             stdout.write("\033[?1049l\033[23t\033[?25h")
             stdout.flush()
-            if not IS_WINDOWS:
-                tcsetattr(fd, TCSADRAIN, old_settings)  # pyright: ignore[reportUnknownVariableType, reportPossiblyUnboundVariable]
+            tcsetattr(fd, TCSADRAIN, old_settings)  # pyright: ignore[reportUnknownArgumentType]
 
 
 def init_pair(pair_number: int, fg: int, bg: int) -> None:
