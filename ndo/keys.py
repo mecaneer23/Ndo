@@ -22,6 +22,9 @@ class Key(IntEnum):
     enter = 10
     ctrl_k = 11
     enter_ = 13
+    shift = 16
+    ctrl = 17
+    alt = 18
     ctrl_r = 18
     ctrl_backspace = 23
     ctrl_x = 24

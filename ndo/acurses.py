@@ -2,6 +2,7 @@
 # ruff: noqa: TRY003, EM101
 
 from functools import singledispatchmethod
+from enum import Enum
 from itertools import compress, count
 from os import get_terminal_size
 from queue import Empty as queue_empty  # noqa: N813
@@ -24,7 +25,14 @@ try:
         setcbreak,  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
     )
 except ImportError:
-    from ctypes import Structure, Union, WinError, byref, windll, wintypes
+    from ctypes import (
+        Structure,
+        Union,
+        WinError,
+        byref,
+        windll,
+        wintypes,
+    )
     from msvcrt import (
         getwch,  # type: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
     )
@@ -32,6 +40,7 @@ except ImportError:
     TCSADRAIN = 1  #  type: ignore[reportConstantRedefinition]
 
     _KEY_EVENT = 1
+    _EVENTS_IN_INPUT_RECORD = 1
     _STD_INPUT_HANDLE = -10
     _STD_OUTPUT_HANDLE = -11
     _ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4
@@ -77,6 +86,72 @@ except ImportError:
             ("Event", Event),
         ]
 
+    class _VirtualKeyCode(Enum):
+        """
+        Virtual key codes when they differ to curses Keys (ndo.keys)
+
+        https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+        """
+
+        VK_LEFT = 0x25
+        VK_UP = 0x26
+        VK_RIGHT = 0x27
+        VK_DOWN = 0x28
+        VK_INSERT = 0x2D
+        VK_DELETE = 0x2E
+        VK_PRIOR = 0x21  # Page Up
+        VK_NEXT = 0x22  # Page Down
+        VK_END = 0x23
+        VK_HOME = 0x24
+
+        def __hash__(self) -> int:
+            return super().__hash__()
+
+        def __eq__(self, other: object) -> bool:
+            if isinstance(other, int):
+                return self.value == other
+            msg = f"Cannot compare with {type(other)}"
+            raise NotImplementedError(msg)
+
+    def _ansify(char: str, vk: int, mod: int) -> str:
+        ctrl = mod & (0x0004 | 0x0008)
+        alt = mod & (0x0001 | 0x0002)
+        shift = mod & 0x0010
+
+        if ctrl and char.isalpha():
+            return chr(ord(char.upper()) - ord("A") + 1)
+
+        if alt and char:
+            return f"\x1b{char}"
+
+        if vk == Key.tab and shift:
+            return "\x1b[Z"
+
+        if vk in {
+            _VirtualKeyCode.VK_LEFT,
+            _VirtualKeyCode.VK_UP,
+            _VirtualKeyCode.VK_RIGHT,
+            _VirtualKeyCode.VK_DOWN,
+        }:
+            return f"\x1b[{['D', 'C', 'A', 'B'][vk - 37]}"
+
+        specials: dict[_VirtualKeyCode, str] = {
+            _VirtualKeyCode.VK_INSERT: "\x1b[2~",
+            _VirtualKeyCode.VK_DELETE: "\x1b[3~",
+            _VirtualKeyCode.VK_PRIOR: "\x1b[5~",
+            _VirtualKeyCode.VK_NEXT: "\x1b[6~",
+            _VirtualKeyCode.VK_END: "\x1b[F",
+            _VirtualKeyCode.VK_HOME: "\x1b[H",
+        }
+        if vk in specials:
+            return specials[_VirtualKeyCode(vk)]
+
+        if char:
+            return char
+
+        msg = f"Unsupported virtual key code: {vk} and character: {char}"
+        raise ValueError(msg)
+
     def _read(size: int = 1) -> str:
         """Read a character from the user"""
 
@@ -91,7 +166,7 @@ except ImportError:
             windll.kernel32.ReadConsoleInputW(
                 windll.kernel32.GetStdHandle(_STD_INPUT_HANDLE),
                 byref(input_record),
-                1,
+                _EVENTS_IN_INPUT_RECORD,
                 byref(wintypes.DWORD()),
             )
 
@@ -105,7 +180,13 @@ except ImportError:
             vk = key.wVirtualKeyCode
             mod = key.dwControlKeyState
 
-            return char, vk, mod
+            if char not in {
+                Key.windows_esc_prefix,
+                Key.windows_esc_prefix_,
+            } and vk in {Key.shift, Key.ctrl, Key.alt}:
+                continue
+
+            return _ansify(char, vk, mod)
 
     stdin.read = lambda _=-1: getwch()  # type: ignore[reportUnknownLambdaType]
     # stdin.read = _read
