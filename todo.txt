@@ -15,6 +15,7 @@
 -c fix: if holding down a key in acurses, make sure it doesn't stay pressed longer than it should (i.e. holding j key) (only reproducible in some terminals)
   -c happens because there is too much delay between actions. You can press keys faster than the program can respond
 -c fix: visual glitch when len(todos) == 1 in acurses
+-c refactor: create acurses_windows.py for windows-specific private structures
 - feat!: implement bcurses (browser-curses) using brython
 - fix: select all todos above/below should be predictable and repeatable
 - feat: add `n` control to move to next instance of found search value
