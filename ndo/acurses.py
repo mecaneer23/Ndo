@@ -10,7 +10,7 @@ from sys import argv, stdin, stdout
 from threading import Lock, Thread
 from time import time as now
 from types import TracebackType
-from typing import Any, Callable, Self, TypeVar, overload
+from typing import Any, Callable, ClassVar, Self, TypeVar, overload
 
 from ndo.keys import Key
 
@@ -24,21 +24,22 @@ try:
         setcbreak,  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
     )
 except ImportError:
-    from ctypes import WinError, byref, windll, wintypes
+    from ctypes import Structure, Union, WinError, byref, windll, wintypes
     from msvcrt import (
         getwch,  # type: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
     )
 
     TCSADRAIN = 1  #  type: ignore[reportConstantRedefinition]
 
+    _KEY_EVENT = 1
     _STD_INPUT_HANDLE = -10
     _STD_OUTPUT_HANDLE = -11
     _ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4
     _ENABLE_ECHO_INPUT = 4
     _ENABLE_LINE_INPUT = 2
 
-    def _enable_ansi() -> None:
-        handle = windll.kernel32.GetStdHandle(_STD_OUTPUT_HANDLE)
+    def _enable_ansi(handle: int, mode_attrs: int) -> None:
+        handle = windll.kernel32.GetStdHandle(handle)
         mode = wintypes.DWORD()
         if not windll.kernel32.GetConsoleMode(
             handle,
@@ -47,10 +48,67 @@ except ImportError:
             raise WinError()
         windll.kernel32.SetConsoleMode(
             handle,
-            mode.value | _ENABLE_VIRTUAL_TERMINAL_PROCESSING,
+            mode.value | mode_attrs,
         )
 
+    class _KeyEventRecord(Structure):  # pylint: disable=too-few-public-methods
+        _fields_: ClassVar = [
+            ("bKeyDown", wintypes.BOOL),
+            ("wRepeatCount", wintypes.WORD),
+            ("wVirtualKeyCode", wintypes.WORD),
+            ("wVirtualScanCode", wintypes.WORD),
+            ("uChar", wintypes.WCHAR),
+            ("dwControlKeyState", wintypes.DWORD),
+        ]
+
+    class _InputRecord(Structure):  # pylint: disable=too-few-public-methods
+        class Event(Union):  # pylint: disable=too-few-public-methods
+            """
+            Represent an event
+
+            https://learn.microsoft.com/en-us/windows/console/input-record-str
+            """
+
+            _fields_: ClassVar = [("KeyEvent", _KeyEventRecord)]
+
+        _anonymous_ = ("Event",)
+        _fields_: ClassVar = [
+            ("EventType", wintypes.WORD),
+            ("Event", Event),
+        ]
+
+    def _read(size: int = 1) -> str:
+        """Read a character from the user"""
+
+        if size != 1:
+            raise NotImplementedError(
+                "Reading an amount of characters other than 1 is not supported",
+            )
+
+        input_record = _InputRecord()
+
+        while True:
+            windll.kernel32.ReadConsoleInputW(
+                windll.kernel32.GetStdHandle(_STD_INPUT_HANDLE),
+                byref(input_record),
+                1,
+                byref(wintypes.DWORD()),
+            )
+
+            if input_record.EventType != _KEY_EVENT:
+                continue
+            key = input_record.KeyEvent
+            if not key.bKeyDown:
+                continue
+
+            char = key.uChar
+            vk = key.wVirtualKeyCode
+            mod = key.dwControlKeyState
+
+            return char, vk, mod
+
     stdin.read = lambda _=-1: getwch()  # type: ignore[reportUnknownLambdaType]
+    # stdin.read = _read
     stdin.fileno = lambda: _STD_INPUT_HANDLE
 
     def tcgetattr(fd: int) -> int:
@@ -77,7 +135,8 @@ except ImportError:
         new_mode = tcgetattr(fd) & ~(_ENABLE_LINE_INPUT | _ENABLE_ECHO_INPUT)
         tcsetattr(fd, TCSADRAIN, new_mode)  # pyright: ignore[reportUnknownArgumentType]
 
-    _enable_ansi()
+    _enable_ansi(_STD_OUTPUT_HANDLE, _ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+    _enable_ansi(_STD_INPUT_HANDLE, 0)
 
 
 _T = TypeVar("_T")
@@ -134,6 +193,20 @@ _KEYPAD_KEYS: dict[str, Key] = {
     "27-91-70": Key.end,
     "27-91-51-59-50-126": Key.shift_delete,
     "27-91-51-59-126": Key.alt_delete,
+    # Windows specific key-sequences
+    "224-72": Key.up_arrow,
+    "224-80": Key.down_arrow,
+    "224-77": Key.right_arrow,
+    "224-75": Key.left_arrow,
+    "224-83": Key.delete,
+    "224-73": Key.page_up,
+    "224-81": Key.page_down,
+    # "224-ERROR": Key.shift_tab_windows,
+    "224-115": Key.ctrl_left_arrow_windows,
+    "224-116": Key.ctrl_right_arrow_windows,
+    "224-71": Key.home,
+    "224-79": Key.end_windows,
+    "0-163": Key.alt_delete_windows,
 }
 _SHORT_TIME_SECONDS = 0.01
 
@@ -287,7 +360,11 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def _get_current_from_buffer(self) -> list[int]:
         char = _CursesWindow._GETCH.get(self._timeout)
         current = [char]
-        if char == Key.escape:
+        if char in {
+            Key.escape,
+            Key.windows_esc_prefix,
+            Key.windows_esc_prefix_,
+        }:
             esc = now()
             while now() - esc < _SHORT_TIME_SECONDS:
                 try:

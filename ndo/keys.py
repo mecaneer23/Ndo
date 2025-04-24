@@ -14,6 +14,7 @@ class Key(IntEnum):
     """
 
     nodelay_escape = -1
+    windows_esc_prefix = 0
     ctrl_a = 1
     ctrl_f = 6
     backspace = 8
@@ -66,6 +67,7 @@ class Key(IntEnum):
     y = 121
     backspace_ = 127
     ctrl_backspace_ = 127
+    windows_esc_prefix_ = 224
     down_arrow = 258
     up_arrow = 259
     left_arrow = 260
@@ -77,10 +79,14 @@ class Key(IntEnum):
     page_up = 339
     shift_tab_windows = 351
     shift_tab = 353
+    end_windows = 358
     end = 360
     shift_delete = 383
     alt_j_windows = 426
     alt_k_windows = 427
+    ctrl_left_arrow_windows = 443
+    ctrl_right_arrow_windows = 443
+    alt_delete_windows = 478
     ctrl_backspace__ = 504
     alt_delete = 522
     ctrl_right_arrow = 565
