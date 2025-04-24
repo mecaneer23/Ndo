@@ -136,7 +136,6 @@ except ImportError:
         tcsetattr(fd, TCSADRAIN, new_mode)  # pyright: ignore[reportUnknownArgumentType]
 
     _enable_ansi(_STD_OUTPUT_HANDLE, _ENABLE_VIRTUAL_TERMINAL_PROCESSING)
-    _enable_ansi(_STD_INPUT_HANDLE, 0)
 
 
 _T = TypeVar("_T")
