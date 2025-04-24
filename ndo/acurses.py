@@ -191,6 +191,8 @@ _KEYPAD_KEYS: dict[str, Key] = {
     "27-91-72": Key.home,
     "27-91-70": Key.end,
     "27-91-51-59-50-126": Key.shift_delete,
+    # TODO: Windows terminal on linux - doesn't fix the issue for some reason  # noqa: TD002, TD003
+    # "27-91-51-59-53-126": Key.ctrl_delete,
     "27-91-51-59-126": Key.alt_delete,
     # Windows specific key-sequences
     "224-72": Key.up_arrow,
