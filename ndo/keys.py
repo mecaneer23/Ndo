@@ -5,10 +5,10 @@ MIT License (c) 2023-2024
 # ruff: noqa: E741, PIE796
 # pylint: disable=invalid-name
 
-from enum import Enum
+from enum import IntEnum
 
 
-class Key(Enum):
+class Key(IntEnum):
     """
     A wrapper to access keys as curses refers to them. Mostly ascii.
     """
@@ -102,6 +102,16 @@ class Key(Enum):
 
     def __hash__(self) -> int:
         return super().__hash__()
+
+    @classmethod
+    def _missing_(cls, value: object) -> "Key":
+        if not isinstance(value, int):
+            msg = f"Key must be an int, not {type(value)}."
+            raise TypeError(msg)
+        obj = int.__new__(cls, value)
+        obj._name_ = chr(value)
+        obj._value_ = value
+        return obj
 
     @staticmethod
     def digits() -> tuple["Key", ...]:
