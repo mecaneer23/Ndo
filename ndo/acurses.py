@@ -152,6 +152,8 @@ except ImportError:
         msg = f"Unsupported virtual key code: {vk} and character: {char}"
         raise ValueError(msg)
 
+    _read_buffer: list[str] = []
+
     def _read(size: int = 1) -> str:
         """Read a character from the user"""
 
@@ -159,6 +161,9 @@ except ImportError:
             raise NotImplementedError(
                 "Reading an amount of characters other than 1 is not supported",
             )
+
+        if _read_buffer:
+            return _read_buffer.pop(0)
 
         input_record = _InputRecord()
 
@@ -186,7 +191,8 @@ except ImportError:
             } and vk in {Key.shift, Key.ctrl, Key.alt}:
                 continue
 
-            return _ansify(char, vk, mod)
+            _read_buffer.extend(_ansify(char, vk, mod))
+            return _read_buffer.pop(0)
 
     stdin.read = lambda _=-1: getwch()  # type: ignore[reportUnknownLambdaType]
     # stdin.read = _read
