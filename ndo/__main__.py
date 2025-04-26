@@ -389,7 +389,11 @@ def _get_main_input(
         )
         return Key(-1)
     func, args = keys_esckeys[0][Key(key)]
-    if key == Key.escape:
+    if key in {
+        Key.escape,
+        Key.windows_esc_prefix,
+        Key.windows_esc_prefix_,
+    }:
         stdscr.nodelay(True)
         key = Key(stdscr.getch())
         stdscr.nodelay(False)

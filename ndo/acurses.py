@@ -1,8 +1,8 @@
 """An ANSI interface that feels like programming with curses"""
 # ruff: noqa: TRY003, EM101
 
-from functools import singledispatchmethod
 from enum import Enum
+from functools import singledispatchmethod
 from itertools import compress, count
 from os import get_terminal_size
 from queue import Empty as queue_empty  # noqa: N813
@@ -33,9 +33,6 @@ except ImportError:
         windll,
         wintypes,
     )
-    from msvcrt import (
-        getwch,  # type: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
-    )
 
     TCSADRAIN = 1  #  type: ignore[reportConstantRedefinition]
 
@@ -46,6 +43,10 @@ except ImportError:
     _ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4
     _ENABLE_ECHO_INPUT = 4
     _ENABLE_LINE_INPUT = 2
+
+    _CTRL_MOD = 12
+    _ALT_MOD = 3
+    _SHIFT_MOD = 16
 
     def _enable_ansi(handle: int, mode_attrs: int) -> None:
         handle = windll.kernel32.GetStdHandle(handle)
@@ -114,9 +115,9 @@ except ImportError:
             raise NotImplementedError(msg)
 
     def _ansify(char: str, vk: int, mod: int) -> str:
-        ctrl = mod & (0x0004 | 0x0008)
-        alt = mod & (0x0001 | 0x0002)
-        shift = mod & 0x0010
+        ctrl = mod & _CTRL_MOD
+        alt = mod & _ALT_MOD
+        shift = mod & _SHIFT_MOD
 
         if ctrl and char.isalpha():
             return chr(ord(char.upper()) - ord("A") + 1)
@@ -183,7 +184,6 @@ except ImportError:
 
             char = key.uChar
             vk = key.wVirtualKeyCode
-            mod = key.dwControlKeyState
 
             if char not in {
                 Key.windows_esc_prefix,
@@ -191,11 +191,13 @@ except ImportError:
             } and vk in {Key.shift, Key.ctrl, Key.alt}:
                 continue
 
-            _read_buffer.extend(_ansify(char, vk, mod))
+            _read_buffer.extend(
+                _ansify(char, vk, key.dwControlKeyState)
+                * (key.wRepeatCount or 1),
+            )
             return _read_buffer.pop(0)
 
-    stdin.read = lambda _=-1: getwch()  # type: ignore[reportUnknownLambdaType]
-    # stdin.read = _read
+    stdin.read = _read
     stdin.fileno = lambda: _STD_INPUT_HANDLE
 
     def tcgetattr(fd: int) -> int:
