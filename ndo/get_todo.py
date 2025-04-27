@@ -220,7 +220,7 @@ class InputTodo:
         if input_char == Key.nodelay_escape:
             return True
         if input_char not in table:
-            self._error_passthrough(str(input_char))
+            self._error_passthrough(f"Escape + {input_char}")
             return False
         self._chars, self._position = table[input_char]()
         return False
