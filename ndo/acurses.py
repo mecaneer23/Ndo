@@ -147,7 +147,7 @@ except ImportError:
         if vk in specials:
             return specials[_VirtualKeyCode(vk)]
 
-        if char:
+        if char and char != "\x00":
             return char
 
         msg = f"Unsupported virtual key code: {vk} and character: {char}"
@@ -169,12 +169,15 @@ except ImportError:
         input_record = _InputRecord()
 
         while True:
-            windll.kernel32.ReadConsoleInputW(
-                windll.kernel32.GetStdHandle(_STD_INPUT_HANDLE),
-                byref(input_record),
-                _EVENTS_IN_INPUT_RECORD,
-                byref(wintypes.DWORD()),
-            )
+            try:
+                windll.kernel32.ReadConsoleInputW(
+                    windll.kernel32.GetStdHandle(_STD_INPUT_HANDLE),
+                    byref(input_record),
+                    _EVENTS_IN_INPUT_RECORD,
+                    byref(wintypes.DWORD()),
+                )
+            except KeyboardInterrupt as err:
+                raise error("Keyboard interrupt") from err
 
             if input_record.EventType != _KEY_EVENT:
                 continue
