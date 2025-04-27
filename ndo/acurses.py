@@ -106,7 +106,7 @@ except ImportError:
         VK_HOME = 0x24
 
         def __hash__(self) -> int:
-            return hash(self.value)
+            return self.value
 
         def __eq__(self, other: object) -> bool:
             if isinstance(other, int):
@@ -122,7 +122,7 @@ except ImportError:
         if ctrl and char.isalpha():
             return chr(ord(char.upper()) - ord("A") + 1)
 
-        if alt and char:
+        if alt and char != "\x00":
             return f"\x1b{char}"
 
         if vk == Key.tab and shift:
@@ -134,7 +134,13 @@ except ImportError:
             _VirtualKeyCode.VK_RIGHT,
             _VirtualKeyCode.VK_DOWN,
         }:
-            return f"\x1b[{['D', 'C', 'A', 'B'][vk - 37]}"
+            return "".join(
+                (
+                    "\x1b[",
+                    "1;5" if ctrl else "",
+                    ["D", "A", "C", "B"][vk - _VirtualKeyCode.VK_LEFT.value],
+                ),
+            )
 
         specials: dict[_VirtualKeyCode, str] = {
             _VirtualKeyCode.VK_INSERT: "\x1b[2~",
@@ -147,7 +153,7 @@ except ImportError:
         if vk in specials:
             return specials[_VirtualKeyCode(vk)]
 
-        if char and char != "\x00":
+        if char != "\x00":
             return char
 
         msg = f"Unsupported virtual key code: {vk} and character: {char}"
