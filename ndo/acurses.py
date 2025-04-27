@@ -289,23 +289,7 @@ _KEYPAD_KEYS: dict[str, Key] = {
     "27-91-72": Key.home,
     "27-91-70": Key.end,
     "27-91-51-59-50-126": Key.shift_delete,
-    # TODO: Windows terminal on linux - doesn't fix the issue for some reason  # noqa: TD002, TD003
-    # "27-91-51-59-53-126": Key.ctrl_delete,
     "27-91-51-59-126": Key.alt_delete,
-    # Windows specific key-sequences
-    "224-72": Key.up_arrow,
-    "224-80": Key.down_arrow,
-    "224-77": Key.right_arrow,
-    "224-75": Key.left_arrow,
-    "224-83": Key.delete,
-    "224-73": Key.page_up,
-    "224-81": Key.page_down,
-    # "224-ERROR": Key.shift_tab_windows,
-    "224-115": Key.ctrl_left_arrow_windows,
-    "224-116": Key.ctrl_right_arrow_windows,
-    "224-71": Key.home,
-    "224-79": Key.end_windows,
-    "0-163": Key.alt_delete_windows,
 }
 _SHORT_TIME_SECONDS = 0.01
 
@@ -459,11 +443,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     def _get_current_from_buffer(self) -> list[int]:
         char = _CursesWindow._GETCH.get(self._timeout)
         current = [char]
-        if char in {
-            Key.escape,
-            Key.windows_esc_prefix,
-            Key.windows_esc_prefix_,
-        }:
+        if char == Key.escape:
             esc = now()
             while now() - esc < _SHORT_TIME_SECONDS:
                 try:
