@@ -106,7 +106,7 @@ except ImportError:
         VK_HOME = 0x24
 
         def __hash__(self) -> int:
-            return super().__hash__()
+            return hash(self.value)
 
         def __eq__(self, other: object) -> bool:
             if isinstance(other, int):
