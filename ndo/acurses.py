@@ -48,6 +48,8 @@ except ImportError:
     _ALT_MOD = 3
     _SHIFT_MOD = 16
 
+    _BACKSPACE = (0x57, 0x08)
+
     def _enable_ansi(handle: int, mode_attrs: int) -> None:
         handle = windll.kernel32.GetStdHandle(handle)
         mode = wintypes.DWORD()
@@ -127,6 +129,9 @@ except ImportError:
 
         if vk == Key.tab and shift:
             return "\x1b[Z"
+
+        if vk in _BACKSPACE and ctrl:
+            return "\x1b\x7f"
 
         if vk in {
             _VirtualKeyCode.VK_LEFT,
