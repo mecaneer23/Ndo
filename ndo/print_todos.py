@@ -275,14 +275,17 @@ def _print_todo(
     """
     counter = 0
     position, print_position = todo_print_position
+    prefix_attrs = (
+        curses.A_STANDOUT | curses.color_pair(todo.get_color().as_int())
+        if position in highlight
+        else get_extra_info_attrs()
+    )
     for column, char in enumerate(display_strings.prefix):
         stdscr.addch(
             position + 1,
             column,
             char,
-            curses.A_STANDOUT | curses.color_pair(todo.get_color().as_int())
-            if position in highlight
-            else get_extra_info_attrs(),
+            prefix_attrs,
         )
     while counter < len(display_strings.text):
         should_strikethrough = STRIKETHROUGH and todo.is_toggled()
