@@ -5,6 +5,7 @@ Helper module to handle printing a list of Todo objects
 
 from collections.abc import Iterator
 from dataclasses import astuple, dataclass
+from functools import cache
 from itertools import count
 from typing import TYPE_CHECKING, Generic, NamedTuple, TypeVar, cast
 
@@ -35,6 +36,7 @@ _ANSI_RESET = "\033[0m"
 _ANSI_STRIKETHROUGH = "\033[9m"
 _DEBUG_FOLD = False
 _EMPTY_LINE_WIDTH = 8
+_SIMPLE_BOX_WIDTH = 3 if SIMPLE_BOXES else 0
 
 
 @dataclass
@@ -261,6 +263,27 @@ def _get_display_strings(
     )
 
 
+@cache
+def _find_first_alphanum(text: str) -> int:
+    for index, char in enumerate(text, start=_SIMPLE_BOX_WIDTH):
+        if char.isalpha():
+            return index
+    return -1
+
+
+def _is_within_strikethrough_range(
+    counter: int,
+    display_string: str,
+    window_width: int,
+) -> bool:
+    offset = _find_first_alphanum(display_string)
+    return (
+        offset - 1
+        < counter
+        < window_width - (window_width - len(display_string.rstrip()))
+    )
+
+
 def _print_todo(
     stdscr: curses.window,
     todo: Todo,
@@ -288,7 +311,15 @@ def _print_todo(
             prefix_attrs,
         )
     while counter < len(display_strings.text):
-        should_strikethrough = STRIKETHROUGH and todo.is_toggled()
+        should_strikethrough = (
+            STRIKETHROUGH
+            and todo.is_toggled()
+            and _is_within_strikethrough_range(
+                counter,
+                display_strings.text,
+                stdscr.getmaxyx()[1],
+            )
+        )
         attrs = curses.color_pair(todo.get_color().as_int())
         if position in highlight:
             attrs |= curses.A_STANDOUT
