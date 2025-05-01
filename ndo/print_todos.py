@@ -276,9 +276,8 @@ def _is_within_strikethrough_range(
     display_string: str,
     window_width: int,
 ) -> bool:
-    offset = _find_first_alphanum(display_string)
     return (
-        offset - 1
+        _find_first_alphanum(display_string) - 1
         < counter
         < window_width - (window_width - len(display_string.rstrip()))
     )
