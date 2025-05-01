@@ -251,8 +251,8 @@ def _get_header(title: list[str]) -> str:
 def _fail_if_not_implemented() -> None:
     if STRIKETHROUGH and UI_TYPE == UiType.CURSES:
         msg = (
-            "Curses UI doesn't fully support strikethrough."
-            "Try running either in acurses mode or without strikethrough."
+            "Curses UI doesn't fully support strikethrough. "
+            "Try running either in acurses mode or without strikethrough. "
             "(`-sga` or `-gc`)"
         )
         raise NotImplementedError(msg)
