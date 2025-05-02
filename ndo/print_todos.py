@@ -264,6 +264,7 @@ def _get_display_strings(
 
 
 @cache
+# TODO: time profile this function; do I need to cache it given the current use case?
 def _find_first_alphanum(text: str) -> int:
     for index, char in enumerate(text, start=_SIMPLE_BOX_WIDTH):
         if char.isalpha():
