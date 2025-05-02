@@ -271,15 +271,13 @@ def _find_first_alphanum(text: str) -> int:
     return -1
 
 
-def _is_within_strikethrough_range(
-    counter: int,
+def _get_strikethrough_range(
     display_string: str,
     window_width: int,
-) -> bool:
-    return (
-        _find_first_alphanum(display_string) - 1
-        < counter
-        < window_width - (window_width - len(display_string.rstrip()))
+) -> range:
+    return range(
+        _find_first_alphanum(display_string),
+        window_width - (window_width - len(display_string.rstrip())),
     )
 
 
@@ -309,15 +307,15 @@ def _print_todo(
             char,
             prefix_attrs,
         )
+    strikethrough_range = _get_strikethrough_range(
+        display_strings.text,
+        stdscr.getmaxyx()[1],
+    )
     while counter < len(display_strings.text):
         should_strikethrough = (
             STRIKETHROUGH
             and todo.is_toggled()
-            and _is_within_strikethrough_range(
-                counter,
-                display_strings.text,
-                stdscr.getmaxyx()[1],
-            )
+            and counter in strikethrough_range
         )
         attrs = curses.color_pair(todo.get_color().as_int())
         if position in highlight:
