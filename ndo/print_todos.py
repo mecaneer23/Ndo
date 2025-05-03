@@ -271,13 +271,10 @@ def _find_first_alphanum(text: str) -> int:
     return -1
 
 
-def _get_strikethrough_range(
-    display_string: str,
-    window_width: int,
-) -> range:
+def _get_strikethrough_range(display_string: str) -> range:
     return range(
         _find_first_alphanum(display_string),
-        window_width - (window_width - len(display_string.rstrip())),
+        len(display_string.rstrip()),
     )
 
 
@@ -307,10 +304,7 @@ def _print_todo(
             char,
             prefix_attrs,
         )
-    strikethrough_range = _get_strikethrough_range(
-        display_strings.text,
-        stdscr.getmaxyx()[1],
-    )
+    strikethrough_range = _get_strikethrough_range(display_strings.text)
     while counter < len(display_strings.text):
         should_strikethrough = (
             STRIKETHROUGH
