@@ -112,7 +112,7 @@ def _get_ui_type(string: str) -> UiType:
 
 def _get_args() -> TypedNamespace:
     parser = ArgumentParser(
-        description="Ndo is a todo list program to"
+        description="Ndo is a todo list program to "
         "help you manage your todo lists",
         add_help=False,
         formatter_class=RawDescriptionHelpFormatter,
