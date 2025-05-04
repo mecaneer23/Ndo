@@ -1,5 +1,5 @@
 """
-MIT License (c) 2023-2024
+MIT License (c) 2023-2025
 """
 
 # ruff: noqa: E741, PIE796
