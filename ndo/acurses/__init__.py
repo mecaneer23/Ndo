@@ -1,5 +1,4 @@
 """An ANSI interface that feels like programming with curses"""
-# ruff: noqa: TRY003, EM101
 
 from functools import singledispatchmethod
 from itertools import compress, count
@@ -31,6 +30,7 @@ except ImportError:
         tcgetattr,
         tcsetattr,
     )
+
     init_windows()
 
 
@@ -302,7 +302,8 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         _ = __
         _ = ___
         _ = ____
-        raise NotImplementedError("Cannot add NoneType: not a string")
+        msg = "Cannot add NoneType: not a string"
+        raise NotImplementedError(msg)
 
     @overload
     def addstr(self, text: str, attr: int = 0) -> None: ...
@@ -457,7 +458,8 @@ def curs_set(visibility: int) -> None:
     elif visibility == 1:
         stdout.write("\033[?25h")
     else:
-        raise NotImplementedError("Invalid visibility level")
+        msg = "Invalid visibility level"
+        raise NotImplementedError(msg)
     stdout.flush()
 
 
