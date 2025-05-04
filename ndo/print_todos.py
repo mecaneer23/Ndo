@@ -319,22 +319,12 @@ def _print_todo(
                 "int",
                 curses.A_STRIKETHROUGH,  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
             )
-        try:
-            stdscr.addch(
-                print_position + 1,
-                len(display_strings.prefix) + counter,
-                display_strings.text[counter],
-                attrs,
-            )
-        except OverflowError:
-            # This function call will throw an OverflowError if
-            # the terminal doesn't support the box character as it
-            # is technically a wide character. By `continue`-ing,
-            # we don't print the box character and indirectly
-            # prompt the user to use the -x option and use simple
-            # boxes when printing.
-            counter += 1
-            continue
+        stdscr.addch(
+            print_position + 1,
+            len(display_strings.prefix) + counter,
+            display_strings.text[counter],
+            attrs,
+        )
         if should_strikethrough and UI_TYPE == UiType.CURSES:
             stdscr.addch(print_position + 1, counter, "\u0336")
         counter += 1
