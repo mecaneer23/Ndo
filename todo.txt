@@ -20,4 +20,4 @@
   - don't reset selection if no remaining matches
 - fix: make sure entering insert mode doesn't crash program for certain length strings
 - feat: make sure ctrl+delete works on windows in all terminals
-- fix: undo line join odd behavior
+- fix: odd behavior when undoing line join
