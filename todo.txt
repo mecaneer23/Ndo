@@ -21,3 +21,4 @@
 - fix: make sure entering insert mode doesn't crash program for certain length strings
 - feat: make sure ctrl+delete works on windows in all terminals
 - fix: odd behavior when undoing line join
+  - steps to replicate?
