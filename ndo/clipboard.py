@@ -11,21 +11,15 @@ except ImportError:
     CLIPBOARD_EXISTS = False  # pyright: ignore[reportConstantRedefinition]
 
 from ndo.cursor import Cursor
-from ndo.get_args import FILENAME, UI_TYPE, UiType
+from ndo.get_args import FILENAME
 from ndo.io_ import update_file
 from ndo.todo import Todo, Todos
+from ndo.ui_protocol import CursesWindow
 from ndo.utils import alert
-
-if UI_TYPE == UiType.ANSI:
-    import ndo.acurses as curses
-elif UI_TYPE == UiType.TKINTER:
-    import ndo.tcurses as curses
-else:
-    import curses
 
 
 def copy_todo(
-    stdscr: curses.window,
+    stdscr: CursesWindow,
     todos: Todos,
     selected: Cursor,
     copied_todo: Todo,
@@ -61,7 +55,7 @@ def copy_todo(
 
 
 def _todo_from_clipboard(
-    stdscr: curses.window,
+    stdscr: CursesWindow,
     todos: Todos,
     selected: int,
     copied_todo: Todo,
@@ -85,7 +79,7 @@ def _todo_from_clipboard(
 
 
 def paste_todo(
-    stdscr: curses.window,
+    stdscr: CursesWindow,
     todos: Todos,
     selected: Cursor,
     copied_todo: Todo,

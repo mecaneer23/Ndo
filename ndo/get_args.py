@@ -27,6 +27,7 @@ from argparse import (
 )
 from enum import Enum
 from pathlib import Path
+from types import ModuleType
 from typing import TypeVar
 
 from ndo.md_to_py import md_table_to_lines
@@ -275,3 +276,18 @@ STRIKETHROUGH: bool = command_line_args.strikethrough
 UI_TYPE: UiType = command_line_args.ui
 _fail_if_not_implemented()
 del command_line_args
+
+
+if UI_TYPE == UiType.ANSI:
+    import ndo.acurses as curses
+    from ndo.acurses import wrapper
+elif UI_TYPE == UiType.TKINTER:
+    import ndo.tcurses as curses
+    from ndo.tcurses import wrapper
+else:
+    import curses
+
+    from ndo.working_initscr import wrapper
+
+curses_module: ModuleType = curses
+wrapper_func = wrapper

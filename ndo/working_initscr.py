@@ -6,11 +6,11 @@ module provides a functional workaround.
 Thanks to https://github.com/zephyrproject-rtos/windows-curses/issues/50
 for the inspiration.
 """
-
-import curses
-from typing import Callable, Concatenate, ParamSpec, TypeVar
+# pylint: disable=wrong-import-order
 
 import _curses
+import curses
+from typing import Callable, Concatenate, ParamSpec, TypeVar
 
 P = ParamSpec("P")
 R = TypeVar("R")
@@ -26,7 +26,7 @@ def initscr() -> curses.window:
 
 
 def wrapper(
-    func: Callable[Concatenate[curses.window, P], R],
+    func: Callable[Concatenate[..., P], R],
     /,
     *args: P.args,
     **kwds: P.kwargs,
@@ -43,12 +43,12 @@ def wrapper(
         stdscr = initscr()
         curses.noecho()
         curses.cbreak()
-        stdscr.keypad(True)
+        stdscr.keypad(True)  # noqa: FBT003
         _curses.start_color()
         return func(stdscr, *args, **kwds)
     finally:
         if "stdscr" in locals():
-            stdscr.keypad(False)  # pyright: ignore
+            stdscr.keypad(False)  # type: ignore[reportPossiblyUnbound]  # noqa: FBT003
             curses.echo()
             curses.nocbreak()
             curses.endwin()

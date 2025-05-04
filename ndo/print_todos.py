@@ -20,16 +20,10 @@ from ndo.get_args import (
     UI_TYPE,
     UiType,
 )
+from ndo.get_args import curses_module as curses
 from ndo.todo import Todo, Todos
+from ndo.ui_protocol import CursesWindow
 from ndo.utils import Chunk, Color, get_extra_info_attrs
-
-if UI_TYPE == UiType.ANSI:
-    import ndo.acurses as curses
-elif UI_TYPE == UiType.TKINTER:
-    import ndo.tcurses as curses
-else:
-    import curses
-
 
 _T = TypeVar("_T")
 _ANSI_RESET = "\033[0m"
@@ -142,7 +136,7 @@ def make_printable_sublist(
     return SublistItems(lst[start:end], cursor - start, start)
 
 
-def _info_message(stdscr: curses.window, height: int, width: int) -> None:
+def _info_message(stdscr: CursesWindow, height: int, width: int) -> None:
     text = (
         "Ndo - an ncurses todo application",
         "",
@@ -159,7 +153,7 @@ def _info_message(stdscr: curses.window, height: int, width: int) -> None:
         )
 
 
-def _get_height_width(stdscr: curses.window | None) -> tuple[int, int]:
+def _get_height_width(stdscr: CursesWindow | None) -> tuple[int, int]:
     if stdscr is None:
         return 0, 0
     return stdscr.getmaxyx()
@@ -279,7 +273,7 @@ def _get_strikethrough_range(display_string: str) -> range:
 
 
 def _print_todo(
-    stdscr: curses.window,
+    stdscr: CursesWindow,
     todo: Todo,
     display_strings: _DisplayText,
     todo_print_position: tuple[int, int],
@@ -338,7 +332,7 @@ def _color_to_ansi(color: int) -> str:
 
 
 def print_todos(
-    stdscr: curses.window | None,
+    stdscr: CursesWindow | None,
     todos: Todos,
     selected: Cursor,
     prev_start: int = 0,

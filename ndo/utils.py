@@ -7,14 +7,8 @@ from enum import Enum
 from itertools import tee
 from typing import NamedTuple
 
-from ndo.get_args import UI_TYPE, UiType
-
-if UI_TYPE == UiType.ANSI:
-    import ndo.acurses as curses
-elif UI_TYPE == UiType.TKINTER:
-    import ndo.tcurses as curses
-else:
-    import curses
+from ndo.get_args import curses_module as curses
+from ndo.ui_protocol import CursesWindow
 
 
 class Chunk(NamedTuple):
@@ -123,7 +117,7 @@ def get_extra_info_attrs() -> int:
     return curses.A_BOLD | curses.color_pair(Color.GREEN.as_int())
 
 
-def set_header(stdscr: curses.window, message: str) -> None:
+def set_header(stdscr: CursesWindow, message: str) -> None:
     """
     Set the header to a specific message.
     """
@@ -189,7 +183,7 @@ def chunk_message(
             right = left + width
 
 
-def alert(stdscr: curses.window, message: str) -> int:
+def alert(stdscr: CursesWindow, message: str) -> int:
     """
     Show a box with a message, similar to a JavaScript alert.
 

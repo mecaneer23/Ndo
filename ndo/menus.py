@@ -14,30 +14,21 @@ except ImportError:
 
 import ndo.get_todo
 from ndo.cursor import Cursor
-from ndo.get_args import (
-    FILENAME,
-    UI_TYPE,
-    UiType,
-)
+from ndo.get_args import FILENAME
+from ndo.get_args import curses_module as curses
 from ndo.io_ import update_file
 from ndo.keys import Key
 from ndo.md_to_py import md_table_to_lines
 from ndo.print_todos import make_printable_sublist
 from ndo.todo import Todo, Todos
+from ndo.ui_protocol import CursesWindow
 from ndo.utils import Color, alert, clamp, overflow, set_header
-
-if UI_TYPE == UiType.ANSI:
-    import ndo.acurses as curses
-elif UI_TYPE == UiType.TKINTER:
-    import ndo.tcurses as curses
-else:
-    import curses
 
 _REVERSE_NAME = "Reverse current"
 
 
 def hline(
-    win: curses.window,
+    win: CursesWindow,
     y_loc: int,
     x_loc: int,
     char: str | int,
@@ -53,7 +44,7 @@ def hline(
 
 
 def _simple_scroll_keybinds(
-    win: curses.window,
+    win: CursesWindow,
     cursor: int,
     len_lines: int,
     len_new_lines: int,
@@ -85,7 +76,7 @@ def _get_move_options(
 
 
 def help_menu(
-    parent_win: curses.window,
+    parent_win: CursesWindow,
     filename: str,
     begin_index: int,
     end_index: int,
@@ -141,7 +132,7 @@ def help_menu(
             break
 
 
-def magnify_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
+def magnify_menu(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
     """
     Magnify the first line of the current selection using pyfiglet.
 
@@ -185,7 +176,7 @@ def magnify_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
     stdscr.clear()
 
 
-def color_menu(parent_win: curses.window, original: Color) -> Color:
+def color_menu(parent_win: CursesWindow, original: Color) -> Color:
     """Show a menu to choose a color. Return the chosen Color."""
     parent_win.clear()
     set_header(parent_win, "Colors:")
@@ -288,7 +279,7 @@ def _sort_by(method: str, todos: Todos, selected: Cursor) -> Todos:
 
 
 def sort_menu(
-    parent_win: curses.window,
+    parent_win: CursesWindow,
     todos: Todos,
     selected: Cursor,
 ) -> Todos:
@@ -339,7 +330,7 @@ def sort_menu(
         win.refresh()
 
 
-def get_newwin(stdscr: curses.window) -> curses.window:
+def get_newwin(stdscr: CursesWindow) -> CursesWindow:
     """
     Create a curses.newwin in the center of the
     screen based on the width and height of the
@@ -349,7 +340,7 @@ def get_newwin(stdscr: curses.window) -> curses.window:
     return curses.newwin(3, max_x * 3 // 4, max_y // 2 - 3, max_x // 8)
 
 
-def search_menu(stdscr: curses.window, todos: Todos, selected: Cursor) -> None:
+def search_menu(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
     """
     Open a menu to search for a given string.
     Move the cursor to the first location of

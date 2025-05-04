@@ -13,18 +13,10 @@ from enum import Enum
 # from typing import Any, Callable, Iterable, TypeVar
 from typing import TypeVar
 
-from ndo.get_args import UI_TYPE, UiType
 from ndo.keys import Key
 from ndo.todo import Todos
+from ndo.ui_protocol import CursesWindow
 from ndo.utils import clamp
-
-if UI_TYPE == UiType.ANSI:
-    import ndo.acurses as curses
-elif UI_TYPE == UiType.TKINTER:
-    import ndo.tcurses as curses
-else:
-    import curses
-
 
 T = TypeVar("T")
 
@@ -240,7 +232,7 @@ class Cursor:
 
     def relative_to(
         self,
-        stdscr: curses.window,
+        stdscr: CursesWindow,
         first_digit: int,
         max_len: int,
         single: bool,  # noqa: FBT001

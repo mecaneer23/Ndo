@@ -22,6 +22,8 @@ from ndo.get_args import (
     UI_TYPE,
     UiType,
 )
+from ndo.get_args import curses_module as curses
+from ndo.get_args import wrapper_func as wrapper
 from ndo.get_todo import InputTodo
 from ndo.history import UndoRedo
 from ndo.io_ import file_string_to_todos, read_file, update_file
@@ -38,19 +40,8 @@ from ndo.menus import (
 from ndo.mode import SingleLineMode, SingleLineModeImpl
 from ndo.print_todos import print_todos
 from ndo.todo import BoxChar, FoldedState, Todo, Todos
+from ndo.ui_protocol import CursesWindow
 from ndo.utils import NewTodoPosition, Response, alert, clamp, set_header
-
-if UI_TYPE == UiType.ANSI:
-    import ndo.acurses as curses
-    from ndo.acurses import wrapper
-elif UI_TYPE == UiType.TKINTER:
-    import ndo.tcurses as curses
-    from ndo.tcurses import wrapper
-else:
-    import curses
-
-    from ndo.working_initscr import wrapper
-
 
 # Migrate the following once Python 3.12 is more common
 # type _PossibleArgs = ...
@@ -60,7 +51,7 @@ _PossibleArgs: TypeAlias = (
     | UndoRedo
     | SingleLineModeImpl
     | Cursor
-    | curses.window
+    | CursesWindow
     | Todos
     | NewTodoPosition
 )
@@ -107,7 +98,7 @@ def todo_down(todos: Todos, selected: Cursor) -> Todos:
 
 
 def new_todo(  # noqa: PLR0913
-    stdscr: curses.window,
+    stdscr: CursesWindow,
     todos: Todos,
     selected: Cursor,
     default_todo: Todo,
@@ -140,7 +131,7 @@ def new_todo(  # noqa: PLR0913
 
 
 def delete_todo(
-    stdscr: curses.window,
+    stdscr: CursesWindow,
     todos: Todos,
     selected: Cursor,
     copied_todo: Todo,
@@ -156,7 +147,7 @@ def delete_todo(
     return todos
 
 
-def color_todo(stdscr: curses.window, todos: Todos, selected: Cursor) -> Todos:
+def color_todo(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> Todos:
     """
     Open a color menu. Set each Todo in `selected`
     to the returned color.
@@ -173,7 +164,7 @@ def color_todo(stdscr: curses.window, todos: Todos, selected: Cursor) -> Todos:
 
 
 def edit_todo(
-    stdscr: curses.window,
+    stdscr: CursesWindow,
     todos: Todos,
     selected: int,
     mode: SingleLineModeImpl,
@@ -291,7 +282,7 @@ def _set_fold_state_under(
         break
 
 
-def _set_folded(stdscr: curses.window, todos: Todos, selected: int) -> None:
+def _set_folded(stdscr: CursesWindow, todos: Todos, selected: int) -> None:
     """
     Set the selected todo as a folder parent
     and set all todos indented below it as folded
@@ -311,7 +302,7 @@ def _set_folded(stdscr: curses.window, todos: Todos, selected: int) -> None:
     stdscr.clear()
 
 
-def _unset_folded(stdscr: curses.window, todos: Todos, selected: int) -> None:
+def _unset_folded(stdscr: CursesWindow, todos: Todos, selected: int) -> None:
     """
     If the selected todo is a folder parent,
     unfold the selected todo and all folded
@@ -331,7 +322,7 @@ def _unset_folded(stdscr: curses.window, todos: Todos, selected: int) -> None:
 
 
 def _handle_enter(
-    stdscr: curses.window,
+    stdscr: CursesWindow,
     todos: Todos,
     selected: Cursor,
     mode: SingleLineModeImpl,
@@ -348,7 +339,7 @@ def _handle_enter(
     )
 
 
-def _handle_alert(stdscr: curses.window, todos: Todos, selected: int) -> None:
+def _handle_alert(stdscr: CursesWindow, todos: Todos, selected: int) -> None:
     """Display the selected todo in an alert window"""
 
     alert(stdscr, todos[selected].get_display_text())
@@ -369,7 +360,7 @@ def _raise_keyboard_interrupt() -> None:
 
 
 def _get_main_input(
-    stdscr: curses.window,
+    stdscr: CursesWindow,
     todos: Todos,
     keys_esckeys: tuple[
         dict[Key, tuple[Callable[..., Todos | None], str]],
@@ -474,7 +465,7 @@ def join_lines(todos: Todos, selected: Cursor) -> None:
     update_file(FILENAME, todos)
 
 
-def _handle_rename(stdscr: curses.window) -> Response:
+def _handle_rename(stdscr: CursesWindow) -> Response:
     if not FILENAME.exists():
         return Response(404, f"{FILENAME} doesn't exist")
     new_filename_as_todo = InputTodo(
@@ -492,7 +483,7 @@ def _handle_rename(stdscr: curses.window) -> Response:
     return Response(200, "Success!")
 
 
-def _handle_help_menu(stdscr: curses.window) -> None:
+def _handle_help_menu(stdscr: CursesWindow) -> None:
     """Wrapper for ndo.menus.help_menu()"""
     help_menu(
         stdscr,
@@ -503,7 +494,7 @@ def _handle_help_menu(stdscr: curses.window) -> None:
     stdscr.clear()
 
 
-def main(stdscr: curses.window) -> Response:
+def main(stdscr: CursesWindow) -> Response:
     """
     The main function for Ndo. Mainly provides keybindings
     for the various functions and contains mainloop.

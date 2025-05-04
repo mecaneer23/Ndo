@@ -8,21 +8,14 @@ from ndo.get_args import (
     INDENT,
     INPUT_BEGIN_INDEX,
     INPUT_END_INDEX,
-    UI_TYPE,
-    UiType,
 )
+from ndo.get_args import curses_module as curses
 from ndo.keys import Key
 from ndo.menus import help_menu
 from ndo.mode import SingleLineMode, SingleLineModeImpl
 from ndo.todo import BoxChar, Todo
+from ndo.ui_protocol import CursesWindow
 from ndo.utils import NewTodoPosition, alert, chunk_message, set_header
-
-if UI_TYPE == UiType.ANSI:
-    import ndo.acurses as curses
-elif UI_TYPE == UiType.TKINTER:
-    import ndo.tcurses as curses
-else:
-    import curses
 
 
 class _Chars(list[str]):
@@ -89,8 +82,8 @@ class InputTodo:
 
     def __init__(
         self,
-        stdscr: curses.window,
-        win: curses.window,
+        stdscr: CursesWindow,
+        win: CursesWindow,
         todo: Todo,
         prev_todo: Todo,
         mode: SingleLineModeImpl | None = None,
