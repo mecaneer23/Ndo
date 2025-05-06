@@ -198,7 +198,6 @@ def _get_display_strings(
     should_highlight: bool,
     enumeration_info: str,
     width: int,
-    ansi_strikethrough: bool,
 ) -> _DisplayText:
     """
     Return a tuple of strings representing a single todo item,
@@ -235,7 +234,10 @@ def _get_display_strings(
             and todo.is_toggled(),
             f"{_get_checkmark(SIMPLE_BOXES)} ",
         ),
-        Chunk(ansi_strikethrough and todo.is_toggled(), _ANSI_STRIKETHROUGH),
+        Chunk(
+            UI_TYPE == UiType.NONE and todo.is_toggled(),
+            _ANSI_STRIKETHROUGH,
+        ),
         Chunk(not _DEBUG_FOLD, todo.get_display_text()),
         Chunk(todo.is_folded_parent(), "› ..."),  # noqa: RUF001
         Chunk(todo.is_folded() and _DEBUG_FOLD, "FOLDED"),
@@ -244,15 +246,15 @@ def _get_display_strings(
     return _DisplayText(
         enumeration_info,
         before_footers
-        if ansi_strikethrough
+        + Chunk.join(
+            Chunk(UI_TYPE == UiType.NONE, _ANSI_RESET),
+            Chunk(width == 0, " "),
+        )
+        if UI_TYPE == UiType.NONE
         else _add_ellipsis(
             before_footers,
             len(enumeration_info),
             width - 1,
-        )
-        + Chunk.join(
-            Chunk(ansi_strikethrough, _ANSI_RESET),
-            Chunk(width == 0, " "),
         ),
     )
 
@@ -377,7 +379,6 @@ def print_todos(
                 if ENUMERATE or RELATIVE_ENUMERATE
                 else "",
                 width,
-                True,
             )
             print(  # noqa: T201
                 display_strings.prefix
@@ -399,7 +400,6 @@ def print_todos(
                         selected.get(),
                     ),
                     width,
-                    False,
                 ),
                 (position, print_position),
                 highlight,
