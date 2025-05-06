@@ -313,6 +313,8 @@ def _print_todo(
                 "int",
                 curses.A_STRIKETHROUGH,  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
             )
+        if BULLETS and todo.get_display_text().startswith("#"):
+            attrs |= curses.A_BOLD
         stdscr.addch(
             print_position + 1,
             len(display_strings.prefix) + counter,
