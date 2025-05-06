@@ -279,6 +279,26 @@ def _get_strikethrough_range(display_string: str) -> range:
     )
 
 
+def _get_attrs(
+    should_strikethrough: bool,
+    todo: Todo,
+    position: int,
+    highlight: range,
+) -> int:
+    """Return the attributes for the current todo item"""
+    attrs = curses.color_pair(todo.get_color().as_int())
+    if position in highlight:
+        attrs |= curses.A_STANDOUT
+    if should_strikethrough and UI_TYPE == UiType.ANSI:
+        attrs |= cast(
+            "int",
+            curses.A_STRIKETHROUGH,  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+        )
+    if BULLETS and todo.get_display_text().startswith("#"):
+        attrs |= curses.A_BOLD
+    return attrs
+
+
 def _print_todo(
     stdscr: CursesWindow,
     todo: Todo,
@@ -312,21 +332,16 @@ def _print_todo(
             and todo.is_toggled()
             and counter in strikethrough_range
         )
-        attrs = curses.color_pair(todo.get_color().as_int())
-        if position in highlight:
-            attrs |= curses.A_STANDOUT
-        if should_strikethrough and UI_TYPE == UiType.ANSI:
-            attrs |= cast(
-                "int",
-                curses.A_STRIKETHROUGH,  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
-            )
-        if BULLETS and todo.get_display_text().startswith("#"):
-            attrs |= curses.A_BOLD
         stdscr.addch(
             print_position + 1,
             len(display_strings.prefix) + counter,
             display_strings.text[counter],
-            attrs,
+            _get_attrs(
+                should_strikethrough,
+                todo,
+                position,
+                highlight,
+            ),
         )
         if should_strikethrough and UI_TYPE == UiType.CURSES:
             stdscr.addch(print_position + 1, counter, "\u0336")
