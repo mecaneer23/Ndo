@@ -28,6 +28,7 @@ from ndo.utils import Chunk, Color, get_extra_info_attrs
 _T = TypeVar("_T")
 _ANSI_RESET = "\033[0m"
 _ANSI_STRIKETHROUGH = "\033[9m"
+_ANSI_BOLD = "\033[1m"
 _DEBUG_FOLD = False
 _EMPTY_LINE_WIDTH = 8
 _SIMPLE_BOX_WIDTH = 3 if SIMPLE_BOXES else 0
@@ -237,6 +238,10 @@ def _get_display_strings(
         Chunk(
             UI_TYPE == UiType.NONE and todo.is_toggled(),
             _ANSI_STRIKETHROUGH,
+        ),
+        Chunk(
+            UI_TYPE == UiType.NONE and todo.get_display_text().startswith("#"),
+            _ANSI_BOLD,
         ),
         Chunk(not _DEBUG_FOLD, todo.get_display_text()),
         Chunk(todo.is_folded_parent(), "› ..."),  # noqa: RUF001
