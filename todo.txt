@@ -22,3 +22,5 @@
 - feat: make sure ctrl+delete works on windows in all terminals
 - fix: odd behavior when undoing line join
   - steps to replicate?
+- refactor: create dedicated _get_attrs() function
+- fix: moving onto empty line should not show artifacts from previously selected line if scrolling
