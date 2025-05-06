@@ -210,7 +210,7 @@ def _get_display_strings(
     2. The todo display text
     """
     if should_highlight and todo.is_empty():
-        return _DisplayText("─" * _EMPTY_LINE_WIDTH, "")
+        return _DisplayText("─" * (width - 1), "")
     before_footers = Chunk.join(
         Chunk(True, todo.get_indent_level() * " "),
         Chunk(
