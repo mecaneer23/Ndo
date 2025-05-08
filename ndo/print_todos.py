@@ -240,7 +240,9 @@ def _get_display_strings(
             _ANSI_STRIKETHROUGH,
         ),
         Chunk(
-            UI_TYPE == UiType.NONE and todo.get_display_text().startswith("#"),
+            UI_TYPE == UiType.NONE
+            and BULLETS
+            and todo.get_display_text().startswith("#"),
             _ANSI_BOLD,
         ),
         Chunk(not _DEBUG_FOLD, todo.get_display_text()),
