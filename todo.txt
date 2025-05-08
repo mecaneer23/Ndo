@@ -22,4 +22,3 @@
 - feat: make sure ctrl+delete works on windows in all terminals
 - fix: odd behavior when undoing line join
   - steps to replicate?
-- fix: automatic line breaking for items without leading dashes

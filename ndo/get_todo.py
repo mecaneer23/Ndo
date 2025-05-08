@@ -316,11 +316,13 @@ class InputTodo:
         if string.endswith(" "):
             two_lines[-1] += " "
         header = self._todo.get_header().strip()
+        if len(header) > 0:
+            header += " "
         if len(two_lines) == 1:
             line = two_lines[0]
-            self._mode.set_extra_data(f"{header} {line[-1]}")
+            self._mode.set_extra_data(f"{header}{line[-1]}")
             return line[:-1]
-        self._mode.set_extra_data(f"{header} {two_lines[position.value]}")
+        self._mode.set_extra_data(f"{header}{two_lines[position.value]}")
         return two_lines[int(not bool(position.value))]
 
     def _display(self) -> None:
