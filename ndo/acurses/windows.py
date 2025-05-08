@@ -119,6 +119,9 @@ def _ansify(char: str, vk: int, mod: int) -> str:  # noqa: PLR0911
     if vk in _BACKSPACE and ctrl:
         return "\x1b\x7f"
 
+    if ctrl and vk == _VirtualKeyCode.VK_DELETE:
+        return "\x1bd"
+
     if vk in {
         _VirtualKeyCode.VK_LEFT,
         _VirtualKeyCode.VK_UP,
@@ -234,6 +237,7 @@ def init_windows() -> None:
     stdin.read = _read
     stdin.fileno = lambda: _STD_INPUT_HANDLE
     _enable_ansi(_STD_OUTPUT_HANDLE, _ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+
 
 if __name__ == "__main__":
     init_windows()
