@@ -167,15 +167,6 @@ class Cursor:
         """Move the cursor to the bottom"""
         self.set(len_list - 1)
 
-    def get_deletable(self) -> list[int]:
-        """
-        Return a list with the same length as the
-        current internal `positions` with each value
-        set to the minimum position of the current
-        Cursor
-        """
-        return [self.get_first() for _ in self.get()]
-
     def multiselect_down(self, max_len: int) -> None:
         """Extend the cursor down by 1"""
         if self.get_last() >= max_len - 1:

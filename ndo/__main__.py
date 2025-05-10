@@ -139,8 +139,8 @@ def delete_todo(
     """Remove each Todo in `selected` from the list"""
     if len(todos) > 0 and CLIPBOARD_EXISTS:
         copy_todo(stdscr, todos, selected, copied_todo)
-    for pos in selected.get_deletable():
-        todos = remove_todo(todos, pos)
+    for _ in selected:
+        todos = remove_todo(todos, selected.get_first())
     selected.set(clamp(int(selected), 0, len(todos)))
     stdscr.clear()
     update_file(FILENAME, todos)
