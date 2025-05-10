@@ -176,10 +176,11 @@ def edit_todo(
     if len(todos) <= 0:
         return todos
     max_y, max_x = stdscr.getmaxyx()
-    length = len(todos[selected].get_display_text())
+    border_width = 2
+    length = len(todos[selected].get_display_text()) + border_width
     ncols = (
         max(max_x * 3 // 4, length + 3)
-        if length < max_x - 1
+        if length < max_x - border_width
         else max_x * 3 // 4
     )
     begin_x = max_x // 8 if length < max_x - 1 - ncols else (max_x - ncols) // 2

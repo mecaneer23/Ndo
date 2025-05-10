@@ -18,6 +18,5 @@
 - feat: add `n` control to move to next instance of found search value
   - display error if no more found
   - don't reset selection if no remaining matches
-- fix: make sure entering insert mode doesn't crash program for certain length strings
 - fix: odd behavior when undoing line join
   - steps to replicate?
