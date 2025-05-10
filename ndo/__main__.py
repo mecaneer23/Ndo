@@ -479,6 +479,8 @@ def _handle_rename(stdscr: CursesWindow) -> Response:
     new_filename = new_filename_as_todo.get_display_text()
     if new_filename == str(FILENAME):
         return Response(409, "File name wasn't changed")
+    if Path(new_filename).exists():
+        return Response(409, f"{new_filename} already exists")
     FILENAME.rename(new_filename)
     return Response(200, "Success!")
 
