@@ -15,7 +15,8 @@ from ndo.menus import help_menu
 from ndo.mode import SingleLineMode, SingleLineModeImpl
 from ndo.todo import BoxChar, Todo
 from ndo.ui_protocol import CursesWindow
-from ndo.utils import NewTodoPosition, alert, chunk_message, set_header
+from ndo.utils import NewTodoPosition, chunk_message
+from ndo.window_interactions import alert, set_header
 
 
 class _Chars(list[str]):

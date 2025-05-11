@@ -9,6 +9,7 @@ from functools import cache
 from itertools import count
 from typing import TYPE_CHECKING, Generic, NamedTuple, TypeVar, cast
 
+from ndo.color import Color
 from ndo.cursor import Cursor
 from ndo.get_args import (
     BULLETS,
@@ -23,14 +24,14 @@ from ndo.get_args import (
 from ndo.get_args import curses_module as curses
 from ndo.todo import Todo, Todos
 from ndo.ui_protocol import CursesWindow
-from ndo.utils import Chunk, Color, get_extra_info_attrs
+from ndo.utils import Chunk
+from ndo.window_interactions import get_extra_info_attrs
 
 _T = TypeVar("_T")
 _ANSI_RESET = "\033[0m"
 _ANSI_STRIKETHROUGH = "\033[9m"
 _ANSI_BOLD = "\033[1m"
 _DEBUG_FOLD = False
-_EMPTY_LINE_WIDTH = 8
 _SIMPLE_BOX_WIDTH = 3 if SIMPLE_BOXES else 0
 
 

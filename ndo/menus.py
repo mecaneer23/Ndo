@@ -13,6 +13,7 @@ except ImportError:
     FIGLET_FORMAT_EXISTS = False  # pyright: ignore[reportConstantRedefinition]
 
 import ndo.get_todo
+from ndo.color import Color
 from ndo.cursor import Cursor
 from ndo.get_args import FILENAME
 from ndo.get_args import curses_module as curses
@@ -22,7 +23,8 @@ from ndo.md_to_py import md_table_to_lines
 from ndo.print_todos import make_printable_sublist
 from ndo.todo import Todo, Todos
 from ndo.ui_protocol import CursesWindow
-from ndo.utils import Color, alert, clamp, overflow, set_header
+from ndo.utils import clamp, overflow
+from ndo.window_interactions import alert, set_header
 
 _REVERSE_NAME = "Reverse current"
 

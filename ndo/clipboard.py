@@ -15,7 +15,7 @@ from ndo.get_args import FILENAME
 from ndo.io_ import update_file
 from ndo.todo import Todo, Todos
 from ndo.ui_protocol import CursesWindow
-from ndo.utils import alert
+from ndo.window_interactions import alert
 
 
 def copy_todo(

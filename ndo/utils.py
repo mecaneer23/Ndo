@@ -4,11 +4,7 @@ General utilities, useful across multiple other files
 
 from collections.abc import Iterator
 from enum import Enum
-from itertools import tee
 from typing import NamedTuple
-
-from ndo.get_args import curses_module as curses
-from ndo.ui_protocol import CursesWindow
 
 
 class Chunk(NamedTuple):
@@ -23,60 +19,6 @@ class Chunk(NamedTuple):
     def join(*chunks: "Chunk") -> str:
         """Join chunks with a True condition into one string"""
         return "".join([item for condition, item in chunks if condition])
-
-
-class Color(Enum):
-    """
-    Standardized colors for Ndo
-    """
-
-    RED = 1
-    GREEN = 2
-    YELLOW = 3
-    BLUE = 4
-    MAGENTA = 5
-    CYAN = 6
-    WHITE = 7
-
-    def as_int(self) -> int:
-        """
-        Main getter for Ndo colors
-        """
-        return self.value
-
-    def as_char(self) -> str:
-        """Get lowercase first letter of color"""
-        return self.name[0].lower()
-
-    @staticmethod
-    def from_first_char(char: str) -> "Color":
-        """Return the color corresponding to its first character"""
-        return {
-            "r": Color.RED,
-            "g": Color.GREEN,
-            "y": Color.YELLOW,
-            "b": Color.BLUE,
-            "m": Color.MAGENTA,
-            "c": Color.CYAN,
-            "w": Color.WHITE,
-        }[char]
-
-    @staticmethod
-    def as_dict() -> dict[str, int]:
-        """
-        Get all colors represented as a mapping of color name
-        to corresponding int value
-        """
-        return {color.name.capitalize(): color.value for color in Color}
-
-    @staticmethod
-    def is_valid(color: "Color | int") -> bool:
-        """
-        Check if a color is valid, either as an int or a Color
-        """
-        if isinstance(color, Color):
-            return True
-        return color in Color.as_dict().values()
 
 
 class NewTodoPosition(Enum):
@@ -103,30 +45,6 @@ def clamp(number: int, minimum: int, maximum: int) -> int:
     Clamp a number in between a minimum and maximum.
     """
     return min(max(number, minimum), maximum - 1)
-
-
-def get_extra_info_attrs() -> int:
-    """
-    Get the attributes for extra information.
-
-    This seems like it could just be a constant, but color pairs
-    must be initialized before they can be used. It's challenging
-    to ensure that initialization prior to this file being imported,
-    so a function is used so the color_pair function doesn't fail.
-    """
-    return curses.A_BOLD | curses.color_pair(Color.GREEN.as_int())
-
-
-def set_header(stdscr: CursesWindow, message: str) -> None:
-    """
-    Set the header to a specific message.
-    """
-    stdscr.addstr(
-        0,
-        0,
-        message.ljust(stdscr.getmaxyx()[1]),
-        get_extra_info_attrs(),
-    )
 
 
 def overflow(counter: int, minimum: int, maximum: int) -> int:
@@ -181,35 +99,3 @@ def chunk_message(
             yield message[left : left + width]
             left += width
             right = left + width
-
-
-def alert(stdscr: CursesWindow, message: str) -> int:
-    """
-    Show a box with a message, similar to a JavaScript alert.
-
-    Press any key to close (pressed key is returned).
-    """
-    set_header(stdscr, "Alert! Press any key to close")
-    stdscr.refresh()
-    border_width = 2
-    max_y, max_x = stdscr.getmaxyx()
-    height_chunk, width_chunk, chunks = tee(
-        chunk_message(message, max_x * 3 // 4 - border_width),
-        3,
-    )
-    width = len(max(width_chunk, key=len)) + border_width
-    height = sum(1 for _ in height_chunk) + border_width
-    win = curses.newwin(
-        height,
-        width,
-        max_y // 2 - height,
-        max_x // 2 - width // 2,
-    )
-    win.clear()
-    win.box()
-    for index, chunk in enumerate(chunks, start=1):
-        win.addstr(index, border_width // 2, chunk)
-    win.refresh()
-    key = stdscr.getch()
-    stdscr.clear()
-    return key

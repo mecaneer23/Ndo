@@ -41,7 +41,8 @@ from ndo.mode import SingleLineMode, SingleLineModeImpl
 from ndo.print_todos import print_todos
 from ndo.todo import BoxChar, FoldedState, Todo, Todos
 from ndo.ui_protocol import CursesWindow
-from ndo.utils import NewTodoPosition, Response, alert, clamp, set_header
+from ndo.utils import NewTodoPosition, Response, clamp
+from ndo.window_interactions import alert, set_header
 
 # Migrate the following once Python 3.12 is more common
 # type _PossibleArgs = ...
