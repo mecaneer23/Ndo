@@ -30,16 +30,12 @@ class Color(Enum):
 
     @staticmethod
     def from_first_char(char: str) -> "Color":
-        """Return the color corresponding to its first character"""
-        return {
-            "r": Color.RED,
-            "g": Color.GREEN,
-            "y": Color.YELLOW,
-            "b": Color.BLUE,
-            "m": Color.MAGENTA,
-            "c": Color.CYAN,
-            "w": Color.WHITE,
-        }[char]
+        """
+        Return the color corresponding to its first character. Cannot
+        distinguish between colors with the same first letter, so will return
+        the first color that starts with `char`.
+        """
+        return {color.name.lower()[0]: color for color in Color}[char]
 
     @staticmethod
     def as_dict() -> dict[str, int]:
