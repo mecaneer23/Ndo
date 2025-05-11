@@ -156,6 +156,8 @@ def color_todo(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> Todos:
         alert(stdscr, "No todo items for which to modify the color")
         return todos
     new_color = color_menu(stdscr, todos[int(selected)].get_color())
+    if new_color is None:
+        return todos
     for pos in selected.get():
         todos[pos].set_color(new_color)
     stdscr.clear()
