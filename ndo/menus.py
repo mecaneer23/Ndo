@@ -239,15 +239,15 @@ def color_menu(parent_win: CursesWindow, original: Color) -> Color | None:
         win.refresh()
 
 
-def _get_sorting_methods() -> dict[str, Callable[[Todos], str]]:
+def _get_sorting_methods() -> dict[str, Callable[[Todos], str | int]]:
     return {
-        "Alphabetical": lambda top_level_todo: top_level_todo[
-            0
-        ].get_display_text(),
-        "Completed": lambda top_level_todo: (
-            "1" if top_level_todo[0].is_toggled() else "0"
-        ),
-        "Color": lambda top_level_todo: str(top_level_todo[0].get_color()),
+        "Alphabetical": lambda section: section[0].get_display_text(),
+        "Completed last": lambda section: 1
+        if section[0].is_toggled()
+        else 0,
+        "Color (alphabetical)": lambda section: section[0]
+        .get_color()
+        .as_char(),
         _REVERSE_NAME: lambda _: "",
     }
 
