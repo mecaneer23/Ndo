@@ -119,7 +119,7 @@ def new_todo(  # noqa: PLR0913
         stdscr,
         get_newwin(stdscr),
         todo=default_todo.copy(),
-        prev_todo=todos[index - 1] if len(todos) > 0 else Todo(),
+        style_information=todos[index - 1] if len(todos) > 0 else Todo(),
         mode=mode,
     ).get_todo()
     if not todo.is_empty():
@@ -191,7 +191,7 @@ def edit_todo(
         stdscr,
         curses.newwin(3, ncols, max_y // 2 - 3, begin_x),
         todo=todos[selected],
-        prev_todo=Todo(),
+        style_information=Todo(),
         mode=mode,
     ).get_todo()
     if edited_todo.is_empty():
@@ -476,7 +476,7 @@ def _handle_rename(stdscr: CursesWindow) -> Response:
         stdscr,
         get_newwin(stdscr),
         todo=Todo(str(FILENAME)),
-        prev_todo=Todo(),
+        style_information=Todo(),
     ).get_todo()
     if new_filename_as_todo.is_empty():
         return Response(400, "New filename is empty")

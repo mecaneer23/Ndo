@@ -242,9 +242,7 @@ def color_menu(parent_win: CursesWindow, original: Color) -> Color | None:
 def _get_sorting_methods() -> dict[str, Callable[[Todos], str | int]]:
     return {
         "Alphabetical": lambda section: section[0].get_display_text(),
-        "Completed last": lambda section: 1
-        if section[0].is_toggled()
-        else 0,
+        "Completed last": lambda section: 1 if section[0].is_toggled() else 0,
         "Color (alphabetical)": lambda section: section[0]
         .get_color()
         .as_char(),
@@ -351,14 +349,13 @@ def search_menu(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
     Move the cursor to the first location of
     that string.
     """
-    set_header(stdscr, "Searching...")
-    stdscr.refresh()
     sequence = (
         ndo.get_todo.InputTodo(
             stdscr,
             get_newwin(stdscr),
             Todo(),
             Todo(),
+            header_string="Searching...",
         )
         .get_todo()
         .get_display_text()

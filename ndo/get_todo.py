@@ -79,20 +79,21 @@ class InputTodo:
         returns a Todo object containing the user's entry.
     """
 
-    _HEADER_STRING = "Insert mode: <Alt>+<h> for help"
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         stdscr: CursesWindow,
         win: CursesWindow,
         todo: Todo,
-        prev_todo: Todo,
+        style_information: Todo,
         mode: SingleLineModeImpl | None = None,
+        *,
+        header_string: str = "Insert mode: <Alt>+<h> for help",
     ) -> None:
         self._stdscr = stdscr
         self._win = win
         self._todo = todo
-        self._prev_todo = prev_todo
+        self._style_information = style_information
         self._mode = (
             SingleLineModeImpl(SingleLineMode.NONE) if mode is None else mode
         )
@@ -100,6 +101,7 @@ class InputTodo:
         self._init_todo()
         self._chars = _Chars(todo.get_display_text())
         self._position = len(self._chars)
+        self._header_string = header_string
 
         self._win.box()
         self._win.nodelay(False)  # noqa: FBT003
@@ -118,9 +120,9 @@ class InputTodo:
 
     def _init_todo(self) -> None:
         if self._todo.is_empty():
-            self._todo.set_indent_level(self._prev_todo.get_indent_level())
-            self._todo.set_color(self._prev_todo.get_color())
-            if not self._prev_todo.has_box():
+            self._todo.set_indent_level(self._style_information.get_indent_level())
+            self._todo.set_color(self._style_information.get_color())
+            if not self._style_information.has_box():
                 self._todo.set_box_char(BoxChar.NONE)
         if self._mode.is_off():
             self._todo.set_box_char(BoxChar.NONE)
@@ -187,7 +189,7 @@ class InputTodo:
         )
         self._stdscr.clear()
         self._win.box()
-        set_header(self._stdscr, self._HEADER_STRING)
+        set_header(self._stdscr, self._header_string)
         self._stdscr.refresh()
         return _EditString(self._chars, self._position)
 
@@ -372,7 +374,7 @@ class InputTodo:
 
     def get_todo(self) -> Todo:
         """External method to get a todo object from the user"""
-        set_header(self._stdscr, self._HEADER_STRING)
+        set_header(self._stdscr, self._header_string)
         self._stdscr.refresh()
 
         original = self._todo.copy()
