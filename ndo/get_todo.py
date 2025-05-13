@@ -225,21 +225,23 @@ class InputTodo:
         self._stdscr.refresh()
         return _EditString(self._chars, self._position)
 
-    def _handle_indent(self) -> _EditString:
-        self._todo.indent()
+    def _set_tab_header(self) -> None:
+        indent_level = self._todo.get_indent_level() // INDENT
+        possible_plural = "" if indent_level == 1 else "s"
         set_header(
             self._stdscr,
-            f"Tab level: {self._todo.get_indent_level() // INDENT} tabs",
+            f"Tab level: {indent_level} tab{possible_plural}",
         )
+
+    def _handle_indent(self) -> _EditString:
+        self._todo.indent()
+        self._set_tab_header()
         self._stdscr.refresh()
         return _EditString(self._chars, self._position)
 
     def _handle_dedent(self) -> _EditString:
         self._todo.dedent()
-        set_header(
-            self._stdscr,
-            f"Tab level: {self._todo.get_indent_level() // INDENT} tabs",
-        )
+        self._set_tab_header()
         self._stdscr.refresh()
         return _EditString(self._chars, self._position)
 
