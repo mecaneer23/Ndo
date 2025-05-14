@@ -52,6 +52,10 @@ def copy_todo(
             )
             return
         raise OSError from err
+    alert(
+        stdscr,
+        f"Copied {len(selected)} to-do item{'' if len(selected) == 1 else 's'}",
+    )
 
 
 def _todo_from_clipboard(
