@@ -500,6 +500,20 @@ def _handle_help_menu(stdscr: CursesWindow) -> None:
     stdscr.clear()
 
 
+def _copy_alert(
+    stdscr: CursesWindow,
+    todos: Todos,
+    selected: Cursor,
+    copied_todo: Todo,
+) -> None:
+    """Copy a todo and show an alert with information"""
+    copy_todo(stdscr, todos, selected, copied_todo)
+    alert(
+        stdscr,
+        f"Copied {len(selected)} to-do item{'' if len(selected) == 1 else 's'}",
+    )
+
+
 def main(stdscr: CursesWindow) -> Response:
     """
     The main function for Ndo. Mainly provides keybindings
@@ -605,7 +619,7 @@ def main(stdscr: CursesWindow) -> Response:
         Key.p: (paste_todo, "stdscr, todos, selected, copied_todo"),
         Key.s: (sort_menu, "stdscr, todos, selected"),
         Key.u: (_handle_undo, "selected, history"),
-        Key.y: (copy_todo, "stdscr, todos, selected, copied_todo"),
+        Key.y: (_copy_alert, "stdscr, todos, selected, copied_todo"),
         Key.down_arrow: (selected.single_down, "len(todos)"),
         Key.up_arrow: (selected.single_up, "len(todos)"),
         Key.delete: (_toggle_todo_note, "todos, selected"),
