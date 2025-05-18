@@ -32,9 +32,10 @@ from ndo.keys import Key
 from ndo.menus import (
     color_menu,
     get_newwin,
+    get_search_sequence,
     help_menu,
     magnify_menu,
-    search_menu,
+    next_search_location,
     sort_menu,
 )
 from ndo.mode import SingleLineMode, SingleLineModeImpl
@@ -55,6 +56,7 @@ _PossibleArgs: TypeAlias = (
     | CursesWindow
     | Todos
     | NewTodoPosition
+    | str
 )
 
 
@@ -561,11 +563,18 @@ def main(stdscr: CursesWindow) -> Response:
     single_line_state = SingleLineModeImpl(SingleLineMode.ON)
     copied_todo = Todo()
     file_modified_time = get_file_modified_time(FILENAME)
+    sequence = ""
+
+    def _update_sequence(stdscr: CursesWindow) -> None:
+        """Side-effect only wrapper for get_search_sequence"""
+        nonlocal sequence
+        sequence = get_search_sequence(stdscr)
+
     # if adding a new feature that updates `todos`,
     # make sure it also calls update_file()
     keys: dict[Key, tuple[Callable[..., Todos | None], str]] = {
         Key.ctrl_a: (selected.multiselect_all, "len(todos)"),
-        Key.ctrl_f: (search_menu, "stdscr, todos, selected"),
+        Key.ctrl_f: (_update_sequence, "stdscr"),
         Key.backspace: (join_lines, "todos, selected"),
         Key.backspace_: (join_lines, "todos, selected"),
         Key.backspace__: (join_lines, "todos, selected"),
@@ -583,7 +592,7 @@ def main(stdscr: CursesWindow) -> Response:
         Key.ctrl_x: (single_line_state.toggle, "None"),
         Key.escape: (lambda: None, "None"),
         Key.minus: (blank_todo, "todos, selected"),
-        Key.slash: (search_menu, "stdscr, todos, selected"),
+        Key.slash: (_update_sequence, "stdscr"),
         Key.zero: (selected.relative_to, "stdscr, 0, len(todos), True"),
         Key.one: (selected.relative_to, "stdscr, 1, len(todos), True"),
         Key.two: (selected.relative_to, "stdscr, 2, len(todos), True"),
@@ -612,6 +621,7 @@ def main(stdscr: CursesWindow) -> Response:
         Key.i: (edit_todo, "stdscr, todos, int(selected), single_line_state"),
         Key.j: (selected.single_down, "len(todos)"),
         Key.k: (selected.single_up, "len(todos)"),
+        Key.n: (next_search_location, "sequence, todos, selected"),
         Key.o: (
             new_todo,
             "stdscr, todos, selected, Todo(), NEXT, single_line_state",
@@ -693,6 +703,7 @@ def main(stdscr: CursesWindow) -> Response:
                 "False": False,
                 "NEXT": NewTodoPosition.NEXT,
                 "CURRENT": NewTodoPosition.CURRENT,
+                "sequence": sequence,
             },
         )
         key = main_input

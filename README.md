@@ -90,6 +90,7 @@ Options:
 | <kbd>i</kbd>                                                             | Edit an existing todo               |
 | <kbd>k</kbd>/<kbd>j</kbd>                                                | Move cursor up and down             |
 | <kbd>o</kbd>                                                             | Add a new todo                      |
+| <kbd>n</kbd>                                                             | Move to next search term location   |
 | <kbd>p</kbd>                                                             | New todo from clipboard             |
 | <kbd>q</kbd>, <kbd>Ctrl</kbd>+<kbd>c</kbd>, <kbd>Esc</kbd>               | Quit                                |
 | <kbd>s</kbd>                                                             | Sort top-level todos various ways   |

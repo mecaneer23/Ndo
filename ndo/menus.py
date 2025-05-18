@@ -2,6 +2,7 @@
 Various helpful menus and their helper functions.
 """
 
+from collections.abc import Iterator
 from functools import partial
 from typing import Callable, cast
 
@@ -343,11 +344,9 @@ def get_newwin(stdscr: CursesWindow) -> CursesWindow:
     return curses.newwin(3, max_x * 3 // 4, max_y // 2 - 3, max_x // 8)
 
 
-def search_menu(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
+def get_search_sequence(stdscr: CursesWindow) -> str:
     """
     Open a menu to search for a given string.
-    Move the cursor to the first location of
-    that string.
     """
     sequence = (
         ndo.get_todo.InputTodo(
@@ -361,8 +360,28 @@ def search_menu(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
         .get_display_text()
     )
     stdscr.clear()
-    for i, todo in enumerate(todos[int(selected) :], start=int(selected)):
+    return sequence
+
+
+def _get_search_todos(
+    todos: Todos,
+    selected: Cursor,
+) -> Iterator[tuple[int, Todo]]:
+    start = int(selected) + 1
+    yield from enumerate(todos[start:], start=start)
+    yield from enumerate(todos[: start - 1])
+
+
+def next_search_location(
+    sequence: str,
+    todos: Todos,
+    selected: Cursor,
+) -> None:
+    """
+    Move the cursor to the next position where the current
+    search sequence exists
+    """
+    for i, todo in _get_search_todos(todos, selected):
         if sequence in todo.get_display_text():
             selected.set(i)
             return
-    selected.set(0)

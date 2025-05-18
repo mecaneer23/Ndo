@@ -33,9 +33,9 @@ from typing import TypeVar
 from ndo.md_to_py import md_table_to_lines
 
 CONTROLS_BEGIN_INDEX: int = 68
-CONTROLS_END_INDEX: int = 98
-INPUT_BEGIN_INDEX: int = 101
-INPUT_END_INDEX: int = 120
+CONTROLS_END_INDEX: int = 99
+INPUT_BEGIN_INDEX: int = 102
+INPUT_END_INDEX: int = 121
 
 _DEFAULT_BULLETS: bool = False
 _DEFAULT_ENUMERATE: bool = False

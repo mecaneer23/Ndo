@@ -15,9 +15,6 @@
 -c fix: visual glitch when len(todos) == 1 in acurses
 - feat!: implement bcurses (browser-curses) using brython
 - fix: select all todos above/below should be predictable and repeatable
-- feat: add `n` control to move to next instance of found search value
-  - display error if no more found
-  - don't reset selection if no remaining matches
 - fix: odd behavior when undoing line join
   - steps to replicate?
 - refactor: add NoneType to Color which is only accessible via dot-notation (not looping through Color), remove usage of Color | None in color_menu
