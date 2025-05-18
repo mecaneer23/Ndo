@@ -19,3 +19,5 @@
   - steps to replicate?
 - refactor: add NoneType to Color which is only accessible via dot-notation (not looping through Color), remove usage of Color | None in color_menu
 - feat: if `todo.txt` doesn't exist, but `README.md` does, automatically default to opening `README.md`
+- feat: automatically apply certain settings if a .ndoconfig file exists in a directory
+  - feat: ~/.ndoconfig file is global unless overwritten by a ./.ndoconfig file
