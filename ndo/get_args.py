@@ -27,6 +27,7 @@ from argparse import (
 )
 from enum import Enum
 from pathlib import Path
+from sys import argv
 from types import ModuleType
 from typing import TypeVar
 
@@ -51,6 +52,7 @@ _DEFAULT_SIMPLE_BOXES: bool = False
 _DEFAULT_STRIKETHROUGH: bool = False
 
 _CHECKBOX_OPTIONS = ("🗹", "☑")
+_CONFIG_FILE_NAME = ".ndoconfig"
 
 
 class UiType(Enum):
@@ -126,6 +128,7 @@ def _get_args() -> TypedNamespace:
                 frozenset({"<kbd>", "</kbd>"}),
             ),
         ),
+        fromfile_prefix_chars="@",
     )
     parser.add_argument(
         "filename",
@@ -229,6 +232,17 @@ def _get_args() -> TypedNamespace:
         help="Allows passing alternate header.\
             Default is filename.",
     )
+    if len(argv) == 1:
+        if Path(_CONFIG_FILE_NAME).exists():
+            return parser.parse_args(
+                [f"@{_CONFIG_FILE_NAME}"],
+                namespace=TypedNamespace(),
+            )
+        if (Path.home() / _CONFIG_FILE_NAME).exists():
+            return parser.parse_args(
+                [f"@{Path.home() / _CONFIG_FILE_NAME}"],
+                namespace=TypedNamespace(),
+            )
     return parser.parse_args(namespace=TypedNamespace())
 
 

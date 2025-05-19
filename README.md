@@ -119,6 +119,30 @@ Options:
 | <kbd>Down</kbd>                                                     | Split line at cursor                 |
 | <kbd>Alt</kbd>+<kbd>h</kbd>                                         | Show a list of controls              |
 
+## `.ndoconfig` files
+
+Pass arguments to `ndo` without specifying explicitly on the command line.
+
+### Syntax
+
+Allows any existing options, separated by newlines
+
+```
+--bullet-display
+--strikethrough
+--indentation-level=4
+--ui ansi
+```
+
+### Precedence
+
+Ordered from highest precedence to lowest. (Top of the list overrides bottom of the list).
+
+1. Arguments passed directly to executable
+2. `./.ndoconfig` file in working directory
+3. `~/.ndoconfig` file in home directory
+
+
 ## View a todo list online
 
 Go to [this link](https://mecaneer23.github.io/Ndo/web-display) and upload your file
