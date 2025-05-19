@@ -21,3 +21,5 @@
 - feat: if `todo.txt` doesn't exist, but `README.md` does, automatically default to opening `README.md`
 - docs: update readme with different OS Support sections for acurses and curses
 - refactor: rename --ui to --user-interface
+- fix: .ndoconfig should be activated even if a specific filename is passed
+- chore: improve shopping list png alt text
