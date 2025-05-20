@@ -232,18 +232,15 @@ def _get_args() -> TypedNamespace:
         help="Allows passing alternate header.\
             Default is filename.",
     )
-    if len(argv) == 1:
-        if Path(_CONFIG_FILE_NAME).exists():
-            return parser.parse_args(
-                [f"@{_CONFIG_FILE_NAME}"],
-                namespace=TypedNamespace(),
-            )
-        if (Path.home() / _CONFIG_FILE_NAME).exists():
-            return parser.parse_args(
-                [f"@{Path.home() / _CONFIG_FILE_NAME}"],
-                namespace=TypedNamespace(),
-            )
-    return parser.parse_args(namespace=TypedNamespace())
+    extra_args: list[str] = []
+    if (Path.home() / _CONFIG_FILE_NAME).exists():
+        extra_args.append(f"@{Path.home() / _CONFIG_FILE_NAME}")
+    if Path(_CONFIG_FILE_NAME).exists():
+        extra_args.append(f"@{_CONFIG_FILE_NAME}")
+    return parser.parse_args(
+        [*extra_args, *argv[1:]],
+        namespace=TypedNamespace(),
+    )
 
 
 def _parse_filename(filename: str) -> Path:
