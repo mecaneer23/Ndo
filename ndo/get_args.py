@@ -165,6 +165,7 @@ def _get_args() -> TypedNamespace:
         "--help-file",
         type=str,
         default=_DEFAULT_HELP_FILE,
+        metavar="FILE",
         help=f"Allows passing alternate file to\
         specify help menu. Default is `{_DEFAULT_HELP_FILE}`.",
     )
@@ -173,6 +174,7 @@ def _get_args() -> TypedNamespace:
         "-i",
         type=int,
         default=_DEFAULT_INDENT,
+        metavar="LEVEL",
         help=f"Allows specification of indentation level. \
             Default is `{_DEFAULT_INDENT}`.",
     )
