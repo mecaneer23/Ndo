@@ -31,8 +31,6 @@ from sys import argv
 from types import ModuleType
 from typing import TypeVar
 
-from ndo.md_to_py import md_table_to_lines
-
 CONTROLS_BEGIN_INDEX: int = 68
 CONTROLS_END_INDEX: int = 99
 INPUT_BEGIN_INDEX: int = 102
@@ -119,15 +117,6 @@ def _get_args() -> TypedNamespace:
         "help you manage your todo lists",
         add_help=False,
         formatter_class=RawDescriptionHelpFormatter,
-        epilog="Controls:\n  "
-        + "\n  ".join(
-            md_table_to_lines(
-                CONTROLS_BEGIN_INDEX,
-                CONTROLS_END_INDEX,
-                str(_DEFAULT_HELP_FILE),
-                frozenset({"<kbd>", "</kbd>"}),
-            ),
-        ),
         fromfile_prefix_chars="@",
     )
     parser.add_argument(
