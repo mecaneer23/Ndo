@@ -53,7 +53,7 @@ Options:
 | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | --bullet-display, -b                                           | Boolean: determine if Todos are displayed with a bullet point rather than a checkbox. Default is `False`.                                             |
 | --enumerate, -e                                                | Boolean: determines if todos are numbered when printed or not. Default is `False`.                                                                    |
-| --ui {curses,ansi,tkinter,none}, -g {curses,ansi,tkinter,none} | UiType: determine how todos should be rendered. Default is `ansi`. If `none` is passed, print state of a todolist to stdout without a user interface. |
+| --user-interface {curses,ansi,tkinter,none}, -g {curses,ansi,tkinter,none} | UiType: determine how todos should be rendered. Default is `ansi`. If `none` is passed, print state of a todolist to stdout without a user interface. |
 | --help, -h                                                     | Show this help message and exit.                                                                                                                      |
 | --help-file HELP_FILE                                          | Allows passing alternate file to specify help menu. Default is `README.md`.                                                                           |
 | --indentation-level INDENTATION_LEVEL, -i INDENTATION_LEVEL    | Allows specification of indentation level. Default is `2`.                                                                                            |
@@ -131,7 +131,7 @@ Allows any existing options, separated by newlines
 --bullet-display
 --strikethrough
 --indentation-level=4
---ui ansi
+--user-interface ansi
 ```
 
 ### Precedence

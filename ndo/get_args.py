@@ -54,7 +54,7 @@ _CONFIG_FILE_NAME = ".ndoconfig"
 
 
 class UiType(Enum):
-    """Represent various supported types of UI"""
+    """Represent various supported User Interfaces"""
 
     CURSES = "curses"
     ANSI = "ansi"
@@ -83,7 +83,7 @@ class TypedNamespace(Namespace):  # pylint: disable=too-few-public-methods
     rename: bool
     simple_boxes: bool
     strikethrough: bool
-    ui: UiType
+    user_interface: UiType
 
 
 _GenericEnum = TypeVar("_GenericEnum", bound=Enum)
@@ -145,6 +145,7 @@ def _get_args() -> TypedNamespace:
             printed or not. Default is `{_DEFAULT_ENUMERATE}`.",
     )
     parser.add_argument(
+        "--user-interface",
         "--ui",
         "-g",
         type=_get_ui_type,
@@ -275,7 +276,7 @@ RELATIVE_ENUMERATE: bool = command_line_args.relative_enumeration
 RENAME: bool = command_line_args.rename
 SIMPLE_BOXES: bool = command_line_args.simple_boxes
 STRIKETHROUGH: bool = command_line_args.strikethrough
-UI_TYPE: UiType = command_line_args.ui
+UI_TYPE: UiType = command_line_args.user_interface
 _fail_if_not_implemented()
 del command_line_args
 

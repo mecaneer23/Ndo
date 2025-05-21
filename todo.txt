@@ -20,5 +20,4 @@
 - refactor: add NoneType to Color which is only accessible via dot-notation (not looping through Color), remove usage of Color | None in color_menu
 - feat: if `todo.txt` doesn't exist, but `README.md` does, automatically default to opening `README.md`
 - docs: update readme with different OS Support sections for acurses and curses
-- refactor: rename --ui to --user-interface
 - chore: improve shopping list png alt text
