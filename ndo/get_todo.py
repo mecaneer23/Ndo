@@ -276,9 +276,11 @@ class InputTodo:
         return second_section
 
     def _handle_backspace(self) -> _EditString:
-        if self._position > 0:
-            self._position -= 1
-            self._chars.pop(self._position)
+        if self._position == 0:
+            curses.beep()
+            return _EditString(self._chars, self._position)
+        self._position -= 1
+        self._chars.pop(self._position)
         return _EditString(self._chars, self._position)
 
     def _delete_left_word(self) -> _EditString:

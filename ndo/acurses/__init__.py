@@ -446,9 +446,13 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         self._attrs = attr
 
 
+def beep() -> None:
+    """Emit a short attention sound."""
+    stdout.write("\a")
+
+
 def use_default_colors() -> None:
     """Allow using default colors. Not yet implemented."""
-    return
 
 
 def curs_set(visibility: int) -> None:
