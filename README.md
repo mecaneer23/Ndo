@@ -127,7 +127,7 @@ Pass arguments to `ndo` without specifying explicitly on the command line.
 
 Allows any existing options, separated by newlines
 
-```
+```bash
 --bullet-display
 --strikethrough
 --indentation-level=4
