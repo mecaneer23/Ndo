@@ -39,6 +39,7 @@ INPUT_END_INDEX: int = 121
 _DEFAULT_BULLETS: bool = False
 _DEFAULT_ENUMERATE: bool = False
 _DEFAULT_FILENAME: Path = Path("todo.txt")
+_BACKUP_FILE: Path = Path("README.md")
 _DEFAULT_HEADER: list[str] = [""]
 _DEFAULT_HELP_FILE: Path = (
     Path(__file__).parent.parent.joinpath("README.md").absolute()
@@ -239,6 +240,12 @@ def _parse_filename(filename: str) -> Path:
     path = Path(filename)
     if path.is_dir():
         return path.joinpath(_DEFAULT_FILENAME)
+    if (
+        path == _DEFAULT_FILENAME
+        and not _DEFAULT_FILENAME.exists()
+        and _BACKUP_FILE.exists()
+    ):
+        return _BACKUP_FILE
     return path
 
 
