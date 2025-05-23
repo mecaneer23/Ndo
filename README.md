@@ -8,6 +8,12 @@ A curses implementation of a todo list helper. Most of the keybindings are simil
 
 ## OS Support
 
+### Default UI (Acurses - ANSI Curses)
+
+- All major operating systems should be fully supported out-of-the-box. Please report a bug if you encounter any issues.
+
+### Curses UI
+
 - Ndo is optimized for Linux, as most Vim users use Linux.
 - MacOS is also supported however some keyboard shortcuts use different modifier keys.
 - In Windows, general editing is available using the following [external package](#curses-for-windows), although some keyboard shortcuts might not work.
@@ -20,7 +26,7 @@ A curses implementation of a todo list helper. Most of the keybindings are simil
 pip install pyfiglet pyperclip
 ```
 
-### Curses for Windows
+### Curses for Windows (unnecessary if running using acurses UI)
 
 ```bash
 pip install windows-curses

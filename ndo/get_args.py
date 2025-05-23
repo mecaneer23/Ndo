@@ -31,10 +31,10 @@ from sys import argv
 from types import ModuleType
 from typing import TypeVar
 
-CONTROLS_BEGIN_INDEX: int = 68
-CONTROLS_END_INDEX: int = 99
-INPUT_BEGIN_INDEX: int = 102
-INPUT_END_INDEX: int = 121
+CONTROLS_BEGIN_INDEX: int = 74
+CONTROLS_END_INDEX: int = 105
+INPUT_BEGIN_INDEX: int = 108
+INPUT_END_INDEX: int = 127
 
 _DEFAULT_BULLETS: bool = False
 _DEFAULT_ENUMERATE: bool = False
