@@ -253,7 +253,10 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         return current
 
     def move(self, new_y: int, new_x: int) -> None:
-        """Move cursor to (new_y, new_x)"""
+        """
+        Move cursor to (new_y, new_x) relative to the
+        window this method is called on
+        """
         pos_y = self._begin_y + new_y
         pos_x = self._begin_x + new_x
         if pos_y < 0:
