@@ -179,10 +179,10 @@ def magnify_menu(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
     stdscr.clear()
 
 
-def color_menu(parent_win: CursesWindow, original: Color) -> Color | None:
+def color_menu(parent_win: CursesWindow, original: Color) -> Color:
     """
     Show a menu to choose a color.
-    Return the chosen Color or None if cancelled.
+    Return the chosen Color or Color.NONE if cancelled.
     """
     parent_win.clear()
     set_header(parent_win, "Colors:")
@@ -222,10 +222,10 @@ def color_menu(parent_win: CursesWindow, original: Color) -> Color | None:
         try:
             key = Key(win.getch())
         except KeyboardInterrupt:
-            return None
-        return_options: dict[Key, Callable[[], Color | None]] = {
-            Key.q: lambda: None,
-            Key.escape: lambda: None,
+            return Color.NONE
+        return_options: dict[Key, Callable[[], Color]] = {
+            Key.q: lambda: Color.NONE,
+            Key.escape: lambda: Color.NONE,
             Key.enter: partial(Color, Color.as_dict()[lines[cursor].strip()]),
         }
         if key in move_options:

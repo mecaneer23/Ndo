@@ -11,6 +11,7 @@ from sys import exit as sys_exit
 from typing import Callable, NamedTuple, TypeAlias
 
 from ndo.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
+from ndo.color import Color
 from ndo.cursor import Cursor
 from ndo.get_args import (
     CONTROLS_BEGIN_INDEX,
@@ -159,7 +160,7 @@ def color_todo(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> Todos:
         alert(stdscr, "No todo items for which to modify the color")
         return todos
     new_color = color_menu(stdscr, todos[int(selected)].get_color())
-    if new_color is None:
+    if new_color is Color.NONE:
         return todos
     for pos in selected.get():
         todos[pos].set_color(new_color)

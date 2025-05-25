@@ -17,4 +17,3 @@
 - fix: select all todos above/below should be predictable and repeatable
 - fix: odd behavior when undoing line join
   - steps to replicate?
-- refactor: add NoneType to Color which is only accessible via dot-notation (not looping through Color), remove usage of Color | None in color_menu
