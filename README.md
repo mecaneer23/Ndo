@@ -4,7 +4,7 @@
 
 A curses implementation of a todo list helper. Most of the keybindings are similar to Vim-bindings so Vim users should feel relatively comfortable.
 
-![Shopping List](res/shopping-list.png)
+![Screenshot of Ndo displaying a shopping list](res/shopping-list.png)
 
 ## OS Support
 
