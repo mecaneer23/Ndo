@@ -110,14 +110,14 @@ def _ansify(char: str, vk: int, mod: int) -> str:  # noqa: PLR0911
     if ctrl and char.isalpha():
         return chr(ord(char.upper()) - ord("A") + 1)
 
-    if alt and char != "\x00":
-        return f"\x1b{char}"
-
     if vk == Key.tab and shift:
         return "\x1b[Z"
 
-    if vk in _BACKSPACE and ctrl:
+    if vk in _BACKSPACE and (ctrl or alt):
         return "\x1b\x7f"
+
+    if alt and char != "\x00":
+        return f"\x1b{char}"
 
     if ctrl and vk == _VirtualKeyCode.VK_DELETE:
         return "\x1bd"
