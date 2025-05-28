@@ -83,19 +83,20 @@ def chunk_message(
         - if no delimiter in window, yield full width
         and slide window
     """
-    left = 0
-    right = width + 1
-    while True:
-        right -= 1
-        if right >= len(message):
-            yield message[left:]
-            break
-        if message[right] == delimiter:
-            yield message[left:right]
-            left = right + 1
-            right += width
-            continue
-        if right == left:
-            yield message[left : left + width]
-            left += width
-            right = left + width
+    for line in message.splitlines():
+        left = 0
+        right = width + 1
+        while True:
+            right -= 1
+            if right >= len(line):
+                yield line[left:]
+                break
+            if line[right] == delimiter:
+                yield line[left:right]
+                left = right + 1
+                right += width
+                continue
+            if right == left:
+                yield line[left : left + width]
+                left += width
+                right = left + width

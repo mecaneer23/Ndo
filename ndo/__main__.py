@@ -346,10 +346,21 @@ def _handle_enter(
     )
 
 
-def _handle_alert(stdscr: CursesWindow, todos: Todos, selected: int) -> None:
+def _handle_alert(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
     """Display the selected todo in an alert window"""
 
-    alert(stdscr, todos[selected].get_display_text())
+    if len(todos) == 0:
+        return
+    if len(selected) == 1:
+        alert(stdscr, todos[selected.get_first()].get_display_text())
+        return
+
+    alert(
+        stdscr,
+        "\n".join(
+            todos[pos].get_indented_display_text() for pos in selected.get()
+        ),
+    )
 
 
 class _MainInputResult(NamedTuple):
@@ -613,7 +624,7 @@ def main(stdscr: CursesWindow) -> Response:
         ),
         # Key.open_bracket: (_set_folded, "stdscr, todos, int(selected)"),
         # Key.close_bracket: (_unset_folded, "stdscr, todos, int(selected)"),
-        Key.a: (_handle_alert, "stdscr, todos, int(selected)"),
+        Key.a: (_handle_alert, "stdscr, todos, selected"),
         Key.b: (magnify_menu, "stdscr, todos, selected"),
         Key.c: (color_todo, "stdscr, todos, selected"),
         Key.d: (delete_todo, "stdscr, todos, selected, copied_todo"),

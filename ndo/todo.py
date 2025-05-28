@@ -102,6 +102,11 @@ class Todo:
 
         return self._color
 
+    def get_indented_display_text(self) -> str:
+        """Return display_text with indent spaces prepended"""
+
+        return " " * self._indent_level + self._display_text
+
     def get_display_text(self) -> str:
         """Getter for display_text"""
 
