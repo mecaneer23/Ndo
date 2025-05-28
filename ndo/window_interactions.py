@@ -2,8 +2,6 @@
 Utility functions for interacting with curses and curses-like interfaces.
 """
 
-from itertools import tee
-
 from ndo.color import Color
 from ndo.get_args import curses_module as curses
 from ndo.ui_protocol import CursesWindow
@@ -45,12 +43,9 @@ def alert(stdscr: CursesWindow, message: str) -> int:
     border_width = 2
     max_y, max_x = stdscr.getmaxyx()
     chunk_width = max_x * 3 // 4 - border_width
-    height_chunks, width_chunks, chunks = tee(
-        chunk_message(message, chunk_width),
-        3,
-    )
-    width = len(max(width_chunks, key=len)) + border_width
-    height = sum(1 for _ in height_chunks) + border_width
+    chunks = list(chunk_message(message, chunk_width))
+    width = len(max(chunks, key=len)) + border_width
+    height = sum(1 for _ in chunks) + border_width
     if height > max_y:
         # This can theoretically recur forever if this branch
         # is accessed with a super small window
