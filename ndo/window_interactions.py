@@ -34,7 +34,6 @@ def set_header(stdscr: CursesWindow, message: str) -> None:
     )
 
 
-
 def alert(stdscr: CursesWindow, message: str) -> int:
     """
     Show a box with a message, similar to a JavaScript alert.
@@ -51,10 +50,21 @@ def alert(stdscr: CursesWindow, message: str) -> int:
     )
     width = len(max(width_chunk, key=len)) + border_width
     height = sum(1 for _ in height_chunk) + border_width
+    if height > max_y:
+        # This can theoretically recur forever if this branch
+        # is accessed with a super small window
+        # (one too small to show this text).
+        # That said, this is so unlikely to happen, that
+        # I don't think it's worth handling.
+        return alert(
+            stdscr,
+            "Message too long to display in window, "
+            "please try again with a shorter message or a larger window.",
+        )
     win = curses.newwin(
         height,
         width,
-        max_y // 2 - height,
+        max_y // 2 - height // 2,
         max_x // 2 - width // 2,
     )
     win.clear()
