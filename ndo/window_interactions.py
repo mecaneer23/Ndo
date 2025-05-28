@@ -44,12 +44,13 @@ def alert(stdscr: CursesWindow, message: str) -> int:
     stdscr.refresh()
     border_width = 2
     max_y, max_x = stdscr.getmaxyx()
-    height_chunk, width_chunk, chunks = tee(
-        chunk_message(message, max_x * 3 // 4 - border_width),
+    chunk_width = max_x * 3 // 4 - border_width
+    height_chunks, width_chunks, chunks = tee(
+        chunk_message(message, chunk_width),
         3,
     )
-    width = len(max(width_chunk, key=len)) + border_width
-    height = sum(1 for _ in height_chunk) + border_width
+    width = len(max(width_chunks, key=len)) + border_width
+    height = sum(1 for _ in height_chunks) + border_width
     if height > max_y:
         # This can theoretically recur forever if this branch
         # is accessed with a super small window
