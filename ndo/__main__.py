@@ -351,8 +351,15 @@ def _handle_alert(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
 
     if len(todos) == 0:
         return
-    if len(selected) == 1:
-        alert(stdscr, todos[selected.get_first()].get_display_text())
+
+    if (
+        len({todos[pos].get_indent_level() for pos in selected.get()}) == 1
+        or len(selected) == 1
+    ):
+        alert(
+            stdscr,
+            "\n".join(todos[pos].get_display_text() for pos in selected.get()),
+        )
         return
 
     alert(

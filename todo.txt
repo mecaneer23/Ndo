@@ -17,4 +17,3 @@
 - fix: select all todos above/below should be predictable and repeatable
 - fix: odd behavior when undoing line join
   - steps to replicate?
-- refactor: _handle_alert should not indent todos if all todo items are at the same level of indentation
