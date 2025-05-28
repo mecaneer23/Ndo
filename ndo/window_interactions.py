@@ -45,7 +45,7 @@ def alert(stdscr: CursesWindow, message: str) -> int:
     chunk_width = max_x * 3 // 4 - border_width
     chunks = list(chunk_message(message, chunk_width))
     width = len(max(chunks, key=len)) + border_width
-    height = sum(1 for _ in chunks) + border_width
+    height = len(chunks) + border_width
     if height > max_y:
         # This can theoretically recur forever if this branch
         # is accessed with a super small window
