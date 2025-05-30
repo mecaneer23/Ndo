@@ -44,6 +44,8 @@ def alert(stdscr: CursesWindow, message: str) -> int:
     max_y, max_x = stdscr.getmaxyx()
     chunk_width = max_x * 3 // 4 - border_width
     chunks = list(chunk_message(message, chunk_width))
+    if len(chunks) == 0:
+        chunks = ["No message provided"]
     width = len(max(chunks, key=len)) + border_width
     height = len(chunks) + border_width
     if height > max_y:

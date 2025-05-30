@@ -350,6 +350,7 @@ def _handle_alert(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
     """Display the selected todo in an alert window"""
 
     if len(todos) == 0:
+        alert(stdscr, "No todos to display")
         return
 
     if (
