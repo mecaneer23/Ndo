@@ -16,7 +16,7 @@ A curses implementation of a todo list helper. Most of the keybindings are simil
 
 - Ndo is optimized for Linux, as most Vim users use Linux.
 - MacOS is also supported however some keyboard shortcuts use different modifier keys.
-- In Windows, general editing is available using the following [external package](#curses-for-windows), although some keyboard shortcuts might not work.
+- In Windows, general editing is available using the following external package, although some keyboard shortcuts might not work.
 
 ## Setup
 
@@ -147,7 +147,6 @@ Ordered from highest precedence to lowest. (Top of the list overrides bottom of 
 1. Arguments passed directly to executable
 2. `./.ndoconfig` file in working directory
 3. `~/.ndoconfig` file in home directory
-
 
 ## View a todo list online
 
