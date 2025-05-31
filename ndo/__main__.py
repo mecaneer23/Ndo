@@ -10,7 +10,7 @@ from pathlib import Path
 from sys import exit as sys_exit
 from typing import Callable, NamedTuple, TypeAlias
 
-from ndo.clipboard import CLIPBOARD_EXISTS, copy_todo, paste_todo
+from ndo.clipboard import CLIPBOARD_EXISTS, copy_todos, paste_todos
 from ndo.color import Color
 from ndo.cursor import Cursor
 from ndo.get_args import (
@@ -138,11 +138,11 @@ def delete_todo(
     stdscr: CursesWindow,
     todos: Todos,
     selected: Cursor,
-    copied_todo: Todo,
+    copied_todos: Todos,
 ) -> Todos:
     """Remove each Todo in `selected` from the list"""
     if len(todos) > 0 and CLIPBOARD_EXISTS:
-        copy_todo(stdscr, todos, selected, copied_todo)
+        copy_todos(stdscr, todos, selected, copied_todos)
     for _ in selected:
         todos = remove_todo(todos, selected.get_first())
     selected.set(clamp(int(selected), 0, len(todos)))
@@ -526,10 +526,10 @@ def _copy_alert(
     stdscr: CursesWindow,
     todos: Todos,
     selected: Cursor,
-    copied_todo: Todo,
+    copied_todos: Todos,
 ) -> None:
     """Copy a todo and show an alert with information"""
-    copy_todo(stdscr, todos, selected, copied_todo)
+    copy_todos(stdscr, todos, selected, copied_todos)
     alert(
         stdscr,
         f"Copied {len(selected)} to-do item{'' if len(selected) == 1 else 's'}",
@@ -564,8 +564,8 @@ def main(stdscr: CursesWindow) -> Response:
     Used to insert multiple Todos simultaneously whenever
     necessary. This is a "global" object that stores state.
 
-    copied_todo:
-    A Todo which stores metadata about a todo, such as
+    copied_todos:
+    Todos which store metadata about todos, such as
     color and indentation level. Used for copy/paste
     operations.
 
@@ -581,7 +581,7 @@ def main(stdscr: CursesWindow) -> Response:
     sublist_top = 0
     history = UndoRedo()
     single_line_state = SingleLineModeImpl(SingleLineMode.ON)
-    copied_todo = Todo()
+    copied_todos: Todos = Todos(())
     file_modified_time = get_file_modified_time(FILENAME)
     sequence = ""
 
@@ -635,7 +635,7 @@ def main(stdscr: CursesWindow) -> Response:
         Key.a: (_handle_alert, "stdscr, todos, selected"),
         Key.b: (magnify_menu, "stdscr, todos, selected"),
         Key.c: (color_todo, "stdscr, todos, selected"),
-        Key.d: (delete_todo, "stdscr, todos, selected, copied_todo"),
+        Key.d: (delete_todo, "stdscr, todos, selected, copied_todos"),
         Key.g: (selected.to_top, "None"),
         Key.h: (_handle_help_menu, "stdscr"),
         Key.i: (edit_todo, "stdscr, todos, int(selected), single_line_state"),
@@ -646,10 +646,10 @@ def main(stdscr: CursesWindow) -> Response:
             new_todo,
             "stdscr, todos, selected, Todo(), NEXT, single_line_state",
         ),
-        Key.p: (paste_todo, "stdscr, todos, selected, copied_todo"),
+        Key.p: (paste_todos, "stdscr, todos, selected, copied_todos"),
         Key.s: (sort_menu, "stdscr, todos, selected"),
         Key.u: (_handle_undo, "selected, history"),
-        Key.y: (_copy_alert, "stdscr, todos, selected, copied_todo"),
+        Key.y: (_copy_alert, "stdscr, todos, selected, copied_todos"),
         Key.down_arrow: (selected.single_down, "len(todos)"),
         Key.up_arrow: (selected.single_up, "len(todos)"),
         Key.delete: (_toggle_todo_note, "todos, selected"),
@@ -710,7 +710,7 @@ def main(stdscr: CursesWindow) -> Response:
             todos,
             (keys, esc_keys),
             {
-                "copied_todo": copied_todo,
+                "copied_todos": copied_todos,
                 "int(selected)": int(selected),
                 "history": history,
                 "len(todos)": len(todos),

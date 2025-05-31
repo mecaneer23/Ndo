@@ -18,17 +18,19 @@ from ndo.ui_protocol import CursesWindow
 from ndo.window_interactions import alert
 
 
-def copy_todo(
+def copy_todos(
     stdscr: CursesWindow,
     todos: Todos,
     selected: Cursor,
-    copied_todo: Todo,
+    copied_todos: Todos,
 ) -> None:
     """
-    Set `copied_todo` to be a duplicate of the first selected Todo.
+    Set `copied_todos` to be a duplicate of the selected Todo(s).
     If possible, also copy to the clipboard.
     """
-    copied_todo.set_text(repr(todos[int(selected)]))
+    copied_todos.clear()
+    for pos in selected.get():
+        copied_todos.append(todos[pos])
     if not CLIPBOARD_EXISTS:
         alert(
             stdscr,
@@ -54,15 +56,28 @@ def copy_todo(
         raise OSError from err
 
 
-def _todo_from_clipboard(
+def _insert_copied_todos(
+    copied_todos: Todos,
+    todos: Todos,
+    selected: int,
+) -> Todos:
+    """
+    Insert copied_todos into todos at the selected position.
+    """
+    for pos, todo in enumerate(copied_todos, start=1):
+        todos.insert(selected + pos, Todo(repr(todo)))
+    return todos
+
+
+def _todos_from_clipboard(
     stdscr: CursesWindow,
     todos: Todos,
     selected: int,
-    copied_todo: Todo,
+    copied_todos: Todos,
 ) -> Todos:
-    """Retrieve copied_todo and insert into todo list"""
+    """Retrieve copied_todos and insert into todo list"""
     if not CLIPBOARD_EXISTS:
-        todos.insert(selected + 1, Todo(repr(copied_todo)))
+        todos = _insert_copied_todos(copied_todos, todos, selected)
         alert(
             stdscr,
             "Pasting from internal buffer. External paste dependency "
@@ -70,23 +85,22 @@ def _todo_from_clipboard(
         )
         return todos
     pasted = paste()  # pyright: ignore[reportPossiblyUnboundVariable]
-    if copied_todo.get_display_text() == pasted:
-        todos.insert(selected + 1, Todo(repr(copied_todo)))
-        return todos
+    if "\n".join(todo.get_display_text() for todo in copied_todos) == pasted:
+        return _insert_copied_todos(copied_todos, todos, selected)
     for index, line in enumerate(pasted.strip().split("\n"), start=1):
         todos.insert(selected + index, Todo(f"- {line}"))
     return todos
 
 
-def paste_todo(
+def paste_todos(
     stdscr: CursesWindow,
     todos: Todos,
     selected: Cursor,
-    copied_todo: Todo,
+    copied_todos: Todos,
 ) -> Todos:
-    """Paste a todo from copied_todo or clipboard if available"""
+    """Paste todos from copied_todos or clipboard if available"""
     temp = todos.copy()
-    todos = _todo_from_clipboard(stdscr, todos, int(selected), copied_todo)
+    todos = _todos_from_clipboard(stdscr, todos, int(selected), copied_todos)
     stdscr.clear()
     if temp != todos:
         selected.single_down(len(todos))
