@@ -15,4 +15,3 @@
 - fix: select all todos above/below should be predictable and repeatable
 - fix: odd behavior when undoing line join
   - steps to replicate?
-- fix: a line beginning with `--` shouldn't be split into `- -`

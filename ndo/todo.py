@@ -49,6 +49,8 @@ class Todo:
     """
     A Todo object, representing parts of a
     string read from a text file.
+
+    [indent level][box][color][whitespace]display_text
     """
 
     def __init__(self, text: str = "") -> None:
@@ -61,7 +63,11 @@ class Todo:
         self.set_text(text)
 
     def _init_box_char(self, pointer: int) -> tuple[BoxChar, int]:
-        if len(self._text) > pointer and self._text[pointer] in "-+":
+        if (
+            len(self._text) > pointer
+            and self._text[pointer] in "-+"
+            and self._text[pointer + 1] not in "-+"
+        ):
             return BoxChar.from_str(self._text[pointer]), pointer + 1
         return BoxChar.NONE, pointer
 
@@ -72,21 +78,22 @@ class Todo:
             return Color(int(self._text[pointer])), pointer + 2
         if self._text[pointer] in "rgybmcw":
             return Color.from_first_char(self._text[pointer]), pointer + 2
+        if self._box_char == BoxChar.NONE:
+            return Color.WHITE, pointer
         msg = (
             f"Invalid color character '{self._text[pointer]}' at position "
             f"{pointer} in text: {self._text}"
         )
         raise ValueError(msg)
 
-    def _init_attrs(self) -> tuple[BoxChar, Color, str]:
+    def _init_attrs(self) -> None:
+        """Initialize attributes from _text and assign to instance variables"""
         pointer = self._indent_level
-        box_char, pointer = self._init_box_char(pointer)
-        color, pointer = self._init_color(pointer)
+        self._box_char, pointer = self._init_box_char(pointer)
+        self._color, pointer = self._init_color(pointer)
         while len(self._text) > pointer and self._text[pointer] == " ":
             pointer += 1
-        display_text = self._text[pointer:]
-
-        return box_char, color, display_text
+        self._display_text = self._text[pointer:]
 
     def set_text(self, text: str) -> None:
         """
@@ -100,7 +107,7 @@ class Todo:
             self._color = Color.WHITE
             self._display_text = ""
             return
-        self._box_char, self._color, self._display_text = self._init_attrs()
+        self._init_attrs()
 
     def get_color(self) -> Color:
         """Getter for color"""
