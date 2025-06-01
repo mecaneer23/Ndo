@@ -66,18 +66,23 @@ class Todo:
         return BoxChar.NONE, pointer
 
     def _init_color(self, pointer: int) -> tuple[Color, int]:
-        if len(self._text) > pointer + 1 and self._text[pointer + 1] == " ":
-            if self._text[pointer].isdigit():
-                return Color(int(self._text[pointer])), pointer + 2
-            if self._text[pointer] in "rgybmcw":
-                return Color.from_first_char(self._text[pointer]), pointer + 2
-        return Color.WHITE, pointer
+        if len(self._text) <= pointer + 1 or self._text[pointer + 1] != " ":
+            return Color.WHITE, pointer
+        if self._text[pointer].isdigit():
+            return Color(int(self._text[pointer])), pointer + 2
+        if self._text[pointer] in "rgybmcw":
+            return Color.from_first_char(self._text[pointer]), pointer + 2
+        msg = (
+            f"Invalid color character '{self._text[pointer]}' at position "
+            f"{pointer} in text: {self._text}"
+        )
+        raise ValueError(msg)
 
     def _init_attrs(self) -> tuple[BoxChar, Color, str]:
         pointer = self._indent_level
         box_char, pointer = self._init_box_char(pointer)
         color, pointer = self._init_color(pointer)
-        if len(self._text) > pointer and self._text[pointer] == " ":
+        while len(self._text) > pointer and self._text[pointer] == " ":
             pointer += 1
         display_text = self._text[pointer:]
 
