@@ -55,53 +55,53 @@ Positional arguments:
 
 Options:
 
-| Option                                                         | Description                                                                                                                                           |
-| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| --bullet-display, -b                                           | Boolean: determine if Todos are displayed with a bullet point rather than a checkbox. Default is `False`.                                             |
-| --enumerate, -e                                                | Boolean: determines if todos are numbered when printed or not. Default is `False`.                                                                    |
+| Option                                                                     | Description                                                                                                                                           |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| --bullet-display, -b                                                       | Boolean: determine if Todos are displayed with a bullet point rather than a checkbox. Default is `False`.                                             |
+| --enumerate, -e                                                            | Boolean: determines if todos are numbered when printed or not. Default is `False`.                                                                    |
 | --user-interface {curses,ansi,tkinter,none}, -g {curses,ansi,tkinter,none} | UiType: determine how todos should be rendered. Default is `ansi`. If `none` is passed, print state of a todolist to stdout without a user interface. |
-| --help, -h                                                     | Show this help message and exit.                                                                                                                      |
-| --help-file HELP_FILE                                          | Allows passing alternate file to specify help menu. Default is `README.md`.                                                                           |
-| --indentation-level INDENTATION_LEVEL, -i INDENTATION_LEVEL    | Allows specification of indentation level. Default is `2`.                                                                                            |
-| --relative-enumeration, -r                                     | Boolean: determines if todos are numbered when printed. Numbers relatively rather than absolutely. Default is `False`.                                |
-| --rename, -n                                                   | Boolean: if true, show prompt to rename file, rename file to input, and exit. Default is `False`.                                                     |
-| --simple-boxes, -x                                             | Boolean: allow rendering simpler checkboxes if terminal doesn't support default ascii checkboxes. Default is `False`.                                 |
-| --strikethrough, -s                                            | Boolean: strikethrough completed todos - option to disable because some terminals don't support strikethroughs. Default is `False`.                   |
-| --title TITLE, -t TITLE                                        | Allows passing alternate header. Default is `filename`.                                                                                               |
+| --help, -h                                                                 | Show this help message and exit.                                                                                                                      |
+| --help-file HELP_FILE                                                      | Allows passing alternate file to specify help menu. Default is `README.md`.                                                                           |
+| --indentation-level INDENTATION_LEVEL, -i INDENTATION_LEVEL                | Allows specification of indentation level. Default is `2`.                                                                                            |
+| --relative-enumeration, -r                                                 | Boolean: determines if todos are numbered when printed. Numbers relatively rather than absolutely. Default is `False`.                                |
+| --rename, -n                                                               | Boolean: if true, show prompt to rename file, rename file to input, and exit. Default is `False`.                                                     |
+| --simple-boxes, -x                                                         | Boolean: allow rendering simpler checkboxes if terminal doesn't support default ascii checkboxes. Default is `False`.                                 |
+| --strikethrough, -s                                                        | Boolean: strikethrough completed todos - option to disable because some terminals don't support strikethroughs. Default is `False`.                   |
+| --title TITLE, -t TITLE                                                    | Allows passing alternate header. Default is `filename`.                                                                                               |
 
 ## Controls (Normal mode)
 
-| Key (arranged alphabetically)                                            | Description                         |
-| ------------------------------------------------------------------------ | ----------------------------------- |
-| <kbd>-</kbd>                                                             | Insert blank line                   |
-| <kbd>/</kbd>                                                             | Search for a sequence               |
-| <kbd>Alt</kbd>+<kbd>g</kbd>/<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>g</kbd> | Select all todos above/below        |
-| <kbd>Alt</kbd>+<kbd>k</kbd>/<kbd>j</kbd>                                 | Move todo up and down               |
-| <kbd>Backspace</kbd>                                                     | Combine with previous todo          |
-| <kbd>Ctrl</kbd>+<kbd>a</kbd>                                             | Select all todos                    |
-| <kbd>Ctrl</kbd>+<kbd>r</kbd>                                             | Redo change                         |
-| <kbd>Ctrl</kbd>+<kbd>x</kbd>, <kbd>k</kbd>                               | Toggle `toggle` and `entry` modes   |
-| <kbd>Delete</kbd>                                                        | Toggle between `Todo` and `Note`    |
-| <kbd>Enter</kbd>                                                         | Toggle a todo as completed          |
-| Numbers                                                                  | Move a number of lines              |
-| <kbd>Shift</kbd>+<kbd>k</kbd>/<kbd>j</kbd>                               | Select/deselect multiple todos      |
-| <kbd>Shift</kbd>+<kbd>o</kbd>                                            | Add a todo on current line          |
-| <kbd>Tab</kbd>/<kbd>Shift</kbd>+<kbd>Tab</kbd>                           | Indent/unindent selected todo       |
-| <kbd>a</kbd>                                                             | Display selected todo as an alert   |
-| <kbd>b</kbd>                                                             | Make selected todo bigger (magnify) |
-| <kbd>c</kbd>                                                             | Change selected todo color          |
-| <kbd>d</kbd>                                                             | Remove selected todo                |
-| <kbd>g</kbd>/<kbd>Shift</kbd>+<kbd>g</kbd>                               | Jump to top/bottom of todos         |
-| <kbd>h</kbd>                                                             | Show a list of controls             |
-| <kbd>i</kbd>                                                             | Edit an existing todo               |
-| <kbd>k</kbd>/<kbd>j</kbd>                                                | Move cursor up and down             |
-| <kbd>o</kbd>                                                             | Add a new todo                      |
-| <kbd>n</kbd>                                                             | Move to next search term location   |
-| <kbd>p</kbd>                                                             | New todo from clipboard             |
-| <kbd>q</kbd>, <kbd>Ctrl</kbd>+<kbd>c</kbd>, <kbd>Esc</kbd>               | Quit                                |
-| <kbd>s</kbd>                                                             | Sort top-level todos various ways   |
-| <kbd>u</kbd>                                                             | Undo change                         |
-| <kbd>y</kbd>                                                             | Copy todo to clipboard              |
+| Key (arranged alphabetically)                                                             | Description                         |
+| ----------------------------------------------------------------------------------------- | ----------------------------------- |
+| <kbd>-</kbd>                                                                              | Insert blank line                   |
+| <kbd>/</kbd>                                                                              | Search for a sequence               |
+| <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>k</kbd>/<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>j</kbd> | Select all todos above/below        |
+| <kbd>Alt</kbd>+<kbd>k</kbd>/<kbd>j</kbd>                                                  | Move todo up and down               |
+| <kbd>Backspace</kbd>                                                                      | Combine with previous todo          |
+| <kbd>Ctrl</kbd>+<kbd>a</kbd>                                                              | Select all todos                    |
+| <kbd>Ctrl</kbd>+<kbd>r</kbd>                                                              | Redo change                         |
+| <kbd>Ctrl</kbd>+<kbd>x</kbd>, <kbd>k</kbd>                                                | Toggle `toggle` and `entry` modes   |
+| <kbd>Delete</kbd>                                                                         | Toggle between `Todo` and `Note`    |
+| <kbd>Enter</kbd>                                                                          | Toggle a todo as completed          |
+| Numbers                                                                                   | Move a number of lines              |
+| <kbd>Shift</kbd>+<kbd>k</kbd>/<kbd>j</kbd>                                                | Select/deselect multiple todos      |
+| <kbd>Shift</kbd>+<kbd>o</kbd>                                                             | Add a todo on current line          |
+| <kbd>Tab</kbd>/<kbd>Shift</kbd>+<kbd>Tab</kbd>                                            | Indent/unindent selected todo       |
+| <kbd>a</kbd>                                                                              | Display selected todo as an alert   |
+| <kbd>b</kbd>                                                                              | Make selected todo bigger (magnify) |
+| <kbd>c</kbd>                                                                              | Change selected todo color          |
+| <kbd>d</kbd>                                                                              | Remove selected todo                |
+| <kbd>g</kbd>/<kbd>Shift</kbd>+<kbd>g</kbd>                                                | Jump to top/bottom of todos         |
+| <kbd>h</kbd>                                                                              | Show a list of controls             |
+| <kbd>i</kbd>                                                                              | Edit an existing todo               |
+| <kbd>k</kbd>/<kbd>j</kbd>                                                                 | Move cursor up and down             |
+| <kbd>o</kbd>                                                                              | Add a new todo                      |
+| <kbd>n</kbd>                                                                              | Move to next search term location   |
+| <kbd>p</kbd>                                                                              | New todo from clipboard             |
+| <kbd>q</kbd>, <kbd>Ctrl</kbd>+<kbd>c</kbd>, <kbd>Esc</kbd>                                | Quit                                |
+| <kbd>s</kbd>                                                                              | Sort top-level todos various ways   |
+| <kbd>u</kbd>                                                                              | Undo change                         |
+| <kbd>y</kbd>                                                                              | Copy todo to clipboard              |
 
 ## Input box controls (Input mode)
 

@@ -659,8 +659,8 @@ def main(stdscr: CursesWindow) -> Response:
         Key.alt_k_windows: (todo_up, "todos, selected"),
     }
     esc_keys: dict[Key, tuple[Callable[..., Todos | None], str]] = {
-        Key.alt_G: (selected.multiselect_bottom, "len(todos)"),
-        Key.alt_g: (selected.multiselect_top, "None"),
+        Key.alt_J: (selected.multiselect_bottom, "len(todos)"),
+        Key.alt_K: (selected.multiselect_top, "None"),
         Key.alt_j: (todo_down, "todos, selected"),
         Key.alt_k: (todo_up, "todos, selected"),
         Key.zero: (selected.relative_to, "stdscr, 0, len(todos), False"),

@@ -50,7 +50,9 @@ class Key(IntEnum):
     G = 71
     alt_G = 71  # noqa: N815
     J = 74
+    alt_J = 74  # noqa: N815
     K = 75
+    alt_K = 75  # noqa: N815
     O = 79
     open_bracket = 91
     backslash = 92
