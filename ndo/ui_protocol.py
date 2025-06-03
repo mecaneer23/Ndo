@@ -1,6 +1,7 @@
 """
 Specification of the curses UI protocol as used by Ndo.
 """
+
 # pylint: disable=missing-function-docstring
 
 from typing import Protocol, overload, runtime_checkable

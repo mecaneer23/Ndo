@@ -516,7 +516,11 @@ def wrapper(
             # RESET_COLOR = \033[39;49m
             stdout.write("\033[?1049l\033[23t\033[?25h")
             stdout.flush()
-            tcsetattr(fd, TCSADRAIN, old_settings)  # pyright: ignore[reportUnknownArgumentType]
+            tcsetattr(
+                fd,
+                TCSADRAIN,  # pyright: ignore[reportUnknownArgumentType]
+                old_settings,  # pyright: ignore[reportUnknownArgumentType]
+            )
 
 
 def init_pair(pair_number: int, fg: int, bg: int) -> None:

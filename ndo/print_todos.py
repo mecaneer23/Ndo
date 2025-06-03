@@ -1,6 +1,7 @@
 """
 Helper module to handle printing a list of Todo objects
 """
+
 # ruff: noqa: FBT001, FBT003
 
 from collections.abc import Iterator
@@ -253,16 +254,18 @@ def _get_display_strings(
     ).ljust(width - 1 - len(enumeration_info), " ")
     return _DisplayText(
         enumeration_info,
-        before_footers
-        + Chunk.join(
-            Chunk(UI_TYPE == UiType.NONE, _ANSI_RESET),
-            Chunk(width == 0, " "),
-        )
-        if UI_TYPE == UiType.NONE
-        else _add_ellipsis(
-            before_footers,
-            len(enumeration_info),
-            width - 1,
+        (
+            before_footers
+            + Chunk.join(
+                Chunk(UI_TYPE == UiType.NONE, _ANSI_RESET),
+                Chunk(width == 0, " "),
+            )
+            if UI_TYPE == UiType.NONE
+            else _add_ellipsis(
+                before_footers,
+                len(enumeration_info),
+                width - 1,
+            )
         ),
     )
 
@@ -398,9 +401,11 @@ def print_todos(
             display_strings = _get_display_strings(
                 new_todos[position],
                 False,
-                str(absolute_pos + 1).rjust(len(str(len(todos)))) + " "
-                if ENUMERATE or RELATIVE_ENUMERATE
-                else "",
+                (
+                    str(absolute_pos + 1).rjust(len(str(len(todos)))) + " "
+                    if ENUMERATE or RELATIVE_ENUMERATE
+                    else ""
+                ),
                 width,
             )
             print(  # noqa: T201

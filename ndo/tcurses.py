@@ -120,7 +120,9 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
     def _parse_attrs(self, attrs: int) -> list[str]:
         possible_attrs: dict[int, str] = dict(
-            (value, name) for name, value in globals().items() if isinstance(value, int)
+            (value, name)
+            for name, value in globals().items()
+            if isinstance(value, int)
         )
         possible_returns = {
             "A_BOLD": "bold",
@@ -221,7 +223,9 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     @_updates_screen
     def clear(self) -> None:
         """Clear the screen"""
-        for row in range(self.begin_yx[0] + 1, self.begin_yx[0] + 1 + self.height):
+        for row in range(
+            self.begin_yx[0] + 1, self.begin_yx[0] + 1 + self.height
+        ):
             self.screen.replace(
                 f"{row}.{self.begin_yx[1]}",
                 f"{row}.{self.width + self.begin_yx[1]}",
@@ -294,7 +298,9 @@ def init_pair(pair_number: int, fg: int, bg: int) -> None:
     color-pair are changed to the new definition.
     """
     bg = max(bg, 2**10)
-    _color_pairs.insert(pair_number, (_get_usable_color(fg), _get_usable_color(bg)))
+    _color_pairs.insert(
+        pair_number, (_get_usable_color(fg), _get_usable_color(bg))
+    )
 
 
 def color_pair(pair_number: int) -> int:
@@ -319,7 +325,9 @@ def newwin(
     return _CursesWindow(screen, (ncols, nlines), (begin_y, begin_x))
 
 
-def wrapper(func: Callable[..., T], /, *args: list[Any], **kwargs: dict[str, Any]) -> T:
+def wrapper(
+    func: Callable[..., T], /, *args: list[Any], **kwargs: dict[str, Any]
+) -> T:
     """
     Initialize tcurses and call another callable object, func, which
     should be the rest of your tcurses-using application. If the

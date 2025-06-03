@@ -8,6 +8,7 @@ from typing import TypeVar
 
 _T = TypeVar("_T")
 
+
 def get_executable_args(
     args: str,
     possible_args: Mapping[str, _T | int | str],

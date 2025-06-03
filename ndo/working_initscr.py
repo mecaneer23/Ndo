@@ -6,6 +6,7 @@ module provides a functional workaround.
 Thanks to https://github.com/zephyrproject-rtos/windows-curses/issues/50
 for the inspiration.
 """
+
 # pylint: disable=wrong-import-order
 
 import _curses

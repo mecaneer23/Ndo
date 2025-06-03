@@ -79,7 +79,6 @@ class InputTodo:
         returns a Todo object containing the user's entry.
     """
 
-
     def __init__(  # noqa: PLR0913
         self,
         stdscr: CursesWindow,
@@ -120,7 +119,9 @@ class InputTodo:
 
     def _init_todo(self) -> None:
         if self._todo.is_empty():
-            self._todo.set_indent_level(self._style_information.get_indent_level())
+            self._todo.set_indent_level(
+                self._style_information.get_indent_level(),
+            )
             self._todo.set_color(self._style_information.get_color())
             if not self._style_information.has_box():
                 self._todo.set_box_char(BoxChar.NONE)

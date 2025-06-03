@@ -4,6 +4,7 @@ Helpers for storing a cursor, or a position in a list.
 Especially helpful for storing a cursor which might span
 multiple consecutive positions.
 """
+
 # ruff: noqa: ERA001
 
 from collections.abc import Iterator
