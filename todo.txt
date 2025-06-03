@@ -1,6 +1,3 @@
--r fix: strikethrough in curses
-  -r fix long lines (longer than width // 2 - 1)
-  -r fix moving down onto a toggled line
 -m fix: make startup faster
   -m depends on how the program is run, not a huge issue
 -y feat: add unit tests?

@@ -260,6 +260,13 @@ def _get_header(title: list[str]) -> str:
 
 
 def _fail_if_not_implemented() -> None:
+    """
+    Check for invalid combinations of command line arguments
+
+    Curses strikethrough:
+    - fix long lines (longer than width // 2 - 1)
+    - fix moving down onto a toggled line
+    """
     if STRIKETHROUGH and UI_TYPE == UiType.CURSES:
         msg = (
             "Curses UI doesn't fully support strikethrough. "
