@@ -88,7 +88,7 @@ class Cursor:
 
     #     def _decorator(func: Callable[..., T]) -> Callable[..., T]:
     #         @wraps(func)
-            # def _inner(self: "Cursor", *args: list[Any], **kwargs: dict[Any, Any]) -> T:
+    # def _inner(self: "Cursor", *args: list[Any], **kwargs: dict[Any, Any]) -> T:
     #             for pos in self:
     #                 # if not self._todos[pos].is_folded_parent():
     #                 # break
@@ -169,7 +169,10 @@ class Cursor:
 
     def multiselect_down(self, max_len: int) -> None:
         """Extend the cursor down by 1"""
-        if self.get_last() >= max_len - 1:
+        if (
+            self.get_last() >= max_len - 1
+            and self._direction == _Direction.DOWN
+        ):
             return
         if len(self) == 1 or self._direction == _Direction.DOWN:
             self._raise_stop(1)
@@ -194,8 +197,8 @@ class Cursor:
         Select every position between 0 and
         the current top of the selection
         """
-        for _ in range(self.get_first(), 0, -1):
-            self.multiselect_up()
+        self.set(0, self.get_first() + 1)
+        self._direction = _Direction.DOWN
 
     def multiselect_bottom(self, max_len: int) -> None:
         """
@@ -203,8 +206,8 @@ class Cursor:
         current bottom of the selection and
         the `max_len` of the list
         """
-        for _ in range(self.get_last() - 1, max_len):
-            self.multiselect_down(max_len)
+        self.set(self.get_last(), max_len)
+        self._direction = _Direction.UP
 
     def _multiselect_to(self, position: int, max_len: int) -> None:
         """Select from current position up or down `position`"""

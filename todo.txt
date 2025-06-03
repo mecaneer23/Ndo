@@ -12,6 +12,5 @@
   -c happens because there is too much delay between actions. You can press keys faster than the program can respond
 -c fix: visual glitch when len(todos) == 1 in acurses
 - feat!: implement bcurses (browser-curses) using brython
-- fix: select all todos above/below should be predictable and repeatable
 - fix: odd behavior when undoing line join
   - steps to replicate?
