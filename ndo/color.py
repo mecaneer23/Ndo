@@ -2,8 +2,9 @@
 Standardized colors for Ndo
 """
 
+from collections.abc import Iterator
 from enum import Enum
-from typing import NamedTuple, Iterator
+from typing import NamedTuple
 
 
 class _InnerColor(NamedTuple):
