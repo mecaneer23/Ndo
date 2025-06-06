@@ -10,3 +10,4 @@
 - fix: odd behavior when undoing line join
   - steps to replicate?
 - feat: add -bx unchecked options (simple alternatives)
+- refactor: rename Cursor to Selection
