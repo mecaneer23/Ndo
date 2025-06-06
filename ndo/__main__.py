@@ -283,10 +283,9 @@ def _set_fold_state_under(
     index = start_index
     while True:
         index += 1
-        if todos[index].get_indent_level() > parent_indent_level:
-            todos[index].set_folded(state)
-            continue
-        break
+        if todos[index].get_indent_level() <= parent_indent_level:
+            break
+        todos[index].set_folded(state)
 
 
 def _set_folded(stdscr: CursesWindow, todos: Todos, selected: int) -> None:
