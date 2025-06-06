@@ -2,8 +2,8 @@
 Standardized colors for Ndo
 """
 
-from collections.abc import Iterator
 from enum import Enum
+from functools import cache
 from typing import NamedTuple
 
 
@@ -31,18 +31,21 @@ class Color(Enum):
     CYAN = 6
     WHITE = 7
 
+    @cache
     @staticmethod
-    def _get_colors() -> Iterator[_InnerColor]:
+    def _get_colors() -> list[_InnerColor]:
         """
         Get all colors as _InnerColors
         """
-        for color in Color:
-            if color.value > 0:
-                yield _InnerColor(
-                    color=color,
-                    name=color.name,
-                    value=color.value,
-                )
+        return [
+            _InnerColor(
+                color=color,
+                name=color.name,
+                value=color.value,
+            )
+            for color in Color
+            if color.value > 0
+        ]
 
     def as_int(self) -> int:
         """
