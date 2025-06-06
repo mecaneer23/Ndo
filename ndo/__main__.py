@@ -117,7 +117,11 @@ def new_todo(  # noqa: PLR0913
     if mode is None:
         mode = SingleLineModeImpl(SingleLineMode.NONE)
     temp = todos.copy()
-    index = int(selected) + offset.value
+    index = (
+        selected.get_first()
+        if offset == NewTodoPosition.CURRENT
+        else selected.get_last() + offset.value
+    )
     todo = InputTodo(
         stdscr,
         get_newwin(stdscr),
@@ -127,9 +131,10 @@ def new_todo(  # noqa: PLR0913
     ).get_todo()
     if not todo.is_empty():
         todos.insert(index, todo)
+    if temp == todos:
+        return todos
     stdscr.clear()
-    if temp != todos and offset == NewTodoPosition.NEXT:
-        selected.single_down(len(todos))
+    selected.set(index)
     update_file(FILENAME, todos)
     return todos
 
@@ -207,7 +212,7 @@ def edit_todo(
 
 def blank_todo(todos: Todos, selected: Cursor) -> Todos:
     """Create an empty Todo object"""
-    todos.insert(int(selected) + 1, Todo())
+    todos.insert(selected.get_last() + 1, Todo())
     selected.single_down(len(todos))
     update_file(FILENAME, todos)
     return todos
