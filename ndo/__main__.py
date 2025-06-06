@@ -291,46 +291,48 @@ def _set_fold_state_under(
         todos[index].set_folded(state)
 
 
-def _set_folded(stdscr: CursesWindow, todos: Todos, selected: int) -> None:
+def _set_folded(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
     """
     Set the selected todo as a folder parent
     and set all todos indented below it as folded
     """
-    parent = todos[selected]
-    index = selected + 1
-    if (
-        selected == len(todos) - 1
-        or todos[index].get_indent_level() <= parent.get_indent_level()
-    ):
-        return
-    parent.set_folded(FoldedState.PARENT)
-    todos[index].set_folded(FoldedState.FOLDED)
-    _set_fold_state_under(
-        FoldedState.FOLDED,
-        parent.get_indent_level(),
-        todos,
-        index,
-    )
-    stdscr.clear()
+    for pos in selected.get():
+        parent = todos[pos]
+        index = pos + 1
+        if (
+            pos == len(todos) - 1
+            or todos[index].get_indent_level() <= parent.get_indent_level()
+        ):
+            continue
+        parent.set_folded(FoldedState.PARENT)
+        todos[index].set_folded(FoldedState.FOLDED)
+        _set_fold_state_under(
+            FoldedState.FOLDED,
+            parent.get_indent_level(),
+            todos,
+            index,
+        )
+        stdscr.clear()
 
 
-def _unset_folded(stdscr: CursesWindow, todos: Todos, selected: int) -> None:
+def _unset_folded(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
     """
     If the selected todo is a folder parent,
     unfold the selected todo and all folded
     todos below it.
     """
-    parent = todos[selected]
-    if not parent.is_folded_parent():
-        return
-    parent.set_folded(FoldedState.DEFAULT)
-    _set_fold_state_under(
-        FoldedState.DEFAULT,
-        parent.get_indent_level(),
-        todos,
-        selected,
-    )
-    stdscr.clear()
+    for pos in selected.get():
+        parent = todos[pos]
+        if not parent.is_folded_parent():
+            continue
+        parent.set_folded(FoldedState.DEFAULT)
+        _set_fold_state_under(
+            FoldedState.DEFAULT,
+            parent.get_indent_level(),
+            todos,
+            pos,
+        )
+        stdscr.clear()
 
 
 def _handle_enter(
@@ -635,8 +637,8 @@ def main(stdscr: CursesWindow) -> Response:
             new_todo,
             "stdscr, todos, selected, Todo(), CURRENT, single_line_state",
         ),
-        # Key.open_bracket: (_set_folded, "stdscr, todos, int(selected)"),
-        # Key.close_bracket: (_unset_folded, "stdscr, todos, int(selected)"),
+        # Key.open_bracket: (_set_folded, "stdscr, todos, selected"),
+        # Key.close_bracket: (_unset_folded, "stdscr, todos, selected"),
         Key.a: (_handle_alert, "stdscr, todos, selected"),
         Key.b: (magnify_menu, "stdscr, todos, selected"),
         Key.c: (color_todo, "stdscr, todos, selected"),
