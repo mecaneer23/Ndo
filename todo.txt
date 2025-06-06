@@ -1,6 +1,4 @@
--m fix: make startup faster
-  -m depends on how the program is run, not a huge issue
--y feat: add unit tests?
+-y feat: add unit tests
 -b feat: use [ and ] to fold/unfold
   -b in _updates_cursor if pos + count > len(todos) IndexOutOfBounds error
   -b needs movement adjustment
