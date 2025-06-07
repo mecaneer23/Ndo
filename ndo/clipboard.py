@@ -10,9 +10,9 @@ try:
 except ImportError:
     CLIPBOARD_EXISTS = False  # pyright: ignore[reportConstantRedefinition]
 
-from ndo.cursor import Cursor
 from ndo.get_args import FILENAME
 from ndo.io_ import update_file
+from ndo.selection import Selection
 from ndo.todo import Todo, Todos
 from ndo.ui_protocol import CursesWindow
 from ndo.window_interactions import alert
@@ -21,7 +21,7 @@ from ndo.window_interactions import alert
 def copy_todos(
     stdscr: CursesWindow,
     todos: Todos,
-    selected: Cursor,
+    selected: Selection,
     copied_todos: Todos,
 ) -> None:
     """
@@ -95,7 +95,7 @@ def _todos_from_clipboard(
 def paste_todos(
     stdscr: CursesWindow,
     todos: Todos,
-    selected: Cursor,
+    selected: Selection,
     copied_todos: Todos,
 ) -> Todos:
     """Paste todos from copied_todos or clipboard if available"""

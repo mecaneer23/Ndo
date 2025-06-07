@@ -1,7 +1,7 @@
 """
-Helpers for storing a cursor, or a position in a list.
+Helpers for storing a selection, or a position in a list.
 
-Especially helpful for storing a cursor which might span
+Especially helpful for storing a selection which might span
 multiple consecutive positions.
 """
 
@@ -28,7 +28,7 @@ class _Direction(Enum):
     NONE = 2
 
 
-class Cursor:
+class Selection:
     """Store potentially multiple consectutive position(s)"""
 
     def __init__(self, start: int, todos: Todos) -> None:
@@ -57,7 +57,7 @@ class Cursor:
         return iter(self.get())
 
     def get(self) -> range:
-        """Return a iterable object holding the current cursor"""
+        """Return a iterable object holding the current selection"""
         return range(self._start, self._stop)
 
     def get_first(self) -> int:
@@ -77,11 +77,11 @@ class Cursor:
         self._stop += amount
 
     # @staticmethod
-    # def _updates_cursor(
+    # def _updates_selection(
     #     direction: _Direction = _Direction.NONE,
     # ) -> Callable[[Callable[..., T]], Callable[..., T]]:
     #     """
-    #     Decorate every function that updates the cursor.
+    #     Decorate every function that updates the selection.
     #     This function ensures folded todos are handled
     #     properly. This basically treats each folded group
     #     of todos like its own individual todo.
@@ -89,7 +89,7 @@ class Cursor:
 
     #     def _decorator(func: Callable[..., T]) -> Callable[..., T]:
     #         @wraps(func)
-    # def _inner(self: "Cursor", *args: list[Any], **kwargs: dict[Any, Any]) -> T:
+    # def _inner(self: "Selection", *args: list[Any], **kwargs: dict[Any, Any]) -> T:
     #             for pos in self:
     #                 # if not self._todos[pos].is_folded_parent():
     #                 # break
@@ -114,11 +114,11 @@ class Cursor:
 
     def set(self, start: int, stop: int = -1) -> None:
         """
-        Setter for Cursor
+        Setter for Selection
 
         - `start` must be non-negative.
 
-        - If `stop` is omitted or negative, set a single-position cursor at
+        - If `stop` is omitted or negative, set a single-position selection at
         `start`.
 
         - If `stop` is provided and non-negative, set the range from
@@ -128,7 +128,7 @@ class Cursor:
         self._stop = start + 1 if stop < 0 else stop
 
     def single_up(self, max_len: int) -> None:
-        """Move a cursor with length 1 up by 1"""
+        """Move a selection of length 1 up by 1"""
         if len(self) == max_len or self.get_first() == 0:
             self.set(0)
             return
@@ -137,14 +137,14 @@ class Cursor:
         #     self.multiselect_up()
 
     def slide_up(self) -> None:
-        """Shift each value in the cursor up by 1"""
+        """Shift each value in the selection up by 1"""
         if self.get_first() == 0:
             return
         self._raise_start(-1)
         self._raise_stop(-1)
 
     def single_down(self, max_len: int) -> None:
-        """Move a cursor with length 1 down by 1"""
+        """Move a selection of length 1 down by 1"""
         if len(self) == max_len:
             self.set(self.get_last())
             return
@@ -154,22 +154,22 @@ class Cursor:
         self.set(self.get_last() + 1)
 
     def slide_down(self, max_len: int) -> None:
-        """Shift each value in the cursor down by 1"""
+        """Shift each value in the selection down by 1"""
         if self.get_last() >= max_len - 1:
             return
         self._raise_start(1)
         self._raise_stop(1)
 
     def to_top(self) -> None:
-        """Move the cursor to the top"""
+        """Set the selection to only the top"""
         self.set(0)
 
     def to_bottom(self, len_list: int) -> None:
-        """Move the cursor to the bottom"""
+        """Set the selection to only the bottom"""
         self.set(len_list - 1)
 
     def multiselect_down(self, max_len: int) -> None:
-        """Extend the cursor down by 1"""
+        """Extend the selection down by 1"""
         if (
             self.get_last() >= max_len - 1
             and self._direction == _Direction.DOWN
@@ -183,7 +183,7 @@ class Cursor:
             self._raise_start(1)
 
     def multiselect_up(self) -> None:
-        """Extend the cursor up by 1"""
+        """Extend the selection up by 1"""
         if self.get_first() == 0 and self._direction == _Direction.UP:
             return
         if len(self) == 1 or self._direction == _Direction.UP:
@@ -233,7 +233,7 @@ class Cursor:
         single: bool,  # noqa: FBT001
     ) -> None:
         """
-        Move the cursor to the specified position relative to the current
+        Move the selection to the specified position relative to the current
         position.
 
         Because the trigger can only be a single keypress, this function also

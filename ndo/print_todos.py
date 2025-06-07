@@ -11,7 +11,7 @@ from itertools import count
 from typing import TYPE_CHECKING, Generic, NamedTuple, TypeVar, cast
 
 from ndo.color import Color
-from ndo.cursor import Cursor
+from ndo.selection import Selection
 from ndo.get_args import (
     BULLETS,
     ENUMERATE,
@@ -364,7 +364,7 @@ def _color_to_ansi(color: int) -> str:
 def print_todos(
     stdscr: CursesWindow | None,
     todos: Todos,
-    selected: Cursor,
+    selected: Selection,
     prev_start: int = 0,
 ) -> int:
     """

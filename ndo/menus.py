@@ -15,13 +15,13 @@ except ImportError:
 
 import ndo.get_todo
 from ndo.color import Color
-from ndo.cursor import Cursor
 from ndo.get_args import FILENAME
 from ndo.get_args import curses_module as curses
 from ndo.io_ import update_file
 from ndo.keys import Key
 from ndo.md_to_py import md_table_to_lines
 from ndo.print_todos import make_printable_sublist
+from ndo.selection import Selection
 from ndo.todo import Todo, Todos
 from ndo.ui_protocol import CursesWindow
 from ndo.utils import clamp, overflow
@@ -135,7 +135,7 @@ def help_menu(
             break
 
 
-def magnify_menu(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
+def magnify_menu(stdscr: CursesWindow, todos: Todos, selected: Selection) -> None:
     """
     Magnify the first line of the current selection using pyfiglet.
 
@@ -265,7 +265,7 @@ def _get_indented_sections(todos: Todos) -> list[Todos]:
     return indented_sections
 
 
-def _sort_by(method: str, todos: Todos, selected: Cursor) -> Todos:
+def _sort_by(method: str, todos: Todos, selected: Selection) -> Todos:
     key = _get_sorting_methods()[method]
     selected_todo = todos[int(selected)]
     sorted_todos = Todos([])
@@ -285,7 +285,7 @@ def _sort_by(method: str, todos: Todos, selected: Cursor) -> Todos:
 def sort_menu(
     parent_win: CursesWindow,
     todos: Todos,
-    selected: Cursor,
+    selected: Selection,
 ) -> Todos:
     """
     Show a menu to choose a method to sort the `Todos`.
@@ -365,7 +365,7 @@ def get_search_sequence(stdscr: CursesWindow) -> str:
 
 def _get_search_todos(
     todos: Todos,
-    selected: Cursor,
+    selected: Selection,
 ) -> Iterator[tuple[int, Todo]]:
     start = int(selected) + 1
     yield from enumerate(todos[start:], start=start)
@@ -375,7 +375,7 @@ def _get_search_todos(
 def next_search_location(
     sequence: str,
     todos: Todos,
-    selected: Cursor,
+    selected: Selection,
 ) -> None:
     """
     Move the cursor to the next position where the current

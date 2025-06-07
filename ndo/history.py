@@ -4,14 +4,14 @@ Helpers for storing and retrieving TodoList object records.
 
 from typing import NamedTuple
 
-from ndo.cursor import Cursor
+from ndo.selection import Selection
 from ndo.todo import Todo, Todos
 
 
 class TodoList(NamedTuple):
     """
     An object representing the todos
-    and a cursor (start and stop integers) within the list
+    and a selection (start and stop integers) within the list
     """
 
     todos: Todos
@@ -26,7 +26,7 @@ class _Restorable:
 
     SEPARATOR = " |SEP|"
 
-    def __init__(self, todos: Todos, selected: Cursor) -> None:
+    def __init__(self, todos: Todos, selected: Selection) -> None:
         self.stored: str = self.SEPARATOR.join([repr(todo) for todo in todos])
         self.first: int = selected.get_first()
         self.last: int = selected.get_last()
@@ -69,7 +69,7 @@ class UndoRedo:
         self._history: list[_Restorable] = []
         self._index: int = -1
 
-    def add(self, todos: Todos, selected: Cursor) -> None:
+    def add(self, todos: Todos, selected: Selection) -> None:
         """
         Add a TodoList to the history.
         Backs up current state for potential retrieval later.

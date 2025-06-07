@@ -12,7 +12,6 @@ from typing import Callable, NamedTuple, TypeAlias
 
 from ndo.clipboard import CLIPBOARD_EXISTS, copy_todos, paste_todos
 from ndo.color import Color
-from ndo.cursor import Cursor
 from ndo.get_args import (
     CONTROLS_BEGIN_INDEX,
     CONTROLS_END_INDEX,
@@ -41,6 +40,7 @@ from ndo.menus import (
 )
 from ndo.mode import SingleLineMode, SingleLineModeImpl
 from ndo.print_todos import print_todos
+from ndo.selection import Selection
 from ndo.todo import BoxChar, FoldedState, Todo, Todos
 from ndo.ui_protocol import CursesWindow
 from ndo.utils import NewTodoPosition, Response, clamp
@@ -53,7 +53,7 @@ _PossibleArgs: TypeAlias = (
     | int
     | UndoRedo
     | SingleLineModeImpl
-    | Cursor
+    | Selection
     | CursesWindow
     | Todos
     | NewTodoPosition
@@ -85,7 +85,7 @@ def move_todo(todos: Todos, group: int, destination: int) -> Todos:
     return todos
 
 
-def todo_up(todos: Todos, selected: Cursor) -> Todos:
+def todo_up(todos: Todos, selected: Selection) -> Todos:
     """Move the selected todo(s) up"""
     todos = move_todo(todos, selected.get_last(), selected.get_first() - 1)
     update_file(FILENAME, todos)
@@ -93,7 +93,7 @@ def todo_up(todos: Todos, selected: Cursor) -> Todos:
     return todos
 
 
-def todo_down(todos: Todos, selected: Cursor) -> Todos:
+def todo_down(todos: Todos, selected: Selection) -> Todos:
     """Move the selected todo(s) down"""
     todos = move_todo(todos, selected.get_first(), selected.get_last() + 1)
     update_file(FILENAME, todos)
@@ -104,7 +104,7 @@ def todo_down(todos: Todos, selected: Cursor) -> Todos:
 def new_todo(  # noqa: PLR0913
     stdscr: CursesWindow,
     todos: Todos,
-    selected: Cursor,
+    selected: Selection,
     default_todo: Todo,
     offset: NewTodoPosition,
     mode: SingleLineModeImpl | None = None,
@@ -142,7 +142,7 @@ def new_todo(  # noqa: PLR0913
 def delete_todo(
     stdscr: CursesWindow,
     todos: Todos,
-    selected: Cursor,
+    selected: Selection,
     copied_todos: Todos,
 ) -> Todos:
     """Remove each Todo in `selected` from the list"""
@@ -156,7 +156,7 @@ def delete_todo(
     return todos
 
 
-def color_todo(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> Todos:
+def color_todo(stdscr: CursesWindow, todos: Todos, selected: Selection) -> Todos:
     """
     Open a color menu. Set each Todo in `selected`
     to the returned color.
@@ -210,7 +210,7 @@ def edit_todo(
     return todos
 
 
-def blank_todo(todos: Todos, selected: Cursor) -> Todos:
+def blank_todo(todos: Todos, selected: Selection) -> Todos:
     """Create an empty Todo object"""
     todos.insert(selected.get_last() + 1, Todo())
     selected.single_down(len(todos))
@@ -218,7 +218,7 @@ def blank_todo(todos: Todos, selected: Cursor) -> Todos:
     return todos
 
 
-def toggle(todos: Todos, selected: Cursor) -> Todos:
+def toggle(todos: Todos, selected: Selection) -> Todos:
     """Toggle the completion of each todo in the selected region"""
     for pos in selected.get():
         todos[pos].toggle()
@@ -240,7 +240,7 @@ def quit_program(todos: Todos, prev_time: float) -> int:
     return update_file(FILENAME, todos)
 
 
-def indent(todos: Todos, selected: Cursor) -> Todos:
+def indent(todos: Todos, selected: Selection) -> Todos:
     """Indent selected todos"""
     for pos in selected.get():
         todos[pos].indent()
@@ -248,7 +248,7 @@ def indent(todos: Todos, selected: Cursor) -> Todos:
     return todos
 
 
-def dedent(todos: Todos, selected: Cursor) -> Todos:
+def dedent(todos: Todos, selected: Selection) -> Todos:
     """Un-indent selected todos"""
     for pos in selected.get():
         todos[pos].dedent()
@@ -256,7 +256,7 @@ def dedent(todos: Todos, selected: Cursor) -> Todos:
     return todos
 
 
-def _toggle_todo_note(todos: Todos, selected: Cursor) -> None:
+def _toggle_todo_note(todos: Todos, selected: Selection) -> None:
     if len(todos) == 0:
         return
     for pos in selected.get():
@@ -265,14 +265,14 @@ def _toggle_todo_note(todos: Todos, selected: Cursor) -> None:
     update_file(FILENAME, todos)
 
 
-def _handle_undo(selected: Cursor, history: UndoRedo) -> Todos:
+def _handle_undo(selected: Selection, history: UndoRedo) -> Todos:
     todo_list = history.undo()
     selected.set(todo_list.start, todo_list.stop)
     update_file(FILENAME, todo_list.todos)
     return todo_list.todos
 
 
-def _handle_redo(selected: Cursor, history: UndoRedo) -> Todos:
+def _handle_redo(selected: Selection, history: UndoRedo) -> Todos:
     todo_list = history.redo()
     selected.set(todo_list.start, todo_list.stop)
     update_file(FILENAME, todo_list.todos)
@@ -296,7 +296,7 @@ def _set_fold_state_under(
         todos[index].set_folded(state)
 
 
-def _set_folded(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
+def _set_folded(stdscr: CursesWindow, todos: Todos, selected: Selection) -> None:
     """
     Set the selected todo as a folder parent
     and set all todos indented below it as folded
@@ -320,7 +320,7 @@ def _set_folded(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
         stdscr.clear()
 
 
-def _unset_folded(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
+def _unset_folded(stdscr: CursesWindow, todos: Todos, selected: Selection) -> None:
     """
     If the selected todo is a folder parent,
     unfold the selected todo and all folded
@@ -343,7 +343,7 @@ def _unset_folded(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
 def _handle_enter(
     stdscr: CursesWindow,
     todos: Todos,
-    selected: Cursor,
+    selected: Selection,
     mode: SingleLineModeImpl,
 ) -> Todos:
     if len(todos) > 0 and todos[int(selected)].has_box():
@@ -358,7 +358,7 @@ def _handle_enter(
     )
 
 
-def _handle_alert(stdscr: CursesWindow, todos: Todos, selected: Cursor) -> None:
+def _handle_alert(stdscr: CursesWindow, todos: Todos, selected: Selection) -> None:
     """Display the selected todo in an alert window"""
 
     if len(todos) == 0:
@@ -469,7 +469,7 @@ def update_modified_time(prev_time: float, todos: Todos) -> tuple[Todos, float]:
     return todos, current_time
 
 
-def _get_lines_to_join(selected: Cursor) -> Iterator[int]:
+def _get_lines_to_join(selected: Selection) -> Iterator[int]:
     """
     Return a sequence of integers corresponding to lines to combine (in
     reverse order).
@@ -486,11 +486,11 @@ def _get_lines_to_join(selected: Cursor) -> Iterator[int]:
         yield zeroith_item
 
 
-def join_lines(todos: Todos, selected: Cursor) -> None:
+def join_lines(todos: Todos, selected: Selection) -> None:
     """Combine current line with previous line by concatenation."""
 
     selection = _get_lines_to_join(selected)
-    ending_cursor_location = next(selection)
+    ending_selection_location = next(selection)
 
     for addend, captain in pairwise(selection):
         todos[captain].set_display_text(
@@ -499,7 +499,7 @@ def join_lines(todos: Todos, selected: Cursor) -> None:
             + todos[addend].get_display_text(),
         )
         todos.pop(addend)
-    selected.set(ending_cursor_location)
+    selected.set(ending_selection_location)
     update_file(FILENAME, todos)
 
 
@@ -537,7 +537,7 @@ def _handle_help_menu(stdscr: CursesWindow) -> None:
 def _copy_alert(
     stdscr: CursesWindow,
     todos: Todos,
-    selected: Cursor,
+    selected: Selection,
     copied_todos: Todos,
 ) -> None:
     """Copy a todo and show an alert with information"""
@@ -562,7 +562,7 @@ def main(stdscr: CursesWindow) -> Response:
     contents of `FILENAME`
 
     selected:
-    main Cursor object for tracking position
+    main Selection object for tracking position
     within the list of Todo objects. Initialized at 0
 
     sublist_top:
@@ -589,7 +589,7 @@ def main(stdscr: CursesWindow) -> Response:
     if RENAME:
         return _handle_rename(stdscr)
     todos = file_string_to_todos(read_file(FILENAME))
-    selected = Cursor(0, todos)
+    selected = Selection(0, todos)
     sublist_top = 0
     history = UndoRedo()
     single_line_state = SingleLineModeImpl(SingleLineMode.ON)
@@ -759,7 +759,7 @@ def run() -> None:
         print_todos(
             None,
             file_string_to_todos(read_file(FILENAME)),
-            Cursor(0, Todos(())),
+            Selection(0, Todos(())),
         )
         sys_exit()
 
