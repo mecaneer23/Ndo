@@ -156,7 +156,11 @@ def delete_todo(
     return todos
 
 
-def color_todo(stdscr: CursesWindow, todos: Todos, selected: Selection) -> Todos:
+def color_todo(
+    stdscr: CursesWindow,
+    todos: Todos,
+    selected: Selection,
+) -> Todos:
     """
     Open a color menu. Set each Todo in `selected`
     to the returned color.
@@ -296,7 +300,11 @@ def _set_fold_state_under(
         todos[index].set_folded(state)
 
 
-def _set_folded(stdscr: CursesWindow, todos: Todos, selected: Selection) -> None:
+def _set_folded(
+    stdscr: CursesWindow,
+    todos: Todos,
+    selected: Selection,
+) -> None:
     """
     Set the selected todo as a folder parent
     and set all todos indented below it as folded
@@ -320,7 +328,11 @@ def _set_folded(stdscr: CursesWindow, todos: Todos, selected: Selection) -> None
         stdscr.clear()
 
 
-def _unset_folded(stdscr: CursesWindow, todos: Todos, selected: Selection) -> None:
+def _unset_folded(
+    stdscr: CursesWindow,
+    todos: Todos,
+    selected: Selection,
+) -> None:
     """
     If the selected todo is a folder parent,
     unfold the selected todo and all folded
@@ -358,7 +370,11 @@ def _handle_enter(
     )
 
 
-def _handle_alert(stdscr: CursesWindow, todos: Todos, selected: Selection) -> None:
+def _handle_alert(
+    stdscr: CursesWindow,
+    todos: Todos,
+    selected: Selection,
+) -> None:
     """Display the selected todo in an alert window"""
 
     if len(todos) == 0:

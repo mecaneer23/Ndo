@@ -135,7 +135,11 @@ def help_menu(
             break
 
 
-def magnify_menu(stdscr: CursesWindow, todos: Todos, selected: Selection) -> None:
+def magnify_menu(
+    stdscr: CursesWindow,
+    todos: Todos,
+    selected: Selection,
+) -> None:
     """
     Magnify the first line of the current selection using pyfiglet.
 

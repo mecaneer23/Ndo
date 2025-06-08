@@ -11,7 +11,6 @@ from itertools import count
 from typing import TYPE_CHECKING, Generic, NamedTuple, TypeVar, cast
 
 from ndo.color import Color
-from ndo.selection import Selection
 from ndo.get_args import (
     BULLETS,
     ENUMERATE,
@@ -23,6 +22,7 @@ from ndo.get_args import (
     UiType,
 )
 from ndo.get_args import curses_module as curses
+from ndo.selection import Selection
 from ndo.todo import Todo, Todos
 from ndo.ui_protocol import CursesWindow
 from ndo.utils import Chunk
