@@ -77,6 +77,8 @@ class _DisplayText(NamedTuple):
 
 
 def _get_bullet(indentation_level: int) -> str:
+    if SIMPLE_BOXES:
+        return "-"
     symbols = (
         "•",
         "◦",

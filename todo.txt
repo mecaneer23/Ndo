@@ -9,4 +9,3 @@
 - feat!: implement bcurses (browser-curses) using brython
 - fix: odd behavior when undoing line join
   - steps to replicate?
-- feat: add -bx unchecked options (simple alternatives)

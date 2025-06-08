@@ -1,6 +1,5 @@
 """
-Class definitions for a Todo, Todos (list of Todo),
-and TodoList (list of Todo + cursor (int)).
+Class definitions for a Todo and Todos (list of Todo).
 """
 
 from collections.abc import Iterable
