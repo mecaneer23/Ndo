@@ -321,18 +321,19 @@ def sort_menu(
             key = Key(win.getch())
         except KeyboardInterrupt:
             return todos
+        enter = partial(_sort_by, lines[cursor], todos, selected)
         return_options: dict[Key, Callable[..., Todos]] = {
             Key.q: lambda: todos,
             Key.escape: lambda: todos,
-            Key.enter: partial(_sort_by, lines[cursor], todos, selected),
+            Key.enter: enter,
+            Key.enter_: enter,
         }
-        if key in move_options:
-            func = move_options[key]
-            cursor = func(cursor)
-        elif key in return_options:
+        if key in return_options:
             return return_options[key]()
-        else:
+        if key not in move_options:
             continue
+        func = move_options[key]
+        cursor = func(cursor)
         cursor = clamp(cursor, 0, len(lines))
         parent_win.refresh()
         win.refresh()
