@@ -10,3 +10,4 @@
 - fix: odd behavior when undoing line join
   - steps to replicate?
 - feat: add `f` format button to detect an existing tabsize and modify the list to use the current tabsize
+- feat: sort menu should sort full list only if one or all todos are selected, else only select selection
