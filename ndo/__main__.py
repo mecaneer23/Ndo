@@ -613,16 +613,22 @@ def main(stdscr: CursesWindow) -> Response:
     file_modified_time = get_file_modified_time(FILENAME)
     sequence = ""
 
-    def _update_sequence(stdscr: CursesWindow) -> None:
+    def _update_sequence(
+        stdscr: CursesWindow,
+        todos: Todos,
+        selected: Selection,
+    ) -> None:
         """Side-effect only wrapper for get_search_sequence"""
         nonlocal sequence
         sequence = get_search_sequence(stdscr)
+        if sequence not in todos[selected.get_first()].get_display_text():
+            next_search_location(sequence, todos, selected)
 
     # if adding a new feature that updates `todos`,
     # make sure it also calls update_file()
     keys: dict[Key, tuple[Callable[..., Todos | None], str]] = {
         Key.ctrl_a: (selected.multiselect_all, "len(todos)"),
-        Key.ctrl_f: (_update_sequence, "stdscr"),
+        Key.ctrl_f: (_update_sequence, "stdscr, todos, selected"),
         Key.backspace: (join_lines, "todos, selected"),
         Key.backspace_: (join_lines, "todos, selected"),
         Key.backspace__: (join_lines, "todos, selected"),
@@ -640,7 +646,7 @@ def main(stdscr: CursesWindow) -> Response:
         Key.ctrl_x: (single_line_state.toggle, "None"),
         Key.escape: (lambda: None, "None"),
         Key.minus: (blank_todo, "todos, selected"),
-        Key.slash: (_update_sequence, "stdscr"),
+        Key.slash: (_update_sequence, "stdscr, todos, selected"),
         Key.zero: (selected.relative_to, "stdscr, 0, len(todos), True"),
         Key.one: (selected.relative_to, "stdscr, 1, len(todos), True"),
         Key.two: (selected.relative_to, "stdscr, 2, len(todos), True"),
