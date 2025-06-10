@@ -77,6 +77,8 @@ class Todo:
             return Color(int(self._text[pointer])), pointer + 2
         if self._text[pointer] in "rgybmcw":
             return Color.from_first_char(self._text[pointer]), pointer + 2
+        if self._text[pointer] == " ":
+            return self._init_color(pointer + 1)
         if self._box_char == BoxChar.NONE:
             return Color.WHITE, pointer
         msg = (
