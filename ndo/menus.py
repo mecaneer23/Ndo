@@ -273,17 +273,26 @@ def _sort_by(method: str, todos: Todos, selected: Selection) -> Todos:
     key = _get_sorting_methods()[method]
     selected_todo = todos[int(selected)]
     sorted_todos = Todos([])
+    sections = _get_indented_sections(
+        Todos(todos[selected.get_first() : selected.get_last() + 1]),
+    )
     sort_iterable = (
-        reversed(_get_indented_sections(todos))
+        reversed(sections)
         if method == _REVERSE_NAME
-        else sorted(_get_indented_sections(todos), key=key)
+        else sorted(sections, key=key)
     )
     for section in sort_iterable:
         for todo in section:
             sorted_todos.append(todo)
-    update_file(FILENAME, sorted_todos)
-    selected.set(sorted_todos.index(selected_todo))
-    return sorted_todos
+    full_todos = Todos(
+        todos[: selected.get_first()]
+        + sorted_todos
+        + todos[selected.get_last() + 1 :],
+    )
+    update_file(FILENAME, full_todos)
+    if len(selected) == 1:
+        selected.set(sorted_todos.index(selected_todo))
+    return full_todos
 
 
 def sort_menu(
