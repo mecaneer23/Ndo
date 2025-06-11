@@ -280,7 +280,10 @@ def _get_indented_sections(todos: Todos, min_indent_level: int) -> list[Todos]:
 
 def _sort_by(method: str, todos: Todos, selected: Selection) -> Todos:
     key = _get_sorting_methods()[method]
-    selected_todo = todos[int(selected)]
+    selected_todo: Todo | None = None
+    if len(selected) == 1:
+        selected_todo = todos[int(selected)]
+        selected.multiselect_all(len(todos))
     sorted_todos = Todos([])
     sections = _get_indented_sections(
         Todos(todos[selected.get_first() : selected.get_last() + 1]),
@@ -300,7 +303,7 @@ def _sort_by(method: str, todos: Todos, selected: Selection) -> Todos:
         + todos[selected.get_last() + 1 :],
     )
     update_file(FILENAME, full_todos)
-    if len(selected) == 1:
+    if selected_todo is not None:
         selected.set(sorted_todos.index(selected_todo))
     return full_todos
 
