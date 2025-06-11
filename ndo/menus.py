@@ -279,6 +279,13 @@ def _get_indented_sections(todos: Todos, min_indent_level: int) -> list[Todos]:
 
 
 def _sort_by(method: str, todos: Todos, selected: Selection) -> Todos:
+    """
+    Sort a `Todos` object by the given method. The passed in `Todos`
+    object should contain the full list of todos, not just the selected ones.
+
+    Sort the full list only if one or all todos are selected,
+    otherwise sort only the selection.
+    """
     key = _get_sorting_methods()[method]
     selected_todo: Todo | None = None
     if len(selected) == 1:
