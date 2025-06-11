@@ -255,11 +255,20 @@ def _get_sorting_methods() -> dict[str, Callable[[Todos], str | int]]:
     }
 
 
-def _get_indented_sections(todos: Todos) -> list[Todos]:
+def _get_min_indent_level(todos: Todos, selected: Selection) -> int:
+    """
+    Get the minimum indent level of the selected todos.
+    """
+    if len(selected) == 0:
+        return 0
+    return min(todos[pos].get_indent_level() for pos in selected.get())
+
+
+def _get_indented_sections(todos: Todos, min_indent_level: int) -> list[Todos]:
     indented_sections: list[Todos] = []
     section: Todos = Todos([])
     for todo in todos:
-        if todo.get_indent_level() > 0:
+        if todo.get_indent_level() > min_indent_level:
             section.append(todo)
             continue
         if len(section) > 0:
@@ -275,6 +284,7 @@ def _sort_by(method: str, todos: Todos, selected: Selection) -> Todos:
     sorted_todos = Todos([])
     sections = _get_indented_sections(
         Todos(todos[selected.get_first() : selected.get_last() + 1]),
+        _get_min_indent_level(todos, selected),
     )
     sort_iterable = (
         reversed(sections)
