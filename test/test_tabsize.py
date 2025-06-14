@@ -38,3 +38,23 @@ def test_detect_tab_size() -> None:
         "  -",
         " -",
     ]) == 2
+    assert detect_tab_size([
+        "  -",
+        "    -",
+        "    -",
+        "      -",
+        "  -",
+        "    -",
+        "    -",
+        "      -",
+    ]) == 2
+    assert detect_tab_size([
+        "  -",
+        "  -",
+        "    -",
+        "    -",
+        "    -",
+        "    -",
+        "      -",
+        "   -",
+    ]) == 2
