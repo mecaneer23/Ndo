@@ -41,6 +41,7 @@ from ndo.menus import (
 from ndo.mode import SingleLineMode, SingleLineModeImpl
 from ndo.print_todos import print_todos
 from ndo.selection import Selection
+from ndo.tab_size import format_todos
 from ndo.todo import BoxChar, FoldedState, Todo, Todos
 from ndo.ui_protocol import CursesWindow
 from ndo.utils import NewTodoPosition, Response, clamp
@@ -606,7 +607,6 @@ def main(stdscr: CursesWindow) -> Response:
         return _handle_rename(stdscr)
     todos = file_string_to_todos(read_file(FILENAME))
     selected = Selection(0, todos)
-    sublist_top = 0
     history = UndoRedo()
     single_line_state = SingleLineModeImpl(SingleLineMode.ON)
     copied_todos: Todos = Todos(())
@@ -709,6 +709,10 @@ def main(stdscr: CursesWindow) -> Response:
         Key.nine: (selected.relative_to, "stdscr, 9, len(todos), False"),
     }
     history.add(todos, selected)
+    set_header(stdscr, f"{HEADER}:")
+    sublist_top = print_todos(stdscr, todos, selected, 0)
+    stdscr.refresh()
+    format_todos(stdscr, todos)
 
     while True:
         todos, file_modified_time = update_modified_time(

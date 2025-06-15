@@ -4,7 +4,7 @@ Tests for tabsize.py
 # ruff: noqa: S101, PLR2004
 # pylint: disable=missing-function-docstring
 
-from ndo.tabsize import detect_tab_size
+from ndo.tab_size import detect_tab_size
 
 
 def test_detect_tab_size() -> None:
