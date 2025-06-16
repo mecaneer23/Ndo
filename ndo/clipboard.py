@@ -85,7 +85,9 @@ def _todos_from_clipboard(
         )
         return todos
     pasted = paste()  # pyright: ignore[reportPossiblyUnboundVariable]
-    if "\n".join(todo.get_display_text() for todo in copied_todos) == pasted:
+    if [
+        todo.get_display_text() for todo in copied_todos
+    ] == pasted.splitlines():
         return _insert_copied_todos(copied_todos, todos, selected)
     for index, line in enumerate(pasted.strip().split("\n"), start=1):
         todos.insert(selected + index, Todo(f"- {line}"))
