@@ -87,10 +87,10 @@ def chunk_message(
         left = 0
         right = width + 1
         while True:
-            right -= 1
             if right >= len(line):
                 yield line[left:]
                 break
+            right -= 1
             if line[right] == delimiter:
                 yield line[left:right]
                 left = right + 1
