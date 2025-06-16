@@ -65,7 +65,7 @@ def _insert_copied_todos(
     Insert copied_todos into todos at the selected position.
     """
     for pos, todo in enumerate(copied_todos, start=1):
-        todos.insert(selected + pos, Todo(repr(todo)))
+        todos.insert(selected + pos, todo.copy())
     return todos
 
 
