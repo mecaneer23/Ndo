@@ -100,7 +100,12 @@ def paste_todos(
 ) -> Todos:
     """Paste todos from copied_todos or clipboard if available"""
     temp = todos.copy()
-    todos = _todos_from_clipboard(stdscr, todos, int(selected), copied_todos)
+    todos = _todos_from_clipboard(
+        stdscr,
+        todos,
+        selected.get_last(),
+        copied_todos,
+    )
     stdscr.clear()
     if temp != todos:
         selected.single_down(len(todos))
