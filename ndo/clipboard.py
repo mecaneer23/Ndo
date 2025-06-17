@@ -64,7 +64,7 @@ def copy_todos(
                 stdscr,
                 "Copied internally. External copy dependency not "
                 "available: try running `pip install pyperclip`\n"
-                "Press x to hide this message in the future.",
+                "Press `x` to hide this message in the future.",
             )
             == Key.x
         ):
@@ -116,7 +116,7 @@ def _todos_from_clipboard(
                 stdscr,
                 "Pasting from internal buffer. External paste dependency "
                 "not available: try running `pip install pyperclip`\n"
-                "Press x to hide this message in the future.",
+                "Press `x` to hide this message in the future.",
             )
             == Key.x
         ):
