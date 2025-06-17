@@ -12,10 +12,36 @@ except ImportError:
 
 from ndo.get_args import FILENAME
 from ndo.io_ import update_file
+from ndo.keys import Key
 from ndo.selection import Selection
 from ndo.todo import Todo, Todos
 from ndo.ui_protocol import CursesWindow
 from ndo.window_interactions import alert
+
+
+class _ShouldShow:
+    """
+    Used to track whether to show the clipboard alerts.
+    """
+
+    def __init__(self) -> None:
+        self._copy = True
+        self._paste = True
+
+    def set_copy(self) -> None:
+        self._copy = False
+
+    def copy(self) -> bool:
+        return self._copy
+
+    def set_paste(self) -> None:
+        self._paste = False
+
+    def paste(self) -> bool:
+        return self._paste
+
+
+_SHOULD_SHOW = _ShouldShow()
 
 
 def copy_todos(
@@ -32,11 +58,17 @@ def copy_todos(
     for pos in selected.get():
         copied_todos.append(todos[pos])
     if not CLIPBOARD_EXISTS:
-        alert(
-            stdscr,
-            "Copied internally. External copy dependency not "
-            "available: try running `pip install pyperclip`",
-        )
+        if (
+            _SHOULD_SHOW.copy()
+            and alert(
+                stdscr,
+                "Copied internally. External copy dependency not "
+                "available: try running `pip install pyperclip`\n"
+                "Press x to hide this message in the future.",
+            )
+            == Key.x
+        ):
+            _SHOULD_SHOW.set_copy()
         return
     try:
         copy(  # pyright: ignore[reportPossiblyUnboundVariable]
@@ -78,11 +110,17 @@ def _todos_from_clipboard(
     """Retrieve copied_todos and insert into todo list"""
     if not CLIPBOARD_EXISTS:
         todos = _insert_copied_todos(copied_todos, todos, selected)
-        alert(
-            stdscr,
-            "Pasting from internal buffer. External paste dependency "
-            "not available: try running `pip install pyperclip`",
-        )
+        if (
+            _SHOULD_SHOW.paste()
+            and alert(
+                stdscr,
+                "Pasting from internal buffer. External paste dependency "
+                "not available: try running `pip install pyperclip`\n"
+                "Press x to hide this message in the future.",
+            )
+            == Key.x
+        ):
+            _SHOULD_SHOW.set_paste()
         return todos
     pasted = paste()  # pyright: ignore[reportPossiblyUnboundVariable]
     if [
