@@ -368,7 +368,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         """If flag is True, getch() will be non-blocking"""
         _CursesWindow._GETCH.set_blocking(not flag)
 
-    def box(self) -> None:
+    def box(self, attrs: int = 0) -> None:
         """Draw a border around the current window"""
         if self._width < 0:
             msg = f"width too small: {self._width}"
@@ -380,15 +380,17 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
             0,
             0,
             ACS_ULCORNER + ACS_HLINE * (self._width - 2) + ACS_URCORNER,
+            attrs,
         )
         for i in range(self._height - 2):
-            self.addstr(i + 1, 0, ACS_VLINE)
+            self.addstr(i + 1, 0, ACS_VLINE, attrs)
         for i in range(self._height - 2):
-            self.addstr(i + 1, self._width - 1, ACS_VLINE)
+            self.addstr(i + 1, self._width - 1, ACS_VLINE, attrs)
         self.addstr(
             self._height - 1,
             0,
             ACS_LLCORNER + ACS_HLINE * (self._width - 2) + ACS_LRCORNER,
+            attrs,
         )
 
     def hline(self, y: int, x: int, ch: str, n: int) -> None:

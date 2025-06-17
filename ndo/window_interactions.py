@@ -3,6 +3,7 @@ Utility functions for interacting with curses and curses-like interfaces.
 """
 
 from ndo.color import Color
+from ndo.get_args import UI_TYPE, UiType
 from ndo.get_args import curses_module as curses
 from ndo.ui_protocol import CursesWindow
 from ndo.utils import chunk_message
@@ -32,11 +33,22 @@ def set_header(stdscr: CursesWindow, message: str) -> None:
     )
 
 
-def alert(stdscr: CursesWindow, message: str) -> int:
+def alert(
+    stdscr: CursesWindow,
+    message: str,
+    *,
+    attrs: int = 0,
+    box_attrs: int = 0,
+) -> int:
     """
     Show a box with a message, similar to a JavaScript alert.
 
     Press any key to close (pressed key is returned).
+
+    If `attrs` is provided, it will be used to style the text inside the popup.
+
+    If `box_attrs` is provided and the UI type is ANSI, the `box_attrs`
+    information will be used to style the border around the popup.
     """
     set_header(stdscr, "Alert! Press any key to close")
     stdscr.refresh()
@@ -59,16 +71,16 @@ def alert(stdscr: CursesWindow, message: str) -> int:
             "Message too long to display in window, "
             "please try again with a shorter message or a larger window.",
         )
-    win = curses.newwin(
+    win: CursesWindow = curses.newwin(
         height,
         width,
         max_y // 2 - height // 2,
         max_x // 2 - width // 2,
     )
     win.clear()
-    win.box()
+    win.box(box_attrs) if UI_TYPE == UiType.ANSI else win.box()  # pylint: disable=W0106 # pyright: ignore[reportCallIssue]
     for index, chunk in enumerate(chunks, start=1):
-        win.addstr(index, border_width // 2, chunk)
+        win.addstr(index, border_width // 2, chunk, attrs)
     win.refresh()
     key = stdscr.getch()
     stdscr.clear()

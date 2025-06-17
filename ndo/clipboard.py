@@ -10,7 +10,9 @@ try:
 except ImportError:
     CLIPBOARD_EXISTS = False  # pyright: ignore[reportConstantRedefinition]
 
+from ndo.color import Color
 from ndo.get_args import FILENAME
+from ndo.get_args import curses_module as curses
 from ndo.io_ import update_file
 from ndo.keys import Key
 from ndo.selection import Selection
@@ -29,15 +31,27 @@ class _ShouldShow:
         self._paste = True
 
     def set_copy(self) -> None:
+        """
+        Set copy alert to not show again.
+        """
         self._copy = False
 
     def copy(self) -> bool:
+        """
+        Return whether to show the copy alert.
+        """
         return self._copy
 
     def set_paste(self) -> None:
+        """
+        Set paste alert to not show again.
+        """
         self._paste = False
 
     def paste(self) -> bool:
+        """
+        Return whether to show the paste alert.
+        """
         return self._paste
 
 
@@ -65,6 +79,7 @@ def copy_todos(
                 "Copied internally. External copy dependency not "
                 "available: try running `pip install pyperclip`\n"
                 "Press `x` to hide this message in the future.",
+                box_attrs=curses.color_pair(Color.YELLOW.as_int()),
             )
             == Key.x
         ):
@@ -117,6 +132,7 @@ def _todos_from_clipboard(
                 "Pasting from internal buffer. External paste dependency "
                 "not available: try running `pip install pyperclip`\n"
                 "Press `x` to hide this message in the future.",
+                box_attrs=curses.color_pair(Color.YELLOW.as_int()),
             )
             == Key.x
         ):
