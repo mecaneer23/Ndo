@@ -53,6 +53,9 @@ class _Restorable:
             and self.last == other.last
         )
 
+    def __hash__(self) -> int:
+        return hash((self.stored, self.first, self.last))
+
     def __repr__(self) -> str:
         return (
             self.stored.replace(self.SEPARATOR, ", ")
