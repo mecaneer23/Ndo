@@ -102,6 +102,16 @@ def todo_down(todos: Todos, selected: Selection) -> Todos:
     return todos
 
 
+def _selection_from_offset(selected: Selection, offset: NewTodoPosition) -> int:
+    """
+    Return the index of the Todo to insert a new Todo at,
+    based on the current selection and the offset.
+    """
+    if offset == NewTodoPosition.CURRENT:
+        return selected.get_first()
+    return selected.get_last() + offset.value
+
+
 def new_todo(  # noqa: PLR0913
     stdscr: CursesWindow,
     todos: Todos,
@@ -118,11 +128,7 @@ def new_todo(  # noqa: PLR0913
     if mode is None:
         mode = SingleLineModeImpl(SingleLineMode.NONE)
     temp = todos.copy()
-    index = (
-        selected.get_first()
-        if offset == NewTodoPosition.CURRENT
-        else selected.get_last() + offset.value
-    )
+    index = _selection_from_offset(selected, offset)
     todo = InputTodo(
         stdscr,
         get_newwin(stdscr),
