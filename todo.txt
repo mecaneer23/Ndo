@@ -11,3 +11,4 @@
 - fix: odd behavior when undoing line join
   - steps to replicate?
 - feat: shift + `-` creates empty line above selection
+- fix: empty file shouldn't prompt about changing tabsize
