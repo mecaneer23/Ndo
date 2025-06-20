@@ -54,9 +54,12 @@ def format_todos(stdscr: CursesWindow, todos: Todos) -> None:
     Format the todos to match the current INDENT level.
     """
 
+    if len(todos) == 0:
+        return
+
     tab_size = _detect_tab_size([repr(todo) for todo in todos])
 
-    if tab_size == INDENT:
+    if tab_size in {INDENT, 0}:
         return
 
     if (
