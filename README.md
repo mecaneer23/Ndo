@@ -125,7 +125,7 @@ Options:
 | <kbd>Down</kbd>                                                     | Split line at cursor                 |
 | <kbd>Alt</kbd>+<kbd>h</kbd>                                         | Show a list of controls              |
 
-## `.ndoconfig` files
+## Config files (`.ndoconfig`)
 
 Pass arguments to `ndo` without specifying explicitly on the command line.
 
