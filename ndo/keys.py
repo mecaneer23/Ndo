@@ -2,7 +2,7 @@
 MIT License (c) 2023-2025
 """
 
-# ruff: noqa: E741, PIE796
+# ruff: noqa: E741
 # pylint: disable=invalid-name
 
 from enum import IntEnum
