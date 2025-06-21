@@ -57,6 +57,7 @@ class Key(IntEnum):
     open_bracket = 91
     backslash = 92
     close_bracket = 93
+    underscore = 95
     a = 97
     b = 98
     c = 99

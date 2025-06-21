@@ -229,6 +229,15 @@ def blank_todo(todos: Todos, selected: Selection) -> Todos:
     return todos
 
 
+def blank_todo_above(todos: Todos, selected: Selection) -> Todos:
+    """Create an empty Todo object above the current selection"""
+    position = selected.get_first()
+    todos.insert(position, Todo())
+    selected.set(position)
+    update_file(FILENAME, todos)
+    return todos
+
+
 def toggle(todos: Todos, selected: Selection) -> Todos:
     """Toggle the completion of each todo in the selected region"""
     for pos in selected.get():
@@ -672,6 +681,7 @@ def main(stdscr: CursesWindow) -> Response:
         ),
         # Key.open_bracket: (_set_folded, "stdscr, todos, selected"),
         # Key.close_bracket: (_unset_folded, "stdscr, todos, selected"),
+        Key.underscore: (blank_todo_above, "todos, selected"),
         Key.a: (_handle_alert, "stdscr, todos, selected"),
         Key.b: (magnify_menu, "stdscr, todos, selected"),
         Key.c: (color_todo, "stdscr, todos, selected"),
