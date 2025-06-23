@@ -71,7 +71,7 @@ def get_file_modified_time(filename: Path) -> float:
     return filename.stat().st_ctime  # pyright: ignore[reportDeprecated]
 
 
-def remove_todo(todos: Todos, index: int) -> Todos:
+def _remove_todo(todos: Todos, index: int) -> Todos:
     """Remove the Todo at `index"""
     if len(todos) < 1:
         return todos
@@ -79,7 +79,7 @@ def remove_todo(todos: Todos, index: int) -> Todos:
     return todos
 
 
-def move_todo(todos: Todos, group: int, destination: int) -> Todos:
+def _move_todo(todos: Todos, group: int, destination: int) -> Todos:
     """Move the todo(s) in `group` to `destination`"""
     if min(group, destination) >= 0 and max(group, destination) < len(todos):
         todos.insert(group, todos.pop(destination))
@@ -88,7 +88,7 @@ def move_todo(todos: Todos, group: int, destination: int) -> Todos:
 
 def todo_up(todos: Todos, selected: Selection) -> Todos:
     """Move the selected todo(s) up"""
-    todos = move_todo(todos, selected.get_last(), selected.get_first() - 1)
+    todos = _move_todo(todos, selected.get_last(), selected.get_first() - 1)
     update_file(FILENAME, todos)
     selected.slide_up()
     return todos
@@ -96,7 +96,7 @@ def todo_up(todos: Todos, selected: Selection) -> Todos:
 
 def todo_down(todos: Todos, selected: Selection) -> Todos:
     """Move the selected todo(s) down"""
-    todos = move_todo(todos, selected.get_first(), selected.get_last() + 1)
+    todos = _move_todo(todos, selected.get_first(), selected.get_last() + 1)
     update_file(FILENAME, todos)
     selected.slide_down(len(todos))
     return todos
@@ -156,7 +156,7 @@ def delete_todo(
     if len(todos) > 0 and CLIPBOARD_EXISTS:
         copy_todos(stdscr, todos, selected, copied_todos)
     for _ in selected:
-        todos = remove_todo(todos, selected.get_first())
+        todos = _remove_todo(todos, selected.get_first())
     selected.set(clamp(int(selected), 0, len(todos)))
     stdscr.clear()
     update_file(FILENAME, todos)
@@ -238,7 +238,7 @@ def blank_todo_above(todos: Todos, selected: Selection) -> Todos:
     return todos
 
 
-def toggle(todos: Todos, selected: Selection) -> Todos:
+def _toggle(todos: Todos, selected: Selection) -> Todos:
     """Toggle the completion of each todo in the selected region"""
     for pos in selected.get():
         todos[pos].toggle()
@@ -246,7 +246,7 @@ def toggle(todos: Todos, selected: Selection) -> Todos:
     return todos
 
 
-def remove_file(filename: Path) -> int:
+def _remove_file(filename: Path) -> int:
     """Delete a file from the file system. NOT UNDOABLE"""
     filename.unlink()
     return 0
@@ -256,7 +256,7 @@ def quit_program(todos: Todos, prev_time: float) -> int:
     """Exit the program, writing to disk first"""
     todos, _ = update_modified_time(prev_time, todos)
     if len(todos) == 0:
-        return remove_file(FILENAME)
+        return _remove_file(FILENAME)
     return update_file(FILENAME, todos)
 
 
@@ -375,7 +375,7 @@ def _handle_enter(
     mode: SingleLineModeImpl,
 ) -> Todos:
     if len(todos) > 0 and todos[int(selected)].has_box():
-        return toggle(todos, selected)
+        return _toggle(todos, selected)
     return new_todo(
         stdscr,
         todos,
