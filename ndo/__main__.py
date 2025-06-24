@@ -633,7 +633,7 @@ def main(stdscr: CursesWindow) -> Response:
         todos: Todos,
         selected: Selection,
     ) -> None:
-        """Side-effect only wrapper for get_search_sequence"""
+        """Side-effect-only wrapper for get_search_sequence"""
         nonlocal sequence
         sequence = get_search_sequence(stdscr)
         if sequence not in todos[selected.get_first()].get_display_text():
