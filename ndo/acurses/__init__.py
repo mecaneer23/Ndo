@@ -187,10 +187,10 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         begin_y: int = 0,
         begin_x: int = 0,
     ) -> None:
-        self._height = height if height > -1 else get_terminal_size().lines
-        self._width = width if width > -1 else get_terminal_size().columns
-        self._begin_y = begin_y
-        self._begin_x = begin_x
+        self._height: int = height if height > -1 else get_terminal_size().lines
+        self._width: int = width if width > -1 else get_terminal_size().columns
+        self._begin_y: int = begin_y
+        self._begin_x: int = begin_x
 
         self._buffer: list[str] = []
         self._stored_attr: int = 0
@@ -201,12 +201,26 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
         self._keypad: bool = False
 
-        self._attrs = 0
+        self._attrs: int = 0
 
         self._timeout: float | None = None
 
         if not _CursesWindow._GETCH.is_started():
             _CursesWindow._GETCH.start()
+
+    def _check_resize_update(self) -> bool:
+        """
+        Check if the terminal size has changed and update
+        the window size accordingly.
+
+        Return whether the size has changed.
+        """
+        new_size = get_terminal_size()
+        if new_size.lines == self._height and new_size.columns == self._width:
+            return False
+        self._height = new_size.lines
+        self._width = new_size.columns
+        return True
 
     def getch(self) -> int:
         """
@@ -217,6 +231,7 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         there is no input, otherwise wait until a key is
         pressed.
         """
+        self._check_resize_update()
         if not _CursesWindow._GETCH.is_blocking():
             try:
                 return self._stored_keys.get(block=False)
