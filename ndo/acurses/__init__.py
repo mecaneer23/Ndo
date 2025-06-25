@@ -8,12 +8,16 @@ from queue import Queue
 from sys import argv, stdin, stdout
 from threading import Lock, Thread
 from time import time as now
-from types import TracebackType
+from types import FrameType, TracebackType
 from typing import Any, Callable, Self, TypeVar, overload
 
 from ndo.keys import Key
 
 try:
+    from signal import (
+        SIGWINCH,  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
+        signal,
+    )
     from termios import (
         TCSADRAIN,  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
         tcgetattr,  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
@@ -22,9 +26,28 @@ try:
     from tty import (
         setcbreak,  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
     )
+
+    def handle_window_resize(func: Callable[[], bool]) -> None:
+        """
+        Handle window resize events by setting a signal handler
+        """
+
+        def _handler(signum: int, frame: FrameType | None) -> None:
+            """
+            Handle window resize events internally
+            """
+            _ = signum
+            _ = frame
+
+            func()
+
+        signal(SIGWINCH, _handler)  # pyright: ignore[reportUnknownArgumentType]
+
+
 except ImportError:
     from ndo.acurses.windows import (
         TCSADRAIN,
+        handle_window_resize,
         init_windows,
         setcbreak,
         tcgetattr,
@@ -207,6 +230,8 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
 
         if not _CursesWindow._GETCH.is_started():
             _CursesWindow._GETCH.start()
+
+        handle_window_resize(self._check_resize_update)
 
     def _check_resize_update(self) -> bool:
         """

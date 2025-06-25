@@ -10,7 +10,7 @@ from ctypes import (
 )
 from enum import Enum
 from sys import stdin
-from typing import ClassVar
+from typing import Callable, ClassVar
 
 from ndo.keys import Key
 
@@ -230,6 +230,11 @@ def setcbreak(fd: int) -> None:
         TCSADRAIN,
         tcgetattr(fd) & ~(_ENABLE_LINE_INPUT | _ENABLE_ECHO_INPUT),
     )
+
+
+def handle_window_resize(func: Callable[[], bool]) -> None:
+    """Handle window resize events"""
+    _ = func
 
 
 def init_windows() -> None:
