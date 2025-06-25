@@ -187,8 +187,8 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         begin_y: int = 0,
         begin_x: int = 0,
     ) -> None:
-        self._height = height if height > -1 else get_terminal_size()[1]
-        self._width = width if width > -1 else get_terminal_size()[0]
+        self._height = height if height > -1 else get_terminal_size().lines
+        self._width = width if width > -1 else get_terminal_size().columns
         self._begin_y = begin_y
         self._begin_x = begin_x
 
