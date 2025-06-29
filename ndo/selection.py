@@ -32,6 +32,9 @@ class Selection:
     """Store potentially multiple consectutive position(s)"""
 
     def __init__(self, start: int, todos: Todos) -> None:
+        if start < 0:
+            msg = "Start position must be non-negative"
+            raise ValueError(msg)
         self._start = start
         self._stop = start + 1
         self._direction: _Direction = _Direction.NONE
@@ -70,10 +73,14 @@ class Selection:
 
     def _raise_start(self, amount: int) -> None:
         """Raise start by `amount`"""
+        if self._start + amount < 0:
+            return
         self._start += amount
 
     def _raise_stop(self, amount: int) -> None:
         """Raise stop by `amount`"""
+        if self._stop + amount < self._start:
+            return
         self._stop += amount
 
     # @staticmethod
