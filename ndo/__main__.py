@@ -128,7 +128,9 @@ def new_todo(  # noqa: PLR0913
     if mode is None:
         mode = SingleLineModeImpl(SingleLineMode.NONE)
     temp = todos.copy()
-    index = _selection_from_offset(selected, offset)
+    index = 0
+    if len(todos) > 0:
+        index = _selection_from_offset(selected, offset)
     todo = InputTodo(
         stdscr,
         get_newwin(stdscr),
