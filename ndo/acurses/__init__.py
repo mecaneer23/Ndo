@@ -201,6 +201,7 @@ class _Getch(_Singleton):
 
 class _CursesWindow:  # pylint: disable=too-many-instance-attributes
     _GETCH = _Getch()
+    _windows = 0
 
     def __init__(
         self,
@@ -231,7 +232,11 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         if not _CursesWindow._GETCH.is_started():
             _CursesWindow._GETCH.start()
 
-        handle_window_resize(self._check_resize_update)
+        self._window_id: int = _CursesWindow._windows
+        _CursesWindow._windows += 1
+
+        if self._window_id == 0:
+            handle_window_resize(self._check_resize_update)
 
     def _check_resize_update(self) -> bool:
         """
@@ -256,7 +261,8 @@ class _CursesWindow:  # pylint: disable=too-many-instance-attributes
         there is no input, otherwise wait until a key is
         pressed.
         """
-        self._check_resize_update()
+        if self._window_id == 0:
+            self._check_resize_update()
         if not _CursesWindow._GETCH.is_blocking():
             try:
                 return self._stored_keys.get(block=False)
