@@ -530,6 +530,24 @@ def initscr() -> window:
     return _CursesWindow()
 
 
+def start_color() -> None:
+    """
+    Initialize color support. Currently does nothing
+
+    TODO:
+    Must be called if the programmer wants to use colors, and before
+    any other color manipulation routine is called. It is good practice
+    to call this routine right after initscr().
+
+    start_color() initializes eight basic colors
+    (black, red, green, yellow, blue, magenta, cyan, and white),
+    and two global variables in the curses module, COLORS and COLOR_PAIRS,
+    containing the maximum number of colors and color-pairs the terminal
+    can support. It also restores the colors on the terminal to the values
+    they had when the terminal was just turned on.
+    """
+
+
 def wrapper(
     func: Callable[..., _T],
     /,
@@ -550,10 +568,7 @@ def wrapper(
     program_name = argv[0].rsplit("/", 1)[-1].rsplit(".", 1)[0]
     try:
         setcbreak(fd)
-        # SAVE_CURSOR = \033[s
-        # CLEAR_SCREEN = \033[2J
-        # CURSOR_HOME = \033[H
-        # _curses.start_color()
+        start_color()
         stdout.write(f"\033[?1049h\033[H\033[22t\033]0;{program_name}\007")
         stdout.flush()
         stdscr = initscr()
@@ -561,7 +576,6 @@ def wrapper(
         return func(stdscr, *args, **kwds)
     finally:
         if "stdscr" in locals():
-            # RESET_COLOR = \033[39;49m
             stdout.write("\033[?1049l\033[23t\033[?25h")
             stdout.flush()
             tcsetattr(
