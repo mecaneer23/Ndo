@@ -9,3 +9,4 @@
 - feat!: implement bcurses (browser-curses) using brython
 - fix: odd behavior when undoing line join
   - steps to replicate?
+- fix: multiselect down beyond screen breaks printing
