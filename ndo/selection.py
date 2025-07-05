@@ -200,6 +200,10 @@ class Selection:
         if len(self) > 1:
             self._raise_stop(-1)
 
+    def is_direction_down(self) -> bool | None:
+        """Check if the current selection is moving down"""
+        return self._direction == _Direction.DOWN
+
     def multiselect_top(self) -> None:
         """
         Select every position between 0 and

@@ -383,11 +383,17 @@ def print_todos(
     new_todos, temp_selected, prev_start = make_printable_sublist(
         height - 1,
         todos,
-        int(selected),
+        selected.get_last()
+        if selected.is_direction_down()
+        else selected.get_first(),
         prev_start=prev_start,
     )
     new_todos = Todos(new_todos)
-    highlight = range(temp_selected, len(selected) + temp_selected)
+    highlight = (
+        range(temp_selected - len(selected) + 1, temp_selected + 1)
+        if len(selected) > 1 and selected.is_direction_down()
+        else range(temp_selected, len(selected) + temp_selected)
+    )
     print_position = -1  # used only with folding
     for relative_pos, (position, todo), absolute_pos in zip(
         [
