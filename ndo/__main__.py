@@ -677,7 +677,7 @@ def main(stdscr: CursesWindow) -> Response:
         Key.G: (selected.to_bottom, "len(todos)"),
         Key.J: (selected.multiselect_down, "len(todos)"),
         Key.K: (selected.multiselect_up, "None"),
-        Key.O: (
+        Key.uppercase_O: (
             new_todo,
             "stdscr, todos, selected, Todo(), CURRENT, single_line_state",
         ),

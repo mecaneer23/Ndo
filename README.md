@@ -1,6 +1,6 @@
 # Ndo - an ncurses todo application
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/746b6de92fed4209aa46905463efd3f4)](https://app.codacy.com/gh/mecaneer23/Ndo/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/746b6de92fed4209aa46905463efd3f4)](https://app.codacy.com/gh/mecaneer23/Ndo/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) [![CodeFactor](https://www.codefactor.io/repository/github/mecaneer23/ndo/badge)](https://www.codefactor.io/repository/github/mecaneer23/ndo)
 
 A curses implementation of a todo list helper. Most of the keybindings are similar to Vim-bindings so Vim users should feel relatively comfortable.
 

@@ -2,7 +2,6 @@
 MIT License (c) 2023-2025
 """
 
-# ruff: noqa: E741
 # pylint: disable=invalid-name
 
 from enum import IntEnum
@@ -53,7 +52,7 @@ class Key(IntEnum):
     alt_J = 74  # noqa: N815
     K = 75
     alt_K = 75  # noqa: N815
-    O = 79
+    uppercase_O = 79  # noqa: N815
     open_bracket = 91
     backslash = 92
     close_bracket = 93
@@ -74,7 +73,7 @@ class Key(IntEnum):
     alt_j = 106
     k = 107
     alt_k = 107
-    l = 108
+    lowercase_l = 108
     m = 109
     n = 110
     o = 111
