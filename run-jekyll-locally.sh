@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GEM_HOME=~/gems
-PATH=~/gems/bin:$PATH
+export GEM_HOME=~/gems
+export PATH=~/gems/bin:$PATH
 
 bundle exec jekyll serve
