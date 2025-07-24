@@ -476,3 +476,16 @@ screen.tag_configure("white*", background="black", foreground="white")
 screen.configure(state="disabled")
 
 stdscr = _CursesWindow(screen, (WIDTH, HEIGHT), (0, 0))
+
+def fail() -> None:
+    """
+    Raise NotImplementedError with a message that tcurses is not fully
+    implemented.
+    """
+    msg = (
+        "tcurses is not fully implemented. Use ANSI (acurses) or standard "
+        "curses UI to run your application."
+    )
+    raise NotImplementedError(msg)
+
+fail()
