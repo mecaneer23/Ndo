@@ -183,3 +183,10 @@ pytest test
 ```bash
 systemctl start docker
 ```
+
+## Bugs
+
+| Description                                     | Steps to reproduce                                                | Expected result                   | Incorrect/actual result           | Work-around or solution                                              |
+| ----------------------------------------------- | ----------------------------------------------------------------- | --------------------------------- | --------------------------------- | -------------------------------------------------------------------- |
+| Attempt to delete word using Alacritty terminal | In Alacritty, enter insert mode, then press ctrl+backspace        | Word is deleted                   | Character is deleted              | Use ctrl+w or alt+backspace instead                                  |
+| Strikethrough completed todos using Curses UI   | Run ndo with both `--ui curses` and `--strikethrough` (or `-sgc`) | Selected items show strikethrough | Program crashes with custom error | Run either with acurses rather than curses, or without strikethrough |
