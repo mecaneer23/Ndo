@@ -312,17 +312,17 @@ def color_pair(pair_number: int) -> int:
     return 2 ** (10 + fg) | 2 ** (10 + bg)
 
 
-def newwin(
-    nlines: int,
-    ncols: int,
-    begin_y: int = 0,
-    begin_x: int = 0,
-) -> _CursesWindow:
-    """
-    Return a new window, whose left-upper corner is at (begin_y, begin_x),
-    and whose height/width is nlines/ncols.
-    """
-    return _CursesWindow(screen, (ncols, nlines), (begin_y, begin_x))
+# def newwin(
+#     nlines: int,
+#     ncols: int,
+#     begin_y: int = 0,
+#     begin_x: int = 0,
+# ) -> _CursesWindow:
+#     """
+#     Return a new window, whose left-upper corner is at (begin_y, begin_x),
+#     and whose height/width is nlines/ncols.
+#     """
+#     return _CursesWindow(screen, (ncols, nlines), (begin_y, begin_x))
 
 
 def wrapper(
