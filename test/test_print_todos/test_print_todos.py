@@ -1,7 +1,7 @@
 """
 Tests for ndo.print_todos.py
 """
-# ruff: noqa: ANN201, S101
+# ruff: noqa: S101
 # pylint: disable=missing-function-docstring
 
 import pytest
@@ -113,7 +113,7 @@ def test_color_to_ansi_invalid() -> None:
 
 def test_get_display_strings_returns_display_text() -> None:
     todo = Todo("- Hello")
-    result = _get_display_strings(todo, False, "1 ", 80, False)  # noqa: FBT003
+    result = _get_display_strings(todo, False, "1 ", 80)  # noqa: FBT003
     assert isinstance(result, _DisplayText)
     assert result.prefix.startswith("1 ")
     assert "Hello" in result.text
