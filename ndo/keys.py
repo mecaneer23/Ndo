@@ -53,6 +53,7 @@ class Key(IntEnum):
     K = 75
     alt_K = 75  # noqa: N815
     uppercase_O = 79  # noqa: N815
+    T = 84
     open_bracket = 91
     backslash = 92
     close_bracket = 93

@@ -86,6 +86,36 @@ def _move_todo(todos: Todos, group: int, destination: int) -> Todos:
     return todos
 
 
+def _todo_top_no_move(todos: Todos, selected: Selection) -> Todos:
+    """
+    Move the selected todo(s) to the top of the list without moving selection
+    """
+    if len(todos) == 0:
+        return todos
+    group = todos[selected.get_first() : selected.get_last() + 1]
+    for item in group:
+        todos.remove(item)
+    todos = Todos(group + todos)
+    update_file(FILENAME, todos)
+    return todos
+
+
+def todo_top_down_one(todos: Todos, selected: Selection) -> Todos:
+    """
+    Move the selected todo(s) to the top of the list, moving selection down one
+    """
+    todos = _todo_top_no_move(todos, selected)
+    selected.single_down(len(todos))
+    return todos
+
+
+def todo_top(todos: Todos, selected: Selection) -> Todos:
+    """Move the selected todo(s) to the top of the list"""
+    todos = _todo_top_no_move(todos, selected)
+    selected.set(0, len(selected))
+    return todos
+
+
 def todo_up(todos: Todos, selected: Selection) -> Todos:
     """Move the selected todo(s) up"""
     todos = _move_todo(todos, selected.get_last(), selected.get_first() - 1)
@@ -677,6 +707,7 @@ def main(stdscr: CursesWindow) -> Response:
         Key.G: (selected.to_bottom, "len(todos)"),
         Key.J: (selected.multiselect_down, "len(todos)"),
         Key.K: (selected.multiselect_up, "None"),
+        Key.T: (todo_top_down_one, "todos, selected"),
         Key.uppercase_O: (
             new_todo,
             "stdscr, todos, selected, Todo(), CURRENT, single_line_state",
@@ -700,6 +731,7 @@ def main(stdscr: CursesWindow) -> Response:
         ),
         Key.p: (paste_todos, "stdscr, todos, selected, copied_todos"),
         Key.s: (sort_menu, "stdscr, todos, selected"),
+        Key.t: (todo_top, "todos, selected"),
         Key.u: (_handle_undo, "selected, history"),
         Key.y: (_copy_alert, "stdscr, todos, selected, copied_todos"),
         Key.down_arrow: (selected.single_down, "len(todos)"),
