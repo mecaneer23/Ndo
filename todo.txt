@@ -10,3 +10,4 @@
 - fix: odd behavior when undoing line join
   - steps to replicate?
 - fix: tcurses
+- feat: add find and replace operation
