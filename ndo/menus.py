@@ -419,3 +419,19 @@ def next_search_location(
         if sequence in todo.get_display_text():
             selected.set(i)
             return
+
+
+def find_and_replace_all(
+    find: str,
+    replace: str,
+    todos: Todos,
+) -> Todos:
+    """
+    Search for all occurrences of `find` in the todos
+    and replace them with `replace`.
+    """
+    updated_todos: list[Todo] = []
+    for todo in todos:
+        updated_text = todo.get_display_text().replace(find, replace)
+        updated_todos.append(todo.copy().set_display_text(updated_text))
+    return Todos(updated_todos)

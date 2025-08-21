@@ -11,3 +11,4 @@
   - steps to replicate?
 - fix: tcurses
 - feat: add find and replace operation
+- docs: add find and replace operation to readme

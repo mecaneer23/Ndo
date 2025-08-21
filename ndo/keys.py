@@ -16,6 +16,7 @@ class Key(IntEnum):
     windows_esc_prefix = 0
     ctrl_a = 1
     ctrl_f = 6
+    ctrl_g = 7
     backspace = 8
     tab = 9
     enter = 10

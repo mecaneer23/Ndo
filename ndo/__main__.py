@@ -31,6 +31,7 @@ from ndo.keyboard_input_helpers import get_executable_args
 from ndo.keys import Key
 from ndo.menus import (
     color_menu,
+    find_and_replace_all,
     get_newwin,
     get_search_sequence,
     help_menu,
@@ -612,6 +613,63 @@ def _copy_alert(
     )
 
 
+def _find_and_replace(stdscr: CursesWindow, todos: Todos) -> None:
+    if (
+        alert(stdscr, "Find and replace initiated. Press `Enter` to continue")
+        != Key.enter
+    ):
+        return
+    find = (
+        InputTodo(
+            stdscr,
+            get_newwin(stdscr),
+            Todo(),
+            Todo(),
+            header_string="String to find...",
+        )
+        .get_todo()
+        .get_display_text()
+    )
+    if not find:
+        alert(stdscr, "No string to find")
+        return
+    replace = (
+        InputTodo(
+            stdscr,
+            get_newwin(stdscr),
+            Todo(),
+            Todo(),
+            header_string="String to replace with...",
+        )
+        .get_todo()
+        .get_display_text()
+    )
+    if not replace:
+        alert(stdscr, "No string to replace with")
+        return
+    while True:
+        choice = alert(
+            stdscr,
+            "Do you want to replace all occurrences? Press `a` "
+            "for all, or `o` to replace one occurrence at a time",
+        )
+        if choice not in (Key.a, Key.o):
+            alert(stdscr, "Invalid choice. Press `a` or `o`")
+            continue
+        if choice == Key.a:
+            updated_todos = find_and_replace_all(
+                find,
+                replace,
+                todos,
+            )
+            break
+        if choice == Key.o:
+            msg = "Replacing one occurrence at a time is not implemented yet"
+            raise NotImplementedError(msg)
+
+    update_file(FILENAME, updated_todos)
+
+
 def main(stdscr: CursesWindow) -> Response:
     """
     The main function for Ndo. Mainly provides keybindings
@@ -688,6 +746,7 @@ def main(stdscr: CursesWindow) -> Response:
             _handle_enter,
             "stdscr, todos, selected, single_line_state",
         ),
+        Key.ctrl_g: (_find_and_replace, "stdscr, todos"),
         Key.ctrl_k: (single_line_state.toggle, "None"),
         Key.ctrl_r: (_handle_redo, "selected, history"),
         Key.ctrl_x: (single_line_state.toggle, "None"),
