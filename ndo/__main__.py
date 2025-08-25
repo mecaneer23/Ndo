@@ -729,6 +729,68 @@ def main(stdscr: CursesWindow) -> Response:
         if sequence not in todos[selected.get_first()].get_display_text():
             next_search_location(sequence, todos, selected)
 
+    def _replace_all(
+        stdscr: CursesWindow,
+        todos: Todos,
+    ) -> None:
+        nonlocal sequence
+        if not sequence:
+            alert(stdscr, "No search sequence defined")
+            return
+        replace = (
+            InputTodo(
+                stdscr,
+                get_newwin(stdscr),
+                Todo(),
+                Todo(),
+                header_string=f"Replace '{sequence}' with...",
+            )
+            .get_todo()
+            .get_display_text()
+        )
+        if not replace:
+            alert(stdscr, "No string to replace with")
+            return
+        updated_todos = find_and_replace_all(
+            sequence,
+            replace,
+            todos,
+        )
+        update_file(FILENAME, updated_todos)
+
+
+    def _replace_within_selection(
+        stdscr: CursesWindow,
+        todos: Todos,
+        selected: Selection,
+    ) -> None:
+        nonlocal sequence
+        if not sequence:
+            alert(stdscr, "No search sequence defined")
+            return
+        replace = (
+            InputTodo(
+                stdscr,
+                get_newwin(stdscr),
+                Todo(),
+                Todo(),
+                header_string=f"Replace '{sequence}' with...",
+            )
+            .get_todo()
+            .get_display_text()
+        )
+        if not replace:
+            alert(stdscr, "No string to replace with")
+            return
+        updated_todos = replace_if_in_selection(
+            sequence,
+            replace,
+            todos,
+            selected,
+        )
+        update_file(FILENAME, updated_todos)
+
+
     # if adding a new feature that updates `todos`,
     # make sure it also calls update_file()
     keys: dict[Key, tuple[Callable[..., Todos | None], str]] = {
@@ -746,7 +808,7 @@ def main(stdscr: CursesWindow) -> Response:
             _handle_enter,
             "stdscr, todos, selected, single_line_state",
         ),
-        Key.ctrl_g: (_find_and_replace, "stdscr, todos"),
+        Key.ctrl_g: (_replace_all, "stdscr, todos"),
         Key.ctrl_k: (single_line_state.toggle, "None"),
         Key.ctrl_r: (_handle_redo, "selected, history"),
         Key.ctrl_x: (single_line_state.toggle, "None"),
