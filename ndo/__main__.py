@@ -31,12 +31,12 @@ from ndo.keyboard_input_helpers import get_executable_args
 from ndo.keys import Key
 from ndo.menus import (
     color_menu,
-    find_and_replace_all,
     get_newwin,
     get_search_sequence,
     help_menu,
     magnify_menu,
     next_search_location,
+    replace_if_in_selection,
     sort_menu,
 )
 from ndo.mode import SingleLineMode, SingleLineModeImpl
@@ -613,25 +613,17 @@ def _copy_alert(
     )
 
 
-def _find_and_replace(stdscr: CursesWindow, todos: Todos) -> None:
-    if (
-        alert(stdscr, "Find and replace initiated. Press `Enter` to continue")
-        != Key.enter
-    ):
-        return
-    find = (
-        InputTodo(
+def _replace_within_selection(
+    stdscr: CursesWindow,
+    todos: Todos,
+    selected: Selection,
+    sequence: str,
+) -> None:
+    if not sequence:
+        alert(
             stdscr,
-            get_newwin(stdscr),
-            Todo(),
-            Todo(),
-            header_string="String to find...",
+            "No search sequence defined. Close alert and press `/` to set one.",
         )
-        .get_todo()
-        .get_display_text()
-    )
-    if not find:
-        alert(stdscr, "No string to find")
         return
     replace = (
         InputTodo(
@@ -639,7 +631,7 @@ def _find_and_replace(stdscr: CursesWindow, todos: Todos) -> None:
             get_newwin(stdscr),
             Todo(),
             Todo(),
-            header_string="String to replace with...",
+            header_string=f"Replace '{sequence}' with...",
         )
         .get_todo()
         .get_display_text()
@@ -647,26 +639,13 @@ def _find_and_replace(stdscr: CursesWindow, todos: Todos) -> None:
     if not replace:
         alert(stdscr, "No string to replace with")
         return
-    while True:
-        choice = alert(
-            stdscr,
-            "Do you want to replace all occurrences? Press `a` "
-            "for all, or `o` to replace one occurrence at a time",
-        )
-        if choice not in (Key.a, Key.o):
-            alert(stdscr, "Invalid choice. Press `a` or `o`")
-            continue
-        if choice == Key.a:
-            updated_todos = find_and_replace_all(
-                find,
-                replace,
-                todos,
-            )
-            break
-        if choice == Key.o:
-            msg = "Replacing one occurrence at a time is not implemented yet"
-            raise NotImplementedError(msg)
-
+    updated_todos = replace_if_in_selection(
+        stdscr,
+        sequence,
+        replace,
+        todos,
+        selected,
+    )
     update_file(FILENAME, updated_todos)
 
 
@@ -728,68 +707,7 @@ def main(stdscr: CursesWindow) -> Response:
         sequence = get_search_sequence(stdscr)
         if sequence not in todos[selected.get_first()].get_display_text():
             next_search_location(sequence, todos, selected)
-
-    def _replace_all(
-        stdscr: CursesWindow,
-        todos: Todos,
-    ) -> None:
-        nonlocal sequence
-        if not sequence:
-            alert(stdscr, "No search sequence defined")
-            return
-        replace = (
-            InputTodo(
-                stdscr,
-                get_newwin(stdscr),
-                Todo(),
-                Todo(),
-                header_string=f"Replace '{sequence}' with...",
-            )
-            .get_todo()
-            .get_display_text()
-        )
-        if not replace:
-            alert(stdscr, "No string to replace with")
-            return
-        updated_todos = find_and_replace_all(
-            sequence,
-            replace,
-            todos,
-        )
-        update_file(FILENAME, updated_todos)
-
-
-    def _replace_within_selection(
-        stdscr: CursesWindow,
-        todos: Todos,
-        selected: Selection,
-    ) -> None:
-        nonlocal sequence
-        if not sequence:
-            alert(stdscr, "No search sequence defined")
-            return
-        replace = (
-            InputTodo(
-                stdscr,
-                get_newwin(stdscr),
-                Todo(),
-                Todo(),
-                header_string=f"Replace '{sequence}' with...",
-            )
-            .get_todo()
-            .get_display_text()
-        )
-        if not replace:
-            alert(stdscr, "No string to replace with")
-            return
-        updated_todos = replace_if_in_selection(
-            sequence,
-            replace,
-            todos,
-            selected,
-        )
-        update_file(FILENAME, updated_todos)
-
+        history.add(todos, selected)
 
     # if adding a new feature that updates `todos`,
     # make sure it also calls update_file()
@@ -808,7 +726,10 @@ def main(stdscr: CursesWindow) -> Response:
             _handle_enter,
             "stdscr, todos, selected, single_line_state",
         ),
-        Key.ctrl_g: (_replace_all, "stdscr, todos"),
+        Key.ctrl_g: (
+            _replace_within_selection,
+            "stdscr, todos, selected, sequence",
+        ),
         Key.ctrl_k: (single_line_state.toggle, "None"),
         Key.ctrl_r: (_handle_redo, "selected, history"),
         Key.ctrl_x: (single_line_state.toggle, "None"),
@@ -840,6 +761,7 @@ def main(stdscr: CursesWindow) -> Response:
         Key.b: (magnify_menu, "stdscr, todos, selected"),
         Key.c: (color_todo, "stdscr, todos, selected"),
         Key.d: (delete_todo, "stdscr, todos, selected, copied_todos"),
+        Key.f: (_replace_within_selection, "stdscr, todos, selected, sequence"),
         Key.g: (selected.to_top, "None"),
         Key.h: (_handle_help_menu, "stdscr"),
         Key.i: (edit_todo, "stdscr, todos, int(selected), single_line_state"),

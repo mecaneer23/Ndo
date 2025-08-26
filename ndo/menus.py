@@ -421,17 +421,31 @@ def next_search_location(
             return
 
 
-def find_and_replace_all(
+def replace_if_in_selection(
+    stdscr: CursesWindow,
     find: str,
     replace: str,
     todos: Todos,
+    selected: Selection,
 ) -> Todos:
     """
-    Search for all occurrences of `find` in the todos
-    and replace them with `replace`.
+    Replace `find` with `replace` for every occurrence of `find` in `selected`.
+
+    Return the updated Todos.
     """
-    updated_todos: list[Todo] = []
-    for todo in todos:
+
+    updated_todos: list[Todo] = todos.copy()
+    list_updates = 0
+    for index, todo in enumerate(todos):
+        if index not in selected.get():
+            continue
         updated_text = todo.get_display_text().replace(find, replace)
-        updated_todos.append(todo.copy().set_display_text(updated_text))
+        updated_todos[index] = todo.copy().set_display_text(updated_text)
+        list_updates += 1
+    alert(
+        stdscr,
+        f"No occurrences of `{find}` found in selection."
+        if not list_updates
+        else f"Replacements made to {list_updates} occurances of `{find}`.",
+    )
     return Todos(updated_todos)
