@@ -631,7 +631,9 @@ def _replace_within_selection(
             get_newwin(stdscr),
             Todo(),
             Todo(),
-            header_string=f"Replace '{sequence}' with...",
+            header_string=(
+                f"Replace selected occurances of '{sequence}' with..."
+            ),
         )
         .get_todo()
         .get_display_text()

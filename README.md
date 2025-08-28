@@ -92,6 +92,7 @@ Options:
 | <kbd>b</kbd>                                                                              | Make selected todo bigger (magnify)    |
 | <kbd>c</kbd>                                                                              | Change selected todo color             |
 | <kbd>d</kbd>                                                                              | Remove selected todo                   |
+| <kbd>f</kbd>/<kbd>Ctrl</kbd>+<kbd>g</kbd>                                                 | Find & replace substrings in selection |
 | <kbd>g</kbd>/<kbd>Shift</kbd>+<kbd>g</kbd>                                                | Jump to top/bottom of todos            |
 | <kbd>h</kbd>                                                                              | Show a list of controls                |
 | <kbd>i</kbd>                                                                              | Edit an existing todo                  |

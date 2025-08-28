@@ -10,4 +10,3 @@
 - fix: odd behavior when undoing line join
   - steps to replicate?
 - fix: tcurses
-- docs: add find and replace operation to readme (both `f` and `ctrl+g`)
