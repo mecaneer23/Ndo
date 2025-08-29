@@ -569,6 +569,9 @@ def join_lines(todos: Todos, selected: Selection) -> None:
 
 
 def _handle_rename(stdscr: CursesWindow) -> Response:
+    """
+    Handler for file renaming operation including proper http-like responses
+    """
     if not FILENAME.exists():
         return Response(404, f"{FILENAME} doesn't exist")
     new_filename_as_todo = InputTodo(
@@ -619,6 +622,9 @@ def _replace_within_selection(
     selected: Selection,
     sequence: str,
 ) -> None:
+    """
+    Replace all occurances of `sequence` in the `selected` todo items
+    """
     if not sequence:
         alert(
             stdscr,
