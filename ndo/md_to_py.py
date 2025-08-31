@@ -11,6 +11,11 @@ S = TypeVar("S")
 
 
 def _is_valid_delimiter(delimiter: str) -> bool:
+    """
+    Check if `delimiter` is a valid delimiter character
+
+    A valid delimiter character is a single character that is not a space.
+    """
     if len(delimiter) != 1:
         msg = (
             f"`delimiter` must be one character, is {len(delimiter)} characters"
