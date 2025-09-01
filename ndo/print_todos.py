@@ -77,6 +77,10 @@ class _DisplayText(NamedTuple):
 
 
 def _get_bullet(indentation_level: int) -> str:
+    """
+    Return a bullet character based on the indentation level
+    (iterating through the symbols in `symbols`)
+    """
     if SIMPLE_BOXES:
         return "-"
     symbols = (
@@ -89,6 +93,7 @@ def _get_bullet(indentation_level: int) -> str:
 
 
 def _get_checkmark(simple: bool) -> str:
+    """Getter for checkmark character based on a flag"""
     return "X" if simple else "✓"
 
 
@@ -159,6 +164,10 @@ def _info_message(stdscr: CursesWindow, height: int, width: int) -> None:
 
 
 def _get_height_width(stdscr: CursesWindow | None) -> tuple[int, int]:
+    """
+    Return a 2-tuple of the height and width of the stdscr,
+    or (0, 0) if stdscr is None
+    """
     if stdscr is None:
         return 0, 0
     return stdscr.getmaxyx()
@@ -189,6 +198,10 @@ def _get_enumeration_info(
     zfill_width: int,
     adjusted_highlight: range,
 ) -> str:
+    """
+    Return the correctly formatted and calculated
+    enumeration string for the current position
+    """
     if not (ENUMERATE or RELATIVE_ENUMERATE):
         return ""
 
@@ -274,6 +287,10 @@ def _get_display_strings(
 
 @cache
 def _find_first_alphanum(text: str) -> int:
+    """
+    Return the index of the first alphanumeric character in `text`,
+    or -1 if there are no alphanumeric characters.
+    """
     for index, char in enumerate(text, start=_SIMPLE_BOX_WIDTH):
         if char.isalpha():
             return index
@@ -281,6 +298,10 @@ def _find_first_alphanum(text: str) -> int:
 
 
 def _get_strikethrough_range(display_string: str) -> range:
+    """
+    Return a range representing the portion of the current item's
+    `display_string` for which the strikethrough operation should be applied.
+    """
     return range(
         _find_first_alphanum(display_string),
         len(display_string.rstrip()),
@@ -357,6 +378,7 @@ def _print_todo(
 
 
 def _color_to_ansi(color: int) -> str:
+    """Convert a Color int to an ANSI escape code"""
     if not Color.is_valid(color):
         msg = f"Invalid color code: {color}"
         raise ValueError(msg)
