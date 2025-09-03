@@ -259,7 +259,7 @@ def blank_todo(todos: Todos, selected: Selection) -> Todos:
     todos.insert(selected.get_last() + 1, Todo())
     selected.single_down(len(todos))
     update_file(FILENAME, todos)
-    return todos
+    # return todos
 
 
 def blank_todo_above(todos: Todos, selected: Selection) -> Todos:
@@ -470,8 +470,13 @@ class _MainInputResult(NamedTuple):
     key: Key = Key(-1)
 
 
-def _raise_keyboard_interrupt() -> None:
-    raise KeyboardInterrupt
+def _get_key(stdscr: CursesWindow) -> Key | None:
+    try:
+        if (key := Key(stdscr.getch())) == Key.q:
+            return None
+    except KeyboardInterrupt:
+        return None
+    return key
 
 
 def _get_main_input(
@@ -483,11 +488,9 @@ def _get_main_input(
     ],
     possible_args: dict[str, _PossibleArgs],
 ) -> _MainInputResult | Key:
-    try:
-        if (key := Key(stdscr.getch())) == Key.q:
-            _raise_keyboard_interrupt()
-    except KeyboardInterrupt:
+    if (key := _get_key(stdscr)) is None:
         return _MainInputResult(True, todos)
+
     if key not in keys_esckeys[0]:
         alert(
             stdscr,
