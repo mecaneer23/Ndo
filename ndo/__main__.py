@@ -49,7 +49,7 @@ from ndo.utils import NewTodoPosition, Response, clamp
 from ndo.window_interactions import alert, set_header
 
 # Migrate the following once Python 3.12 is more common
-# type _PossibleArgs = ...
+# type _PossibleArgs = ...  # noqa: ERA001
 _PossibleArgs: TypeAlias = (
     Todo
     | int
@@ -355,7 +355,7 @@ def _set_fold_state_under(
         todos[index].set_folded(state)
 
 
-def _set_folded(
+def _set_folded(  # pyright: ignore[reportUnusedFunction]
     stdscr: CursesWindow,
     todos: Todos,
     selected: Selection,
@@ -383,7 +383,7 @@ def _set_folded(
         stdscr.clear()
 
 
-def _unset_folded(
+def _unset_folded(  # pyright: ignore[reportUnusedFunction]
     stdscr: CursesWindow,
     todos: Todos,
     selected: Selection,
