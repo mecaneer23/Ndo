@@ -259,7 +259,7 @@ def blank_todo(todos: Todos, selected: Selection) -> Todos:
     todos.insert(selected.get_last() + 1, Todo())
     selected.single_down(len(todos))
     update_file(FILENAME, todos)
-    # return todos
+    return todos
 
 
 def blank_todo_above(todos: Todos, selected: Selection) -> Todos:
