@@ -310,6 +310,10 @@ def dedent(todos: Todos, selected: Selection) -> Todos:
 
 
 def _toggle_todo_note(todos: Todos, selected: Selection) -> None:
+    """
+    Toggle whether a symbol (bullet, checkbox, etc.) is shown before every
+    todo in the selected region
+    """
     if len(todos) == 0:
         return
     for pos in selected.get():
@@ -319,6 +323,7 @@ def _toggle_todo_note(todos: Todos, selected: Selection) -> None:
 
 
 def _handle_undo(selected: Selection, history: UndoRedo) -> Todos:
+    """Wrapper for the UndoRedo.undo() function taking context into account"""
     todo_list = history.undo()
     selected.set(todo_list.start, todo_list.stop)
     update_file(FILENAME, todo_list.todos)
@@ -326,6 +331,7 @@ def _handle_undo(selected: Selection, history: UndoRedo) -> Todos:
 
 
 def _handle_redo(selected: Selection, history: UndoRedo) -> Todos:
+    """Wrapper for the UndoRedo.redo() function taking context into account"""
     todo_list = history.redo()
     selected.set(todo_list.start, todo_list.stop)
     update_file(FILENAME, todo_list.todos)
@@ -407,6 +413,12 @@ def _handle_enter(
     selected: Selection,
     mode: SingleLineModeImpl,
 ) -> Todos:
+    """
+    Handle the enter key
+
+    If the selected todo has a checkbox, toggle it.
+    Otherwise, create a new todo below the selected todo.
+    """
     if len(todos) > 0 and todos[int(selected)].has_box():
         return _toggle(todos, selected)
     return new_todo(
