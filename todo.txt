@@ -10,4 +10,4 @@
 - fix: odd behavior when undoing line join
   - steps to replicate?
 - fix: tcurses
-refactor: don't return `Todos` from __main__ functions that modify `todos` in place
+- refactor: don't return `Todos` from __main__ functions that modify `todos` in place
