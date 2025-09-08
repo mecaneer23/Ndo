@@ -102,10 +102,3 @@ class Styles:
             symbol = style.style.value
             output += f"{symbol}{style.text}{symbol}"
         return output
-
-
-if __name__ == "__main__":
-    styles = Styles()
-    styles.tokenize_to_map("Code snippet: `print('Hello, World!')` *italics* in text.")
-    print(styles.as_string())
-    print(styles.get_styles())
