@@ -25,6 +25,8 @@ class StyledText(NamedTuple):
     """
 
     text: str
+    start_index: int
+    end_index: int
     style: TextStyle
 
 
@@ -42,46 +44,78 @@ class Styles:
         """
         return self._styles
 
-
     def tokenize_to_map(self, string: str) -> None:
         """
         Tokenize a string into an Styles object representing
         LaTeX-style formatting.
 
-        Iterate through a string using two pointers (left and right).
+        Iterate through a string using two pointers.
         When a style marker is found, create a new StyledText object,
         with the correct section of text and style.
 
         Currently doesn't support nested styles.
         """
-        text_styles = [style.value for style in TextStyle]
         counter = 0
         current_style = TextStyle.NORMAL
-        section_start = -1
+        section_start = 0
         while counter < len(string):
-            if string[counter] in text_styles:  # counter points to a single-char style or the first character of a double-char style
-                # if string[counter : counter + 2] in text_styles:
-                #     if section_start != -1:
-                #         section_start = counter
-                #     else:
-                #         right = counter
-                if current_style == TextStyle.NORMAL:
-                    current_style = TextStyle(string[counter])
-                    section_start = counter + 1
-                else:
-                    self._styles.append(
-                        StyledText(
-                            string[section_start : counter],
-                            current_style,
-                        ),
-                    )
-                    current_style = TextStyle.NORMAL
-                    section_start = counter + 1
+            if string[counter] not in {"*", "_", "~", "`"}:
+                counter += 1
+                continue
+            # counter points to a single-char style or the first character
+            # of a double-char style
+            # if (
+            #     string[counter : counter + 2] in {"**", "__", "~~"}
+            # ):  # counter points to a double-char style
+            #     if current_style == TextStyle.NORMAL:
+            #         current_style = TextStyle(string[counter : counter + 2])
+            #         self._styles.append(
+            #             StyledText(
+            #                 string[section_start:counter],
+            #                 section_start,
+            #                 counter,
+            #                 TextStyle.NORMAL,
+            #             ),
+            #         )
+            #     counter += 2
+            #     section_start = counter
+            #     continue
+            self._styles.append(
+                StyledText(
+                    string[section_start:counter],
+                    section_start,
+                    counter,
+                    current_style,
+                ),
+            )
+            if current_style == TextStyle.NORMAL:
+                current_style = TextStyle(string[counter])
+            else:
+                current_style = TextStyle.NORMAL
             counter += 1
+            section_start = counter
+        self._styles.append(
+            StyledText(
+                string[section_start:],
+                section_start,
+                len(string),
+                current_style,
+            ),
+        )
+
+    def as_string(self) -> str:
+        """
+        Return a string representation of the styles
+        """
+        output = ""
+        for style in self._styles:
+            symbol = style.style.value
+            output += f"{symbol}{style.text}{symbol}"
+        return output
 
 
 if __name__ == "__main__":
     styles = Styles()
-    # styles.tokenize_to_map("This is **bold** and *italic* text with `code`.")
-    styles.tokenize_to_map("This is *italic* text with `code`.")
+    styles.tokenize_to_map("Code snippet: `print('Hello, World!')` in text.")
+    print(styles.as_string())
     print(styles.get_styles())
