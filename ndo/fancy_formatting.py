@@ -74,19 +74,15 @@ class Styles:
                         current_style,
                     ),
                 )
+            style_token_len = 1
             if string[counter : counter + 2] in {"**", "__", "~~"}:
-                if current_style == TextStyle.NORMAL:
-                    current_style = TextStyle(string[counter : counter + 2])
-                else:
-                    current_style = TextStyle.NORMAL
-                counter += 2
-                section_start = counter
-                continue
-            if current_style == TextStyle.NORMAL:
-                current_style = TextStyle(string[counter])
-            else:
-                current_style = TextStyle.NORMAL
-            counter += 1
+                style_token_len = 2
+            current_style = (
+                TextStyle(string[counter : counter + style_token_len])
+                if current_style == TextStyle.NORMAL
+                else TextStyle.NORMAL
+            )
+            counter += style_token_len
             section_start = counter
 
         if section_start == counter:
