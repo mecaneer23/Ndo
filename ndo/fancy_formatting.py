@@ -62,24 +62,6 @@ class Styles:
             if string[counter] not in {"*", "_", "~", "`"}:
                 counter += 1
                 continue
-            # counter points to a single-char style or the first character
-            # of a double-char style
-            # if (
-            #     string[counter : counter + 2] in {"**", "__", "~~"}
-            # ):  # counter points to a double-char style
-            #     if current_style == TextStyle.NORMAL:
-            #         current_style = TextStyle(string[counter : counter + 2])
-            #         self._styles.append(
-            #             StyledText(
-            #                 string[section_start:counter],
-            #                 section_start,
-            #                 counter,
-            #                 TextStyle.NORMAL,
-            #             ),
-            #         )
-            #     counter += 2
-            #     section_start = counter
-            #     continue
             self._styles.append(
                 StyledText(
                     string[section_start:counter],
@@ -88,6 +70,14 @@ class Styles:
                     current_style,
                 ),
             )
+            if string[counter : counter + 2] in {"**", "__", "~~"}:
+                if current_style == TextStyle.NORMAL:
+                    current_style = TextStyle(string[counter : counter + 2])
+                else:
+                    current_style = TextStyle.NORMAL
+                counter += 2
+                section_start = counter
+                continue
             if current_style == TextStyle.NORMAL:
                 current_style = TextStyle(string[counter])
             else:
@@ -116,6 +106,6 @@ class Styles:
 
 if __name__ == "__main__":
     styles = Styles()
-    styles.tokenize_to_map("Code snippet: `print('Hello, World!')` in text.")
+    styles.tokenize_to_map("Code snippet: `print('Hello, World!')` *italics* in text.")
     print(styles.as_string())
     print(styles.get_styles())
