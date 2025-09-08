@@ -53,7 +53,10 @@ class Styles:
         When a style marker is found, create a new StyledText object,
         with the correct section of text and style.
 
-        Currently doesn't support nested styles.
+        Currently doesn't support the following:
+          - nested styles
+          - unmatched style markers
+          - using style markers as normal text
         """
         counter = 0
         current_style = TextStyle.NORMAL
@@ -62,14 +65,15 @@ class Styles:
             if string[counter] not in {"*", "_", "~", "`"}:
                 counter += 1
                 continue
-            self._styles.append(
-                StyledText(
-                    string[section_start:counter],
-                    section_start,
-                    counter,
-                    current_style,
-                ),
-            )
+            if section_start != counter:
+                self._styles.append(
+                    StyledText(
+                        string[section_start:counter],
+                        section_start,
+                        counter,
+                        current_style,
+                    ),
+                )
             if string[counter : counter + 2] in {"**", "__", "~~"}:
                 if current_style == TextStyle.NORMAL:
                     current_style = TextStyle(string[counter : counter + 2])
@@ -84,12 +88,15 @@ class Styles:
                 current_style = TextStyle.NORMAL
             counter += 1
             section_start = counter
+
+        if section_start == counter:
+            return
         self._styles.append(
             StyledText(
                 string[section_start:],
                 section_start,
                 len(string),
-                current_style,
+                TextStyle.NORMAL,
             ),
         )
 

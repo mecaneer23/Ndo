@@ -19,6 +19,8 @@ from ndo.fancy_formatting import Styles
         "Mixed **bold** and __underline__ text.",
         "This is **bold** and *italic* text with `code`.",
         "Multiple ~~strikethrough~~ examples ~~here~~.",
+        "Ends with *italics*",
+        "This is **bold back***to back with italics*.",
         # "Edge case with unmatched *asterisks.",
         # "Nested *italic and **bold*** text."
     ],
