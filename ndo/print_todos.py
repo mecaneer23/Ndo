@@ -11,6 +11,7 @@ from itertools import count
 from typing import TYPE_CHECKING, Generic, NamedTuple, TypeVar, cast
 
 from ndo.color import Color
+from ndo.fancy_formatting import Styles, TextStyle
 from ndo.get_args import (
     BULLETS,
     ENUMERATE,
@@ -328,6 +329,30 @@ def _get_attrs(
     return attrs
 
 
+def _fancify_styles(
+    existing_attrs: int,
+    styles: Styles,
+    character_ptr: int,
+) -> int:
+    """
+    Apply ANSI text styles to a character based on its style context
+    """
+    style = styles.as_char_list()[character_ptr]
+    if style == TextStyle.STYLE:
+        return existing_attrs
+    style_map: dict[TextStyle, int] = {
+        TextStyle.BOLD: curses.A_BOLD,
+        TextStyle.ITALIC: curses.A_ITALIC,
+        TextStyle.UNDERLINE: curses.A_UNDERLINE,
+        TextStyle.STRIKETHROUGH: cast(
+            "int",
+            curses.A_STRIKETHROUGH,  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+        ),
+        TextStyle.CODE: curses.A_DIM,
+    }
+    return existing_attrs | style_map.get(style, 0)
+
+
 def _print_todo(
     stdscr: CursesWindow,
     todo: Todo,
@@ -355,7 +380,14 @@ def _print_todo(
             prefix_attrs,
         )
     strikethrough_range = _get_strikethrough_range(display_strings.text)
+    styles = Styles()
+    styles.tokenize_to_map(display_strings.text)
+    horizontal_offset = len(display_strings.prefix) - 1
     while counter < len(display_strings.text):
+        if styles.as_char_list()[counter] == TextStyle.STYLE:
+            counter += 1
+            continue
+        horizontal_offset += 1
         should_strikethrough = (
             STRIKETHROUGH
             and todo.is_toggled()
@@ -363,13 +395,17 @@ def _print_todo(
         )
         stdscr.addch(
             print_position + 1,
-            len(display_strings.prefix) + counter,
+            horizontal_offset,
             display_strings.text[counter],
-            _get_attrs(
-                should_strikethrough,
-                todo,
-                position,
-                highlight,
+            _fancify_styles(
+                _get_attrs(
+                    should_strikethrough,
+                    todo,
+                    position,
+                    highlight,
+                ),
+                styles,
+                counter,
             ),
         )
         if should_strikethrough and UI_TYPE == UiType.CURSES:

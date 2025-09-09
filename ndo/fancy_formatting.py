@@ -3,6 +3,7 @@ Handle LaTeX-style formatting for text rendering
 """
 
 from enum import Enum
+from functools import cache
 from typing import NamedTuple
 
 
@@ -12,6 +13,7 @@ class TextStyle(Enum):
     """
 
     NORMAL = ""
+    STYLE = "<STYLE>"
     BOLD = "**"
     ITALIC = "*"
     UNDERLINE = "__"
@@ -84,6 +86,14 @@ class Styles:
             )
             counter += style_token_len
             section_start = counter
+            self._styles.append(
+                StyledText(
+                    " " * style_token_len,
+                    counter,
+                    counter,
+                    TextStyle.STYLE,
+                ),
+            )
 
         if section_start == counter:
             return
@@ -102,6 +112,21 @@ class Styles:
         """
         output = ""
         for style in self._styles:
+            if style.style == TextStyle.STYLE:
+                continue
             symbol = style.style.value
             output += f"{symbol}{style.text}{symbol}"
+        return output
+
+    @cache
+    def as_char_list(self) -> list[TextStyle]:
+        """
+        Return a list of TextStyles, one for each
+        character in the original string
+        """
+        if not self._styles:
+            return []
+        output: list[TextStyle] = []
+        for style in self._styles:
+            output.extend([style.style] * len(style.text))
         return output
