@@ -23,7 +23,8 @@ from ndo.fancy_formatting import Styles, TextStyle, as_char_list
         "There are _some_ single `_` _ underscores __under-scoring_this__.",
         "This is **bold back***to back with italics*.",
         # "Edge case with unmatched *asterisks.",
-        # "Nested *italic and **bold*** text."
+        # "Nested *italic and **bold*** text.",
+        # "Nesting `__underline__` within `code` should work like an escape.",
     ],
 )
 def test_tokenize_to_map(string: str) -> None:
@@ -31,6 +32,16 @@ def test_tokenize_to_map(string: str) -> None:
     styles = Styles()
     styles.tokenize_to_map(string)
     assert styles.as_string() == string, styles.get_styles()
+
+
+def test_tokenize_to_map_escape_sequence() -> None:
+    """Test escape sequences for the tokenize_to_map function."""
+    styles = Styles()
+    # string = "Escape characters \\*should allow\\* escaping."
+    string = "Escape characters should allow escaping."
+    styles.tokenize_to_map(string)
+    assert styles.as_string() == string
+    assert TextStyle.ITALIC not in as_char_list(styles)
 
 
 def test_as_char_list() -> None:
