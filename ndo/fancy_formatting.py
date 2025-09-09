@@ -64,7 +64,9 @@ class Styles:
         current_style = TextStyle.NORMAL
         section_start = 0
         while counter < len(string):
-            if string[counter] not in {"*", "_", "~", "`"}:
+            if string[counter] not in {"*", "_", "~", "`"} or (
+                string[counter] == "_" and string[counter : counter + 2] != "__"
+            ):
                 counter += 1
                 continue
             if section_start != counter:
@@ -79,9 +81,6 @@ class Styles:
             style_token_len = 1
             if string[counter : counter + 2] in {"**", "__", "~~"}:
                 style_token_len = 2
-            if style_token_len == 1 and string[counter] == "_":
-                counter += 1
-                continue
             current_style = (
                 TextStyle(string[counter : counter + style_token_len])
                 if current_style == TextStyle.NORMAL

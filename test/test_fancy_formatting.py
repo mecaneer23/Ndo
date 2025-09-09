@@ -20,6 +20,7 @@ from ndo.fancy_formatting import Styles, TextStyle, as_char_list
         "This is **bold** and *italic* text with `code`.",
         "Multiple ~~strikethrough~~ examples ~~here~~.",
         "Ends with *italics*",
+        "There are _some_ single `_` _ underscores __under-scoring_this__.",
         "This is **bold back***to back with italics*.",
         # "Edge case with unmatched *asterisks.",
         # "Nested *italic and **bold*** text."
