@@ -2,7 +2,7 @@
 
 import pytest
 
-from ndo.fancy_formatting import Styles, TextStyle
+from ndo.fancy_formatting import Styles, TextStyle, as_char_list
 
 # ruff: noqa: S101
 # pylint: disable=missing-function-docstring
@@ -37,7 +37,7 @@ def test_as_char_list() -> None:
     string = "a **b** c"
     styles = Styles()
     styles.tokenize_to_map(string)
-    char_list = styles.as_char_list()
+    char_list = as_char_list(styles)
     assert char_list == [
         TextStyle.NORMAL,
         TextStyle.NORMAL,

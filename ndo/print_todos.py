@@ -11,7 +11,7 @@ from itertools import count
 from typing import TYPE_CHECKING, Generic, NamedTuple, TypeVar, cast
 
 from ndo.color import Color
-from ndo.fancy_formatting import Styles, TextStyle
+from ndo.fancy_formatting import Styles, TextStyle, as_char_list
 from ndo.get_args import (
     BULLETS,
     ENUMERATE,
@@ -337,7 +337,7 @@ def _fancify_styles(
     """
     Apply ANSI text styles to a character based on its style context
     """
-    style = styles.as_char_list()[character_ptr]
+    style = as_char_list(styles)[character_ptr]
     if style == TextStyle.STYLE:
         return existing_attrs
     style_map: dict[TextStyle, int] = {
@@ -384,7 +384,7 @@ def _print_todo(
     styles.tokenize_to_map(display_strings.text)
     horizontal_offset = len(display_strings.prefix) - 1
     while counter < len(display_strings.text):
-        if styles.as_char_list()[counter] == TextStyle.STYLE:
+        if as_char_list(styles)[counter] == TextStyle.STYLE:
             counter += 1
             continue
         horizontal_offset += 1
