@@ -79,6 +79,9 @@ class Styles:
             style_token_len = 1
             if string[counter : counter + 2] in {"**", "__", "~~"}:
                 style_token_len = 2
+            if style_token_len == 1 and string[counter] == "_":
+                counter += 1
+                continue
             current_style = (
                 TextStyle(string[counter : counter + style_token_len])
                 if current_style == TextStyle.NORMAL
