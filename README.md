@@ -128,6 +128,16 @@ Options:
 | <kbd>Down</kbd>                                                     | Split line at cursor                 |
 | <kbd>Alt</kbd>+<kbd>h</kbd>                                         | Show a list of controls              |
 
+## Style options (Markdown/LaTeX subset)
+
+Ndo implements special formatting for certain sequences:
+
+- `*italics*`
+- `**bold**`
+- `` `code` ``
+- `__underline__`
+- `~~strikethrough~~`
+
 ## Config files (`.ndoconfig`)
 
 Pass arguments to `ndo` without specifying explicitly on the command line.
