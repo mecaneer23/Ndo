@@ -344,12 +344,17 @@ def _fancify_styles(
         TextStyle.BOLD: curses.A_BOLD,
         TextStyle.ITALIC: curses.A_ITALIC,
         TextStyle.UNDERLINE: curses.A_UNDERLINE,
-        TextStyle.STRIKETHROUGH: cast(
-            "int",
-            curses.A_STRIKETHROUGH,  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
-        ),
         TextStyle.CODE: curses.A_DIM,
     }
+    if UI_TYPE != UiType.CURSES:
+        style_map.update(
+            {
+                TextStyle.STRIKETHROUGH: cast(
+                    "int",
+                    curses.A_STRIKETHROUGH,  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+                ),
+            },
+        )
     return existing_attrs | style_map.get(style, 0)
 
 
