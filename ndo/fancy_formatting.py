@@ -51,7 +51,7 @@ class Styles:
         Tokenize a string into an Styles object representing
         LaTeX-style formatting.
 
-        Iterate through a string using two pointers.
+        Iterate through a string.
         When a style marker is found, create a new StyledText object,
         with the correct section of text and style.
 
