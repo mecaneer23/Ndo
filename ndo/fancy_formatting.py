@@ -120,6 +120,32 @@ class Styles:
             output += f"{symbol}{style.text}{symbol}"
         return output
 
+    def _get_superscript_offset(self, char: str) -> int:
+        """
+        Get the offset to convert a standard character to
+        a superscript character
+        """
+        if char == "1":
+            return 0xB9 - ord("1")
+        if char in "23":
+            return 0xB2 - ord("2")
+        if char in "4567890":
+            return 0x2070 - ord("0")
+        return 0
+
+    def _standard_to_superscript(self, char: str) -> str:
+        """
+        Convert a standard character to a superscript character
+        """
+        return chr(ord(char) + self._get_superscript_offset(char))
+
+    def _handle_superscripts(self) -> None:
+        """
+        Convert characters between a `^` and a ` ` to superscript characters
+        """
+        msg = "Superscript handling not implemented yet"
+        raise NotImplementedError(msg)
+
 
 @cache
 def as_char_list(styles: Styles) -> list[TextStyle]:
