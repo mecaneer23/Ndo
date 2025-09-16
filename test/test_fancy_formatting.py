@@ -99,13 +99,13 @@ def _test_superscripts_subscripts(
 
 def test_handle_superscripts() -> None:
     styles = Styles()
-    assert styles._standard_to_superscript("1") == "¹"
-    assert styles._standard_to_superscript("2") == "²"
-    assert styles._standard_to_superscript("3") == "³"
-    assert styles._standard_to_superscript("4") == "⁴"
-    assert styles._standard_to_superscript("5") == "⁵"
-    assert styles._standard_to_superscript("6") == "⁶"
-    assert styles._standard_to_superscript("7") == "⁷"
-    assert styles._standard_to_superscript("8") == "⁸"
-    assert styles._standard_to_superscript("9") == "⁹"
-    assert styles._standard_to_superscript("0") == "⁰"
+    assert styles._standard_to_superscript("1") == "¹"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
+    assert styles._standard_to_superscript("2") == "²"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
+    assert styles._standard_to_superscript("3") == "³"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
+    assert styles._standard_to_superscript("4") == "⁴"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
+    assert styles._standard_to_superscript("5") == "⁵"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
+    assert styles._standard_to_superscript("6") == "⁶"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
+    assert styles._standard_to_superscript("7") == "⁷"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
+    assert styles._standard_to_superscript("8") == "⁸"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
+    assert styles._standard_to_superscript("9") == "⁹"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
+    assert styles._standard_to_superscript("0") == "⁰"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
