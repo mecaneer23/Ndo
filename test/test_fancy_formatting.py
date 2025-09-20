@@ -109,3 +109,11 @@ def test_handle_superscripts() -> None:
     assert styles._get_superscript("8") == "⁸"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
     assert styles._get_superscript("9") == "⁹"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
     assert styles._get_superscript("0") == "⁰"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
+
+
+def test_get_subscripts() -> None:
+    styles = Styles()
+    assert styles._get_subscript("1") == "₁"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
+    assert styles._get_subscript("2") == "₂"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
+    assert styles._get_subscript("a") == "ₐ"  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
+    assert styles._get_subscript("A") == ""  # pyright: ignore[reportPrivateUsage] # noqa: SLF001 # pylint: disable=protected-access
