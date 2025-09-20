@@ -60,6 +60,7 @@ class Styles:
           - unmatched style markers
           - using style markers as normal text
         """
+        # TODO: reimplement using stack; handle nested styles, unmatched markers
         counter = 0
         current_style = TextStyle.NORMAL
         section_start = 0
@@ -120,24 +121,78 @@ class Styles:
             output += f"{symbol}{style.text}{symbol}"
         return output
 
-    def _get_superscript_offset(self, char: str) -> int:
-        """
-        Get the offset to convert a standard character to
-        a superscript character
-        """
-        if char == "1":
-            return 0xB9 - ord("1")
-        if char in "23":
-            return 0xB2 - ord("2")
-        if char in "4567890":
-            return 0x2070 - ord("0")
-        return 0
-
-    def _standard_to_superscript(self, char: str) -> str:
+    def _get_superscript(self, char: str) -> str:
         """
         Convert a standard character to a superscript character
         """
-        return chr(ord(char) + self._get_superscript_offset(char))
+        chars: dict[str, str] = {
+            "0": "⁰",
+            "1": "¹",
+            "2": "²",
+            "3": "³",
+            "4": "⁴",
+            "5": "⁵",
+            "6": "⁶",
+            "7": "⁷",
+            "8": "⁸",
+            "9": "⁹",
+            "a": "ᵃ",
+            "b": "ᵇ",
+            "c": "ᶜ",
+            "d": "ᵈ",
+            "e": "ᵉ",
+            "f": "ᶠ",
+            "g": "ᵍ",
+            "h": "ʰ",
+            "i": "ⁱ",
+            "j": "ʲ",
+            "k": "ᵏ",
+            "l": "ˡ",
+            "m": "ᵐ",
+            "n": "ⁿ",
+            "o": "ᵒ",
+            "p": "ᵖ",
+            "q": "𐞥",
+            "r": "ʳ",
+            "s": "ˢ",
+            "t": "ᵗ",
+            "u": "ᵘ",
+            "v": "ᵛ",
+            "w": "ʷ",
+            "x": "ˣ",
+            "y": "ʸ",
+            "z": "ᶻ",
+            "A": "ᴬ",
+            "B": "ᴮ",
+            "C": "ᶜ",
+            "D": "ᴰ",
+            "E": "ᴱ",
+            "F": "ꟳ",
+            "G": "ᴳ",
+            "H": "ᴴ",
+            "I": "ᴵ",
+            "J": "ᴶ",
+            "K": "ᴷ",
+            "L": "ᴸ",
+            "M": "ᴹ",
+            "N": "ᴺ",
+            "O": "ᴼ",
+            "P": "ᴾ",
+            "Q": "ꟴ",
+            "R": "ᴿ",
+            "S": "ᔆ",  # no S superscript - use centered `S` or superscript `s`
+            "T": "ᵀ",
+            "U": "ᵁ",
+            "V": "ⱽ",
+            "W": "ᵂ",
+            "X": "ᕽ",  # no X superscript, this one is close-ish  # noqa: RUF001
+            "Y": "ʸ",  # there is no Y superscript in Unicode
+            "Z": "ᶻ",  # there is no Z superscript in Unicode
+        }
+        if char not in chars:
+            msg = f"Character '{char}' cannot be converted to superscript"
+            raise ValueError(msg)
+        return chars[char]
 
     def _handle_superscripts(self) -> None:
         """
