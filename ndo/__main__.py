@@ -266,7 +266,7 @@ def blank_todo_above(todos: Todos, selected: Selection) -> Todos:
     """Create an empty Todo object above the current selection"""
     position = selected.get_first()
     todos.insert(position, Todo())
-    selected.set(position)
+    selected.set(position + 1)
     update_file(FILENAME, todos)
     return todos
 
