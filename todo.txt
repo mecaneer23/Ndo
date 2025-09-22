@@ -13,6 +13,8 @@
 - refactor: don't return `Todos` from __main__ functions that modify `todos` in place
 - feat: add markdown support
   - feat: add support for *italics*, **bold**, etc.
+  - fix: if a line continues past the end of a window and certain chararacters are hidden, make sure the ellipsis still appears in the correct location
 - feat: add laTeX support
   - feat: add support for special glyphs
     - https://unix.stackexchange.com/questions/96591/is-it-possible-to-show-mathematical-symbols-in-the-terminal
+    - `->` -> `→`
