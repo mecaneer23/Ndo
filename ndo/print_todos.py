@@ -39,8 +39,8 @@ _SIMPLE_BOX_WIDTH = 3 if SIMPLE_BOXES else 0
 
 @dataclass
 class SublistItems(
-    Generic[_T],
     tuple[list[_T], int, int] if TYPE_CHECKING else object,
+    Generic[_T],
 ):  # pylint: disable=useless-object-inheritance
     """
     Pseudo-NamedTuple representing a slice of a
